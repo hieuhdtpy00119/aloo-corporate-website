@@ -1,0 +1,257 @@
+export const banners = [
+  {
+    id: 1,
+    title: 'ALOO - Kem Bo Thuan Viet',
+    description: 'Banner chinh gioi thieu thuong hieu kem bo va mo hinh nhuong quyen.',
+    subtitle: 'Huong vi bo mem min, kem vang beo nhe va cach phuc vu hien dai cho nguoi Viet.',
+    cta: 'Đăng ký tư vấn',
+    image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1200&q=80',
+    position: 'Trang chủ',
+    status: 'Đang hiển thị',
+  },
+  {
+    id: 2,
+    title: 'Mo hinh kiosk ALOO',
+    description: 'Banner phu gioi thieu diem ban nho gon cho khu dan cu va truong hoc.',
+    subtitle: 'Khoi dau gon voi quy trinh san pham tap trung.',
+    cta: 'Xem chi phi',
+    image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=1200&q=80',
+    position: 'Nhượng quyền',
+    status: 'Ẩn',
+  },
+  {
+    id: 3,
+    title: 'Menu kem bo moi',
+    description: 'Banner thong bao dong san pham moi theo mua.',
+    subtitle: 'Them lua chon kem bo cacao va sau rieng.',
+    cta: 'Xem menu',
+    image: 'https://images.unsplash.com/photo-1488900128323-21503983a07e?auto=format&fit=crop&w=1200&q=80',
+    position: 'Sản phẩm',
+    status: 'Hết hạn',
+  },
+]
+
+export const products = [
+  {
+    id: 1,
+    name: 'Kem bo truyen thong',
+    category: 'Best seller',
+    price: '39.000d',
+    description: 'Bo xay min, kem sua vang kem va topping dua say gion.',
+    image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=80',
+    status: 'Đang bán',
+  },
+  {
+    id: 2,
+    name: 'Kem bo sau rieng',
+    category: 'Dac biet',
+    price: '49.000d',
+    description: 'Vi bo beo thanh ket hop sau rieng thom dam, hop khau vi Viet.',
+    image: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=900&q=80',
+    status: 'Đang bán',
+  },
+  {
+    id: 3,
+    name: 'Sinh to bo kem',
+    category: 'Do uong',
+    price: '35.000d',
+    description: 'Sinh to bo sanh min, them vien kem vang kem mat lanh.',
+    image: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=900&q=80',
+    status: 'Tạm ẩn',
+  },
+  {
+    id: 4,
+    name: 'Kem bo cacao',
+    category: 'Moi',
+    price: '45.000d',
+    description: 'Nen bo mem be, cacao dang nhe va hat rang thom.',
+    image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=900&q=80',
+    status: 'Đang bán',
+  },
+]
+
+export const franchiseSteps = [
+  { id: 1, title: 'Tu van mo hinh', description: 'Danh gia khu vuc, muc von va mat bang phu hop.' },
+  { id: 2, title: 'Ky thoa thuan', description: 'Thong nhat chinh sach thuong hieu, van hanh va ho tro.' },
+  { id: 3, title: 'Thiet ke cua hang', description: 'Bo cuc quay, nhan dien va quy trinh phuc vu dong bo.' },
+  { id: 4, title: 'Dao tao van hanh', description: 'Dao tao pha che, ban hang, quan ly kho va cham soc khach.' },
+  { id: 5, title: 'Khai truong', description: 'Ho tro checklist, truyen thong dia phuong va theo doi sau mo ban.' },
+]
+
+export const franchiseBenefits = [
+  { id: 1, title: 'Cong thuc dong bo', description: 'Dinh luong, topping va quy trinh pha che de dao tao nhanh.' },
+  { id: 2, title: 'Nhan dien san sang', description: 'Bo mau, menu, bang hieu va vat pham ban hang thong nhat.' },
+  { id: 3, title: 'Ho tro khai truong', description: 'Checklist van hanh, truyen thong tai diem ban va theo doi sau mo ban.' },
+]
+
+export const franchiseConditions = [
+  { id: 1, title: 'Mat bang', description: 'Dien tich tu 12m2, mat tien de nhan dien va co khu vuc bao quan nguyen lieu.' },
+  { id: 2, title: 'Von dau tu', description: 'Nguon von phu hop voi goi kiosk, cua hang tieu chuan hoac flagship mini.' },
+  { id: 3, title: 'Van hanh', description: 'Cam ket tuan thu quy trinh san pham, ve sinh va dich vu cua thuong hieu.' },
+]
+
+export const franchiseProcess = [
+  { id: 1, title: 'Tiep nhan thong tin', description: 'Doi ngu ALOO lien he va xac nhan nhu cau dau tu.' },
+  { id: 2, title: 'Khao sat khu vuc', description: 'Danh gia luu luong khach, doi thu va muc chi phi mat bang.' },
+  { id: 3, title: 'Trien khai cua hang', description: 'Thiet ke, lap dat, dao tao va chuan bi khai truong.' },
+]
+
+export const costItems = [
+  { id: 1, title: 'Goi xe day / kiosk', amount: '120 - 180 trieu', note: 'Phu hop diem ban nho, chi phi gon.' },
+  { id: 2, title: 'Goi cua hang tieu chuan', amount: '280 - 450 trieu', note: 'Danh cho mat bang pho hoac trung tam khu dan cu.' },
+  { id: 3, title: 'Goi flagship mini', amount: '500 - 750 trieu', note: 'Khong gian trai nghiem day du va nhan dien noi bat.' },
+]
+
+export const registrations = [
+  {
+    id: 1,
+    name: 'Nguyễn Minh Anh',
+    phone: '0918 246 579',
+    email: 'minhanh@gmail.com',
+    area: 'Quan 7, TP.HCM',
+    capital: 350000000,
+    note: 'Muốn mở kiosk gần khu chung cư, cần tư vấn mặt bằng.',
+    createdAt: '13/05/2026',
+    status: 'Mới',
+  },
+  {
+    id: 2,
+    name: 'Trần Quang Huy',
+    phone: '0936 728 145',
+    email: 'quanghuy@gmail.com',
+    area: 'Đà Nẵng',
+    capital: 500000000,
+    note: 'Đã có mặt bằng mặt tiền, muốn tìm hiểu gói cửa hàng tiêu chuẩn.',
+    createdAt: '12/05/2026',
+    status: 'Đã liên hệ',
+  },
+  {
+    id: 3,
+    name: 'Lê Thu Hà',
+    phone: '0974 512 386',
+    email: 'thuha.aloo@gmail.com',
+    area: 'Cần Thơ',
+    capital: 250000000,
+    note: 'Quan tâm mô hình xe đẩy/kiosk, cần bảng dự toán chi phí.',
+    createdAt: '10/05/2026',
+    status: 'Đang tư vấn',
+  },
+  {
+    id: 4,
+    name: 'Phạm Gia Huy',
+    phone: '0907 638 219',
+    email: 'giahuy.fnb@gmail.com',
+    area: 'Hà Nội',
+    capital: 700000000,
+    note: 'Muốn mở flagship mini tại khu văn phòng.',
+    createdAt: '08/05/2026',
+    status: 'Hoàn tất',
+  },
+  {
+    id: 5,
+    name: 'Đỗ Mai Linh',
+    phone: '0928 415 763',
+    email: 'mailinh.store@gmail.com',
+    area: 'Bình Dương',
+    capital: 180000000,
+    note: 'Tạm dừng kế hoạch do chưa tìm được mặt bằng phù hợp.',
+    createdAt: '05/05/2026',
+    status: 'Hủy',
+  },
+]
+
+export const posts = [
+  {
+    id: 1,
+    title: 'Cau chuyen kem bo thuan Viet cua ALOO',
+    excerpt: 'Hành trình xây dựng hương vị kem bơ gần gũi với người Việt.',
+    content: 'ALOO phát triển từ ý tưởng đưa món kem bơ quen thuộc vào mô hình cửa hàng hiện đại, dễ nhân rộng.',
+    image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=80',
+    category: 'Cau chuyen thuong hieu',
+    publishedAt: '12/05/2026',
+    status: 'Đã đăng',
+  },
+  {
+    id: 2,
+    title: 'Vi sao kiosk kem bo phu hop khu dan cu',
+    excerpt: 'Mô hình kiosk giúp tối ưu chi phí và tiếp cận khách hàng thường xuyên.',
+    content: 'Kiosk kem bơ phù hợp khu dân cư nhờ menu gọn, tốc độ phục vụ nhanh và chi phí vận hành dễ kiểm soát.',
+    image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=900&q=80',
+    category: 'Nhuong quyen',
+    publishedAt: '08/05/2026',
+    status: 'Bản nháp',
+  },
+  {
+    id: 3,
+    title: 'Checklist khai truong cua hang kem bo',
+    excerpt: 'Các hạng mục cần chuẩn bị trước ngày khai trương điểm bán ALOO.',
+    content: 'Checklist gồm mặt bằng, thiết bị, nguyên liệu, đào tạo nhân sự, truyền thông và vận hành thử.',
+    image: 'https://images.unsplash.com/photo-1521305916504-4a1121188589?auto=format&fit=crop&w=900&q=80',
+    category: 'Van hanh',
+    publishedAt: '03/05/2026',
+    status: 'Lên lịch',
+  },
+  {
+    id: 4,
+    title: 'Menu theo mua giup diem ban tang doanh thu',
+    excerpt: 'Menu theo mùa giúp cửa hàng có thêm lý do để khách quay lại.',
+    content: 'Các món theo mùa tạo sự mới mẻ nhưng vẫn giữ nền sản phẩm kem bơ chủ lực của thương hiệu.',
+    image: 'https://images.unsplash.com/photo-1488900128323-21503983a07e?auto=format&fit=crop&w=900&q=80',
+    category: 'San pham',
+    publishedAt: '28/04/2026',
+    status: 'Ẩn',
+  },
+]
+
+export const locations = [
+  {
+    id: 1,
+    name: 'ALOO Nguyen Trai',
+    address: '128 Nguyen Trai, Phuong Ben Thanh',
+    province: 'TP.HCM',
+    phone: '0900 888 168',
+    openingHours: '09:00 - 22:00',
+    mapUrl: 'https://maps.google.com/?q=128+Nguyen+Trai+TPHCM',
+    status: 'Đang hoạt động',
+  },
+  {
+    id: 2,
+    name: 'ALOO Phu My Hung',
+    address: '45 Nguyen Duc Canh, Quan 7',
+    province: 'TP.HCM',
+    phone: '0901 222 168',
+    openingHours: '10:00 - 22:30',
+    mapUrl: 'https://maps.google.com/?q=45+Nguyen+Duc+Canh+Quan+7',
+    status: 'Đang hoạt động',
+  },
+  {
+    id: 3,
+    name: 'ALOO Hai Chau',
+    address: '82 Bach Dang, Quan Hai Chau',
+    province: 'Da Nang',
+    phone: '0902 333 168',
+    openingHours: '09:30 - 22:00',
+    mapUrl: 'https://maps.google.com/?q=82+Bach+Dang+Da+Nang',
+    status: 'Sắp khai trương',
+  },
+  {
+    id: 4,
+    name: 'ALOO Ninh Kieu',
+    address: '19 Mau Than, Quan Ninh Kieu',
+    province: 'Can Tho',
+    phone: '0903 444 168',
+    openingHours: '09:00 - 21:30',
+    mapUrl: 'https://maps.google.com/?q=19+Mau+Than+Can+Tho',
+    status: 'Đang hoạt động',
+  },
+  {
+    id: 5,
+    name: 'ALOO Hoan Kiem',
+    address: '36 Ly Thuong Kiet, Quan Hoan Kiem',
+    province: 'Ha Noi',
+    phone: '0904 555 168',
+    openingHours: '10:00 - 22:00',
+    mapUrl: 'https://maps.google.com/?q=36+Ly+Thuong+Kiet+Ha+Noi',
+    status: 'Sắp khai trương',
+  },
+]

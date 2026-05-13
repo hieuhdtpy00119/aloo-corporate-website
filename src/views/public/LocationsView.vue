@@ -1,0 +1,92 @@
+<script setup>
+import { computed, ref } from 'vue'
+import SectionTitle from '../../components/public/SectionTitle.vue'
+import { locations } from '../../data/mockData'
+
+const searchKeyword = ref('')
+const selectedProvince = ref('Tat ca')
+
+const provinces = computed(() => ['Tat ca', ...new Set(locations.map((location) => location.province))])
+
+const filteredLocations = computed(() => {
+  const keyword = searchKeyword.value.trim().toLowerCase()
+
+  return locations.filter((location) => {
+    const matchesProvince =
+      selectedProvince.value === 'Tat ca' || location.province === selectedProvince.value
+    const matchesKeyword =
+      !keyword ||
+      location.name.toLowerCase().includes(keyword) ||
+      location.address.toLowerCase().includes(keyword)
+
+    return matchesProvince && matchesKeyword
+  })
+})
+</script>
+
+<template>
+  <section class="bg-avocado-50 px-4 py-16 sm:px-6 lg:px-8">
+    <SectionTitle
+      eyebrow="Dia diem"
+      title="He thong cua hang ALOO"
+      description="Tim chi nhanh ALOO gan ban theo tinh thanh, ten cua hang hoac dia chi."
+    />
+
+    <div class="mx-auto mb-8 grid max-w-5xl gap-4 rounded-lg border border-avocado-100 bg-white p-5 shadow-sm md:grid-cols-[1fr_240px]">
+      <input
+        v-model="searchKeyword"
+        type="search"
+        placeholder="Tim theo ten chi nhanh hoac dia chi"
+        class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500"
+      />
+      <select
+        v-model="selectedProvince"
+        class="rounded-lg border border-slate-200 px-4 py-3 font-semibold text-slate-700 outline-none focus:border-avocado-500"
+      >
+        <option v-for="province in provinces" :key="province" :value="province">{{ province }}</option>
+      </select>
+    </div>
+
+    <div class="mx-auto grid max-w-7xl gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <article
+        v-for="location in filteredLocations"
+        :key="location.id"
+        class="rounded-lg border border-avocado-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+      >
+        <div class="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-xl font-black text-avocado-950">{{ location.name }}</h3>
+            <p class="mt-1 text-sm font-bold text-avocado-700">{{ location.province }}</p>
+          </div>
+          <span
+            class="rounded-full px-3 py-1 text-xs font-bold"
+            :class="
+              location.status === 'Đang hoạt động'
+                ? 'bg-emerald-50 text-emerald-700'
+                : 'bg-amber-50 text-amber-700'
+            "
+          >
+            {{ location.status }}
+          </span>
+        </div>
+        <div class="space-y-3 text-sm leading-6 text-slate-600">
+          <p><span class="font-bold text-slate-800">Dia chi:</span> {{ location.address }}</p>
+          <p><span class="font-bold text-slate-800">Dien thoai:</span> {{ location.phone }}</p>
+          <p><span class="font-bold text-slate-800">Gio mo cua:</span> {{ location.openingHours }}</p>
+        </div>
+        <a
+          :href="location.mapUrl"
+          target="_blank"
+          rel="noreferrer"
+          class="mt-6 inline-flex rounded-full bg-cream-400 px-5 py-3 text-sm font-black text-avocado-950 hover:bg-cream-300"
+        >
+          Xem ban do
+        </a>
+      </article>
+    </div>
+
+    <p v-if="filteredLocations.length === 0" class="mx-auto mt-10 max-w-xl text-center font-semibold text-slate-500">
+      Khong tim thay cua hang phu hop.
+    </p>
+  </section>
+</template>
