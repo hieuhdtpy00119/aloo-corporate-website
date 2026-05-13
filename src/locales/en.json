@@ -1,0 +1,283 @@
+{
+  "brand": {
+    "name": "ALOO",
+    "tagline": "Vietnamese Avocado Ice Cream",
+    "badge": "Vietnamese avocado ice cream brand"
+  },
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "system": "Locations",
+    "franchise": "Franchise",
+    "about": "About ALOO",
+    "blog": "Blog",
+    "contact": "Contact",
+    "consultation": "Get Consultation",
+    "menu": "Menu"
+  },
+  "common": {
+    "all": "All",
+    "viewMore": "View more",
+    "viewProducts": "View products",
+    "viewMap": "View map",
+    "address": "Address",
+    "phone": "Phone",
+    "openingHours": "Opening hours",
+    "publishedAt": "Published",
+    "noLocationFound": "No matching stores found."
+  },
+  "footer": {
+    "description": "A Vietnamese avocado ice cream brand built around modern, lean and franchise-ready store models.",
+    "brand": "Brand",
+    "system": "System",
+    "storeLocations": "Store locations",
+    "hotline": "Hotline",
+    "email": "Email",
+    "address": "Address",
+    "addressValue": "Ho Chi Minh City, Vietnam",
+    "copyright": "© 2026 ALOO. All rights reserved."
+  },
+  "home": {
+    "heroTitle": "ALOO - Vietnamese Avocado Ice Cream",
+    "heroSubtitle": "Smooth avocado flavor, creamy golden ice cream and a modern serving experience for Vietnamese customers.",
+    "heroMetaLabel": "Flexible model",
+    "heroMetaValue": "Kiosk - Store - Mini flagship",
+    "productsEyebrow": "Core products",
+    "productsTitle": "Vietnamese avocado ice cream, memorable and easy to sell",
+    "productsDescription": "The menu focuses on repeatable best-sellers for both retail customers and franchise stores.",
+    "franchiseEyebrow": "Franchise",
+    "franchiseTitle": "A clear store opening roadmap",
+    "franchiseDescription": "ALOO prioritizes easy rollout, cost control and consistent customer experience across stores."
+  },
+  "about": {
+    "eyebrow": "About us",
+    "title": "ALOO is built from a familiar Vietnamese flavor",
+    "description": "The brand focuses on avocado ice cream, accessible ingredients and lean operations for local markets.",
+    "cards": [
+      {
+        "title": "Focused products",
+        "description": "A compact menu that is easier to train and keep consistent."
+      },
+      {
+        "title": "Clean identity",
+        "description": "Avocado green, creamy yellow and white create a fresh, soft and modern feel."
+      },
+      {
+        "title": "Flexible model",
+        "description": "Suitable for kiosks, small stores and mini flagship locations."
+      }
+    ]
+  },
+  "products": {
+    "eyebrow": "ALOO Menu",
+    "title": "Sample product catalog",
+    "description": "Products are designed to clearly present benefits, pricing and menu groups in the frontend demo.",
+    "items": [
+      {
+        "id": 1,
+        "name": "Classic avocado ice cream",
+        "category": "Best seller",
+        "price": "39,000 VND",
+        "description": "Smooth blended avocado, creamy golden ice cream and crispy coconut topping."
+      },
+      {
+        "id": 2,
+        "name": "Durian avocado ice cream",
+        "category": "Special",
+        "price": "49,000 VND",
+        "description": "Rich avocado flavor combined with aromatic durian for Vietnamese taste."
+      },
+      {
+        "id": 3,
+        "name": "Avocado ice cream smoothie",
+        "category": "Drink",
+        "price": "35,000 VND",
+        "description": "Thick avocado smoothie topped with cool creamy ice cream."
+      },
+      {
+        "id": 4,
+        "name": "Cacao avocado ice cream",
+        "category": "New",
+        "price": "45,000 VND",
+        "description": "Soft avocado base, light bitter cacao and roasted nuts."
+      }
+    ]
+  },
+  "franchise": {
+    "eyebrow": "Partnership opportunity",
+    "title": "ALOO franchise for local investors",
+    "description": "An overview of the brand model, investment packages and why ALOO fits the Vietnamese avocado ice cream market.",
+    "benefitsTitle": "What partners receive",
+    "benefits": [
+      "Core recipes and product portioning.",
+      "Store identity, menu and sales materials.",
+      "Training for operations, preparation and ingredient control.",
+      "Grand opening support and post-launch follow-up."
+    ],
+    "partnerTitle": "Ideal partners",
+    "partnerDescription": "ALOO fits small-location owners, first-time F&B investors or operators who want a repeat-purchase product.",
+    "steps": [
+      {
+        "id": 1,
+        "title": "Model consultation",
+        "description": "Evaluate location, budget and suitable store format."
+      },
+      {
+        "id": 2,
+        "title": "Agreement signing",
+        "description": "Align brand policy, operations and support scope."
+      },
+      {
+        "id": 3,
+        "title": "Store design",
+        "description": "Plan counter layout, identity and service workflow."
+      },
+      {
+        "id": 4,
+        "title": "Operations training",
+        "description": "Train preparation, sales, stock control and customer care."
+      },
+      {
+        "id": 5,
+        "title": "Grand opening",
+        "description": "Support checklist, local launch marketing and post-launch tracking."
+      }
+    ]
+  },
+  "locations": {
+    "eyebrow": "Locations",
+    "title": "ALOO store system",
+    "description": "Find a nearby ALOO branch by province, store name or address.",
+    "searchPlaceholder": "Search by branch name or address",
+    "active": "Open",
+    "comingSoon": "Coming soon",
+    "items": [
+      {
+        "id": 1,
+        "name": "ALOO Nguyen Trai",
+        "address": "128 Nguyen Trai, Ben Thanh Ward",
+        "province": "Ho Chi Minh City",
+        "phone": "0900 888 168",
+        "openingHours": "09:00 - 22:00",
+        "mapUrl": "https://maps.google.com/?q=128+Nguyen+Trai+TPHCM",
+        "status": "active"
+      },
+      {
+        "id": 2,
+        "name": "ALOO Phu My Hung",
+        "address": "45 Nguyen Duc Canh, District 7",
+        "province": "Ho Chi Minh City",
+        "phone": "0901 222 168",
+        "openingHours": "10:00 - 22:30",
+        "mapUrl": "https://maps.google.com/?q=45+Nguyen+Duc+Canh+Quan+7",
+        "status": "active"
+      },
+      {
+        "id": 3,
+        "name": "ALOO Hai Chau",
+        "address": "82 Bach Dang, Hai Chau District",
+        "province": "Da Nang",
+        "phone": "0902 333 168",
+        "openingHours": "09:30 - 22:00",
+        "mapUrl": "https://maps.google.com/?q=82+Bach+Dang+Da+Nang",
+        "status": "comingSoon"
+      },
+      {
+        "id": 4,
+        "name": "ALOO Ninh Kieu",
+        "address": "19 Mau Than, Ninh Kieu District",
+        "province": "Can Tho",
+        "phone": "0903 444 168",
+        "openingHours": "09:00 - 21:30",
+        "mapUrl": "https://maps.google.com/?q=19+Mau+Than+Can+Tho",
+        "status": "active"
+      }
+    ]
+  },
+  "blog": {
+    "eyebrow": "Blog",
+    "title": "ALOO news and stories",
+    "description": "Updates about products, store operations and the growth journey of a Vietnamese avocado ice cream brand.",
+    "sampleDescription": "Sample article content for the ALOO website, supporting brand and franchise storytelling.",
+    "items": [
+      {
+        "id": 1,
+        "title": "The story of ALOO Vietnamese avocado ice cream",
+        "category": "Brand story",
+        "publishedAt": "12/05/2026",
+        "status": "Published"
+      },
+      {
+        "id": 2,
+        "title": "Why avocado ice cream kiosks fit residential areas",
+        "category": "Franchise",
+        "publishedAt": "08/05/2026",
+        "status": "Draft"
+      },
+      {
+        "id": 3,
+        "title": "Store opening checklist for avocado ice cream shops",
+        "category": "Operations",
+        "publishedAt": "03/05/2026",
+        "status": "Scheduled"
+      },
+      {
+        "id": 4,
+        "title": "Seasonal menus help stores grow repeat sales",
+        "category": "Products",
+        "publishedAt": "28/04/2026",
+        "status": "Hidden"
+      }
+    ]
+  },
+  "consultation": {
+    "eyebrow": "Franchise consultation",
+    "title": "Send your ALOO store information",
+    "description": "Fill in basic information so our consulting team can contact you and suggest a suitable model.",
+    "success": "Consultation request submitted successfully!",
+    "fields": {
+      "name": "Full name",
+      "phone": "Phone number",
+      "email": "Email",
+      "area": "Preferred store area",
+      "capital": "Expected budget",
+      "note": "Note"
+    },
+    "submit": "Submit information"
+  },
+  "contact": {
+    "eyebrow": "Contact",
+    "title": "Connect with ALOO",
+    "description": "Sample contact information for the brand and franchise website."
+  },
+  "process": {
+    "eyebrow": "Opening process",
+    "title": "Store opening process",
+    "description": "From initial consultation to grand opening, each step has clear tasks for investors to follow."
+  },
+  "cost": {
+    "eyebrow": "Estimated cost",
+    "title": "Reference investment cost",
+    "description": "Sample cost ranges help visitors understand the initial investment scale.",
+    "items": [
+      {
+        "id": 1,
+        "title": "Cart / kiosk package",
+        "amount": "120 - 180 million VND",
+        "note": "Suitable for small points of sale with lean costs."
+      },
+      {
+        "id": 2,
+        "title": "Standard store package",
+        "amount": "280 - 450 million VND",
+        "note": "For street locations or residential centers."
+      },
+      {
+        "id": 3,
+        "title": "Mini flagship package",
+        "amount": "500 - 750 million VND",
+        "note": "Fuller experience space with stronger brand visibility."
+      }
+    ]
+  }
+}

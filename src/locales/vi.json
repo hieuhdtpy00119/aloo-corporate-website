@@ -1,0 +1,283 @@
+{
+  "brand": {
+    "name": "ALOO",
+    "tagline": "Kem Bơ Thuần Việt",
+    "badge": "Thương hiệu kem bơ Việt Nam"
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "products": "Sản phẩm",
+    "system": "Hệ thống",
+    "franchise": "Nhượng quyền",
+    "about": "Về ALOO",
+    "blog": "Blog",
+    "contact": "Liên hệ",
+    "consultation": "Đăng ký tư vấn",
+    "menu": "Menu"
+  },
+  "common": {
+    "all": "Tất cả",
+    "viewMore": "Xem thêm",
+    "viewProducts": "Xem sản phẩm",
+    "viewMap": "Xem bản đồ",
+    "address": "Địa chỉ",
+    "phone": "Số điện thoại",
+    "openingHours": "Giờ mở cửa",
+    "publishedAt": "Ngày đăng",
+    "noLocationFound": "Không tìm thấy cửa hàng phù hợp."
+  },
+  "footer": {
+    "description": "Thương hiệu kem bơ thuần Việt, phát triển mô hình cửa hàng hiện đại, tinh gọn và phù hợp nhượng quyền.",
+    "brand": "Thương hiệu",
+    "system": "Hệ thống",
+    "storeLocations": "Địa điểm cửa hàng",
+    "hotline": "Hotline",
+    "email": "Email",
+    "address": "Địa chỉ",
+    "addressValue": "TP.HCM, Việt Nam",
+    "copyright": "© 2026 ALOO. All rights reserved."
+  },
+  "home": {
+    "heroTitle": "ALOO - Kem Bơ Thuần Việt",
+    "heroSubtitle": "Hương vị bơ mềm mịn, kem vàng béo nhẹ và cách phục vụ hiện đại cho người Việt.",
+    "heroMetaLabel": "Mô hình linh hoạt",
+    "heroMetaValue": "Kiosk - Cửa hàng - Mini flagship",
+    "productsEyebrow": "Sản phẩm chủ lực",
+    "productsTitle": "Kem bơ thuần Việt, dễ nhớ và dễ bán",
+    "productsDescription": "Menu tập trung vào các món có khả năng bán lặp lại cao, phù hợp cả khách mua lẻ và điểm bán nhượng quyền.",
+    "franchiseEyebrow": "Nhượng quyền",
+    "franchiseTitle": "Lộ trình mở cửa hàng rõ ràng",
+    "franchiseDescription": "ALOO ưu tiên quy trình dễ triển khai, quản lý chi phí và tạo trải nghiệm đồng nhất giữa các điểm bán."
+  },
+  "about": {
+    "eyebrow": "Về chúng tôi",
+    "title": "ALOO xây dựng từ hương vị quen thuộc của người Việt",
+    "description": "Thương hiệu tập trung vào kem bơ, nguyên liệu dễ tiếp cận và quy trình vận hành gọn để phù hợp với thị trường địa phương.",
+    "cards": [
+      {
+        "title": "Sản phẩm tập trung",
+        "description": "Menu không dàn trải, dễ đào tạo và giữ chất lượng ổn định."
+      },
+      {
+        "title": "Nhận diện sạch",
+        "description": "Màu xanh bơ, vàng kem và trắng tạo cảm giác tươi, mềm và hiện đại."
+      },
+      {
+        "title": "Mô hình linh hoạt",
+        "description": "Phù hợp kiosk, cửa hàng nhỏ và mô hình flagship mini."
+      }
+    ]
+  },
+  "products": {
+    "eyebrow": "Menu ALOO",
+    "title": "Danh mục sản phẩm mẫu",
+    "description": "Các sản phẩm được thiết kế để trình bày rõ lợi ích, giá bán và nhóm món trong demo frontend.",
+    "items": [
+      {
+        "id": 1,
+        "name": "Kem bơ truyền thống",
+        "category": "Bán chạy",
+        "price": "39.000đ",
+        "description": "Bơ xay mịn, kem sữa vàng kem và topping dừa sấy giòn."
+      },
+      {
+        "id": 2,
+        "name": "Kem bơ sầu riêng",
+        "category": "Đặc biệt",
+        "price": "49.000đ",
+        "description": "Vị bơ béo thanh kết hợp sầu riêng thơm đậm, hợp khẩu vị Việt."
+      },
+      {
+        "id": 3,
+        "name": "Sinh tố bơ kem",
+        "category": "Đồ uống",
+        "price": "35.000đ",
+        "description": "Sinh tố bơ sánh mịn, thêm viên kem vàng kem mát lạnh."
+      },
+      {
+        "id": 4,
+        "name": "Kem bơ cacao",
+        "category": "Mới",
+        "price": "45.000đ",
+        "description": "Nền bơ mềm béo, cacao đắng nhẹ và hạt rang thơm."
+      }
+    ]
+  },
+  "franchise": {
+    "eyebrow": "Cơ hội hợp tác",
+    "title": "Nhượng quyền ALOO cho nhà đầu tư địa phương",
+    "description": "Trang giới thiệu mô hình thương hiệu, các gói đầu tư và lý do ALOO phù hợp với thị trường kem bơ Việt Nam.",
+    "benefitsTitle": "Giá trị nhận được",
+    "benefits": [
+      "Công thức và định lượng món chủ lực.",
+      "Bộ nhận diện cửa hàng, menu và vật phẩm bán hàng.",
+      "Đào tạo vận hành, pha chế, quản lý nguyên liệu.",
+      "Hỗ trợ khai trương và theo dõi sau mở bán."
+    ],
+    "partnerTitle": "Đối tác phù hợp",
+    "partnerDescription": "ALOO phù hợp với người có mặt bằng nhỏ, nhà đầu tư lần đầu mở cửa hàng F&B, hoặc chủ kinh doanh muốn thêm một sản phẩm có tính mua lặp lại cao.",
+    "steps": [
+      {
+        "id": 1,
+        "title": "Tư vấn mô hình",
+        "description": "Đánh giá khu vực, mức vốn và mặt bằng phù hợp."
+      },
+      {
+        "id": 2,
+        "title": "Ký thỏa thuận",
+        "description": "Thống nhất chính sách thương hiệu, vận hành và hỗ trợ."
+      },
+      {
+        "id": 3,
+        "title": "Thiết kế cửa hàng",
+        "description": "Bố cục quầy, nhận diện và quy trình phục vụ đồng bộ."
+      },
+      {
+        "id": 4,
+        "title": "Đào tạo vận hành",
+        "description": "Đào tạo pha chế, bán hàng, quản lý kho và chăm sóc khách."
+      },
+      {
+        "id": 5,
+        "title": "Khai trương",
+        "description": "Hỗ trợ checklist, truyền thông địa phương và theo dõi sau mở bán."
+      }
+    ]
+  },
+  "locations": {
+    "eyebrow": "Địa điểm",
+    "title": "Hệ thống cửa hàng ALOO",
+    "description": "Tìm chi nhánh ALOO gần bạn theo tỉnh thành, tên cửa hàng hoặc địa chỉ.",
+    "searchPlaceholder": "Tìm theo tên chi nhánh hoặc địa chỉ",
+    "active": "Đang hoạt động",
+    "comingSoon": "Sắp khai trương",
+    "items": [
+      {
+        "id": 1,
+        "name": "ALOO Nguyễn Trãi",
+        "address": "128 Nguyễn Trãi, Phường Bến Thành",
+        "province": "TP.HCM",
+        "phone": "0900 888 168",
+        "openingHours": "09:00 - 22:00",
+        "mapUrl": "https://maps.google.com/?q=128+Nguyen+Trai+TPHCM",
+        "status": "active"
+      },
+      {
+        "id": 2,
+        "name": "ALOO Phú Mỹ Hưng",
+        "address": "45 Nguyễn Đức Cảnh, Quận 7",
+        "province": "TP.HCM",
+        "phone": "0901 222 168",
+        "openingHours": "10:00 - 22:30",
+        "mapUrl": "https://maps.google.com/?q=45+Nguyen+Duc+Canh+Quan+7",
+        "status": "active"
+      },
+      {
+        "id": 3,
+        "name": "ALOO Hải Châu",
+        "address": "82 Bạch Đằng, Quận Hải Châu",
+        "province": "Đà Nẵng",
+        "phone": "0902 333 168",
+        "openingHours": "09:30 - 22:00",
+        "mapUrl": "https://maps.google.com/?q=82+Bach+Dang+Da+Nang",
+        "status": "comingSoon"
+      },
+      {
+        "id": 4,
+        "name": "ALOO Ninh Kiều",
+        "address": "19 Mậu Thân, Quận Ninh Kiều",
+        "province": "Cần Thơ",
+        "phone": "0903 444 168",
+        "openingHours": "09:00 - 21:30",
+        "mapUrl": "https://maps.google.com/?q=19+Mau+Than+Can+Tho",
+        "status": "active"
+      }
+    ]
+  },
+  "blog": {
+    "eyebrow": "Blog",
+    "title": "Tin tức và câu chuyện ALOO",
+    "description": "Cập nhật nội dung về sản phẩm, vận hành cửa hàng và hành trình phát triển thương hiệu kem bơ thuần Việt.",
+    "sampleDescription": "Bài viết mẫu cho website ALOO, phục vụ trình bày nội dung thương hiệu và nhượng quyền.",
+    "items": [
+      {
+        "id": 1,
+        "title": "Câu chuyện kem bơ thuần Việt của ALOO",
+        "category": "Câu chuyện thương hiệu",
+        "publishedAt": "12/05/2026",
+        "status": "Đã đăng"
+      },
+      {
+        "id": 2,
+        "title": "Vì sao kiosk kem bơ phù hợp khu dân cư",
+        "category": "Nhượng quyền",
+        "publishedAt": "08/05/2026",
+        "status": "Bản nháp"
+      },
+      {
+        "id": 3,
+        "title": "Checklist khai trương cửa hàng kem bơ",
+        "category": "Vận hành",
+        "publishedAt": "03/05/2026",
+        "status": "Lên lịch"
+      },
+      {
+        "id": 4,
+        "title": "Menu theo mùa giúp điểm bán tăng doanh thu",
+        "category": "Sản phẩm",
+        "publishedAt": "28/04/2026",
+        "status": "Ẩn"
+      }
+    ]
+  },
+  "consultation": {
+    "eyebrow": "Đăng ký tư vấn",
+    "title": "Gửi thông tin mở cửa hàng ALOO",
+    "description": "Điền thông tin cơ bản để đội ngũ tư vấn liên hệ và gợi ý mô hình phù hợp.",
+    "success": "Đăng ký tư vấn thành công!",
+    "fields": {
+      "name": "Họ tên",
+      "phone": "Số điện thoại",
+      "email": "Email",
+      "area": "Khu vực muốn mở cửa hàng",
+      "capital": "Số vốn dự kiến",
+      "note": "Ghi chú"
+    },
+    "submit": "Gửi thông tin"
+  },
+  "contact": {
+    "eyebrow": "Liên hệ",
+    "title": "Kết nối với ALOO",
+    "description": "Thông tin liên hệ mẫu cho website thương hiệu và nhượng quyền."
+  },
+  "process": {
+    "eyebrow": "Quy trình mở cửa hàng",
+    "title": "Quy trình mở cửa hàng",
+    "description": "Từ tư vấn ban đầu đến khai trương, mỗi bước đều có đầu việc rõ ràng để nhà đầu tư dễ theo dõi."
+  },
+  "cost": {
+    "eyebrow": "Chi phí dự kiến",
+    "title": "Chi phí đầu tư tham khảo",
+    "description": "Các mức chi phí là dữ liệu mẫu cho giao diện, giúp người xem hình dung quy mô đầu tư ban đầu.",
+    "items": [
+      {
+        "id": 1,
+        "title": "Gói xe đẩy / kiosk",
+        "amount": "120 - 180 triệu",
+        "note": "Phù hợp điểm bán nhỏ, chi phí gọn."
+      },
+      {
+        "id": 2,
+        "title": "Gói cửa hàng tiêu chuẩn",
+        "amount": "280 - 450 triệu",
+        "note": "Dành cho mặt bằng phố hoặc trung tâm khu dân cư."
+      },
+      {
+        "id": 3,
+        "title": "Gói flagship mini",
+        "amount": "500 - 750 triệu",
+        "note": "Không gian trải nghiệm đầy đủ và nhận diện nổi bật."
+      }
+    ]
+  }
+}

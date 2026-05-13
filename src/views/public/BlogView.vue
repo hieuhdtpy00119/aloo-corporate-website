@@ -1,14 +1,18 @@
 <script setup>
 import SectionTitle from '../../components/public/SectionTitle.vue'
-import { posts } from '../../data/mockData'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t, tm } = useI18n()
+const posts = computed(() => tm('blog.items'))
 </script>
 
 <template>
   <section class="px-4 py-16 sm:px-6 lg:px-8">
     <SectionTitle
-      eyebrow="Blog"
-      title="Tin tuc va cau chuyen ALOO"
-      description="Cap nhat noi dung ve san pham, van hanh cua hang va hanh trinh phat trien thuong hieu kem bo thuan Viet."
+      :eyebrow="t('blog.eyebrow')"
+      :title="t('blog.title')"
+      :description="t('blog.description')"
     />
 
     <div class="mx-auto grid max-w-7xl gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -24,18 +28,18 @@ import { posts } from '../../data/mockData'
           <span
             class="rounded-full px-3 py-1 text-xs font-bold"
             :class="{
-              'bg-emerald-50 text-emerald-700': post.status === 'Đã đăng',
-              'bg-amber-50 text-amber-700': post.status === 'Bản nháp' || post.status === 'Lên lịch',
-              'bg-slate-100 text-slate-600': post.status === 'Ẩn',
+              'bg-emerald-50 text-emerald-700': post.status === 'Đã đăng' || post.status === 'Published',
+              'bg-amber-50 text-amber-700': ['Bản nháp', 'Lên lịch', 'Draft', 'Scheduled'].includes(post.status),
+              'bg-slate-100 text-slate-600': post.status === 'Ẩn' || post.status === 'Hidden',
             }"
           >
             {{ post.status }}
           </span>
         </div>
         <h3 class="text-xl font-black leading-7 text-avocado-950">{{ post.title }}</h3>
-        <p class="mt-4 text-sm font-semibold text-slate-500">Ngay dang: {{ post.publishedAt }}</p>
+        <p class="mt-4 text-sm font-semibold text-slate-500">{{ t('common.publishedAt') }}: {{ post.publishedAt }}</p>
         <p class="mt-4 leading-7 text-slate-600">
-          Bai viet mau cho website ALOO, phuc vu trinh bay noi dung thuong hieu va nhuong quyen.
+          {{ t('blog.sampleDescription') }}
         </p>
       </article>
     </div>

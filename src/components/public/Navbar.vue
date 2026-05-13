@@ -1,17 +1,20 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import LanguageSwitcher from './LanguageSwitcher.vue'
 
 const route = useRoute()
+const { t } = useI18n()
 const isDrawerOpen = ref(false)
 
 const navItems = [
-  { label: 'Trang chủ', to: '/' },
-  { label: 'Sản phẩm', to: '/products' },
-  { label: 'Hệ thống', to: '/locations' },
-  { label: 'Nhượng quyền', to: '/franchise', featured: true },
-  { label: 'Về ALOO', to: '/about' },
-  { label: 'Blog', to: '/blog' },
+  { labelKey: 'nav.home', to: '/' },
+  { labelKey: 'nav.products', to: '/products' },
+  { labelKey: 'nav.system', to: '/locations' },
+  { labelKey: 'nav.franchise', to: '/franchise', featured: true },
+  { labelKey: 'nav.about', to: '/about' },
+  { labelKey: 'nav.blog', to: '/blog' },
 ]
 
 const isActive = (path) => route.path === path
@@ -30,8 +33,8 @@ const closeDrawer = () => {
       <RouterLink to="/" class="flex items-center gap-3">
         <span class="grid h-11 w-11 place-items-center rounded-full bg-avocado-700 text-lg font-black text-white shadow-sm">A</span>
         <span>
-          <span class="block text-lg font-black tracking-wide text-avocado-950">ALOO</span>
-          <span class="block text-xs font-semibold text-avocado-600">Kem Bơ Thuần Việt</span>
+          <span class="block text-lg font-black tracking-wide text-avocado-950">{{ t('brand.name') }}</span>
+          <span class="block text-xs font-semibold text-avocado-600">{{ t('brand.tagline') }}</span>
         </span>
       </RouterLink>
 
@@ -46,18 +49,19 @@ const closeDrawer = () => {
             item.featured && !isActive(item.to) ? 'text-avocado-800 ring-1 ring-avocado-200' : '',
           ]"
         >
-          {{ item.label }}
+          {{ t(item.labelKey) }}
         </RouterLink>
       </div>
 
-      <div class="hidden items-center lg:flex">
+      <div class="hidden items-center gap-3 lg:flex">
+        <LanguageSwitcher />
         <RouterLink to="/consultation" class="rounded-xl bg-cream-400 px-5 py-2.5 text-sm font-black text-avocado-950 shadow-sm transition hover:bg-cream-300">
-          Đăng ký tư vấn
+          {{ t('nav.consultation') }}
         </RouterLink>
       </div>
 
       <button class="rounded-xl border border-avocado-200 px-4 py-2 text-sm font-black text-avocado-800 lg:hidden" @click="isDrawerOpen = true">
-        Menu
+        {{ t('nav.menu') }}
       </button>
     </nav>
 
@@ -65,8 +69,8 @@ const closeDrawer = () => {
       <aside :class="['ml-auto h-full w-[min(380px,88vw)] bg-white p-5 shadow-2xl transition duration-300', drawerClasses]">
         <div class="mb-6 flex items-center justify-between">
           <div>
-            <div class="text-xl font-black text-avocado-950">ALOO</div>
-            <div class="text-sm font-semibold text-avocado-600">Kem Bơ Thuần Việt</div>
+            <div class="text-xl font-black text-avocado-950">{{ t('brand.name') }}</div>
+            <div class="text-sm font-semibold text-avocado-600">{{ t('brand.tagline') }}</div>
           </div>
           <button class="rounded-lg border border-slate-200 px-3 py-2 font-black text-slate-600" @click="closeDrawer">×</button>
         </div>
@@ -83,13 +87,17 @@ const closeDrawer = () => {
             ]"
             @click="closeDrawer"
           >
-            {{ item.label }}
+            {{ t(item.labelKey) }}
           </RouterLink>
         </div>
 
-        <div class="mt-6 border-t border-slate-100 pt-5">
+        <div class="mt-6 flex items-center justify-between border-t border-slate-100 pt-5">
+          <LanguageSwitcher />
+        </div>
+
+        <div class="mt-4">
           <RouterLink to="/consultation" class="block rounded-xl bg-cream-400 px-4 py-3 text-center font-black text-avocado-950" @click="closeDrawer">
-            Đăng ký tư vấn
+            {{ t('nav.consultation') }}
           </RouterLink>
         </div>
       </aside>

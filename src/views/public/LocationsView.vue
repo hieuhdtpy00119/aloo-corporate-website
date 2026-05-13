@@ -1,19 +1,23 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import SectionTitle from '../../components/public/SectionTitle.vue'
-import { locations } from '../../data/mockData'
 
+const { t, tm } = useI18n()
 const searchKeyword = ref('')
-const selectedProvince = ref('Tat ca')
+const selectedProvince = ref('all')
 
-const provinces = computed(() => ['Tat ca', ...new Set(locations.map((location) => location.province))])
+const locations = computed(() => tm('locations.items'))
+const provinces = computed(() => ['all', ...new Set(locations.value.map((location) => location.province))])
+const getProvinceLabel = (province) => (province === 'all' ? t('common.all') : province)
+const getStatusLabel = (status) => (status === 'active' ? t('locations.active') : t('locations.comingSoon'))
 
 const filteredLocations = computed(() => {
   const keyword = searchKeyword.value.trim().toLowerCase()
 
-  return locations.filter((location) => {
+  return locations.value.filter((location) => {
     const matchesProvince =
-      selectedProvince.value === 'Tat ca' || location.province === selectedProvince.value
+      selectedProvince.value === 'all' || location.province === selectedProvince.value
     const matchesKeyword =
       !keyword ||
       location.name.toLowerCase().includes(keyword) ||
@@ -27,23 +31,23 @@ const filteredLocations = computed(() => {
 <template>
   <section class="bg-avocado-50 px-4 py-16 sm:px-6 lg:px-8">
     <SectionTitle
-      eyebrow="Dia diem"
-      title="He thong cua hang ALOO"
-      description="Tim chi nhanh ALOO gan ban theo tinh thanh, ten cua hang hoac dia chi."
+      :eyebrow="t('locations.eyebrow')"
+      :title="t('locations.title')"
+      :description="t('locations.description')"
     />
 
     <div class="mx-auto mb-8 grid max-w-5xl gap-4 rounded-lg border border-avocado-100 bg-white p-5 shadow-sm md:grid-cols-[1fr_240px]">
       <input
         v-model="searchKeyword"
         type="search"
-        placeholder="Tim theo ten chi nhanh hoac dia chi"
+        :placeholder="t('locations.searchPlaceholder')"
         class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500"
       />
       <select
         v-model="selectedProvince"
         class="rounded-lg border border-slate-200 px-4 py-3 font-semibold text-slate-700 outline-none focus:border-avocado-500"
       >
-        <option v-for="province in provinces" :key="province" :value="province">{{ province }}</option>
+        <option v-for="province in provinces" :key="province" :value="province">{{ getProvinceLabel(province) }}</option>
       </select>
     </div>
 
@@ -61,18 +65,18 @@ const filteredLocations = computed(() => {
           <span
             class="rounded-full px-3 py-1 text-xs font-bold"
             :class="
-              location.status === 'Đang hoạt động'
+              location.status === 'active'
                 ? 'bg-emerald-50 text-emerald-700'
                 : 'bg-amber-50 text-amber-700'
             "
           >
-            {{ location.status }}
+            {{ getStatusLabel(location.status) }}
           </span>
         </div>
         <div class="space-y-3 text-sm leading-6 text-slate-600">
-          <p><span class="font-bold text-slate-800">Dia chi:</span> {{ location.address }}</p>
-          <p><span class="font-bold text-slate-800">Dien thoai:</span> {{ location.phone }}</p>
-          <p><span class="font-bold text-slate-800">Gio mo cua:</span> {{ location.openingHours }}</p>
+          <p><span class="font-bold text-slate-800">{{ t('common.address') }}:</span> {{ location.address }}</p>
+          <p><span class="font-bold text-slate-800">{{ t('common.phone') }}:</span> {{ location.phone }}</p>
+          <p><span class="font-bold text-slate-800">{{ t('common.openingHours') }}:</span> {{ location.openingHours }}</p>
         </div>
         <a
           :href="location.mapUrl"
@@ -80,13 +84,13 @@ const filteredLocations = computed(() => {
           rel="noreferrer"
           class="mt-6 inline-flex rounded-full bg-cream-400 px-5 py-3 text-sm font-black text-avocado-950 hover:bg-cream-300"
         >
-          Xem ban do
+          {{ t('common.viewMap') }}
         </a>
       </article>
     </div>
 
     <p v-if="filteredLocations.length === 0" class="mx-auto mt-10 max-w-xl text-center font-semibold text-slate-500">
-      Khong tim thay cua hang phu hop.
+      {{ t('common.noLocationFound') }}
     </p>
   </section>
 </template>
