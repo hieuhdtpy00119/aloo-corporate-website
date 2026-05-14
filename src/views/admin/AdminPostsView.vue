@@ -4,6 +4,7 @@ import BaseModal from '../../components/admin/BaseModal.vue'
 import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
 import Pagination from '../../components/admin/Pagination.vue'
+import RichTextEditor from '../../components/admin/RichTextEditor.vue'
 import SearchFilterBar from '../../components/admin/SearchFilterBar.vue'
 import { useAppStore } from '../../stores/appStore'
 import { useToastStore } from '../../stores/toastStore'
@@ -24,6 +25,7 @@ const statusFilters = ['Tất cả', ...postStatuses]
 
 const form = reactive({
   title: '',
+  slug: '',
   excerpt: '',
   content: '',
   image: '',
@@ -34,6 +36,7 @@ const form = reactive({
 
 const resetForm = () => {
   form.title = ''
+  form.slug = ''
   form.excerpt = ''
   form.content = ''
   form.image = ''
@@ -72,6 +75,29 @@ const savePost = () => {
     toast.success('Đã cập nhật bài viết thành công')
   }
   closeModal()
+}
+
+const toSlug = (value) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+
+const syncSlug = () => {
+  if (!form.slug) {
+    form.slug = toSlug(form.title)
+  }
+}
+
+const uploadThumbnail = (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+  form.image = URL.createObjectURL(file)
+  event.target.value = ''
 }
 
 const deletePost = (postId) => {
@@ -171,38 +197,93 @@ watch([searchQuery, statusFilter], () => {
 
     <Pagination :page="currentPage" :total-pages="totalPages" :visible-count="paginatedPosts.length" :total-count="filteredPosts.length" label="bài viết" @prev="currentPage--" @next="currentPage++" />
 
-    <BaseModal :show="showModal" :title="mode === 'create' ? 'Thêm bài viết' : 'Sửa bài viết'" max-width="max-w-3xl" @close="closeModal">
-      <form id="post-form" class="grid gap-5 md:grid-cols-2" @submit.prevent="savePost">
-        <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
-          Tiêu đề
-          <input v-model="form.title" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
-        </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Danh mục
-          <input v-model="form.category" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
-        </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Trạng thái
-          <select v-model="form.status" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500">
-            <option v-for="status in postStatuses" :key="status" :value="status">{{ status }}</option>
-          </select>
-        </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Ngày đăng
-          <input v-model="form.publishedAt" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
-        </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Ảnh
-          <input v-model="form.image" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
-        </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
-          Mô tả ngắn
-          <textarea v-model="form.excerpt" required rows="2" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500"></textarea>
-        </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
-          Nội dung
-          <textarea v-model="form.content" required rows="5" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500"></textarea>
-        </label>
+    <BaseModal :show="showModal" :title="mode === 'create' ? 'Thêm bài viết' : 'Sửa bài viết'" max-width="max-w-6xl" @close="closeModal">
+      <form id="post-form" class="grid gap-6" @submit.prevent="savePost">
+        <section class="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 md:grid-cols-2">
+          <div class="md:col-span-2">
+            <h3 class="text-lg font-black text-avocado-950">Thông tin cơ bản</h3>
+            <p class="mt-1 text-sm text-slate-500">Tiêu đề, danh mục và mô tả ngắn của bài viết.</p>
+          </div>
+          <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
+            Tiêu đề
+            <input v-model="form.title" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" @blur="syncSlug" />
+          </label>
+          <label class="grid gap-2 text-sm font-bold text-slate-700">
+            Danh mục
+            <input v-model="form.category" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
+          </label>
+          <label class="grid gap-2 text-sm font-bold text-slate-700">
+            Ngày đăng
+            <input v-model="form.publishedAt" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
+          </label>
+          <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
+            Mô tả ngắn
+            <textarea v-model="form.excerpt" required rows="2" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500"></textarea>
+          </label>
+        </section>
+
+        <section class="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 md:grid-cols-2">
+          <div class="md:col-span-2">
+            <h3 class="text-lg font-black text-avocado-950">SEO / slug</h3>
+            <p class="mt-1 text-sm text-slate-500">Slug dùng cho URL bài viết khi kết nối backend thật.</p>
+          </div>
+          <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
+            Slug
+            <input v-model="form.slug" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
+          </label>
+        </section>
+
+        <section class="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 md:grid-cols-[1fr_220px]">
+          <div>
+            <h3 class="text-lg font-black text-avocado-950">Ảnh đại diện</h3>
+            <p class="mt-1 text-sm text-slate-500">Có thể nhập URL hoặc chọn file local để xem trước tạm thời.</p>
+            <div class="mt-4 grid gap-3">
+              <input v-model="form.image" placeholder="https://..." class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
+              <input type="file" accept="image/*" class="rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600" @change="uploadThumbnail" />
+            </div>
+          </div>
+          <div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+            <img v-if="form.image" :src="form.image" alt="Preview ảnh đại diện" class="h-full min-h-40 w-full object-cover" />
+            <div v-else class="grid min-h-40 place-items-center p-4 text-center text-sm font-semibold text-slate-400">
+              Chưa có ảnh đại diện
+            </div>
+          </div>
+        </section>
+
+        <section class="grid gap-4 rounded-xl border border-slate-200 bg-white p-5">
+          <div>
+            <h3 class="text-lg font-black text-avocado-950">Nội dung bài viết</h3>
+            <p class="mt-1 text-sm text-slate-500">Nội dung lưu dạng HTML. Backend thật cần sanitize HTML trước khi lưu hoặc render.</p>
+          </div>
+          <RichTextEditor v-model="form.content" />
+        </section>
+
+        <section class="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 md:grid-cols-2">
+          <div>
+            <h3 class="text-lg font-black text-avocado-950">Trạng thái</h3>
+            <p class="mt-1 text-sm text-slate-500">Chỉ bài đã đăng được hiển thị ở public.</p>
+          </div>
+          <label class="grid gap-2 text-sm font-bold text-slate-700">
+            Trạng thái
+            <select v-model="form.status" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500">
+              <option v-for="status in postStatuses" :key="status" :value="status">{{ status }}</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="grid gap-4 rounded-xl border border-avocado-100 bg-avocado-50/60 p-5">
+          <div>
+            <h3 class="text-lg font-black text-avocado-950">Preview bài viết</h3>
+            <p class="mt-1 text-sm text-slate-500">Bản xem trước nhanh trước khi lưu.</p>
+          </div>
+          <article class="rounded-xl bg-white p-5 shadow-sm">
+            <img v-if="form.image" :src="form.image" alt="" class="mb-5 aspect-video w-full rounded-xl object-cover" />
+            <div class="text-sm font-bold text-avocado-700">{{ form.category || 'Danh mục' }}</div>
+            <h1 class="mt-2 text-3xl font-black text-avocado-950">{{ form.title || 'Tiêu đề bài viết' }}</h1>
+            <p class="mt-3 leading-7 text-slate-600">{{ form.excerpt || 'Mô tả ngắn của bài viết.' }}</p>
+            <div class="blog-preview mt-5 leading-8 text-slate-700" v-html="form.content"></div>
+          </article>
+        </section>
       </form>
       <template #footer>
         <div class="flex justify-end gap-3">
