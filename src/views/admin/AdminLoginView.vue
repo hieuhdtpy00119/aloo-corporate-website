@@ -10,6 +10,7 @@ const errorMessage = ref('')
 const handleLogin = () => {
   if (email.value === 'admin@aloo.vn' && password.value === '123456') {
     localStorage.setItem('admin_token', 'demo-token')
+    window.dispatchEvent(new Event('aloo-auth-change'))
     router.push('/admin')
   } else {
     errorMessage.value = 'Sai tai khoan hoac mat khau'
