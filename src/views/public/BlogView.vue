@@ -2,9 +2,11 @@
 import SectionTitle from '../../components/public/SectionTitle.vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAppStore } from '../../stores/appStore'
 
-const { t, tm } = useI18n()
-const posts = computed(() => tm('blog.items'))
+const { t } = useI18n()
+const store = useAppStore()
+const posts = computed(() => store.posts.filter((post) => post.status === 'Đã đăng'))
 </script>
 
 <template>
@@ -36,10 +38,12 @@ const posts = computed(() => tm('blog.items'))
             {{ post.status }}
           </span>
         </div>
-        <h3 class="text-xl font-black leading-7 text-avocado-950">{{ post.title }}</h3>
+        <RouterLink :to="`/blog/${post.id}`" class="block text-xl font-black leading-7 text-avocado-950 hover:text-avocado-700">
+          {{ post.title }}
+        </RouterLink>
         <p class="mt-4 text-sm font-semibold text-slate-500">{{ t('common.publishedAt') }}: {{ post.publishedAt }}</p>
         <p class="mt-4 leading-7 text-slate-600">
-          {{ t('blog.sampleDescription') }}
+          {{ post.excerpt || t('blog.sampleDescription') }}
         </p>
       </article>
     </div>

@@ -3,9 +3,11 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SectionTitle from '../../components/public/SectionTitle.vue'
 import ProductCard from '../../components/public/ProductCard.vue'
+import { useAppStore } from '../../stores/appStore'
 
-const { t, tm } = useI18n()
-const products = computed(() => tm('products.items'))
+const { t } = useI18n()
+const store = useAppStore()
+const products = computed(() => store.products.filter((product) => product.status === 'Đang bán'))
 </script>
 
 <template>

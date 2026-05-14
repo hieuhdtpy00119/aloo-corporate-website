@@ -2,15 +2,21 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SectionTitle from '../../components/public/SectionTitle.vue'
+import { useAppStore } from '../../stores/appStore'
 
-const { t, tm } = useI18n()
+const { t } = useI18n()
+const store = useAppStore()
 const searchKeyword = ref('')
 const selectedProvince = ref('all')
 
-const locations = computed(() => tm('locations.items'))
+const locations = computed(() => store.locations.filter((location) => location.status !== 'Tạm đóng'))
 const provinces = computed(() => ['all', ...new Set(locations.value.map((location) => location.province))])
 const getProvinceLabel = (province) => (province === 'all' ? t('common.all') : province)
-const getStatusLabel = (status) => (status === 'active' ? t('locations.active') : t('locations.comingSoon'))
+const getStatusLabel = (status) => {
+  if (status === 'Đang hoạt động' || status === 'active') return t('locations.active')
+  if (status === 'Sắp khai trương' || status === 'comingSoon') return t('locations.comingSoon')
+  return status
+}
 
 const filteredLocations = computed(() => {
   const keyword = searchKeyword.value.trim().toLowerCase()
@@ -65,7 +71,7 @@ const filteredLocations = computed(() => {
           <span
             class="rounded-full px-3 py-1 text-xs font-bold"
             :class="
-              location.status === 'active'
+              location.status === 'Đang hoạt động' || location.status === 'active'
                 ? 'bg-emerald-50 text-emerald-700'
                 : 'bg-amber-50 text-amber-700'
             "

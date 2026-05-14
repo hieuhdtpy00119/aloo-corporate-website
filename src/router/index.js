@@ -11,6 +11,7 @@ import ConsultationView from '../views/public/ConsultationView.vue'
 import ContactView from '../views/public/ContactView.vue'
 import LocationsView from '../views/public/LocationsView.vue'
 import BlogView from '../views/public/BlogView.vue'
+import BlogDetailView from '../views/public/BlogDetailView.vue'
 import AdminLoginView from '../views/admin/AdminLoginView.vue'
 import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
 import AdminProductsView from '../views/admin/AdminProductsView.vue'
@@ -35,6 +36,7 @@ const router = createRouter({
         { path: 'cost', name: 'cost', component: CostView },
         { path: 'locations', name: 'locations', component: LocationsView },
         { path: 'blog', name: 'blog', component: BlogView },
+        { path: 'blog/:id', name: 'blog-detail', component: BlogDetailView },
         { path: 'consultation', name: 'consultation', component: ConsultationView },
         { path: 'contact', name: 'contact', component: ContactView },
       ],

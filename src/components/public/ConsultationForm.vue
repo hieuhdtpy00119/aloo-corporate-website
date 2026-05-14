@@ -1,8 +1,10 @@
 <script setup>
 import { reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAppStore } from '../../stores/appStore'
 
 const { t } = useI18n()
+const store = useAppStore()
 
 const form = reactive({
   name: '',
@@ -14,6 +16,17 @@ const form = reactive({
 })
 
 const submitForm = () => {
+  store.registrations.unshift({
+    id: Date.now(),
+    name: form.name,
+    phone: form.phone,
+    email: form.email,
+    area: form.area,
+    capital: Number(String(form.capital).replace(/\D/g, '')) || 0,
+    note: form.note,
+    createdAt: new Date().toLocaleDateString('vi-VN'),
+    status: 'Mới',
+  })
   alert(t('consultation.success'))
   Object.keys(form).forEach((key) => {
     form[key] = ''

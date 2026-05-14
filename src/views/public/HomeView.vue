@@ -5,9 +5,11 @@ import HeroBanner from '../../components/public/HeroBanner.vue'
 import SectionTitle from '../../components/public/SectionTitle.vue'
 import ProductCard from '../../components/public/ProductCard.vue'
 import FranchiseStep from '../../components/public/FranchiseStep.vue'
+import { useAppStore } from '../../stores/appStore'
 
 const { t, tm } = useI18n()
-const products = computed(() => tm('products.items'))
+const store = useAppStore()
+const products = computed(() => store.products.filter((product) => product.status === 'Đang bán').slice(0, 4))
 const franchiseSteps = computed(() => tm('franchise.steps'))
 </script>
 
