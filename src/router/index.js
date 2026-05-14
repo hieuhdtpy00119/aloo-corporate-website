@@ -18,6 +18,7 @@ import AdminProductsView from '../views/admin/AdminProductsView.vue'
 import AdminRegistrationsView from '../views/admin/AdminRegistrationsView.vue'
 import AdminBannersView from '../views/admin/AdminBannersView.vue'
 import AdminPostsView from '../views/admin/AdminPostsView.vue'
+import AdminPostEditorView from '../views/admin/AdminPostEditorView.vue'
 import AdminFranchiseContentView from '../views/admin/AdminFranchiseContentView.vue'
 import AdminLocationsView from '../views/admin/AdminLocationsView.vue'
 
@@ -50,6 +51,8 @@ const router = createRouter({
         { path: 'products', name: 'admin-products', component: AdminProductsView },
         { path: 'banners', name: 'admin-banners', component: AdminBannersView },
         { path: 'posts', name: 'admin-posts', component: AdminPostsView },
+        { path: 'posts/new', name: 'admin-post-new', component: AdminPostEditorView },
+        { path: 'posts/:id/edit', name: 'admin-post-edit', component: AdminPostEditorView },
         { path: 'locations', name: 'admin-locations', component: AdminLocationsView },
         { path: 'registrations', name: 'admin-registrations', component: AdminRegistrationsView },
         {

@@ -1,19 +1,16 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
-import BaseModal from '../../components/admin/BaseModal.vue'
+import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
 import Pagination from '../../components/admin/Pagination.vue'
-import RichTextEditor from '../../components/admin/RichTextEditor.vue'
 import SearchFilterBar from '../../components/admin/SearchFilterBar.vue'
 import { useAppStore } from '../../stores/appStore'
 import { useToastStore } from '../../stores/toastStore'
 
 const store = useAppStore()
 const toast = useToastStore()
-const showModal = ref(false)
-const mode = ref('create')
-const editingId = ref(null)
+const router = useRouter()
 const pendingDeleteId = ref(null)
 const searchQuery = ref('')
 const statusFilter = ref('Tất cả')
@@ -23,105 +20,15 @@ const pageSize = 5
 const postStatuses = ['Đã đăng', 'Bản nháp', 'Lên lịch', 'Ẩn']
 const statusFilters = ['Tất cả', ...postStatuses]
 
-const form = reactive({
-  title: '',
-  slug: '',
-  excerpt: '',
-  content: '',
-  image: '',
-  category: '',
-  publishedAt: '',
-  status: 'Bản nháp',
-})
-
-const resetForm = () => {
-  form.title = ''
-  form.slug = ''
-  form.excerpt = ''
-  form.content = ''
-  form.image = ''
-  form.category = ''
-  form.publishedAt = ''
-  form.status = 'Bản nháp'
-  delete form.id
-  editingId.value = null
-}
-
-const openCreateModal = () => {
-  mode.value = 'create'
-  resetForm()
-  showModal.value = true
-}
-
-const openEditModal = (post) => {
-  mode.value = 'edit'
-  editingId.value = post.id
-  Object.assign(form, { ...post })
-  showModal.value = true
-}
-
-const closeModal = () => {
-  showModal.value = false
-  resetForm()
-}
-
-const savePost = () => {
-  if (mode.value === 'create') {
-    store.posts.push({ id: Date.now(), ...form })
-    toast.success('Đã thêm bài viết thành công')
-  } else {
-    const post = store.posts.find((item) => item.id === editingId.value)
-    if (post) Object.assign(post, { ...form })
-    toast.success('Đã cập nhật bài viết thành công')
-  }
-  closeModal()
-}
-
-const toSlug = (value) =>
-  value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-
-const syncSlug = () => {
-  if (!form.slug) {
-    form.slug = toSlug(form.title)
-  }
-}
-
-const uploadThumbnail = (event) => {
-  const file = event.target.files?.[0]
-  if (!file) return
-  form.image = URL.createObjectURL(file)
-  event.target.value = ''
-}
-
-const deletePost = (postId) => {
-  pendingDeleteId.value = postId
-}
-
-const confirmDeletePost = () => {
-  const index = store.posts.findIndex((item) => item.id === pendingDeleteId.value)
-  if (index !== -1) {
-    store.posts.splice(index, 1)
-    toast.success('Đã xóa bài viết thành công')
-  }
-  pendingDeleteId.value = null
-}
-
-const notifyStatusChange = () => {
-  toast.success('Đã cập nhật trạng thái bài viết')
-}
-
 const statusClass = (status) => ({
   'bg-green-50 text-green-700 border-green-200': status === 'Đã đăng',
   'bg-yellow-50 text-yellow-700 border-yellow-200': status === 'Bản nháp' || status === 'Lên lịch',
   'bg-gray-50 text-gray-700 border-gray-200': status === 'Ẩn',
 })
+
+const notifyStatusChange = () => {
+  toast.success('Đã cập nhật trạng thái bài viết')
+}
 
 const filteredPosts = computed(() => {
   const keyword = searchQuery.value.trim().toLowerCase()
@@ -141,6 +48,19 @@ const paginatedPosts = computed(() =>
   filteredPosts.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize),
 )
 
+const deletePost = (postId) => {
+  pendingDeleteId.value = postId
+}
+
+const confirmDeletePost = () => {
+  const index = store.posts.findIndex((item) => item.id === pendingDeleteId.value)
+  if (index !== -1) {
+    store.posts.splice(index, 1)
+    toast.success('Đã xóa bài viết thành công')
+  }
+  pendingDeleteId.value = null
+}
+
 watch([searchQuery, statusFilter], () => {
   currentPage.value = 1
 })
@@ -151,11 +71,11 @@ watch([searchQuery, statusFilter], () => {
     <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
       <div>
         <h2 class="text-3xl font-black text-avocado-950">Quản lý bài viết</h2>
-        <p class="mt-2 text-slate-600">Tin tức, câu chuyện thương hiệu và nội dung hỗ trợ nhượng quyền.</p>
+        <p class="mt-2 text-slate-600">Bài SEO, review địa điểm ăn uống và câu chuyện thương hiệu ALOO.</p>
       </div>
-      <button class="rounded-xl bg-[#2D5A27] px-5 py-3 font-black text-white hover:bg-[#24491f]" @click="openCreateModal">
+      <RouterLink to="/admin/posts/new" class="rounded-xl bg-[#2D5A27] px-5 py-3 text-center font-black text-white hover:bg-[#24491f]">
         Thêm bài viết
-      </button>
+      </RouterLink>
     </div>
 
     <SearchFilterBar v-model:search="searchQuery" v-model:status="statusFilter" search-placeholder="Tìm bài viết, danh mục, mô tả" :status-options="statusFilters" />
@@ -185,7 +105,7 @@ watch([searchQuery, statusFilter], () => {
               </td>
               <td class="whitespace-nowrap px-5 py-4 text-sm">
                 <div class="flex gap-2">
-                  <button class="rounded-lg border border-avocado-200 px-3 py-2 font-bold text-avocado-700 hover:bg-avocado-50" @click="openEditModal(post)">Sửa</button>
+                  <button class="rounded-lg border border-avocado-200 px-3 py-2 font-bold text-avocado-700 hover:bg-avocado-50" @click="router.push(`/admin/posts/${post.id}/edit`)">Sửa</button>
                   <button class="rounded-lg border border-red-200 px-3 py-2 font-bold text-red-600 hover:bg-red-50" @click="deletePost(post.id)">Xóa</button>
                 </div>
               </td>
@@ -196,104 +116,6 @@ watch([searchQuery, statusFilter], () => {
     </div>
 
     <Pagination :page="currentPage" :total-pages="totalPages" :visible-count="paginatedPosts.length" :total-count="filteredPosts.length" label="bài viết" @prev="currentPage--" @next="currentPage++" />
-
-    <BaseModal :show="showModal" :title="mode === 'create' ? 'Thêm bài viết' : 'Sửa bài viết'" max-width="max-w-6xl" @close="closeModal">
-      <form id="post-form" class="grid gap-6" @submit.prevent="savePost">
-        <section class="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 md:grid-cols-2">
-          <div class="md:col-span-2">
-            <h3 class="text-lg font-black text-avocado-950">Thông tin cơ bản</h3>
-            <p class="mt-1 text-sm text-slate-500">Tiêu đề, danh mục và mô tả ngắn của bài viết.</p>
-          </div>
-          <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
-            Tiêu đề
-            <input v-model="form.title" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" @blur="syncSlug" />
-          </label>
-          <label class="grid gap-2 text-sm font-bold text-slate-700">
-            Danh mục
-            <input v-model="form.category" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
-          </label>
-          <label class="grid gap-2 text-sm font-bold text-slate-700">
-            Ngày đăng
-            <input v-model="form.publishedAt" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
-          </label>
-          <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
-            Mô tả ngắn
-            <textarea v-model="form.excerpt" required rows="2" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500"></textarea>
-          </label>
-        </section>
-
-        <section class="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 md:grid-cols-2">
-          <div class="md:col-span-2">
-            <h3 class="text-lg font-black text-avocado-950">SEO / slug</h3>
-            <p class="mt-1 text-sm text-slate-500">Slug dùng cho URL bài viết khi kết nối backend thật.</p>
-          </div>
-          <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
-            Slug
-            <input v-model="form.slug" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
-          </label>
-        </section>
-
-        <section class="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 md:grid-cols-[1fr_220px]">
-          <div>
-            <h3 class="text-lg font-black text-avocado-950">Ảnh đại diện</h3>
-            <p class="mt-1 text-sm text-slate-500">Có thể nhập URL hoặc chọn file local để xem trước tạm thời.</p>
-            <div class="mt-4 grid gap-3">
-              <input v-model="form.image" placeholder="https://..." class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
-              <input type="file" accept="image/*" class="rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600" @change="uploadThumbnail" />
-            </div>
-          </div>
-          <div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-            <img v-if="form.image" :src="form.image" alt="Preview ảnh đại diện" class="h-full min-h-40 w-full object-cover" />
-            <div v-else class="grid min-h-40 place-items-center p-4 text-center text-sm font-semibold text-slate-400">
-              Chưa có ảnh đại diện
-            </div>
-          </div>
-        </section>
-
-        <section class="grid gap-4 rounded-xl border border-slate-200 bg-white p-5">
-          <div>
-            <h3 class="text-lg font-black text-avocado-950">Nội dung bài viết</h3>
-            <p class="mt-1 text-sm text-slate-500">Nội dung lưu dạng HTML. Backend thật cần sanitize HTML trước khi lưu hoặc render.</p>
-          </div>
-          <RichTextEditor v-model="form.content" />
-        </section>
-
-        <section class="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 md:grid-cols-2">
-          <div>
-            <h3 class="text-lg font-black text-avocado-950">Trạng thái</h3>
-            <p class="mt-1 text-sm text-slate-500">Chỉ bài đã đăng được hiển thị ở public.</p>
-          </div>
-          <label class="grid gap-2 text-sm font-bold text-slate-700">
-            Trạng thái
-            <select v-model="form.status" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500">
-              <option v-for="status in postStatuses" :key="status" :value="status">{{ status }}</option>
-            </select>
-          </label>
-        </section>
-
-        <section class="grid gap-4 rounded-xl border border-avocado-100 bg-avocado-50/60 p-5">
-          <div>
-            <h3 class="text-lg font-black text-avocado-950">Preview bài viết</h3>
-            <p class="mt-1 text-sm text-slate-500">Bản xem trước nhanh trước khi lưu.</p>
-          </div>
-          <article class="rounded-xl bg-white p-5 shadow-sm">
-            <img v-if="form.image" :src="form.image" alt="" class="mb-5 aspect-video w-full rounded-xl object-cover" />
-            <div class="text-sm font-bold text-avocado-700">{{ form.category || 'Danh mục' }}</div>
-            <h1 class="mt-2 text-3xl font-black text-avocado-950">{{ form.title || 'Tiêu đề bài viết' }}</h1>
-            <p class="mt-3 leading-7 text-slate-600">{{ form.excerpt || 'Mô tả ngắn của bài viết.' }}</p>
-            <div class="blog-preview mt-5 leading-8 text-slate-700" v-html="form.content"></div>
-          </article>
-        </section>
-      </form>
-      <template #footer>
-        <div class="flex justify-end gap-3">
-          <button class="rounded-lg border border-slate-200 px-4 py-3 font-bold text-slate-600 hover:bg-slate-50" @click="closeModal">Hủy</button>
-          <button class="rounded-lg bg-[#2D5A27] px-4 py-3 font-black text-white hover:bg-[#24491f]" form="post-form" type="submit">
-            {{ mode === 'create' ? 'Thêm mới' : 'Lưu thay đổi' }}
-          </button>
-        </div>
-      </template>
-    </BaseModal>
 
     <ConfirmModal
       :show="Boolean(pendingDeleteId)"
