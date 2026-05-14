@@ -15,6 +15,13 @@
     "consultation": "Get Consultation",
     "menu": "Menu"
   },
+  "userMenu": {
+    "login": "Log in",
+    "profile": "Profile",
+    "cms": "CMS Admin",
+    "changePassword": "Change password",
+    "logout": "Log out"
+  },
   "common": {
     "all": "All",
     "viewMore": "View more",

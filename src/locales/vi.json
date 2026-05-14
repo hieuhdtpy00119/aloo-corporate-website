@@ -15,6 +15,13 @@
     "consultation": "Đăng ký tư vấn",
     "menu": "Menu"
   },
+  "userMenu": {
+    "login": "Đăng nhập",
+    "profile": "Thông tin cá nhân",
+    "cms": "Quản trị CMS",
+    "changePassword": "Đổi mật khẩu",
+    "logout": "Đăng xuất"
+  },
   "common": {
     "all": "Tất cả",
     "viewMore": "Xem thêm",

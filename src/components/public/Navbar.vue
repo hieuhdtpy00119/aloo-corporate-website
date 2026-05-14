@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import LanguageSwitcher from './LanguageSwitcher.vue'
+import UserMenu from './UserMenu.vue'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -58,6 +59,7 @@ const closeDrawer = () => {
         <RouterLink to="/consultation" class="rounded-xl bg-cream-400 px-5 py-2.5 text-sm font-black text-avocado-950 shadow-sm transition hover:bg-cream-300">
           {{ t('nav.consultation') }}
         </RouterLink>
+        <UserMenu />
       </div>
 
       <button class="rounded-xl border border-avocado-200 px-4 py-2 text-sm font-black text-avocado-800 lg:hidden" @click="isDrawerOpen = true">
@@ -99,6 +101,10 @@ const closeDrawer = () => {
           <RouterLink to="/consultation" class="block rounded-xl bg-cream-400 px-4 py-3 text-center font-black text-avocado-950" @click="closeDrawer">
             {{ t('nav.consultation') }}
           </RouterLink>
+        </div>
+
+        <div class="mt-4 flex justify-end">
+          <UserMenu @navigate="closeDrawer" />
         </div>
       </aside>
     </div>
