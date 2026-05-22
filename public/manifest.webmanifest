@@ -1,0 +1,18 @@
+{
+  "name": "ALOO - Kem Bơ Thuần Việt",
+  "short_name": "ALOO",
+  "description": "Website thương hiệu và nhượng quyền ALOO Kem Bơ Thuần Việt.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2D5A27",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

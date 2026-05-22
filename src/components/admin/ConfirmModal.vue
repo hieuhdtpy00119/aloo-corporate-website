@@ -13,12 +13,15 @@ defineEmits(['cancel', 'confirm'])
 
 <template>
   <BaseModal :show="show" title="Xác nhận xóa" max-width="max-w-md" @close="$emit('cancel')">
-    <p class="leading-7 text-slate-700">Bạn có chắc muốn xóa dữ liệu này không?</p>
+    <p class="leading-relaxed text-sm text-slate-500">
+      Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa vĩnh viễn mục dữ liệu này khỏi cơ sở dữ liệu hệ thống?
+    </p>
     <template #footer>
       <div class="flex justify-end gap-3">
-        <button class="rounded-lg border border-slate-200 px-4 py-3 font-bold text-slate-600 hover:bg-slate-50" @click="$emit('cancel')">Hủy</button>
-        <button class="rounded-lg bg-red-600 px-4 py-3 font-black text-white hover:bg-red-700" @click="$emit('confirm')">Xóa</button>
+        <button class="rounded-full border border-slate-200 px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-slate-50 transition" @click="$emit('cancel')">Hủy bỏ</button>
+        <button class="rounded-full bg-red-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:bg-red-500 transition shadow-md shadow-red-600/10" @click="$emit('confirm')">Xác nhận xóa</button>
       </div>
     </template>
   </BaseModal>
 </template>
+

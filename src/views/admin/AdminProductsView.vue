@@ -1,44 +1,69 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import BaseModal from '../../components/admin/BaseModal.vue'
 import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
 import Pagination from '../../components/admin/Pagination.vue'
 import SearchFilterBar from '../../components/admin/SearchFilterBar.vue'
+import { uploadService } from '../../services/cmsService'
 import { useAppStore } from '../../stores/appStore'
 import { useToastStore } from '../../stores/toastStore'
+import { Plus, Edit2, Trash2, Image, Link, ChevronRight } from 'lucide-vue-next'
 
 const store = useAppStore()
 const toast = useToastStore()
+
 const showModal = ref(false)
 const mode = ref('create')
 const editingId = ref(null)
 const pendingDeleteId = ref(null)
 const searchQuery = ref('')
 const statusFilter = ref('Tất cả')
-const isLoading = ref(false)
 const currentPage = ref(1)
-const pageSize = 5
-const productStatuses = ['Đang bán', 'Tạm ẩn', 'Hết hàng']
-const statusFilters = ['Tất cả', ...productStatuses]
+const isUploadingImage = ref(false)
+const pageSize = 6
+
+const isLoading = computed(() => store.loading.products)
+const errorMessage = computed(() => store.errors.products)
+const productStatuses = ['ACTIVE', 'INACTIVE']
+const statusLabels = {
+  ACTIVE: 'Đang bán',
+  INACTIVE: 'Tạm ẩn',
+}
+const statusFilters = ['Tất cả', ...productStatuses.map((status) => statusLabels[status])]
+const categoryOptions = computed(() => [
+  '',
+  ...new Set(store.categories.filter((category) => category.status === 'ACTIVE').map((category) => category.name)),
+])
 
 const form = reactive({
   name: '',
+  slug: '',
   description: '',
-  price: '',
-  image: '',
+  price: 0,
+  imageUrl: '',
   category: '',
-  status: 'Đang bán',
+  status: 'ACTIVE',
 })
 
+const slugify = (value) =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+
 const resetForm = () => {
-  form.name = ''
-  form.description = ''
-  form.price = ''
-  form.image = ''
-  form.category = ''
-  form.status = 'Đang bán'
-  delete form.id
+  Object.assign(form, {
+    name: '',
+    slug: '',
+    description: '',
+    price: 0,
+    imageUrl: '',
+    category: '',
+    status: 'ACTIVE',
+  })
   editingId.value = null
 }
 
@@ -51,7 +76,15 @@ const openCreateModal = () => {
 const openEditModal = (product) => {
   mode.value = 'edit'
   editingId.value = product.id
-  Object.assign(form, { ...product })
+  Object.assign(form, {
+    name: product.name || '',
+    slug: product.slug || '',
+    description: product.description || '',
+    price: Number(product.price || 0),
+    imageUrl: product.imageUrl || product.image || '',
+    category: product.category || '',
+    status: product.status || 'ACTIVE',
+  })
   showModal.value = true
 }
 
@@ -60,50 +93,40 @@ const closeModal = () => {
   resetForm()
 }
 
-const saveProduct = () => {
-  if (mode.value === 'create') {
-    store.products.push({ id: Date.now(), ...form })
-    toast.success('Đã thêm sản phẩm thành công')
-  } else {
-    const product = store.products.find((item) => item.id === editingId.value)
-    if (product) Object.assign(product, { ...form })
-    toast.success('Đã cập nhật sản phẩm thành công')
+const handleImageFileChange = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  isUploadingImage.value = true
+  try {
+    const { data } = await uploadService.image(file)
+    form.imageUrl = data.url
+    toast.success('Đã tải ảnh sản phẩm lên backend')
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không tải được ảnh sản phẩm')
+  } finally {
+    isUploadingImage.value = false
+    event.target.value = ''
   }
-  closeModal()
 }
 
-const deleteProduct = (productId) => {
-  pendingDeleteId.value = productId
-}
+const statusClass = (status) =>
+  status === 'ACTIVE'
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+    : 'border-slate-200 bg-slate-50 text-slate-500'
 
-const confirmDeleteProduct = () => {
-  const index = store.products.findIndex((item) => item.id === pendingDeleteId.value)
-  if (index !== -1) {
-    store.products.splice(index, 1)
-    toast.success('Đã xóa sản phẩm thành công')
-  }
-  pendingDeleteId.value = null
-}
-
-const notifyStatusChange = () => {
-  toast.success('Đã cập nhật trạng thái sản phẩm')
-}
-
-const statusClass = (status) => ({
-  'bg-green-50 text-green-700 border-green-200': status === 'Đang bán',
-  'bg-gray-50 text-gray-700 border-gray-200': status === 'Tạm ẩn',
-  'bg-red-50 text-red-700 border-red-200': status === 'Hết hàng',
-})
+const getStatusValue = (label) =>
+  Object.entries(statusLabels).find(([, value]) => value === label)?.[0] || label
 
 const filteredProducts = computed(() => {
   const keyword = searchQuery.value.trim().toLowerCase()
   return store.products.filter((product) => {
     const matchesSearch =
       !keyword ||
-      product.name.toLowerCase().includes(keyword) ||
-      product.category.toLowerCase().includes(keyword) ||
-      product.description.toLowerCase().includes(keyword)
-    const matchesStatus = statusFilter.value === 'Tất cả' || product.status === statusFilter.value
+      product.name?.toLowerCase().includes(keyword) ||
+      product.slug?.toLowerCase().includes(keyword) ||
+      product.category?.toLowerCase().includes(keyword)
+    const matchesStatus = statusFilter.value === 'Tất cả' || product.status === getStatusValue(statusFilter.value)
     return matchesSearch && matchesStatus
   })
 })
@@ -113,109 +136,286 @@ const paginatedProducts = computed(() =>
   filteredProducts.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize),
 )
 
+const saveProduct = async () => {
+  if (!form.name.trim() || !form.slug.trim()) {
+    toast.error('Vui lòng nhập tên và slug sản phẩm')
+    return
+  }
+
+  try {
+    await store.saveProduct({
+      id: editingId.value,
+      ...form,
+    })
+    toast.success(mode.value === 'create' ? 'Đã thêm sản phẩm thành công' : 'Đã cập nhật sản phẩm thành công')
+    closeModal()
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không lưu được sản phẩm')
+  }
+}
+
+const confirmDeleteProduct = async () => {
+  try {
+    await store.deleteProduct(pendingDeleteId.value)
+    toast.success('Đã xóa sản phẩm thành công')
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không xóa được sản phẩm')
+  } finally {
+    pendingDeleteId.value = null
+  }
+}
+
+const saveExistingProductStatus = async (product) => {
+  try {
+    await store.saveProduct(product)
+    toast.success('Đã cập nhật trạng thái sản phẩm')
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không cập nhật được trạng thái')
+    store.fetchProducts()
+  }
+}
+
+watch(
+  () => form.name,
+  (name) => {
+    if (!form.slug) form.slug = slugify(name)
+  },
+)
+
 watch([searchQuery, statusFilter], () => {
   currentPage.value = 1
+})
+
+onMounted(() => {
+  Promise.allSettled([store.fetchProducts(), store.fetchCategories()]).then((results) => {
+    if (results.some((result) => result.status === 'rejected')) {
+      toast.error('Không tải được dữ liệu sản phẩm')
+    }
+  })
 })
 </script>
 
 <template>
-  <section>
-    <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+  <section class="space-y-6 pb-10">
+    <!-- Header Block -->
+    <div class="flex flex-col justify-between gap-5 rounded-3xl border border-avocado-100/30 bg-white p-6 sm:p-8 shadow-sm lg:flex-row lg:items-center">
       <div>
-        <h2 class="text-3xl font-black text-avocado-950">Quản lý sản phẩm</h2>
-        <p class="mt-2 text-slate-600">Quản lý menu sản phẩm ALOO bằng dữ liệu mock.</p>
+        <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-avocado-600">Products Catalog</span>
+        <h1 class="mt-1 text-2xl font-black text-avocado-950">Quản lý sản phẩm</h1>
+        <p class="mt-1 text-xs text-slate-400">Đồng bộ dữ liệu sản phẩm qua REST API.</p>
       </div>
-      <button class="rounded-xl bg-[#2D5A27] px-5 py-3 font-black text-white hover:bg-[#24491f]" @click="openCreateModal">
+      <button 
+        class="rounded-full bg-avocado-600 hover:bg-avocado-700 px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-white transition flex items-center justify-center gap-2 shadow-lg shadow-avocado-600/10" 
+        @click="openCreateModal"
+      >
+        <Plus class="h-4.5 w-4.5" />
         Thêm sản phẩm
       </button>
     </div>
 
-    <SearchFilterBar v-model:search="searchQuery" v-model:status="statusFilter" search-placeholder="Tìm sản phẩm, danh mục, mô tả" :status-options="statusFilters" />
+    <!-- Filters -->
+    <SearchFilterBar
+      v-model:search="searchQuery"
+      v-model:status="statusFilter"
+      search-placeholder="Tìm tên, slug, danh mục..."
+      :status-options="statusFilters"
+    />
+    
+    <p v-if="errorMessage" class="rounded-2xl bg-red-50 border border-red-200/50 px-4 py-3 text-xs font-bold text-red-700">
+      {{ errorMessage }}
+    </p>
 
-    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-      <EmptyState v-if="isLoading || filteredProducts.length === 0" :loading="isLoading" />
+    <!-- Table content -->
+    <div class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
       <div class="overflow-x-auto">
-        <table v-if="!isLoading && filteredProducts.length > 0" class="min-w-full divide-y divide-slate-200 text-left">
-          <thead class="bg-slate-50">
+        <table v-if="!isLoading && filteredProducts.length" class="w-full min-w-[820px] table-fixed whitespace-nowrap text-left">
+          <colgroup>
+            <col class="w-[9%]" />
+            <col class="w-[28%]" />
+            <col class="w-[18%]" />
+            <col class="w-[18%]" />
+            <col class="w-[13%]" />
+            <col class="w-[14%]" />
+          </colgroup>
+          <thead class="bg-slate-50/50 border-b border-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             <tr>
-              <th class="px-5 py-4 text-sm font-black text-slate-600">Tên sản phẩm</th>
-              <th class="px-5 py-4 text-sm font-black text-slate-600">Danh mục</th>
-              <th class="px-5 py-4 text-sm font-black text-slate-600">Giá</th>
-              <th class="px-5 py-4 text-sm font-black text-slate-600">Ảnh</th>
-              <th class="px-5 py-4 text-sm font-black text-slate-600">Trạng thái</th>
-              <th class="px-5 py-4 text-sm font-black text-slate-600">Hành động</th>
+              <th class="px-6 py-4">Ảnh</th>
+              <th class="px-6 py-4">Sản phẩm</th>
+              <th class="px-6 py-4">Slug</th>
+              <th class="px-6 py-4">Danh mục</th>
+              <th class="px-6 py-4">Trạng thái</th>
+              <th class="px-6 py-4 text-right">Hành động</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-for="product in paginatedProducts" :key="product.id" class="hover:bg-avocado-50/60">
-              <td class="min-w-56 px-5 py-4 text-sm font-bold text-avocado-950">{{ product.name }}</td>
-              <td class="whitespace-nowrap px-5 py-4 text-sm text-slate-700">{{ product.category }}</td>
-              <td class="whitespace-nowrap px-5 py-4 text-sm font-bold text-slate-800">{{ product.price }}</td>
-              <td class="whitespace-nowrap px-5 py-4">
-                <img :src="product.image" :alt="product.name" class="h-14 w-24 rounded-md object-cover" />
+          <tbody class="divide-y divide-slate-50 text-xs">
+            <tr v-for="product in paginatedProducts" :key="product.id" class="hover:bg-slate-50/30 transition">
+              <td class="px-6 py-4">
+                <img
+                  v-if="product.imageUrl"
+                  :src="product.imageUrl"
+                  :alt="product.name"
+                  class="h-10 w-12 rounded-xl object-cover border border-slate-100 shadow-sm"
+                />
+                <div v-else class="grid h-10 w-12 place-items-center rounded-xl bg-slate-50 border border-slate-100 text-[9px] font-bold text-slate-400">
+                  <Image class="h-4 w-4" />
+                </div>
               </td>
-              <td class="whitespace-nowrap px-5 py-4 text-sm">
-                <select v-model="product.status" class="rounded-full border px-3 py-1.5 text-sm font-bold outline-none" :class="statusClass(product.status)" @change="notifyStatusChange">
-                  <option v-for="status in productStatuses" :key="status" :value="status">{{ status }}</option>
+              <td class="px-6 py-4">
+                <p class="truncate font-bold text-xs text-avocado-950">{{ product.name }}</p>
+                <p class="mt-1 truncate text-[10px] text-slate-400 max-w-[200px]">{{ product.description || 'Chưa có mô tả' }}</p>
+              </td>
+              <td class="truncate px-6 py-4 font-semibold text-slate-500">/{{ product.slug }}</td>
+              <td class="truncate px-6 py-4 text-slate-500">
+                <span class="inline-block bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-lg font-medium">{{ product.category || '-' }}</span>
+              </td>
+              <td class="px-6 py-4">
+                <select 
+                  v-model="product.status" 
+                  class="rounded-full border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer shadow-inner transition" 
+                  :class="statusClass(product.status)" 
+                  @change="saveExistingProductStatus(product)"
+                >
+                  <option v-for="status in productStatuses" :key="status" :value="status">{{ statusLabels[status] }}</option>
                 </select>
               </td>
-              <td class="whitespace-nowrap px-5 py-4 text-sm">
-                <div class="flex gap-2">
-                  <button class="rounded-lg border border-avocado-200 px-3 py-2 font-bold text-avocado-700 hover:bg-avocado-50" @click="openEditModal(product)">Sửa</button>
-                  <button class="rounded-lg border border-red-200 px-3 py-2 font-bold text-red-600 hover:bg-red-50" @click="deleteProduct(product.id)">Xóa</button>
+              <td class="px-6 py-4">
+                <div class="flex justify-end gap-1.5">
+                  <button 
+                    class="rounded-xl border border-avocado-100/50 p-2 font-bold text-avocado-700 hover:bg-avocado-50/50 transition" 
+                    title="Sửa" 
+                    @click="openEditModal(product)"
+                  >
+                    <Edit2 class="h-3.5 w-3.5" />
+                  </button>
+                  <button 
+                    class="rounded-xl border border-red-100 p-2 font-bold text-red-600 hover:bg-red-50 transition" 
+                    title="Xóa" 
+                    @click="pendingDeleteId = product.id"
+                  >
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+      <EmptyState v-if="isLoading || filteredProducts.length === 0" :loading="isLoading" message="Không có sản phẩm phù hợp" />
     </div>
 
-    <Pagination :page="currentPage" :total-pages="totalPages" :visible-count="paginatedProducts.length" :total-count="filteredProducts.length" label="sản phẩm" @prev="currentPage--" @next="currentPage++" />
+    <!-- Pagination -->
+    <Pagination
+      :page="currentPage"
+      :total-pages="totalPages"
+      :visible-count="paginatedProducts.length"
+      :total-count="filteredProducts.length"
+      label="sản phẩm"
+      @prev="currentPage = Math.max(1, currentPage - 1)"
+      @next="currentPage = Math.min(totalPages, currentPage + 1)"
+    />
 
-    <BaseModal :show="showModal" :title="mode === 'create' ? 'Thêm sản phẩm' : 'Sửa sản phẩm'" @close="closeModal">
-      <form id="product-form" class="grid gap-5 md:grid-cols-2" @submit.prevent="saveProduct">
-        <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Tên sản phẩm
-          <input v-model="form.name" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
+    <!-- Edit modal -->
+    <BaseModal :show="showModal" :title="mode === 'create' ? 'Thêm Sản Phẩm Mới' : 'Cập Nhật Sản Phẩm'" max-width="max-w-2xl" @close="closeModal">
+      <form id="product-form" class="grid gap-5" @submit.prevent="saveProduct">
+        <div class="grid gap-5 md:grid-cols-2">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Tên sản phẩm *
+            <input v-model="form.name" required class="admin-input-premium" placeholder="Nhập tên sản phẩm..." />
+          </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Slug *
+            <input v-model="form.slug" required class="admin-input-premium" placeholder="url-friendly-slug" />
+          </label>
+        </div>
+        <div class="grid gap-5 md:grid-cols-3">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Danh mục
+            <input v-model="form.category" list="product-categories" class="admin-input-premium" placeholder="Chọn hoặc nhập danh mục" />
+            <datalist id="product-categories">
+              <option v-for="category in categoryOptions" :key="category" :value="category" />
+            </datalist>
+          </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Giá sản phẩm (VND) *
+            <input v-model.number="form.price" type="number" required min="0" class="admin-input-premium" placeholder="Nhập giá..." />
+          </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Trạng thái
+            <select v-model="form.status" class="admin-input-premium cursor-pointer">
+              <option v-for="status in productStatuses" :key="status" :value="status">{{ statusLabels[status] }}</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="h-px bg-slate-100 w-full my-2"></div>
+
+        <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+          Đường dẫn ảnh (Image URL)
+          <div class="relative">
+            <Link class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-4.5 w-4.5" />
+            <input v-model="form.imageUrl" class="admin-input-premium pl-11" placeholder="https://..." />
+          </div>
         </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Giá
-          <input v-model="form.price" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
+
+        <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+          Hoặc tải ảnh mới từ máy tính
+          <input
+            type="file"
+            accept="image/*"
+            class="w-full text-xs font-bold text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white file:cursor-pointer hover:file:bg-avocado-700 transition"
+            :disabled="isUploadingImage"
+            @change="handleImageFileChange"
+          />
+          <span v-if="isUploadingImage" class="text-xs font-bold text-avocado-700 animate-pulse">Đang upload lên máy chủ...</span>
         </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Danh mục
-          <input v-model="form.category" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
-        </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Trạng thái
-          <select v-model="form.status" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500">
-            <option v-for="status in productStatuses" :key="status" :value="status">{{ status }}</option>
-          </select>
-        </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
-          Ảnh
-          <input v-model="form.image" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
-        </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
-          Mô tả
-          <textarea v-model="form.description" required rows="3" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500"></textarea>
+
+        <div v-if="form.imageUrl" class="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+          <p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Xem trước ảnh</p>
+          <img :src="form.imageUrl" alt="Xem trước sản phẩm" class="h-32 w-40 rounded-xl border border-slate-100 object-cover shadow-sm" />
+        </div>
+
+        <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+          Mô tả sản phẩm
+          <textarea v-model="form.description" rows="3" class="admin-input-premium resize-none" placeholder="Mô tả chi tiết nguyên liệu, dung tích..."></textarea>
         </label>
       </form>
       <template #footer>
-        <div class="flex justify-end gap-3">
-          <button class="rounded-lg border border-slate-200 px-4 py-3 font-bold text-slate-600 hover:bg-slate-50" @click="closeModal">Hủy</button>
-          <button class="rounded-lg bg-[#2D5A27] px-4 py-3 font-black text-white hover:bg-[#24491f]" form="product-form" type="submit">
-            {{ mode === 'create' ? 'Thêm mới' : 'Lưu thay đổi' }}
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <button class="rounded-full border border-slate-200 px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-slate-50 transition" @click="closeModal">Hủy bỏ</button>
+          <button 
+            class="rounded-full bg-avocado-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:bg-avocado-700 disabled:cursor-not-allowed disabled:opacity-60 transition shadow-md" 
+            form="product-form" 
+            type="submit" 
+            :disabled="isUploadingImage"
+          >
+            {{ mode === 'create' ? 'Tạo sản phẩm' : 'Lưu cập nhật' }}
           </button>
         </div>
       </template>
     </BaseModal>
 
-    <ConfirmModal
-      :show="Boolean(pendingDeleteId)"
-      @cancel="pendingDeleteId = null"
-      @confirm="confirmDeleteProduct"
-    />
+    <ConfirmModal :show="Boolean(pendingDeleteId)" @cancel="pendingDeleteId = null" @confirm="confirmDeleteProduct" />
   </section>
 </template>
+
+<style scoped>
+.admin-input-premium {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgb(241, 245, 249);
+  background: rgb(248, 250, 252, 0.5);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(30, 41, 59);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.admin-input-premium:focus {
+  background: white;
+  border-color: rgb(112, 149, 107);
+  box-shadow: 0 0 0 3px rgba(112, 149, 107, 0.1);
+}
+</style>
+

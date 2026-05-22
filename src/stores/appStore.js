@@ -1,13 +1,71 @@
 import { defineStore } from 'pinia'
-import { banners, locations, posts, products, registrations } from '../data/mockData'
+import {
+  categoryService,
+  locationService,
+  postService,
+  productService,
+  registrationService,
+  resolveBackendAssetUrl,
+} from '../services/cmsService'
+
+const registrationStatusToUi = {
+  NEW: 'Mới',
+  CONTACTED: 'Đã liên hệ',
+  CONSULTING: 'Đang tư vấn',
+  DONE: 'Hoàn tất',
+  COMPLETED: 'Hoàn tất',
+  CANCELED: 'Hủy',
+  CANCELLED: 'Hủy',
+}
+
+const registrationStatusToApi = {
+  Mới: 'NEW',
+  'Đã liên hệ': 'CONTACTED',
+  'Đang tư vấn': 'CONSULTING',
+  'Hoàn tất': 'DONE',
+  Hủy: 'CANCELED',
+}
+
+const normalizeDate = (value) => {
+  if (!value) return ''
+  return String(value).replace('T', ' ').slice(0, 16)
+}
+
+const slugify = (value) =>
+  String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+
+const toDateTime = (value) => {
+  if (!value) return null
+  const normalized = String(value).trim().replace(' ', 'T')
+  return normalized.includes('T') ? normalized : `${normalized}T00:00:00`
+}
 
 export const useAppStore = defineStore('app', {
   state: () => ({
-    products,
-    registrations,
-    banners,
-    posts,
-    locations,
+    products: [],
+    registrations: [],
+    posts: [],
+    locations: [],
+    categories: [],
+    loading: {
+      products: false,
+      registrations: false,
+      posts: false,
+      locations: false,
+      categories: false,
+    },
+    errors: {
+      products: '',
+      registrations: '',
+      posts: '',
+      locations: '',
+      categories: '',
+    },
   }),
   getters: {
     totalProducts: (state) => state.products.length,
@@ -15,5 +73,288 @@ export const useAppStore = defineStore('app', {
     newRegistrations: (state) => state.registrations.filter((item) => item.status === 'Mới').length,
     contactedRegistrations: (state) =>
       state.registrations.filter((item) => item.status === 'Đã liên hệ').length,
+    categoryNameById: (state) => (id) =>
+      state.categories.find((category) => Number(category.id) === Number(id))?.name || '',
+    categoryIdByName: (state) => (name) =>
+      state.categories.find((category) => category.name === name)?.id || null,
+  },
+  actions: {
+    normalizeProduct(product) {
+      const imageUrl = resolveBackendAssetUrl(product.imageUrl || product.image || '')
+      return {
+        ...product,
+        image: imageUrl,
+        imageUrl,
+        price: product.price ?? 0,
+        priceDisplay:
+          product.price === null || product.price === undefined
+            ? ''
+            : `${new Intl.NumberFormat('vi-VN').format(Number(product.price))} đ`,
+        category: product.category || '',
+        categoryId: product.categoryId || null,
+        sortOrder: Number(product.sortOrder || product.id || 0),
+        status: product.status || 'ACTIVE',
+      }
+    },
+    normalizeCategory(category) {
+      return {
+        ...category,
+        type: category.type || 'ARTICLE',
+        sortOrder: Number(category.sortOrder || category.id || 1),
+        parentId: category.parentId || null,
+        languageCode: category.languageCode || 'vi',
+        status: category.status || 'ACTIVE',
+      }
+    },
+    normalizePost(post) {
+      const thumbnailUrl = resolveBackendAssetUrl(post.thumbnailUrl || post.image || '')
+      const categoryName =
+        post.category ||
+        this.categoryNameById(post.categoryId) ||
+        ''
+
+      return {
+        ...post,
+        image: thumbnailUrl,
+        thumbnailUrl,
+        category: categoryName,
+        categoryId: post.categoryId || null,
+        author: post.author || 'ALOO Editorial',
+        source: post.source || '',
+        sourceLink: post.sourceLink || '',
+        articleType: post.articleType || 'Bài SEO',
+        status: post.status || 'DRAFT',
+        publishedAt: normalizeDate(post.publishedAt),
+        date: normalizeDate(post.publishedAt),
+        tags: Array.isArray(post.tags) ? post.tags : [],
+        gallery: Array.isArray(post.gallery) ? post.gallery : [],
+        relatedPostIds: Array.isArray(post.relatedPostIds) ? post.relatedPostIds : [],
+        metaKeywords: post.metaKeywords || '',
+        metaDescription: post.metaDescription || post.seoDescription || '',
+        canonicalUrl: post.canonicalUrl || '',
+        seoDescription: post.seoDescription || post.metaDescription || '',
+      }
+    },
+    normalizeRegistration(registration) {
+      const status = registrationStatusToUi[registration.status] || registration.status || 'Mới'
+      return {
+        ...registration,
+        name: registration.fullName || registration.name || '',
+        fullName: registration.fullName || registration.name || '',
+        area: registration.province || registration.area || '',
+        province: registration.province || registration.area || '',
+        capital: registration.expectedBudget ?? registration.capital ?? 0,
+        expectedBudget: registration.expectedBudget ?? registration.capital ?? 0,
+        createdAt: normalizeDate(registration.createdAt),
+        updatedAt: normalizeDate(registration.updatedAt),
+        status,
+      }
+    },
+    normalizeLocation(location) {
+      const imageUrl = resolveBackendAssetUrl(location.imageUrl || '')
+      return {
+        ...location,
+        addressText: location.address || location.addressText || '',
+        city: location.province || location.city || '',
+        province: location.province || location.city || '',
+        district: location.district || '',
+        imageUrl,
+        amenities: Array.isArray(location.amenities) ? location.amenities : [],
+        displayOrder: Number(location.displayOrder || location.id || 1),
+        featured: Boolean(location.featured),
+        status: location.status || 'ACTIVE',
+      }
+    },
+    async runLoad(key, request, assign) {
+      this.loading[key] = true
+      this.errors[key] = ''
+      try {
+        const { data } = await request()
+        assign(Array.isArray(data) ? data : [])
+      } catch (error) {
+        this.errors[key] = error.response?.data?.message || error.message || 'Không tải được dữ liệu'
+        throw error
+      } finally {
+        this.loading[key] = false
+      }
+    },
+    async fetchProducts() {
+      await this.runLoad('products', productService.list, (data) => {
+        this.products = data.map(this.normalizeProduct)
+      })
+    },
+    async fetchCategories() {
+      await this.runLoad('categories', categoryService.list, (data) => {
+        this.categories = data.map(this.normalizeCategory)
+      })
+    },
+    async fetchPosts() {
+      await this.runLoad('posts', postService.list, (data) => {
+        this.posts = data.map((post) => this.normalizePost(post))
+      })
+    },
+    async fetchLocations() {
+      await this.runLoad('locations', locationService.list, (data) => {
+        this.locations = data.map(this.normalizeLocation)
+      })
+    },
+    async fetchRegistrations() {
+      await this.runLoad('registrations', registrationService.list, (data) => {
+        this.registrations = data.map(this.normalizeRegistration)
+      })
+    },
+    async fetchPublicData() {
+      await Promise.allSettled([
+        this.fetchProducts(),
+        this.fetchCategories().then(() => this.fetchPosts()),
+        this.fetchLocations(),
+      ])
+    },
+    async fetchAdminData() {
+      await Promise.allSettled([
+        this.fetchProducts(),
+        this.fetchCategories(),
+        this.fetchPosts(),
+        this.fetchLocations(),
+        this.fetchRegistrations(),
+      ])
+    },
+    buildProductPayload(product) {
+      return {
+        name: product.name?.trim(),
+        slug: product.slug?.trim() || slugify(product.name),
+        description: product.description?.trim() || '',
+        price: Number(product.price || 0),
+        imageUrl: product.imageUrl || product.image || '',
+        categoryId: product.categoryId || null,
+        category: product.category || '',
+        sortOrder: Number(product.sortOrder || 0),
+        status: product.status || 'ACTIVE',
+      }
+    },
+    async saveProduct(product) {
+      const payload = this.buildProductPayload(product)
+      const request = product.id ? productService.update(product.id, payload) : productService.create(payload)
+      const { data } = await request
+      const normalized = this.normalizeProduct(data)
+      const index = this.products.findIndex((item) => item.id === normalized.id)
+      if (index === -1) this.products.unshift(normalized)
+      else this.products.splice(index, 1, normalized)
+      return normalized
+    },
+    async deleteProduct(id) {
+      await productService.remove(id)
+      this.products = this.products.filter((item) => item.id !== id)
+    },
+    buildCategoryPayload(category) {
+      return {
+        name: category.name?.trim(),
+        slug: category.slug?.trim() || slugify(category.name),
+        type: category.type || 'ARTICLE',
+        description: category.description?.trim() || '',
+        parentId: category.parentId || null,
+        sortOrder: Number(category.sortOrder || 0),
+        status: category.status || 'ACTIVE',
+        languageCode: category.languageCode || 'vi',
+      }
+    },
+    async saveCategory(category) {
+      const payload = this.buildCategoryPayload(category)
+      const request = category.id ? categoryService.update(category.id, payload) : categoryService.create(payload)
+      const { data } = await request
+      const normalized = this.normalizeCategory(data)
+      const index = this.categories.findIndex((item) => item.id === normalized.id)
+      if (index === -1) this.categories.push(normalized)
+      else this.categories.splice(index, 1, normalized)
+      return normalized
+    },
+    async deleteCategory(id) {
+      await categoryService.remove(id)
+      this.categories = this.categories.filter((item) => item.id !== id)
+    },
+    buildPostPayload(post) {
+      return {
+        title: post.title?.trim(),
+        slug: post.slug?.trim() || slugify(post.title),
+        excerpt: post.excerpt?.trim() || '',
+        content: post.content || '',
+        thumbnailUrl: post.thumbnailUrl || post.image || '',
+        categoryId: post.categoryId || this.categoryIdByName(post.category) || null,
+        category: post.category || '',
+        author: post.author?.trim() || 'ALOO Editorial',
+        source: post.source?.trim() || '',
+        sourceLink: post.sourceLink?.trim() || '',
+        articleType: post.articleType || '',
+        status: post.status || 'DRAFT',
+        publishedAt: toDateTime(post.publishedAt),
+        seoTitle: post.seoTitle?.trim() || post.title?.trim(),
+        seoDescription: post.seoDescription?.trim() || post.metaDescription?.trim() || post.excerpt?.trim() || '',
+        metaDescription: post.metaDescription?.trim() || post.seoDescription?.trim() || post.excerpt?.trim() || '',
+        metaKeywords: post.metaKeywords?.trim() || '',
+        canonicalUrl: post.canonicalUrl?.trim() || '',
+        tags: Array.isArray(post.tags) ? post.tags : [],
+        gallery: Array.isArray(post.gallery) ? post.gallery : [],
+        relatedPostIds: Array.isArray(post.relatedPostIds) ? post.relatedPostIds : [],
+      }
+    },
+    async savePost(post) {
+      const payload = this.buildPostPayload(post)
+      const request = post.id ? postService.update(post.id, payload) : postService.create(payload)
+      const { data } = await request
+      const normalized = this.normalizePost(data)
+      const index = this.posts.findIndex((item) => item.id === normalized.id)
+      if (index === -1) this.posts.unshift(normalized)
+      else this.posts.splice(index, 1, normalized)
+      return normalized
+    },
+    async deletePost(id) {
+      await postService.remove(id)
+      this.posts = this.posts.filter((item) => item.id !== id)
+    },
+    buildLocationPayload(location) {
+      return {
+        name: location.name?.trim(),
+        address: location.address || location.addressText || '',
+        province: location.province || location.city || '',
+        district: location.district || '',
+        phone: location.phone || '',
+        openingHours: location.openingHours || '',
+        mapUrl: location.mapUrl || '',
+        imageUrl: location.imageUrl || '',
+        amenities: Array.isArray(location.amenities) ? location.amenities : [],
+        displayOrder: Number(location.displayOrder || 0),
+        featured: Boolean(location.featured),
+        status: location.status || 'ACTIVE',
+      }
+    },
+    async saveLocation(location) {
+      const payload = this.buildLocationPayload(location)
+      const request = location.id ? locationService.update(location.id, payload) : locationService.create(payload)
+      const { data } = await request
+      const normalized = this.normalizeLocation(data)
+      const index = this.locations.findIndex((item) => item.id === normalized.id)
+      if (index === -1) this.locations.push(normalized)
+      else this.locations.splice(index, 1, normalized)
+      return normalized
+    },
+    async deleteLocation(id) {
+      await locationService.remove(id)
+      this.locations = this.locations.filter((item) => item.id !== id)
+    },
+    async updateRegistrationStatus(registration, status) {
+      const apiStatus = registrationStatusToApi[status] || status
+      const { data } = await registrationService.updateStatus(registration.id, apiStatus)
+      const normalized = this.normalizeRegistration(data)
+      const index = this.registrations.findIndex((item) => item.id === normalized.id)
+      if (index !== -1) this.registrations.splice(index, 1, normalized)
+      return normalized
+    },
+    async deleteRegistration(id) {
+      await registrationService.remove(id)
+      this.registrations = this.registrations.filter((item) => item.id !== id)
+    },
+    addRegistration(registration) {
+      this.registrations.unshift(this.normalizeRegistration(registration))
+    },
   },
 })

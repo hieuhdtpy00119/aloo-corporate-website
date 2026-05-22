@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BaseModal from '../../components/admin/BaseModal.vue'
 import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
@@ -14,9 +14,11 @@ const selectedRegistration = ref(null)
 const pendingDeleteId = ref(null)
 const searchQuery = ref('')
 const statusFilter = ref('Tất cả')
-const isLoading = ref(false)
+const isLoading = computed(() => store.loading.registrations)
+const errorMessage = computed(() => store.errors.registrations)
 const currentPage = ref(1)
 const pageSize = 5
+const openStatusMenuId = ref(null)
 const registrationStatuses = ['Mới', 'Đã liên hệ', 'Đang tư vấn', 'Hoàn tất', 'Hủy']
 const statusFilters = ['Tất cả', ...registrationStatuses]
 
@@ -45,6 +47,28 @@ const showDetail = (registration) => {
   selectedRegistration.value = registration
 }
 
+const notifyStatusChange = () => {
+  toast.success('Đã cập nhật trạng thái đăng ký')
+}
+
+const toggleStatusMenu = (registrationId) => {
+  openStatusMenuId.value = openStatusMenuId.value === registrationId ? null : registrationId
+}
+
+const updateRegistrationStatus = async (registration, status) => {
+  openStatusMenuId.value = null
+  try {
+    await store.updateRegistrationStatus(registration, status)
+    notifyStatusChange()
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không cập nhật được trạng thái')
+  }
+}
+
+const closeStatusMenu = () => {
+  openStatusMenuId.value = null
+}
+
 const closeDetailModal = () => {
   selectedRegistration.value = null
 }
@@ -53,20 +77,18 @@ const deleteRegistration = (registrationId) => {
   pendingDeleteId.value = registrationId
 }
 
-const confirmDeleteRegistration = () => {
-  const index = store.registrations.findIndex((item) => item.id === pendingDeleteId.value)
-  if (index !== -1) {
-    store.registrations.splice(index, 1)
+const confirmDeleteRegistration = async () => {
+  try {
+    await store.deleteRegistration(pendingDeleteId.value)
     toast.success('Đã xóa đăng ký tư vấn thành công')
+    if (selectedRegistration.value?.id === pendingDeleteId.value) {
+      closeDetailModal()
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không xóa được đăng ký tư vấn')
+  } finally {
+    pendingDeleteId.value = null
   }
-  if (selectedRegistration.value?.id === pendingDeleteId.value) {
-    closeDetailModal()
-  }
-  pendingDeleteId.value = null
-}
-
-const notifyStatusChange = () => {
-  toast.success('Đã cập nhật trạng thái đăng ký')
 }
 
 const filteredRegistrations = computed(() => {
@@ -91,6 +113,17 @@ const paginatedRegistrations = computed(() =>
 watch([searchQuery, statusFilter], () => {
   currentPage.value = 1
 })
+
+onMounted(() => {
+  document.addEventListener('click', closeStatusMenu)
+  store.fetchRegistrations().catch(() => {
+    toast.error('Không tải được danh sách đăng ký tư vấn')
+  })
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', closeStatusMenu)
+})
 </script>
 
 <template>
@@ -101,54 +134,78 @@ watch([searchQuery, statusFilter], () => {
     </div>
 
     <SearchFilterBar v-model:search="searchQuery" v-model:status="statusFilter" search-placeholder="Tìm họ tên, điện thoại, email, khu vực" :status-options="statusFilters" />
+    <p v-if="errorMessage" class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+      {{ errorMessage }}
+    </p>
 
     <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
       <EmptyState v-if="isLoading || filteredRegistrations.length === 0" :loading="isLoading" />
       <div v-if="!isLoading && filteredRegistrations.length > 0" class="hidden lg:block">
-        <table class="w-full table-fixed divide-y divide-slate-200 text-left">
+        <table class="w-full table-fixed divide-y divide-slate-200 whitespace-nowrap text-left">
           <colgroup>
+            <col class="w-[15%]" />
+            <col class="w-[12%]" />
             <col class="w-[16%]" />
-            <col class="w-[13%]" />
-            <col class="w-[18%]" />
             <col class="w-[11%]" />
-            <col class="w-[13%]" />
-            <col class="w-[11%]" />
+            <col class="w-[12%]" />
             <col class="w-[18%]" />
+            <col class="w-[16%]" />
           </colgroup>
           <thead class="bg-slate-50">
             <tr>
-              <th class="px-4 py-3 text-sm font-black text-slate-600">Họ tên</th>
-              <th class="px-4 py-3 text-sm font-black text-slate-600">Số điện thoại</th>
-              <th class="px-4 py-3 text-sm font-black text-slate-600">Email</th>
-              <th class="px-4 py-3 text-sm font-black text-slate-600">Khu vực</th>
-              <th class="px-4 py-3 text-right text-sm font-black text-slate-600">Số vốn</th>
-              <th class="px-4 py-3 text-sm font-black text-slate-600">Trạng thái</th>
-              <th class="px-4 py-3 text-sm font-black text-slate-600">Hành động</th>
+              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Họ tên</th>
+              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Số điện thoại</th>
+              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Email</th>
+              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Khu vực</th>
+              <th class="px-3 py-3 text-right text-xs font-black uppercase tracking-wide text-slate-500">Số vốn</th>
+              <th class="px-3 py-3 text-center text-xs font-black uppercase tracking-wide text-slate-500">Trạng thái</th>
+              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Hành động</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="registration in paginatedRegistrations" :key="registration.id" class="align-middle hover:bg-avocado-50/60">
-              <td class="px-4 py-3 text-sm font-bold text-avocado-950">{{ registration.name }}</td>
-              <td class="px-4 py-3 text-sm text-slate-700">{{ registration.phone }}</td>
-              <td class="truncate px-4 py-3 text-sm text-slate-700" :title="registration.email">{{ registration.email }}</td>
-              <td class="px-4 py-3 text-sm text-slate-700">{{ registration.area }}</td>
-              <td class="px-4 py-3 text-right text-sm font-bold tabular-nums text-slate-800">{{ formatCurrency(registration.capital) }}</td>
-              <td class="px-4 py-3 text-sm">
-                <select
-                  v-model="registration.status"
-                  class="w-full max-w-[132px] rounded-full border px-3 py-1.5 text-sm font-bold outline-none transition"
-                  :class="getStatusSelectClass(registration.status)"
-                  @change="notifyStatusChange"
-                >
-                  <option v-for="status in registrationStatuses" :key="status" :value="status">{{ status }}</option>
-                </select>
+              <td class="px-3 py-2.5 text-sm font-bold text-avocado-950">
+                <span class="block truncate">{{ registration.name }}</span>
               </td>
-              <td class="px-4 py-3 align-middle text-sm">
-                <div class="flex min-w-[160px] flex-wrap gap-2">
-                  <button class="min-w-[92px] rounded-lg border border-blue-200 px-3 py-2 text-center font-bold leading-5 text-blue-700 hover:bg-blue-50" @click="showDetail(registration)">
-                    Xem chi tiết
+              <td class="whitespace-nowrap px-3 py-2.5 text-sm text-slate-700">{{ registration.phone }}</td>
+              <td class="truncate px-3 py-2.5 text-sm text-slate-700" :title="registration.email">{{ registration.email }}</td>
+              <td class="whitespace-nowrap px-3 py-2.5 text-sm text-slate-700">{{ registration.area }}</td>
+              <td class="whitespace-nowrap px-3 py-2.5 text-right text-sm font-bold tabular-nums text-slate-800">{{ formatCurrency(registration.capital) }}</td>
+              <td class="px-3 py-2.5 text-center text-sm">
+                <div class="relative inline-block text-left" @click.stop>
+                  <button
+                    type="button"
+                    class="flex h-9 w-full min-w-[180px] max-w-[200px] items-center justify-between gap-2 rounded-lg border px-3 text-sm font-black transition"
+                    :class="getStatusSelectClass(registration.status)"
+                    @click="toggleStatusMenu(registration.id)"
+                  >
+                    <span>{{ registration.status }}</span>
+                    <span class="text-xs">⌄</span>
                   </button>
-                  <button class="min-w-[58px] rounded-lg border border-red-200 px-3 py-2 text-center font-bold leading-5 text-red-600 hover:bg-red-50" @click="deleteRegistration(registration.id)">
+                  <div
+                    v-if="openStatusMenuId === registration.id"
+                    class="absolute left-0 z-50 mt-2 w-[180px] overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 text-left shadow-2xl shadow-slate-900/12"
+                  >
+                    <button
+                      v-for="status in registrationStatuses"
+                      :key="status"
+                      type="button"
+                      class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-bold transition hover:bg-slate-50"
+                      :class="registration.status === status ? 'bg-avocado-50 text-avocado-800' : 'text-slate-700'"
+                      @click="updateRegistrationStatus(registration, status)"
+                    >
+                      <span>{{ status }}</span>
+                      <span v-if="registration.status === status" class="text-avocado-700">✓</span>
+                    </button>
+                  </div>
+                </div>
+              </td>
+              <td class="px-3 py-2.5 align-middle text-sm">
+                <div class="inline-flex min-w-[142px] items-center gap-2 whitespace-nowrap">
+                  <button class="rounded-lg border border-blue-200 px-3 py-1.5 text-center font-bold leading-5 text-blue-700 hover:bg-blue-50" @click="showDetail(registration)">
+                    Chi tiết
+                  </button>
+                  <button class="rounded-lg border border-red-200 px-3 py-1.5 text-center font-bold leading-5 text-red-600 hover:bg-red-50" @click="deleteRegistration(registration.id)">
                     Xóa
                   </button>
                 </div>
@@ -168,14 +225,33 @@ watch([searchQuery, statusFilter], () => {
               <h3 class="font-black text-avocado-950">{{ registration.name }}</h3>
               <p class="mt-1 text-sm text-slate-600">{{ registration.phone }}</p>
             </div>
-            <select
-              v-model="registration.status"
-              class="rounded-full border px-3 py-1.5 text-sm font-bold outline-none transition"
-              :class="getStatusSelectClass(registration.status)"
-              @change="notifyStatusChange"
-            >
-              <option v-for="status in registrationStatuses" :key="status" :value="status">{{ status }}</option>
-            </select>
+            <div class="relative" @click.stop>
+              <button
+                type="button"
+                class="flex h-10 min-w-[150px] items-center justify-between gap-3 rounded-xl border px-3 text-sm font-black transition"
+                :class="getStatusSelectClass(registration.status)"
+                @click="toggleStatusMenu(registration.id)"
+              >
+                <span>{{ registration.status }}</span>
+                <span class="text-xs">⌄</span>
+              </button>
+              <div
+                v-if="openStatusMenuId === registration.id"
+                class="absolute right-0 z-50 mt-2 w-[190px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 text-left shadow-2xl shadow-slate-900/12"
+              >
+                <button
+                  v-for="status in registrationStatuses"
+                  :key="status"
+                  type="button"
+                  class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-bold transition hover:bg-slate-50"
+                  :class="registration.status === status ? 'bg-avocado-50 text-avocado-800' : 'text-slate-700'"
+                  @click="updateRegistrationStatus(registration, status)"
+                >
+                  <span>{{ status }}</span>
+                  <span v-if="registration.status === status" class="text-avocado-700">✓</span>
+                </button>
+              </div>
+            </div>
           </div>
           <div class="mt-4 grid gap-2 text-sm text-slate-700">
             <p><span class="font-bold text-slate-900">Email:</span> {{ registration.email }}</p>

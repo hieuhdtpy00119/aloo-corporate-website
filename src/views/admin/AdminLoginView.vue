@@ -1,43 +1,106 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { loginAdmin } from '../../services/authService'
+import { Lock, Mail, ArrowLeft, ShieldAlert } from 'lucide-vue-next'
 
 const router = useRouter()
 const email = ref('admin@aloo.vn')
-const password = ref('123456')
+const password = ref('')
 const errorMessage = ref('')
+const isSubmitting = ref(false)
 
-const handleLogin = () => {
-  if (email.value === 'admin@aloo.vn' && password.value === '123456') {
-    localStorage.setItem('admin_token', 'demo-token')
+const handleLogin = async () => {
+  if (isSubmitting.value) return
+
+  errorMessage.value = ''
+  isSubmitting.value = true
+
+  try {
+    const { data } = await loginAdmin({
+      email: email.value,
+      password: password.value,
+    })
+
+    localStorage.setItem('admin_token', data.token)
+    localStorage.setItem('admin_user', JSON.stringify(data.user))
     window.dispatchEvent(new Event('aloo-auth-change'))
     router.push('/admin')
-  } else {
-    errorMessage.value = 'Sai tai khoan hoac mat khau'
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || 'Sai tài khoản hoặc mật khẩu'
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>
 
 <template>
-  <main class="grid min-h-screen place-items-center bg-avocado-50 px-4">
-    <form class="w-full max-w-md rounded-lg bg-white p-8 shadow-xl" @submit.prevent="handleLogin">
-      <RouterLink to="/" class="text-sm font-bold text-avocado-700">Ve website</RouterLink>
-      <h1 class="mt-6 text-3xl font-black text-avocado-950">Dang nhap Admin</h1>
-      <p class="mt-2 text-slate-600">Man hinh dang nhap demo cho phan quan tri ALOO.</p>
-      <p v-if="errorMessage" class="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
-        {{ errorMessage }}
-      </p>
-      <div class="mt-8 grid gap-5">
-        <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Email
-          <input v-model="email" type="email" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
-        </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Mat khau
-          <input v-model="password" type="password" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
-        </label>
-        <button class="rounded-full bg-avocado-700 px-6 py-3 font-black text-white hover:bg-avocado-800">Dang nhap</button>
-      </div>
-    </form>
+  <main class="grid min-h-screen place-items-center bg-[#faf8f2] px-4 relative overflow-hidden">
+    <!-- Visual background blobs -->
+    <div class="absolute -left-20 -top-20 w-96 h-96 bg-avocado-200/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-cream-300/30 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="w-full max-w-md relative z-10">
+      <!-- Back button -->
+      <RouterLink 
+        to="/" 
+        class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-avocado-800 hover:text-avocado-950 mb-6 transition"
+      >
+        <ArrowLeft class="h-4 w-4" />
+        Quay lại Trang chủ
+      </RouterLink>
+
+      <form class="rounded-[2rem] bg-white p-8 sm:p-10 shadow-xl border border-avocado-100/20" @submit.prevent="handleLogin">
+        <!-- Logo -->
+        <div class="flex items-center gap-2 mb-6">
+          <div class="h-9 w-9 bg-cream-400 text-avocado-950 font-black rounded-xl grid place-items-center text-sm shadow-md">
+            A
+          </div>
+          <div>
+            <div class="text-xl font-bold tracking-tight text-avocado-950">ALOO Admin</div>
+            <p class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Đăng nhập hệ thống</p>
+          </div>
+        </div>
+
+        <h1 class="text-2xl font-black text-avocado-950 leading-tight">Đăng Nhập CMS</h1>
+        <p class="mt-2 text-xs leading-relaxed text-slate-400">
+          Hãy nhập tài khoản quản trị để truy cập trang quản lý thương hiệu & sản phẩm ALOO.
+        </p>
+
+        <!-- Error panel -->
+        <div v-if="errorMessage" class="mt-5 rounded-2xl bg-red-50 border border-red-200/50 px-4 py-3 text-xs font-bold text-red-700 flex items-center gap-2">
+          <ShieldAlert class="h-4 w-4 shrink-0 text-red-600" />
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <div class="mt-8 space-y-5">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Email
+            <div class="relative">
+              <Mail class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-4.5 w-4.5" />
+              <input v-model="email" type="email" required class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 pl-11 pr-4 py-3.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-avocado-500 focus:ring-2 focus:ring-avocado-100 transition" />
+            </div>
+          </label>
+
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Mật khẩu
+            <div class="relative">
+              <Lock class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-4.5 w-4.5" />
+              <input v-model="password" type="password" required class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 pl-11 pr-4 py-3.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-avocado-500 focus:ring-2 focus:ring-avocado-100 transition" />
+            </div>
+          </label>
+
+          <div class="pt-2">
+            <button 
+              class="w-full rounded-full bg-avocado-600 px-6 py-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-avocado-700 transition duration-300 disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg shadow-avocado-600/10" 
+              :disabled="isSubmitting"
+            >
+              {{ isSubmitting ? 'Đang xác thực...' : 'Xác thực tài khoản' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
   </main>
 </template>
+

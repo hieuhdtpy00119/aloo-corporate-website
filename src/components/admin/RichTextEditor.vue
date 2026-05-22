@@ -1,9 +1,13 @@
 <script setup>
-import { onBeforeUnmount, watch } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
+import Underline from '@tiptap/extension-underline'
+import TextAlign from '@tiptap/extension-text-align'
+import { Table, TableCell, TableHeader, TableRow } from '@tiptap/extension-table'
+import { uploadService } from '../../services/cmsService'
 
 const props = defineProps({
   modelValue: {
@@ -13,11 +17,39 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+const isUploading = ref(false)
+
+const uploadAndInsertImage = async (file, position = null) => {
+  isUploading.value = true
+  try {
+    const { data } = await uploadService.image(file)
+    const chain = editor.value?.chain().focus()
+    if (position !== null) {
+      chain?.insertContentAt(position, { type: 'image', attrs: { src: data.url } }).run()
+    } else {
+      chain?.setImage({ src: data.url }).run()
+    }
+  } catch (error) {
+    console.warn('Could not upload editor image', error)
+  } finally {
+    isUploading.value = false
+  }
+}
 
 const editor = useEditor({
   content: props.modelValue,
   extensions: [
     StarterKit,
+    Underline,
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+    }),
+    Table.configure({
+      resizable: true,
+    }),
+    TableRow,
+    TableHeader,
+    TableCell,
     Image.configure({
       allowBase64: true,
     }),
@@ -41,10 +73,9 @@ const editor = useEditor({
       event.preventDefault()
 
       files.forEach((file) => {
-        const src = URL.createObjectURL(file)
         const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
         const position = coordinates?.pos ?? view.state.selection.to
-        view.dispatch(view.state.tr.insert(position, view.state.schema.nodes.image.create({ src })))
+        uploadAndInsertImage(file, position)
       })
 
       return true
@@ -78,6 +109,10 @@ const setLink = () => {
   editor.value?.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
 }
 
+const insertTable = () => {
+  editor.value?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+}
+
 const addImageByUrl = () => {
   const url = window.prompt('Nhập URL ảnh')
   if (url) {
@@ -85,12 +120,11 @@ const addImageByUrl = () => {
   }
 }
 
-const uploadImage = (event) => {
+const uploadImage = async (event) => {
   const file = event.target.files?.[0]
   if (!file) return
 
-  const src = URL.createObjectURL(file)
-  editor.value?.chain().focus().setImage({ src }).run()
+  await uploadAndInsertImage(file)
   event.target.value = ''
 }
 
@@ -104,16 +138,24 @@ onBeforeUnmount(() => {
     <div v-if="editor" class="sticky top-0 z-10 flex flex-wrap gap-2 border-b border-slate-200 bg-slate-50/95 p-3 backdrop-blur">
       <button type="button" class="toolbar-btn" :class="{ active: editor.isActive('bold') }" @click="editor.chain().focus().toggleBold().run()">B</button>
       <button type="button" class="toolbar-btn italic" :class="{ active: editor.isActive('italic') }" @click="editor.chain().focus().toggleItalic().run()">I</button>
+      <button type="button" class="toolbar-btn underline" :class="{ active: editor.isActive('underline') }" @click="editor.chain().focus().toggleUnderline().run()">U</button>
       <button type="button" class="toolbar-btn" :class="{ active: editor.isActive('heading', { level: 2 }) }" @click="editor.chain().focus().toggleHeading({ level: 2 }).run()">H2</button>
       <button type="button" class="toolbar-btn" :class="{ active: editor.isActive('heading', { level: 3 }) }" @click="editor.chain().focus().toggleHeading({ level: 3 }).run()">H3</button>
+      <button type="button" class="toolbar-btn" :class="{ active: editor.isActive({ textAlign: 'left' }) }" @click="editor.chain().focus().setTextAlign('left').run()">Left</button>
+      <button type="button" class="toolbar-btn" :class="{ active: editor.isActive({ textAlign: 'center' }) }" @click="editor.chain().focus().setTextAlign('center').run()">Center</button>
+      <button type="button" class="toolbar-btn" :class="{ active: editor.isActive({ textAlign: 'right' }) }" @click="editor.chain().focus().setTextAlign('right').run()">Right</button>
       <button type="button" class="toolbar-btn" :class="{ active: editor.isActive('bulletList') }" @click="editor.chain().focus().toggleBulletList().run()">• List</button>
       <button type="button" class="toolbar-btn" :class="{ active: editor.isActive('orderedList') }" @click="editor.chain().focus().toggleOrderedList().run()">1. List</button>
       <button type="button" class="toolbar-btn" :class="{ active: editor.isActive('blockquote') }" @click="editor.chain().focus().toggleBlockquote().run()">Quote</button>
       <button type="button" class="toolbar-btn" :class="{ active: editor.isActive('link') }" @click="setLink">Link</button>
       <button type="button" class="toolbar-btn" @click="addImageByUrl">Image URL</button>
+      <button type="button" class="toolbar-btn" @click="insertTable">Table</button>
+      <button type="button" class="toolbar-btn" :disabled="!editor.can().addColumnAfter()" @click="editor.chain().focus().addColumnAfter().run()">+ Col</button>
+      <button type="button" class="toolbar-btn" :disabled="!editor.can().addRowAfter()" @click="editor.chain().focus().addRowAfter().run()">+ Row</button>
+      <button type="button" class="toolbar-btn" :disabled="!editor.can().deleteTable()" @click="editor.chain().focus().deleteTable().run()">Del Table</button>
       <label class="toolbar-btn cursor-pointer">
-        Upload
-        <input type="file" accept="image/*" class="hidden" @change="uploadImage" />
+        {{ isUploading ? 'Uploading...' : 'Upload' }}
+        <input type="file" accept="image/*" class="hidden" :disabled="isUploading" @change="uploadImage" />
       </label>
       <button type="button" class="toolbar-btn" :disabled="!editor.can().undo()" @click="editor.chain().focus().undo().run()">Undo</button>
       <button type="button" class="toolbar-btn" :disabled="!editor.can().redo()" @click="editor.chain().focus().redo().run()">Redo</button>
@@ -122,7 +164,7 @@ onBeforeUnmount(() => {
     <EditorContent :editor="editor" />
 
     <div class="border-t border-dashed border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-500">
-      Có thể kéo thả ảnh trực tiếp vào vùng soạn thảo. Khi làm backend thật cần sanitize HTML trước khi lưu hoặc render.
+      Có thể kéo thả ảnh trực tiếp vào vùng soạn thảo. Ảnh sẽ được upload lên backend trước khi chèn vào bài viết.
     </div>
   </div>
 </template>
@@ -154,5 +196,23 @@ onBeforeUnmount(() => {
 .toolbar-btn:disabled {
   cursor: not-allowed;
   opacity: 0.45;
+}
+
+:deep(.tiptap table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+:deep(.tiptap th),
+:deep(.tiptap td) {
+  border: 1px solid rgb(203 213 225);
+  padding: 0.65rem;
+  vertical-align: top;
+}
+
+:deep(.tiptap th) {
+  background: rgb(244 249 239);
+  color: rgb(45 90 39);
 }
 </style>

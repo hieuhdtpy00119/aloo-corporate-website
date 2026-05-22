@@ -1,0 +1,130 @@
+export const heroSlides = [
+  {
+    id: 1,
+    title: 'Kem bơ truyền thống',
+    subtitle: 'Signature ALOO',
+    description: 'Bơ sáp chín tự nhiên hòa cùng kem tươi mát lạnh, tạo vị béo mịn và thơm nhẹ.',
+    backgroundImage: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1800&q=80',
+    productImage: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1200&q=85',
+    thumbnailImage: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=300&q=80',
+    status: 'ACTIVE',
+    sortOrder: 1,
+    tone: 'light',
+  },
+  {
+    id: 2,
+    title: 'Kem bơ sầu riêng',
+    subtitle: 'Tropical Bold',
+    description: 'Lớp bơ mịn kết hợp sầu riêng đậm vị, dành cho khách thích hương nhiệt đới rõ nét.',
+    backgroundImage: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=1800&q=80',
+    productImage: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=1200&q=85',
+    thumbnailImage: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=300&q=80',
+    status: 'ACTIVE',
+    sortOrder: 2,
+    tone: 'dark',
+  },
+  {
+    id: 3,
+    title: 'Sinh tố bơ kem',
+    subtitle: 'Creamy Smoothie',
+    description: 'Sinh tố bơ sánh mịn, thêm viên kem vàng mát lạnh cho trải nghiệm nhẹ và dễ uống.',
+    backgroundImage: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=1800&q=80',
+    productImage: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=1200&q=85',
+    thumbnailImage: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=300&q=80',
+    status: 'ACTIVE',
+    sortOrder: 3,
+    tone: 'light',
+  },
+  {
+    id: 4,
+    title: 'Kem bơ cacao',
+    subtitle: 'Cacao Edition',
+    description: 'Vị bơ béo nhẹ gặp cacao thơm dịu, tạo chiều sâu vị giác nhưng vẫn giữ cảm giác tươi mát.',
+    backgroundImage: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=1800&q=80',
+    productImage: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=1200&q=85',
+    thumbnailImage: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=300&q=80',
+    status: 'ACTIVE',
+    sortOrder: 4,
+    tone: 'dark',
+  },
+]
+
+export const menuPoster = {
+  title: 'ALOO Menu',
+  subtitle: 'Menu Poster',
+  image: '/menu-poster.jpg',
+  alt: 'Poster menu ALOO Kem Bơ Thuần Việt',
+  status: 'ACTIVE',
+}
+
+export const menuPosterByBranch = {
+  'quy-nhon': {
+    title: 'ALOO Menu Quy Nhơn',
+    subtitle: 'Menu Poster',
+    imageUrl: '/menu-poster.jpg',
+    altText: 'Poster menu ALOO Quy Nhơn',
+    status: 'ACTIVE',
+  },
+  'nha-trang': {
+    title: 'ALOO Menu Nha Trang',
+    subtitle: 'Menu Poster',
+    imageUrl: '/z7837173979151_328c8afa5ad53933e0ec26dbdac5c550.jpg',
+    altText: 'Poster menu ALOO Nha Trang',
+    status: 'ACTIVE',
+  },
+}
+
+export const menuGroups = [
+  {
+    id: 1,
+    name: 'Kem bơ',
+    icon: 'ice-cream',
+    status: 'ACTIVE',
+    sortOrder: 1,
+    items: [
+      { id: 101, groupId: 1, name: 'Kem bơ truyền thống', image: heroSlides[0].productImage, status: 'ACTIVE', sortOrder: 1 },
+      { id: 102, groupId: 1, name: 'Kem bơ sầu riêng', image: heroSlides[1].productImage, status: 'ACTIVE', sortOrder: 2 },
+      { id: 103, groupId: 1, name: 'Kem bơ cacao', image: heroSlides[3].productImage, status: 'ACTIVE', sortOrder: 3 },
+      { id: 104, groupId: 1, name: 'Kem bơ dừa', image: heroSlides[0].productImage, status: 'ACTIVE', sortOrder: 4 },
+    ],
+  },
+  {
+    id: 2,
+    name: 'Đồ uống',
+    icon: 'coffee',
+    status: 'ACTIVE',
+    sortOrder: 2,
+    items: [
+      { id: 201, groupId: 2, name: 'Sinh tố bơ kem', image: heroSlides[2].productImage, status: 'ACTIVE', sortOrder: 1 },
+      { id: 202, groupId: 2, name: 'Trà bơ nhiệt đới', image: heroSlides[2].productImage, status: 'ACTIVE', sortOrder: 2 },
+      { id: 203, groupId: 2, name: 'Cà phê kem bơ', image: heroSlides[2].productImage, status: 'ACTIVE', sortOrder: 3 },
+      { id: 204, groupId: 2, name: 'Nước ép trái cây', image: heroSlides[2].productImage, status: 'ACTIVE', sortOrder: 4 },
+    ],
+  },
+  {
+    id: 3,
+    name: 'Combo',
+    icon: 'sparkles',
+    status: 'ACTIVE',
+    sortOrder: 3,
+    items: [
+      { id: 301, groupId: 3, name: 'Combo Signature', image: heroSlides[0].productImage, status: 'ACTIVE', sortOrder: 1 },
+      { id: 302, groupId: 3, name: 'Combo Healthy', image: heroSlides[2].productImage, status: 'ACTIVE', sortOrder: 2 },
+      { id: 303, groupId: 3, name: 'Combo Gia đình', image: heroSlides[1].productImage, status: 'ACTIVE', sortOrder: 3 },
+      { id: 304, groupId: 3, name: 'Combo Check-in', image: heroSlides[3].productImage, status: 'ACTIVE', sortOrder: 4 },
+    ],
+  },
+  {
+    id: 4,
+    name: 'Topping',
+    icon: 'leaf',
+    status: 'ACTIVE',
+    sortOrder: 4,
+    items: [
+      { id: 401, groupId: 4, name: 'Dừa sấy', image: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=500&q=80', status: 'ACTIVE', sortOrder: 1 },
+      { id: 402, groupId: 4, name: 'Cacao', image: heroSlides[3].productImage, status: 'ACTIVE', sortOrder: 2 },
+      { id: 403, groupId: 4, name: 'Sầu riêng', image: heroSlides[1].productImage, status: 'ACTIVE', sortOrder: 3 },
+      { id: 404, groupId: 4, name: 'Trân châu', image: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=500&q=80', status: 'ACTIVE', sortOrder: 4 },
+    ],
+  },
+]

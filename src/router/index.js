@@ -12,15 +12,21 @@ import ContactView from '../views/public/ContactView.vue'
 import LocationsView from '../views/public/LocationsView.vue'
 import BlogView from '../views/public/BlogView.vue'
 import BlogDetailView from '../views/public/BlogDetailView.vue'
+import UserLoginView from '../views/public/UserLoginView.vue'
+import UserProfileView from '../views/public/UserProfileView.vue'
+import UserChangePasswordView from '../views/public/UserChangePasswordView.vue'
+import NotFoundView from '../views/public/NotFoundView.vue'
 import AdminLoginView from '../views/admin/AdminLoginView.vue'
 import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
 import AdminProductsView from '../views/admin/AdminProductsView.vue'
 import AdminRegistrationsView from '../views/admin/AdminRegistrationsView.vue'
-import AdminBannersView from '../views/admin/AdminBannersView.vue'
-import AdminPostsView from '../views/admin/AdminPostsView.vue'
-import AdminPostEditorView from '../views/admin/AdminPostEditorView.vue'
+import AdminArticlesView from '../views/admin/AdminArticlesView.vue'
+import AdminArticleEditorView from '../views/admin/AdminArticleEditorView.vue'
+import AdminCategoriesView from '../views/admin/AdminCategoriesView.vue'
 import AdminFranchiseContentView from '../views/admin/AdminFranchiseContentView.vue'
 import AdminLocationsView from '../views/admin/AdminLocationsView.vue'
+import AdminProfileView from '../views/admin/AdminProfileView.vue'
+import AdminChangePasswordView from '../views/admin/AdminChangePasswordView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -40,6 +46,14 @@ const router = createRouter({
         { path: 'blog/:id', name: 'blog-detail', component: BlogDetailView },
         { path: 'consultation', name: 'consultation', component: ConsultationView },
         { path: 'contact', name: 'contact', component: ContactView },
+        { path: 'login', name: 'user-login', component: UserLoginView },
+        { path: 'profile', name: 'user-profile', component: UserProfileView, meta: { requiresUser: true } },
+        {
+          path: 'change-password',
+          name: 'user-change-password',
+          component: UserChangePasswordView,
+          meta: { requiresUser: true },
+        },
       ],
     },
     { path: '/admin/login', name: 'admin-login', component: AdminLoginView },
@@ -49,24 +63,32 @@ const router = createRouter({
       children: [
         { path: '', name: 'admin-dashboard', component: AdminDashboardView },
         { path: 'products', name: 'admin-products', component: AdminProductsView },
-        { path: 'banners', name: 'admin-banners', component: AdminBannersView },
-        { path: 'posts', name: 'admin-posts', component: AdminPostsView },
-        { path: 'posts/new', name: 'admin-post-new', component: AdminPostEditorView },
-        { path: 'posts/:id/edit', name: 'admin-post-edit', component: AdminPostEditorView },
+        { path: 'articles', name: 'admin-articles', component: AdminArticlesView },
+        { path: 'articles/new', name: 'admin-article-new', component: AdminArticleEditorView },
+        { path: 'articles/:id/edit', name: 'admin-article-edit', component: AdminArticleEditorView },
+        { path: 'categories', name: 'admin-categories', component: AdminCategoriesView },
+        { path: 'posts', redirect: '/admin/articles' },
+        { path: 'posts/new', redirect: '/admin/articles/new' },
+        { path: 'posts/:id/edit', redirect: (to) => `/admin/articles/${to.params.id}/edit` },
         { path: 'locations', name: 'admin-locations', component: AdminLocationsView },
         { path: 'registrations', name: 'admin-registrations', component: AdminRegistrationsView },
+        { path: 'profile', name: 'admin-profile', component: AdminProfileView },
+        { path: 'change-password', name: 'admin-change-password', component: AdminChangePasswordView },
         {
           path: 'franchise-content',
           name: 'admin-franchise-content',
           component: AdminFranchiseContentView,
         },
+        { path: ':pathMatch(.*)*', name: 'admin-not-found', component: NotFoundView },
       ],
     },
+    { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
   ],
 })
 
 router.beforeEach((to) => {
-  const token = localStorage.getItem('admin_token')
+  const adminToken = localStorage.getItem('admin_token')
+  const userToken = localStorage.getItem('user_token')
   const isAdminLogin = to.path === '/admin/login'
   const isAdminRoute = to.path.startsWith('/admin') && !isAdminLogin
 
@@ -74,8 +96,12 @@ router.beforeEach((to) => {
     return true
   }
 
-  if (isAdminRoute && !token) {
+  if (isAdminRoute && !adminToken) {
     return '/admin/login'
+  }
+
+  if (to.meta.requiresUser && !userToken) {
+    return '/login'
   }
 
   return true

@@ -9,10 +9,15 @@ const toastStore = useToastStore()
     <div
       v-for="toast in toastStore.toasts"
       :key="toast.id"
-      class="flex items-start justify-between gap-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-800 shadow-lg"
+      class="flex items-start justify-between gap-4 rounded-xl border px-4 py-3 shadow-lg"
+      :class="
+        toast.type === 'error'
+          ? 'border-red-200 bg-red-50 text-red-800'
+          : 'border-green-200 bg-green-50 text-green-800'
+      "
     >
       <p class="text-sm font-bold">{{ toast.message }}</p>
-      <button class="text-sm font-black text-green-700" type="button" @click="toastStore.remove(toast.id)">×</button>
+      <button class="text-sm font-black" type="button" @click="toastStore.remove(toast.id)">×</button>
     </div>
   </div>
 </template>

@@ -1,5 +1,6 @@
 <script setup>
 import { onBeforeUnmount, onMounted } from 'vue'
+import { X } from 'lucide-vue-next'
 
 const props = defineProps({
   show: {
@@ -35,21 +36,22 @@ onBeforeUnmount(() => {
 
 <template>
   <Teleport to="body">
-    <div v-if="show" class="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 px-4 py-6" @click.self="$emit('close')">
-      <section :class="['flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl bg-white shadow-2xl', maxWidth]">
-        <header class="shrink-0 flex items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
-          <h2 class="text-xl font-black text-avocado-950">{{ title }}</h2>
-          <button class="rounded-lg px-3 py-2 text-xl font-black text-slate-500 hover:bg-slate-100" type="button" @click="$emit('close')">
-            ×
+    <div v-if="show" class="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 backdrop-blur-sm px-4 py-6" @click.self="$emit('close')">
+      <section :class="['flex max-h-[90vh] w-full flex-col overflow-hidden rounded-[2rem] bg-white shadow-2xl border border-slate-100', maxWidth]">
+        <header class="shrink-0 flex items-center justify-between gap-4 border-b border-slate-100 px-8 py-5">
+          <h2 class="text-lg font-black text-avocado-950 tracking-tight">{{ title }}</h2>
+          <button class="rounded-xl p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-700 transition" type="button" @click="$emit('close')">
+            <X class="h-5 w-5" />
           </button>
         </header>
-        <div class="flex-1 overflow-y-auto px-6 py-5">
+        <div class="flex-1 overflow-y-auto px-8 py-6">
           <slot />
         </div>
-        <footer v-if="$slots.footer" class="shrink-0 border-t border-slate-200 bg-white px-6 py-4">
+        <footer v-if="$slots.footer" class="shrink-0 bg-slate-50/50 border-t border-slate-100 px-8 py-5">
           <slot name="footer" />
         </footer>
       </section>
     </div>
   </Teleport>
 </template>
+

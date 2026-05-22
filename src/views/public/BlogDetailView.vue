@@ -1,21 +1,60 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '../../stores/appStore'
 
 const route = useRoute()
 const store = useAppStore()
+const routeIdentifier = computed(() => String(route.params.id || ''))
 
 const post = computed(() =>
-  store.posts.find((item) => String(item.id) === String(route.params.id) && item.status === 'Đã đăng'),
+  store.posts.find(
+    (item) =>
+      (String(item.id) === routeIdentifier.value || item.slug === routeIdentifier.value) &&
+      ['Đã đăng', 'Published', 'PUBLISHED'].includes(item.status),
+  ),
 )
 
+const slugify = (value) =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+
+const articleContent = computed(() => {
+  if (!post.value?.content) return ''
+  let index = 0
+  return post.value.content.replace(/<h2([^>]*)>(.*?)<\/h2>/g, (match, attrs, title) => {
+    if (attrs.includes('id=')) return match
+    index += 1
+    return `<h2${attrs} id="${slugify(title) || `section-${index}`}">${title}</h2>`
+  })
+})
+
 const tocItems = computed(() => {
-  if (!post.value?.content) return []
-  return [...post.value.content.matchAll(/<h2[^>]*id="([^"]+)"[^>]*>(.*?)<\/h2>/g)].map((match) => ({
+  if (!articleContent.value) return []
+  return [...articleContent.value.matchAll(/<h2[^>]*id="([^"]+)"[^>]*>(.*?)<\/h2>/g)].map((match) => ({
     id: match[1],
     title: match[2].replace(/<[^>]+>/g, ''),
   }))
+})
+
+const relatedPosts = computed(() => {
+  if (!post.value) return []
+  const relatedIds = post.value.relatedPostIds || []
+  const publishedPosts = store.posts.filter((item) => ['Đã đăng', 'Published', 'PUBLISHED'].includes(item.status))
+  const explicitRelated = publishedPosts.filter((item) => relatedIds.includes(item.id))
+  if (explicitRelated.length) return explicitRelated.slice(0, 3)
+  return publishedPosts
+    .filter((item) => item.id !== post.value.id && item.category === post.value.category)
+    .slice(0, 3)
+})
+
+onMounted(() => {
+  Promise.allSettled([store.fetchCategories(), store.fetchPosts()])
 })
 </script>
 
@@ -37,6 +76,9 @@ const tocItems = computed(() => {
           </div>
           <h1 class="mt-5 max-w-4xl text-4xl font-black leading-tight text-avocado-950 lg:text-5xl">{{ post.title }}</h1>
           <p class="mt-5 max-w-3xl text-lg leading-8 text-slate-600">{{ post.excerpt }}</p>
+          <div v-if="post.tags?.length" class="mt-5 flex flex-wrap gap-2">
+            <span v-for="tag in post.tags" :key="tag" class="rounded-full bg-cream-100 px-3 py-1 text-xs font-black text-avocado-800">#{{ tag }}</span>
+          </div>
         </div>
       </header>
 
@@ -51,7 +93,22 @@ const tocItems = computed(() => {
         </aside>
 
         <div>
-          <div class="blog-content rounded-xl border border-avocado-100 bg-white p-6 leading-8 text-slate-700 shadow-sm lg:p-8" v-html="post.content"></div>
+          <div class="blog-content rounded-xl border border-avocado-100 bg-white p-6 leading-8 text-slate-700 shadow-sm lg:p-8" v-html="articleContent"></div>
+
+          <section v-if="relatedPosts.length" class="mt-6 rounded-2xl border border-avocado-100 bg-white p-6 shadow-sm">
+            <h2 class="text-xl font-black text-avocado-950">Bài viết liên quan</h2>
+            <div class="mt-4 grid gap-4 md:grid-cols-3">
+              <RouterLink
+                v-for="item in relatedPosts"
+                :key="item.id"
+                :to="`/blog/${item.slug || item.id}`"
+                class="rounded-xl border border-slate-100 p-4 transition hover:border-avocado-200 hover:bg-avocado-50"
+              >
+                <p class="text-xs font-black uppercase tracking-wide text-avocado-600">{{ item.category }}</p>
+                <h3 class="mt-2 line-clamp-3 font-black leading-6 text-avocado-950">{{ item.title }}</h3>
+              </RouterLink>
+            </div>
+          </section>
 
           <div class="mt-6 grid gap-3 rounded-2xl bg-avocado-800 p-6 text-white shadow-lg lg:grid-cols-3">
             <RouterLink to="/consultation" class="rounded-xl bg-cream-400 px-5 py-3 text-center font-black text-avocado-950 hover:bg-cream-300">
@@ -85,6 +142,14 @@ const tocItems = computed(() => {
   font-size: 1.5rem;
   font-weight: 900;
   color: rgb(15 43 20);
+}
+
+.blog-content :deep(.article-contact) {
+  margin-top: 2rem;
+  border-radius: 1rem;
+  background: rgb(244 249 239);
+  padding: 1.5rem;
+  box-shadow: inset 0 0 0 1px rgb(181 211 153 / 0.5);
 }
 
 .blog-content :deep(h3) {
@@ -122,14 +187,6 @@ const tocItems = computed(() => {
   color: rgb(45 90 39);
 }
 
-.blog-content :deep(.article-contact) {
-  margin-top: 2rem;
-  border-radius: 1rem;
-  background: rgb(244 249 239);
-  padding: 1.5rem;
-  box-shadow: inset 0 0 0 1px rgb(181 211 153 / 0.5);
-}
-
 .blog-content :deep(a) {
   font-weight: 800;
   color: rgb(45 90 39);
@@ -142,5 +199,22 @@ const tocItems = computed(() => {
   border-radius: 1rem;
   object-fit: cover;
   box-shadow: 0 12px 30px rgb(15 23 42 / 0.08);
+}
+
+.blog-content :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.blog-content :deep(th),
+.blog-content :deep(td) {
+  border: 1px solid rgb(203 213 225);
+  padding: 0.75rem;
+}
+
+.blog-content :deep(th) {
+  background: rgb(244 249 239);
+  color: rgb(45 90 39);
 }
 </style>

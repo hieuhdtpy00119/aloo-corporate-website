@@ -1,14 +1,12 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import BaseModal from '../../components/admin/BaseModal.vue'
-import { costItems, franchiseBenefits, franchiseConditions, franchiseProcess } from '../../data/mockData'
+import { useFranchiseContentStore } from '../../stores/franchiseContentStore'
+import { useToastStore } from '../../stores/toastStore'
 
-const content = reactive({
-  benefits: franchiseBenefits.map((item) => ({ ...item })),
-  conditions: franchiseConditions.map((item) => ({ ...item })),
-  process: franchiseProcess.map((item) => ({ ...item })),
-  costs: costItems.map((item) => ({ ...item })),
-})
+const franchiseStore = useFranchiseContentStore()
+const toast = useToastStore()
+const statuses = ['ACTIVE', 'INACTIVE', 'HIDDEN']
 
 const sectionMeta = {
   benefits: { title: 'Lợi ích', description: 'Các lợi ích nhượng quyền dành cho đối tác.' },
@@ -24,13 +22,16 @@ const sections = computed(() =>
   Object.entries(sectionMeta).map(([key, meta]) => ({
     key,
     ...meta,
-    items: content[key],
+    items: franchiseStore.content[key],
   })),
 )
 
 const openEditModal = (sectionKey) => {
   editingSection.value = sectionKey
-  editingItems.value = content[sectionKey].map((item) => ({ ...item }))
+  editingItems.value = franchiseStore.content[sectionKey].map((item) => ({
+    status: 'ACTIVE',
+    ...item,
+  }))
 }
 
 const closeModal = () => {
@@ -38,9 +39,15 @@ const closeModal = () => {
   editingItems.value = []
 }
 
-const saveSection = () => {
+const saveSection = async () => {
   if (editingSection.value) {
-    content[editingSection.value] = editingItems.value.map((item) => ({ ...item }))
+    try {
+      await franchiseStore.updateSection(editingSection.value, editingItems.value)
+      toast.success('Đã lưu nội dung nhượng quyền')
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Không lưu được nội dung nhượng quyền')
+      return
+    }
   }
   closeModal()
 }
@@ -48,6 +55,18 @@ const saveSection = () => {
 const modalTitle = computed(() =>
   editingSection.value ? `Chỉnh sửa ${sectionMeta[editingSection.value].title.toLowerCase()}` : '',
 )
+
+const statusClass = (status) => ({
+  'bg-green-50 text-green-700 border-green-200': status === 'ACTIVE',
+  'bg-gray-50 text-gray-700 border-gray-200': status === 'INACTIVE',
+  'bg-red-50 text-red-700 border-red-200': status === 'HIDDEN',
+})
+
+onMounted(() => {
+  franchiseStore.fetchContent().catch(() => {
+    toast.error('Không tải được nội dung nhượng quyền')
+  })
+})
 </script>
 
 <template>
@@ -56,8 +75,14 @@ const modalTitle = computed(() =>
       <h2 class="text-3xl font-black text-avocado-950">Nội dung nhượng quyền</h2>
       <p class="mt-2 text-slate-600">Quản lý nội dung dài bằng các section gọn, chỉnh sửa trong modal chung.</p>
     </div>
+    <p v-if="franchiseStore.error" class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+      {{ franchiseStore.error }}
+    </p>
+    <p v-if="franchiseStore.loading" class="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-8 text-center text-sm font-bold text-slate-500">
+      Đang tải nội dung nhượng quyền...
+    </p>
 
-    <div class="grid gap-6 xl:grid-cols-2">
+    <div v-if="!franchiseStore.loading" class="grid gap-6 xl:grid-cols-2">
       <article v-for="section in sections" :key="section.key" class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <div class="mb-5 flex items-start justify-between gap-4">
           <div>
@@ -70,7 +95,12 @@ const modalTitle = computed(() =>
         </div>
         <div class="grid gap-3">
           <div v-for="item in section.items" :key="item.id" class="rounded-lg bg-slate-50 p-4">
-            <h4 class="font-black text-avocado-950">{{ item.title }}</h4>
+            <div class="flex items-start justify-between gap-3">
+              <h4 class="font-black text-avocado-950">{{ item.title }}</h4>
+              <span class="rounded-full border px-3 py-1 text-xs font-black" :class="statusClass(item.status || 'ACTIVE')">
+                {{ item.status || 'ACTIVE' }}
+              </span>
+            </div>
             <p class="mt-2 text-sm leading-6 text-slate-600">
               {{ section.key === 'costs' ? `${item.amount} - ${item.note}` : item.description }}
             </p>
@@ -85,6 +115,12 @@ const modalTitle = computed(() =>
           <label class="grid gap-2 text-sm font-bold text-slate-700">
             Tiêu đề
             <input v-model="item.title" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
+          </label>
+          <label class="grid gap-2 text-sm font-bold text-slate-700">
+            Trạng thái
+            <select v-model="item.status" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500">
+              <option v-for="status in statuses" :key="status" :value="status">{{ status }}</option>
+            </select>
           </label>
           <template v-if="editingSection === 'costs'">
             <label class="grid gap-2 text-sm font-bold text-slate-700">

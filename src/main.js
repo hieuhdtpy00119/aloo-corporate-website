@@ -5,4 +5,10 @@ import router from './router'
 import { createPinia } from 'pinia'
 import i18n from './plugins/i18n'
 
+if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => registration.unregister())
+  })
+}
+
 createApp(App).use(createPinia()).use(router).use(i18n).mount('#app')
