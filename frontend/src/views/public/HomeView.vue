@@ -84,19 +84,13 @@ const scrollProducts = (direction) => {
 
 <template>
   <section class="bg-avocado-50/20">
-    <!-- Hero Banner with Video & Glassmorphic Content Card Overlay -->
+    <!-- Hero Banner with Glassmorphic Content Card Overlay -->
     <div class="relative h-[80vh] min-h-[580px] w-full overflow-hidden bg-avocado-950">
-      <video
+      <img
         class="absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-luminosity"
-        autoplay
-        muted
-        loop
-        playsinline
-        poster="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=2200&q=90"
-        aria-label="Video hero ALOO Kem Bơ"
-      >
-        <source src="/Si%C3%AAu%20Nh%C3%A2n%20Gao%20vs%20Si%C3%AAu%20Nh%C3%A2n%20Cu%E1%BB%93ng%20Phong%20_%20Gaoranger%20vs%20Hurricanger.mp4" type="video/mp4" />
-      </video>
+        src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=2200&q=90"
+        alt="ALOO Kem Bơ Thuần Việt"
+      />
       
       <!-- Gradient overlay for readability -->
       <div class="absolute inset-0 bg-gradient-to-t from-avocado-950 via-avocado-950/40 to-transparent"></div>
@@ -325,4 +319,3 @@ const scrollProducts = (direction) => {
   background: #a2dd85;
 }
 </style>
-

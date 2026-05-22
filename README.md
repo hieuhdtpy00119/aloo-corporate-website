@@ -1,116 +1,44 @@
-# ALOO Corporate Website
+# ALOO Franchise CMS
 
-Frontend website and admin CMS demo for **ALOO - Kem Bơ Thuần Việt**.
+Repository này tách rõ frontend và backend:
 
-## Tech Stack
-
-- Vue 3
-- Vite
-- Vue Router
-- Pinia
-- Tailwind CSS
-- Axios
-
-## Requirements
-
-- Node.js 18+ recommended
-- npm
-- Git
-
-## Download Project
-
-Clone repository:
-
-```bash
-git clone https://github.com/hieuhdtpy00119/aloo-corporate-website.git
-cd aloo-corporate-website
+```text
+aloo-corporate-website/
+├─ frontend/   # Vue 3 + Vite
+└─ backend/    # Spring Boot + SQL Server
 ```
 
-## Install Dependencies
+## Frontend
 
-```bash
+```powershell
+cd frontend
 npm install
-```
-
-## Environment Setup
-
-Create `.env` from the example file if needed:
-
-```bash
-cp .env.example .env
-```
-
-Default example:
-
-```env
-VITE_API_URL=http://localhost:3000/api
-```
-
-This project currently uses mock data, so backend setup is not required.
-
-## Run Development Server
-
-```bash
 npm run dev
 ```
 
-Open:
+Frontend chạy tại:
 
 ```text
-http://localhost:5173/
+http://localhost:5173
 ```
 
-## Build Production
+## Backend
 
-```bash
-npm run build
+```powershell
+cd backend
+$env:DB_PASSWORD="123456"
+$env:RATE_LIMIT_BACKEND="memory"
+mvn spring-boot:run
 ```
 
-## Preview Production Build
-
-```bash
-npm run preview
-```
-
-## Admin Demo
-
-Admin login route:
+Backend chạy tại:
 
 ```text
-http://localhost:5173/admin/login
+http://localhost:8080/api
 ```
 
-Demo account:
+Script database chính:
 
 ```text
-Email: admin@aloo.vn
-Password: 123456
+backend/database/aloo_franchise_cms.sql
 ```
-
-## Main Routes
-
-Public:
-
-- `/`
-- `/products`
-- `/locations`
-- `/franchise`
-- `/about`
-- `/blog`
-- `/consultation`
-
-Admin:
-
-- `/admin`
-- `/admin/products`
-- `/admin/banners`
-- `/admin/posts`
-- `/admin/registrations`
-- `/admin/locations`
-- `/admin/franchise-content`
-
-## Notes
-
-- `node_modules/`, `dist/`, and `.env` are ignored by Git.
-- Do not commit real API keys or secrets.
-- Vite variables starting with `VITE_` are exposed to browser code, so secret keys should be stored in a backend service.
