@@ -7,7 +7,6 @@ import com.aloo.cms.entity.FranchiseRegistration;
 import com.aloo.cms.exception.ResourceNotFoundException;
 import com.aloo.cms.mapper.FranchiseRegistrationMapper;
 import com.aloo.cms.repository.FranchiseRegistrationRepository;
-import com.aloo.cms.telegram.TelegramBotService;
 import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +20,10 @@ public class FranchiseRegistrationService {
 
     private final FranchiseRegistrationRepository registrationRepository;
     private final FranchiseRegistrationMapper registrationMapper;
-    private final TelegramBotService telegramBotService;
 
     @Transactional
     public FranchiseRegistrationResponse create(FranchiseRegistrationRequest request) {
         FranchiseRegistration registration = registrationRepository.save(registrationMapper.toEntity(request));
-        telegramBotService.notifyNewRegistration(registration);
         return registrationMapper.toResponse(registration);
     }
 

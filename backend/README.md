@@ -12,7 +12,6 @@ Backend Spring Boot cho ALOO Franchise CMS.
 - Spring Security JWT
 - Lombok
 - Jakarta Validation
-- Telegram notification
 
 ## Cấu hình
 
@@ -31,8 +30,6 @@ $env:DB_URL="jdbc:sqlserver://localhost:1433;databaseName=ALOO_Franchise_CMS;enc
 $env:DB_USERNAME="sa"
 $env:DB_PASSWORD="your-password"
 $env:JWT_SECRET="change-this-secret-to-at-least-32-characters"
-$env:TELEGRAM_BOT_TOKEN="your-telegram-bot-token"
-$env:TELEGRAM_CHAT_ID="your-telegram-chat-id"
 ```
 
 ## Rate limit
@@ -219,8 +216,3 @@ Authorization: Bearer <user-token>
 - `POST /api/menu-posters`
 - `PUT /api/menu-posters/{id}`
 - `DELETE /api/menu-posters/{id}`
-
-## Telegram
-
-Khi `POST /api/franchise-registrations` thành công, backend lưu database rồi gửi Telegram cho admin.
-Nếu Telegram lỗi hoặc thiếu config, API chính vẫn trả thành công và backend chỉ ghi warning log.
