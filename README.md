@@ -26,7 +26,7 @@ http://localhost:5173
 
 ```powershell
 cd backend
-$env:DB_PASSWORD="123456"
+$env:DB_PASSWORD="<your_sql_server_password>"
 $env:RATE_LIMIT_BACKEND="memory"
 mvn spring-boot:run
 ```
