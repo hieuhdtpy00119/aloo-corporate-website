@@ -27,6 +27,7 @@ import AdminFranchiseContentView from '../views/admin/AdminFranchiseContentView.
 import AdminLocationsView from '../views/admin/AdminLocationsView.vue'
 import AdminProfileView from '../views/admin/AdminProfileView.vue'
 import AdminChangePasswordView from '../views/admin/AdminChangePasswordView.vue'
+import { resolveAuthRedirect } from './authGuard'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -86,25 +87,6 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
-  const adminToken = localStorage.getItem('admin_token')
-  const userToken = localStorage.getItem('user_token')
-  const isAdminLogin = to.path === '/admin/login'
-  const isAdminRoute = to.path.startsWith('/admin') && !isAdminLogin
-
-  if (isAdminLogin) {
-    return true
-  }
-
-  if (isAdminRoute && !adminToken) {
-    return '/admin/login'
-  }
-
-  if (to.meta.requiresUser && !userToken) {
-    return '/login'
-  }
-
-  return true
-})
+router.beforeEach((to) => resolveAuthRedirect(to))
 
 export default router

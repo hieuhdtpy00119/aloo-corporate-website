@@ -61,7 +61,7 @@ const submitForm = async () => {
       </label>
       <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
         {{ t('consultation.fields.phone') }} *
-        <input v-model="form.phone" required class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-avocado-500 focus:ring-2 focus:ring-avocado-100 transition" />
+        <input v-model="form.phone" required type="tel" pattern="^[0-9+() .-]{8,40}$" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-avocado-500 focus:ring-2 focus:ring-avocado-100 transition" />
       </label>
     </div>
     <div class="grid gap-5 md:grid-cols-2">
@@ -93,4 +93,3 @@ const submitForm = async () => {
     </div>
   </form>
 </template>
-

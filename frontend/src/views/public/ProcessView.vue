@@ -45,10 +45,9 @@ const franchiseSteps = computed(() => tm('franchise.steps'))
       <!-- Quick Consultation CTA -->
       <div class="mt-16 text-center">
         <RouterLink to="/consultation" class="inline-flex rounded-full bg-avocado-900 text-white font-bold px-8 py-3.5 hover:bg-avocado-800 transition duration-300 shadow-md text-xs uppercase tracking-wider">
-          Xem lịch sử các cửa hàng đã mở
+          Đăng ký tư vấn mở cửa hàng
         </RouterLink>
       </div>
     </section>
   </main>
 </template>
-

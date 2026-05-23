@@ -32,6 +32,15 @@ $env:DB_PASSWORD="your-password"
 $env:JWT_SECRET="change-this-secret-to-at-least-32-characters"
 ```
 
+File `application.properties` trong repo chỉ dùng placeholder. Không commit mật khẩu database, JWT secret hoặc credential production vào Git.
+
+Nếu muốn chạy demo local đúng với frontend hiện tại, set thêm trước lần chạy đầu:
+
+```powershell
+$env:ADMIN_PASSWORD="123456"
+$env:USER_PASSWORD="123456"
+```
+
 ## Rate limit
 
 Mặc định local dùng in-memory rate limit, không cần Redis:
@@ -58,7 +67,7 @@ Các endpoint đang được giới hạn:
 
 Nếu Redis lỗi, backend ghi warning và fallback tạm về in-memory để API không sập.
 
-Admin seed mặc định khi bảng `users` đang trống:
+Admin seed local khi bảng `users` đang trống và đã set biến môi trường demo:
 
 ```text
 Email: admin@aloo.vn
@@ -73,7 +82,7 @@ $env:ADMIN_PASSWORD="your-strong-password"
 $env:ADMIN_FULL_NAME="Admin"
 ```
 
-User seed mặc định khi bảng `customer_users` chưa có tài khoản:
+User seed local khi bảng `customer_users` chưa có tài khoản và đã set biến môi trường demo:
 
 ```text
 Email: user@aloo.vn

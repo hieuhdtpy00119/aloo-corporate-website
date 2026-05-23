@@ -1,10 +1,12 @@
 <script setup>
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { KeyRound, LockKeyhole, ShieldCheck } from 'lucide-vue-next'
 import { changeUserPassword } from '../../services/userAuthService'
 import { useToastStore } from '../../stores/toastStore'
 
 const toast = useToastStore()
+const router = useRouter()
 const isSaving = ref(false)
 
 const form = reactive({
@@ -34,8 +36,8 @@ const validate = () => {
 
   if (!form.newPassword.trim()) {
     errors.newPassword = 'Vui lòng nhập mật khẩu mới'
-  } else if (form.newPassword.length < 6) {
-    errors.newPassword = 'Mật khẩu mới tối thiểu 6 ký tự'
+  } else if (form.newPassword.length < 8) {
+    errors.newPassword = 'Mật khẩu mới tối thiểu 8 ký tự'
   }
 
   if (!form.confirmPassword.trim()) {
@@ -62,7 +64,12 @@ const changePassword = async () => {
     form.currentPassword = ''
     form.newPassword = ''
     form.confirmPassword = ''
+    localStorage.removeItem('user_token')
+    localStorage.removeItem('user_user')
+    localStorage.removeItem('user_role')
+    window.dispatchEvent(new Event('aloo-auth-change'))
     toast.success('Đổi mật khẩu thành công')
+    router.replace('/login')
   } catch (error) {
     toast.error(error.response?.data?.message || 'Không đổi được mật khẩu')
   } finally {
@@ -89,7 +96,7 @@ const changePassword = async () => {
           </div>
           <h2 class="mt-5 text-xl font-black text-avocado-950">Tăng bảo mật</h2>
           <p class="mt-2 text-sm leading-6 text-slate-600">
-            Mật khẩu mới nên có ít nhất 6 ký tự và không trùng mật khẩu cũ.
+            Mật khẩu mới nên có ít nhất 8 ký tự và không trùng mật khẩu cũ.
           </p>
         </aside>
 

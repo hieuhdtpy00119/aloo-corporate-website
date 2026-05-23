@@ -1,9 +1,98 @@
 <script setup>
+import { reactive, ref } from 'vue'
 import SectionTitle from '../../components/public/SectionTitle.vue'
 import { useI18n } from 'vue-i18n'
-import { Phone, Mail, MapPin, Sparkles } from 'lucide-vue-next'
+import { Phone, Mail, MapPin, Sparkles, Send } from 'lucide-vue-next'
+import { createFranchiseRegistration } from '../../services/franchiseRegistrationService'
+import { useToastStore } from '../../stores/toastStore'
 
 const { t } = useI18n()
+const toast = useToastStore()
+const isSubmitting = ref(false)
+
+const form = reactive({
+  fullName: '',
+  phone: '',
+  email: '',
+  province: '',
+  message: '',
+})
+
+const errors = reactive({
+  fullName: '',
+  phone: '',
+  email: '',
+  message: '',
+})
+
+const phonePattern = /^[0-9+() .-]{8,40}$/
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function resetErrors() {
+  errors.fullName = ''
+  errors.phone = ''
+  errors.email = ''
+  errors.message = ''
+}
+
+function validateForm() {
+  resetErrors()
+
+  if (!form.fullName.trim()) {
+    errors.fullName = 'Vui lòng nhập họ tên'
+  }
+
+  if (!form.phone.trim()) {
+    errors.phone = 'Vui lòng nhập số điện thoại'
+  } else if (!phonePattern.test(form.phone.trim())) {
+    errors.phone = 'Số điện thoại không đúng định dạng'
+  }
+
+  if (form.email.trim() && !emailPattern.test(form.email.trim())) {
+    errors.email = 'Email không đúng định dạng'
+  }
+
+  if (!form.message.trim()) {
+    errors.message = 'Vui lòng nhập nội dung cần hỗ trợ'
+  }
+
+  return !errors.fullName && !errors.phone && !errors.email && !errors.message
+}
+
+function resetForm() {
+  form.fullName = ''
+  form.phone = ''
+  form.email = ''
+  form.province = ''
+  form.message = ''
+  resetErrors()
+}
+
+async function submitContact() {
+  if (isSubmitting.value) return
+  if (!validateForm()) {
+    toast.error('Vui lòng kiểm tra lại thông tin liên hệ')
+    return
+  }
+
+  isSubmitting.value = true
+  try {
+    await createFranchiseRegistration({
+      fullName: form.fullName.trim(),
+      phone: form.phone.trim(),
+      email: form.email.trim() || null,
+      province: form.province.trim() || 'Liên hệ website',
+      expectedBudget: 0,
+      note: `[Lien he website] ${form.message.trim()}`,
+    })
+    toast.success('Đã gửi liên hệ thành công')
+    resetForm()
+  } catch (error) {
+    toast.error(error?.response?.data?.message || 'Không gửi được liên hệ, vui lòng thử lại')
+  } finally {
+    isSubmitting.value = false
+  }
+}
 </script>
 
 <template>
@@ -71,6 +160,104 @@ const { t } = useI18n()
         </div>
       </div>
 
+      <!-- Contact form -->
+      <div class="mt-12 grid gap-8 rounded-[2rem] border border-avocado-100/45 bg-white p-6 shadow-sm md:p-8 lg:grid-cols-[0.85fr_1.15fr]">
+        <div class="space-y-4">
+          <span class="inline-flex items-center gap-2 rounded-full bg-avocado-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-avocado-700">
+            <Send class="h-4 w-4" />
+            Gửi yêu cầu
+          </span>
+          <h2 class="text-3xl font-black leading-tight text-avocado-950">ALOO sẽ liên hệ lại với bạn</h2>
+          <p class="text-sm leading-relaxed text-slate-600">
+            Điền thông tin bên dưới nếu bạn cần tư vấn nhanh về nhượng quyền, mặt bằng, menu hoặc hợp tác truyền thông.
+          </p>
+          <div class="rounded-2xl bg-avocado-50 p-5 text-sm leading-relaxed text-avocado-900">
+            Dữ liệu form được gửi về cùng luồng đăng ký tư vấn để đội ngũ vận hành xử lý tập trung trong CMS.
+          </div>
+        </div>
+
+        <form class="grid gap-4" data-testid="contact-form" novalidate @submit.prevent="submitContact">
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="grid gap-2 text-sm font-bold text-avocado-950">
+              Họ tên
+              <input
+                v-model="form.fullName"
+                class="h-12 rounded-xl border border-avocado-100 bg-white px-4 text-sm font-semibold outline-none transition focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100"
+                :class="{ 'border-red-300 focus:border-red-400 focus:ring-red-100': errors.fullName }"
+                name="fullName"
+                placeholder="Nguyễn Văn A"
+                required
+                type="text"
+              />
+              <span v-if="errors.fullName" class="text-xs font-semibold text-red-600">{{ errors.fullName }}</span>
+            </label>
+
+            <label class="grid gap-2 text-sm font-bold text-avocado-950">
+              Số điện thoại
+              <input
+                v-model="form.phone"
+                class="h-12 rounded-xl border border-avocado-100 bg-white px-4 text-sm font-semibold outline-none transition focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100"
+                :class="{ 'border-red-300 focus:border-red-400 focus:ring-red-100': errors.phone }"
+                name="phone"
+                pattern="^[0-9+() .-]{8,40}$"
+                placeholder="0900 888 168"
+                required
+                type="tel"
+              />
+              <span v-if="errors.phone" class="text-xs font-semibold text-red-600">{{ errors.phone }}</span>
+            </label>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="grid gap-2 text-sm font-bold text-avocado-950">
+              Email
+              <input
+                v-model="form.email"
+                class="h-12 rounded-xl border border-avocado-100 bg-white px-4 text-sm font-semibold outline-none transition focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100"
+                :class="{ 'border-red-300 focus:border-red-400 focus:ring-red-100': errors.email }"
+                name="email"
+                placeholder="email@example.com"
+                type="email"
+              />
+              <span v-if="errors.email" class="text-xs font-semibold text-red-600">{{ errors.email }}</span>
+            </label>
+
+            <label class="grid gap-2 text-sm font-bold text-avocado-950">
+              Khu vực
+              <input
+                v-model="form.province"
+                class="h-12 rounded-xl border border-avocado-100 bg-white px-4 text-sm font-semibold outline-none transition focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100"
+                name="province"
+                placeholder="TP.HCM, Đà Nẵng..."
+                type="text"
+              />
+            </label>
+          </div>
+
+          <label class="grid gap-2 text-sm font-bold text-avocado-950">
+            Nội dung cần hỗ trợ
+            <textarea
+              v-model="form.message"
+              class="min-h-32 rounded-xl border border-avocado-100 bg-white px-4 py-3 text-sm font-semibold outline-none transition focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100"
+              :class="{ 'border-red-300 focus:border-red-400 focus:ring-red-100': errors.message }"
+              name="message"
+              placeholder="Tôi muốn được tư vấn mô hình ALOO phù hợp..."
+              required
+            ></textarea>
+            <span v-if="errors.message" class="text-xs font-semibold text-red-600">{{ errors.message }}</span>
+          </label>
+
+          <button
+            class="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-avocado-900 px-6 text-sm font-black uppercase tracking-wider text-white transition hover:bg-avocado-800 disabled:cursor-not-allowed disabled:opacity-60"
+            :disabled="isSubmitting"
+            type="submit"
+          >
+            <Send class="h-4 w-4" />
+            {{ isSubmitting ? 'Đang gửi...' : 'Gửi liên hệ' }}
+          </button>
+        </form>
+      </div>
+
       <!-- Quick Franchise CTA -->
       <div class="mt-20 overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-avocado-950 via-avocado-900 to-[#122310] p-8 sm:p-12 text-white relative shadow-xl">
         <div class="absolute -right-20 -top-20 w-80 h-80 bg-cream-400/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -96,4 +283,3 @@ const { t } = useI18n()
     </section>
   </main>
 </template>
-

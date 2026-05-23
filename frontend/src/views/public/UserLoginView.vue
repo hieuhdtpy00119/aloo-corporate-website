@@ -11,6 +11,27 @@ const password = ref('123456')
 const errorMessage = ref('')
 const isSubmitting = ref(false)
 
+const validateLogin = () => {
+  const normalizedEmail = email.value.trim().toLowerCase()
+  if (!normalizedEmail) {
+    errorMessage.value = 'Vui lòng nhập email'
+    return false
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    errorMessage.value = 'Email không đúng định dạng'
+    return false
+  }
+  if (!password.value) {
+    errorMessage.value = 'Vui lòng nhập mật khẩu'
+    return false
+  }
+  if (password.value.length < 6) {
+    errorMessage.value = 'Mật khẩu tối thiểu 6 ký tự'
+    return false
+  }
+  return true
+}
+
 const loginAsAdmin = async () => {
   const { data } = await loginAdmin({
     email: email.value,
@@ -40,6 +61,8 @@ const handleLogin = async () => {
   if (isSubmitting.value) return
 
   errorMessage.value = ''
+  if (!validateLogin()) return
+
   isSubmitting.value = true
   try {
     if (email.value.trim().toLowerCase() === 'admin@aloo.vn') {
@@ -76,7 +99,7 @@ const handleLogin = async () => {
           <p>Mật khẩu: 123456</p>
           <div class="my-3 border-t border-avocado-100"></div>
           <p>Email admin: admin@aloo.vn</p>
-          <p>Mật khẩu admin: Admin@123</p>
+          <p>Mật khẩu admin: 123456</p>
         </div>
       </aside>
 
@@ -95,13 +118,13 @@ const handleLogin = async () => {
         <div class="mt-7 grid gap-5">
           <label class="grid gap-2 text-sm font-bold text-slate-700">
             Email
-            <input v-model.trim="email" type="email" class="rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100" />
+            <input v-model.trim="email" type="email" required class="rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100" />
           </label>
           <label class="grid gap-2 text-sm font-bold text-slate-700">
             Mật khẩu
-            <input v-model="password" type="password" class="rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100" />
+            <input v-model="password" type="password" required minlength="6" class="rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100" />
           </label>
-          <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-avocado-800 px-6 py-3 font-black text-white transition hover:bg-avocado-900">
+          <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-avocado-800 px-6 py-3 font-black text-white transition hover:bg-avocado-900 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isSubmitting">
             <LogIn class="h-5 w-5" />
             {{ isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập' }}
           </button>

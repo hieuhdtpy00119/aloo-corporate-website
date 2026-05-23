@@ -37,7 +37,7 @@ public class DataSeeder implements CommandLineRunner {
     @Value("${app.user.email:user@aloo.vn}")
     private String userEmail;
 
-    @Value("${app.user.password:123456}")
+    @Value("${app.user.password:change-me}")
     private String userPassword;
 
     @Value("${app.user.full-name:ALOO User}")

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '../../stores/appStore'
 
@@ -52,6 +52,14 @@ const relatedPosts = computed(() => {
     .filter((item) => item.id !== post.value.id && item.category === post.value.category)
     .slice(0, 3)
 })
+
+watch(
+  post,
+  (value) => {
+    document.title = value ? `${value.seoTitle || value.title} | ALOO` : 'Không tìm thấy bài viết | ALOO'
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
   Promise.allSettled([store.fetchCategories(), store.fetchPosts()])
