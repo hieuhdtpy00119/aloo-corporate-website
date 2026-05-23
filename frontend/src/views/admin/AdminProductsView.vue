@@ -5,7 +5,7 @@ import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
 import Pagination from '../../components/admin/Pagination.vue'
 import SearchFilterBar from '../../components/admin/SearchFilterBar.vue'
-import { uploadService } from '../../services/cmsService'
+import { menuPosterService, resolveBackendAssetUrl, uploadService } from '../../services/cmsService'
 import { useAppStore } from '../../stores/appStore'
 import { useToastStore } from '../../stores/toastStore'
 import { Plus, Edit2, Trash2, Image, Link, ChevronRight } from 'lucide-vue-next'
@@ -13,6 +13,7 @@ import { Plus, Edit2, Trash2, Image, Link, ChevronRight } from 'lucide-vue-next'
 const store = useAppStore()
 const toast = useToastStore()
 
+const activeTab = ref('products')
 const showModal = ref(false)
 const mode = ref('create')
 const editingId = ref(null)
@@ -22,6 +23,18 @@ const statusFilter = ref('Tất cả')
 const currentPage = ref(1)
 const isUploadingImage = ref(false)
 const pageSize = 6
+
+const showPosterModal = ref(false)
+const posterMode = ref('create')
+const editingPosterId = ref(null)
+const pendingDeletePosterId = ref(null)
+const posterSearchQuery = ref('')
+const posterStatusFilter = ref('Tất cả')
+const posterCurrentPage = ref(1)
+const isLoadingMenuPosters = ref(false)
+const menuPosterError = ref('')
+const isUploadingPosterImage = ref(false)
+const menuPosters = ref([])
 
 const isLoading = computed(() => store.loading.products)
 const errorMessage = computed(() => store.errors.products)
@@ -46,6 +59,16 @@ const form = reactive({
   status: 'ACTIVE',
 })
 
+const posterForm = reactive({
+  branchKey: '',
+  title: '',
+  subtitle: '',
+  imageUrl: '',
+  altText: '',
+  sortOrder: 0,
+  status: 'ACTIVE',
+})
+
 const slugify = (value) =>
   value
     .toLowerCase()
@@ -65,6 +88,30 @@ const resetForm = () => {
     status: 'ACTIVE',
   })
   editingId.value = null
+}
+
+const normalizeMenuPoster = (poster) => ({
+  ...poster,
+  branchKey: poster.branchKey || '',
+  title: poster.title || '',
+  subtitle: poster.subtitle || '',
+  imageUrl: resolveBackendAssetUrl(poster.imageUrl || ''),
+  altText: poster.altText || '',
+  sortOrder: Number(poster.sortOrder || 0),
+  status: poster.status || 'ACTIVE',
+})
+
+const resetPosterForm = () => {
+  Object.assign(posterForm, {
+    branchKey: '',
+    title: '',
+    subtitle: '',
+    imageUrl: '',
+    altText: '',
+    sortOrder: 0,
+    status: 'ACTIVE',
+  })
+  editingPosterId.value = null
 }
 
 const openCreateModal = () => {
@@ -93,6 +140,32 @@ const closeModal = () => {
   resetForm()
 }
 
+const openCreatePosterModal = () => {
+  posterMode.value = 'create'
+  resetPosterForm()
+  showPosterModal.value = true
+}
+
+const openEditPosterModal = (poster) => {
+  posterMode.value = 'edit'
+  editingPosterId.value = poster.id
+  Object.assign(posterForm, {
+    branchKey: poster.branchKey || '',
+    title: poster.title || '',
+    subtitle: poster.subtitle || '',
+    imageUrl: poster.imageUrl || '',
+    altText: poster.altText || '',
+    sortOrder: Number(poster.sortOrder || 0),
+    status: poster.status || 'ACTIVE',
+  })
+  showPosterModal.value = true
+}
+
+const closePosterModal = () => {
+  showPosterModal.value = false
+  resetPosterForm()
+}
+
 const handleImageFileChange = async (event) => {
   const file = event.target.files?.[0]
   if (!file) return
@@ -106,6 +179,23 @@ const handleImageFileChange = async (event) => {
     toast.error(error.response?.data?.message || 'Không tải được ảnh sản phẩm')
   } finally {
     isUploadingImage.value = false
+    event.target.value = ''
+  }
+}
+
+const handlePosterImageFileChange = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  isUploadingPosterImage.value = true
+  try {
+    const { data } = await uploadService.image(file)
+    posterForm.imageUrl = data.url
+    toast.success('Đã tải ảnh menu lên backend')
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không tải được ảnh menu')
+  } finally {
+    isUploadingPosterImage.value = false
     event.target.value = ''
   }
 }
@@ -131,10 +221,41 @@ const filteredProducts = computed(() => {
   })
 })
 
+const filteredMenuPosters = computed(() => {
+  const keyword = posterSearchQuery.value.trim().toLowerCase()
+  return menuPosters.value.filter((poster) => {
+    const haystack = [poster.title, poster.subtitle, poster.branchKey, poster.altText]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+    const matchesSearch = !keyword || haystack.includes(keyword)
+    const matchesStatus = posterStatusFilter.value === 'Tất cả' || poster.status === getStatusValue(posterStatusFilter.value)
+    return matchesSearch && matchesStatus
+  })
+})
+
 const totalPages = computed(() => Math.max(1, Math.ceil(filteredProducts.value.length / pageSize)))
 const paginatedProducts = computed(() =>
   filteredProducts.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize),
 )
+const totalPosterPages = computed(() => Math.max(1, Math.ceil(filteredMenuPosters.value.length / pageSize)))
+const paginatedMenuPosters = computed(() =>
+  filteredMenuPosters.value.slice((posterCurrentPage.value - 1) * pageSize, posterCurrentPage.value * pageSize),
+)
+
+const fetchMenuPosters = async () => {
+  isLoadingMenuPosters.value = true
+  menuPosterError.value = ''
+  try {
+    const { data } = await menuPosterService.list()
+    menuPosters.value = Array.isArray(data) ? data.map(normalizeMenuPoster) : []
+  } catch (error) {
+    menuPosterError.value = error.response?.data?.message || 'Không tải được menu hiển thị'
+    throw error
+  } finally {
+    isLoadingMenuPosters.value = false
+  }
+}
 
 const saveProduct = async () => {
   if (!form.name.trim() || !form.slug.trim()) {
@@ -165,6 +286,50 @@ const confirmDeleteProduct = async () => {
   }
 }
 
+const saveMenuPoster = async () => {
+  if (!posterForm.branchKey.trim() || !posterForm.title.trim()) {
+    toast.error('Vui lòng nhập mã chi nhánh và tên menu')
+    return
+  }
+
+  const payload = {
+    branchKey: posterForm.branchKey.trim(),
+    title: posterForm.title.trim(),
+    subtitle: posterForm.subtitle.trim(),
+    imageUrl: posterForm.imageUrl,
+    altText: posterForm.altText.trim() || posterForm.title.trim(),
+    sortOrder: Number(posterForm.sortOrder || 0),
+    status: posterForm.status || 'ACTIVE',
+  }
+
+  try {
+    const request = editingPosterId.value
+      ? menuPosterService.update(editingPosterId.value, payload)
+      : menuPosterService.create(payload)
+    const { data } = await request
+    const normalized = normalizeMenuPoster(data)
+    const index = menuPosters.value.findIndex((item) => item.id === normalized.id)
+    if (index === -1) menuPosters.value.unshift(normalized)
+    else menuPosters.value.splice(index, 1, normalized)
+    toast.success(posterMode.value === 'create' ? 'Đã thêm menu hiển thị' : 'Đã cập nhật menu hiển thị')
+    closePosterModal()
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không lưu được menu hiển thị')
+  }
+}
+
+const confirmDeleteMenuPoster = async () => {
+  try {
+    await menuPosterService.remove(pendingDeletePosterId.value)
+    menuPosters.value = menuPosters.value.filter((item) => item.id !== pendingDeletePosterId.value)
+    toast.success('Đã xóa menu hiển thị')
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không xóa được menu hiển thị')
+  } finally {
+    pendingDeletePosterId.value = null
+  }
+}
+
 const saveExistingProductStatus = async (product) => {
   try {
     await store.saveProduct(product)
@@ -172,6 +337,27 @@ const saveExistingProductStatus = async (product) => {
   } catch (error) {
     toast.error(error.response?.data?.message || 'Không cập nhật được trạng thái')
     store.fetchProducts()
+  }
+}
+
+const saveExistingPosterStatus = async (poster) => {
+  try {
+    const { data } = await menuPosterService.update(poster.id, {
+      branchKey: poster.branchKey,
+      title: poster.title,
+      subtitle: poster.subtitle || '',
+      imageUrl: poster.imageUrl || '',
+      altText: poster.altText || poster.title,
+      sortOrder: Number(poster.sortOrder || 0),
+      status: poster.status || 'ACTIVE',
+    })
+    const normalized = normalizeMenuPoster(data)
+    const index = menuPosters.value.findIndex((item) => item.id === normalized.id)
+    if (index !== -1) menuPosters.value.splice(index, 1, normalized)
+    toast.success('Đã cập nhật trạng thái menu')
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không cập nhật được trạng thái menu')
+    fetchMenuPosters()
   }
 }
 
@@ -186,10 +372,14 @@ watch([searchQuery, statusFilter], () => {
   currentPage.value = 1
 })
 
+watch([posterSearchQuery, posterStatusFilter], () => {
+  posterCurrentPage.value = 1
+})
+
 onMounted(() => {
-  Promise.allSettled([store.fetchProducts(), store.fetchCategories()]).then((results) => {
+  Promise.allSettled([store.fetchProducts(), store.fetchCategories(), fetchMenuPosters()]).then((results) => {
     if (results.some((result) => result.status === 'rejected')) {
-      toast.error('Không tải được dữ liệu sản phẩm')
+      toast.error('Không tải được một phần dữ liệu sản phẩm')
     }
   })
 })
@@ -206,27 +396,62 @@ onMounted(() => {
       </div>
       <button 
         class="rounded-full bg-avocado-600 hover:bg-avocado-700 px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-white transition flex items-center justify-center gap-2 shadow-lg shadow-avocado-600/10" 
-        @click="openCreateModal"
+        @click="activeTab === 'products' ? openCreateModal() : openCreatePosterModal()"
       >
         <Plus class="h-4.5 w-4.5" />
-        Thêm sản phẩm
+        {{ activeTab === 'products' ? 'Thêm sản phẩm' : 'Thêm menu' }}
+      </button>
+    </div>
+
+    <div class="inline-flex w-full rounded-3xl border border-slate-100 bg-white p-1.5 shadow-sm sm:w-auto">
+      <button
+        type="button"
+        class="flex-1 rounded-2xl px-5 py-3 text-xs font-black uppercase tracking-wider transition sm:flex-none"
+        :class="activeTab === 'products' ? 'bg-avocado-900 text-white shadow-sm' : 'text-slate-500 hover:bg-avocado-50 hover:text-avocado-900'"
+        @click="activeTab = 'products'"
+      >
+        Sản phẩm
+      </button>
+      <button
+        type="button"
+        class="flex-1 rounded-2xl px-5 py-3 text-xs font-black uppercase tracking-wider transition sm:flex-none"
+        :class="activeTab === 'menu' ? 'bg-avocado-900 text-white shadow-sm' : 'text-slate-500 hover:bg-avocado-50 hover:text-avocado-900'"
+        @click="activeTab = 'menu'"
+      >
+        Menu hiển thị
       </button>
     </div>
 
     <!-- Filters -->
     <SearchFilterBar
+      v-if="activeTab === 'products'"
       v-model:search="searchQuery"
       v-model:status="statusFilter"
+      search-label="Tìm sản phẩm"
       search-placeholder="Tìm tên, slug, danh mục..."
+      status-label="Trạng thái bán"
+      :status-options="statusFilters"
+    />
+
+    <SearchFilterBar
+      v-else
+      v-model:search="posterSearchQuery"
+      v-model:status="posterStatusFilter"
+      search-label="Tìm menu"
+      search-placeholder="Tìm tên menu, chi nhánh, khu vực..."
+      status-label="Trạng thái hiển thị"
       :status-options="statusFilters"
     />
     
-    <p v-if="errorMessage" class="rounded-2xl bg-red-50 border border-red-200/50 px-4 py-3 text-xs font-bold text-red-700">
+    <p v-if="activeTab === 'products' && errorMessage" class="rounded-2xl bg-red-50 border border-red-200/50 px-4 py-3 text-xs font-bold text-red-700">
       {{ errorMessage }}
+    </p>
+    <p v-if="activeTab === 'menu' && menuPosterError" class="rounded-2xl bg-red-50 border border-red-200/50 px-4 py-3 text-xs font-bold text-red-700">
+      {{ menuPosterError }}
     </p>
 
     <!-- Table content -->
-    <div class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+    <div v-if="activeTab === 'products'" class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
       <div class="overflow-x-auto">
         <table v-if="!isLoading && filteredProducts.length" class="w-full min-w-[820px] table-fixed whitespace-nowrap text-left">
           <colgroup>
@@ -303,8 +528,86 @@ onMounted(() => {
       <EmptyState v-if="isLoading || filteredProducts.length === 0" :loading="isLoading" message="Không có sản phẩm phù hợp" />
     </div>
 
+    <div v-else class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+      <div class="overflow-x-auto">
+        <table v-if="!isLoadingMenuPosters && filteredMenuPosters.length" class="w-full min-w-[920px] table-fixed whitespace-nowrap text-left">
+          <colgroup>
+            <col class="w-[10%]" />
+            <col class="w-[25%]" />
+            <col class="w-[18%]" />
+            <col class="w-[24%]" />
+            <col class="w-[11%]" />
+            <col class="w-[12%]" />
+          </colgroup>
+          <thead class="bg-slate-50/50 border-b border-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <tr>
+              <th class="px-6 py-4">Ảnh</th>
+              <th class="px-6 py-4">Menu</th>
+              <th class="px-6 py-4">Chi nhánh</th>
+              <th class="px-6 py-4">Mô tả</th>
+              <th class="px-6 py-4">Trạng thái</th>
+              <th class="px-6 py-4 text-right">Hành động</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50 text-xs">
+            <tr v-for="poster in paginatedMenuPosters" :key="poster.id" class="hover:bg-slate-50/30 transition">
+              <td class="px-6 py-4">
+                <img
+                  v-if="poster.imageUrl"
+                  :src="poster.imageUrl"
+                  :alt="poster.altText || poster.title"
+                  class="h-14 w-12 rounded-xl object-cover border border-slate-100 shadow-sm"
+                />
+                <div v-else class="grid h-14 w-12 place-items-center rounded-xl bg-slate-50 border border-slate-100 text-[9px] font-bold text-slate-400">
+                  <Image class="h-4 w-4" />
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <p class="truncate font-bold text-xs text-avocado-950">{{ poster.title }}</p>
+                <p class="mt-1 truncate text-[10px] text-slate-400">Thứ tự: {{ poster.sortOrder }}</p>
+              </td>
+              <td class="truncate px-6 py-4 font-semibold text-slate-500">{{ poster.branchKey }}</td>
+              <td class="px-6 py-4">
+                <p class="truncate text-slate-500">{{ poster.subtitle || poster.altText || 'Chưa có mô tả' }}</p>
+              </td>
+              <td class="px-6 py-4">
+                <select
+                  v-model="poster.status"
+                  class="rounded-full border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer shadow-inner transition"
+                  :class="statusClass(poster.status)"
+                  @change="saveExistingPosterStatus(poster)"
+                >
+                  <option v-for="status in productStatuses" :key="status" :value="status">{{ statusLabels[status] }}</option>
+                </select>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex justify-end gap-1.5">
+                  <button
+                    class="rounded-xl border border-avocado-100/50 p-2 font-bold text-avocado-700 hover:bg-avocado-50/50 transition"
+                    title="Sửa"
+                    @click="openEditPosterModal(poster)"
+                  >
+                    <Edit2 class="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    class="rounded-xl border border-red-100 p-2 font-bold text-red-600 hover:bg-red-50 transition"
+                    title="Xóa"
+                    @click="pendingDeletePosterId = poster.id"
+                  >
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <EmptyState v-if="isLoadingMenuPosters || filteredMenuPosters.length === 0" :loading="isLoadingMenuPosters" message="Không có menu hiển thị phù hợp" />
+    </div>
+
     <!-- Pagination -->
     <Pagination
+      v-if="activeTab === 'products'"
       :page="currentPage"
       :total-pages="totalPages"
       :visible-count="paginatedProducts.length"
@@ -312,6 +615,17 @@ onMounted(() => {
       label="sản phẩm"
       @prev="currentPage = Math.max(1, currentPage - 1)"
       @next="currentPage = Math.min(totalPages, currentPage + 1)"
+    />
+
+    <Pagination
+      v-else
+      :page="posterCurrentPage"
+      :total-pages="totalPosterPages"
+      :visible-count="paginatedMenuPosters.length"
+      :total-count="filteredMenuPosters.length"
+      label="menu"
+      @prev="posterCurrentPage = Math.max(1, posterCurrentPage - 1)"
+      @next="posterCurrentPage = Math.min(totalPosterPages, posterCurrentPage + 1)"
     />
 
     <!-- Edit modal -->
@@ -353,7 +667,7 @@ onMounted(() => {
           Đường dẫn ảnh (Image URL)
           <div class="relative">
             <Link class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-4.5 w-4.5" />
-            <input v-model="form.imageUrl" class="admin-input-premium pl-11" placeholder="https://..." />
+            <input v-model="form.imageUrl" class="admin-input-premium admin-input-with-icon" placeholder="https://..." />
           </div>
         </label>
 
@@ -394,7 +708,85 @@ onMounted(() => {
       </template>
     </BaseModal>
 
+    <BaseModal :show="showPosterModal" :title="posterMode === 'create' ? 'Thêm Menu Hiển Thị' : 'Cập Nhật Menu Hiển Thị'" max-width="max-w-2xl" @close="closePosterModal">
+      <form id="poster-form" class="grid gap-5" @submit.prevent="saveMenuPoster">
+        <div class="grid gap-5 md:grid-cols-2">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Mã chi nhánh / khu vực *
+            <input v-model="posterForm.branchKey" required class="admin-input-premium" placeholder="quy-nhon, nha-trang..." />
+          </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Tên menu *
+            <input v-model="posterForm.title" required class="admin-input-premium" placeholder="ALOO Menu Quy Nhơn" />
+          </label>
+        </div>
+
+        <div class="grid gap-5 md:grid-cols-3">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 md:col-span-2">
+            Mô tả ngắn
+            <input v-model="posterForm.subtitle" class="admin-input-premium" placeholder="Menu theo chi nhánh hoặc khu vực" />
+          </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Thứ tự
+            <input v-model.number="posterForm.sortOrder" type="number" min="0" class="admin-input-premium" />
+          </label>
+        </div>
+
+        <div class="grid gap-5 md:grid-cols-2">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Trạng thái
+            <select v-model="posterForm.status" class="admin-input-premium cursor-pointer">
+              <option v-for="status in productStatuses" :key="status" :value="status">{{ statusLabels[status] }}</option>
+            </select>
+          </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Alt text
+            <input v-model="posterForm.altText" class="admin-input-premium" placeholder="Mô tả ảnh menu cho SEO" />
+          </label>
+        </div>
+
+        <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+          Đường dẫn ảnh menu
+          <div class="relative">
+            <Link class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-4.5 w-4.5" />
+            <input v-model="posterForm.imageUrl" class="admin-input-premium admin-input-with-icon" placeholder="https://..." />
+          </div>
+        </label>
+
+        <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+          Hoặc tải ảnh menu từ máy tính
+          <input
+            type="file"
+            accept="image/*"
+            class="w-full text-xs font-bold text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white file:cursor-pointer hover:file:bg-avocado-700 transition"
+            :disabled="isUploadingPosterImage"
+            @change="handlePosterImageFileChange"
+          />
+          <span v-if="isUploadingPosterImage" class="text-xs font-bold text-avocado-700 animate-pulse">Đang upload ảnh menu...</span>
+        </label>
+
+        <div v-if="posterForm.imageUrl" class="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+          <p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Xem trước menu</p>
+          <img :src="posterForm.imageUrl" alt="Xem trước menu" class="h-44 w-32 rounded-xl border border-slate-100 object-cover shadow-sm" />
+        </div>
+      </form>
+      <template #footer>
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <button class="rounded-full border border-slate-200 px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-slate-50 transition" @click="closePosterModal">Hủy bỏ</button>
+          <button
+            class="rounded-full bg-avocado-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:bg-avocado-700 disabled:cursor-not-allowed disabled:opacity-60 transition shadow-md"
+            form="poster-form"
+            type="submit"
+            :disabled="isUploadingPosterImage"
+          >
+            {{ posterMode === 'create' ? 'Tạo menu' : 'Lưu cập nhật' }}
+          </button>
+        </div>
+      </template>
+    </BaseModal>
+
     <ConfirmModal :show="Boolean(pendingDeleteId)" @cancel="pendingDeleteId = null" @confirm="confirmDeleteProduct" />
+    <ConfirmModal :show="Boolean(pendingDeletePosterId)" @cancel="pendingDeletePosterId = null" @confirm="confirmDeleteMenuPoster" />
   </section>
 </template>
 
@@ -417,5 +809,8 @@ onMounted(() => {
   border-color: rgb(112, 149, 107);
   box-shadow: 0 0 0 3px rgba(112, 149, 107, 0.1);
 }
-</style>
 
+.admin-input-with-icon {
+  padding-left: 2.75rem;
+}
+</style>

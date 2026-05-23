@@ -133,7 +133,14 @@ onBeforeUnmount(() => {
       <p class="mt-2 text-slate-600">Danh sách khách hàng tiềm năng và trạng thái xử lý tư vấn nhượng quyền.</p>
     </div>
 
-    <SearchFilterBar v-model:search="searchQuery" v-model:status="statusFilter" search-placeholder="Tìm họ tên, điện thoại, email, khu vực" :status-options="statusFilters" />
+    <SearchFilterBar
+      v-model:search="searchQuery"
+      v-model:status="statusFilter"
+      search-label="Tìm lead"
+      search-placeholder="Tìm họ tên, điện thoại, email, khu vực"
+      status-label="Trạng thái tư vấn"
+      :status-options="statusFilters"
+    />
     <p v-if="errorMessage" class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
       {{ errorMessage }}
     </p>

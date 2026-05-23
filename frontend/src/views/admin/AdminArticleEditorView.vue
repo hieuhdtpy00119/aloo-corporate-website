@@ -14,7 +14,14 @@ const toast = useToastStore()
 const articleId = computed(() => Number(route.params.id))
 const isEdit = computed(() => Number.isFinite(articleId.value) && articleId.value > 0)
 
-const statuses = ['DRAFT', 'PENDING', 'REVIEWING', 'APPROVED', 'PUBLISHED', 'ARCHIVED']
+const statuses = [
+  { value: 'DRAFT', label: 'Nháp' },
+  { value: 'PENDING', label: 'Chờ duyệt' },
+  { value: 'REVIEWING', label: 'Đang rà soát' },
+  { value: 'APPROVED', label: 'Đã duyệt' },
+  { value: 'PUBLISHED', label: 'Đã xuất bản' },
+  { value: 'ARCHIVED', label: 'Lưu trữ' },
+]
 const articleTypes = ['Tin tức', 'Review địa điểm', 'Bài SEO', 'Câu chuyện thương hiệu', 'Hướng dẫn nhượng quyền']
 const articleCategories = computed(() =>
   store.categories
@@ -137,6 +144,33 @@ const seoScore = computed(() => {
   if (tags.value.length) score += 5
   return Math.min(score, 100)
 })
+
+const toDateInputValue = (date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const publishedAtDisplay = computed(() => {
+  if (!form.publishedAt) return 'Chưa chọn ngày đăng'
+
+  const date = new Date(`${form.publishedAt}T00:00:00`)
+  if (Number.isNaN(date.getTime())) return 'Ngày đăng chưa hợp lệ'
+
+  return new Intl.DateTimeFormat('vi-VN', {
+    weekday: 'long',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date)
+})
+
+const setPublishedDate = (daysFromToday) => {
+  const date = new Date()
+  date.setDate(date.getDate() + daysFromToday)
+  form.publishedAt = toDateInputValue(date)
+}
 
 const handleThumbnailUpload = async (event) => {
   const file = event.target.files?.[0]
@@ -357,20 +391,46 @@ onMounted(async () => {
 
       <aside class="space-y-6">
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 class="text-xl font-black text-avocado-950">Publish panel</h2>
+          <h2 class="text-xl font-black text-avocado-950">Bảng xuất bản</h2>
           <div class="mt-5 space-y-4">
             <label class="space-y-2">
               <span class="text-sm font-black text-slate-700">Trạng thái</span>
               <select v-model="form.status" class="admin-input">
-                <option v-for="status in statuses" :key="status" :value="status">{{ status }}</option>
+                <option v-for="status in statuses" :key="status.value" :value="status.value">{{ status.label }}</option>
               </select>
             </label>
             <label class="space-y-2">
               <span class="text-sm font-black text-slate-700">Ngày đăng</span>
               <input v-model="form.publishedAt" type="date" class="admin-input" />
+              <p class="rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600">
+                {{ publishedAtDisplay }}
+              </p>
+              <div class="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:border-avocado-200 hover:bg-avocado-50 hover:text-avocado-800"
+                  @click="setPublishedDate(0)"
+                >
+                  Hôm nay
+                </button>
+                <button
+                  type="button"
+                  class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:border-avocado-200 hover:bg-avocado-50 hover:text-avocado-800"
+                  @click="setPublishedDate(1)"
+                >
+                  Ngày mai
+                </button>
+                <button
+                  type="button"
+                  class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:border-avocado-200 hover:bg-avocado-50 hover:text-avocado-800"
+                  @click="setPublishedDate(7)"
+                >
+                  Tuần sau
+                </button>
+              </div>
             </label>
             <div class="rounded-xl bg-avocado-50 p-4">
-              <p class="text-sm font-black text-avocado-900">Auto save draft</p>
+              <p class="text-sm font-black text-avocado-900">Tự lưu bản nháp</p>
               <p class="mt-1 text-sm text-avocado-800">Bản nháp được lưu vào localStorage trong lúc soạn.</p>
             </div>
           </div>

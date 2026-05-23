@@ -178,7 +178,9 @@ onMounted(() => {
     <SearchFilterBar
       v-model:search="searchQuery"
       v-model:status="statusFilter"
+      search-label="Tìm danh mục"
       search-placeholder="Tìm tên danh mục, slug, mô tả"
+      status-label="Trạng thái"
       :status-options="statusFilters"
     />
     <p v-if="errorMessage" class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">

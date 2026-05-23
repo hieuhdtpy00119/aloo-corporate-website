@@ -286,21 +286,33 @@ onMounted(() => {
     </p>
 
     <div class="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:grid-cols-[1fr_180px_210px_170px]">
-      <input
-        v-model="searchQuery"
-        type="search"
-        placeholder="Tìm chi nhánh, địa chỉ, quận/huyện..."
-        class="rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500"
-      />
-      <select v-model="cityFilter" class="rounded-xl border border-slate-200 px-4 py-3 font-bold outline-none focus:border-avocado-500">
-        <option v-for="city in cityFilters" :key="city" :value="city">{{ city }}</option>
-      </select>
-      <select v-model="statusFilter" class="rounded-xl border border-slate-200 px-4 py-3 font-bold outline-none focus:border-avocado-500">
-        <option v-for="status in statusFilters" :key="status" :value="status">{{ status }}</option>
-      </select>
-      <select v-model="featuredFilter" class="rounded-xl border border-slate-200 px-4 py-3 font-bold outline-none focus:border-avocado-500">
-        <option v-for="option in featuredFilters" :key="option" :value="option">{{ option }}</option>
-      </select>
+      <label class="grid gap-2">
+        <span class="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Tìm địa điểm</span>
+        <input
+          v-model="searchQuery"
+          type="search"
+          placeholder="Tìm chi nhánh, địa chỉ, quận/huyện..."
+          class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-avocado-500"
+        />
+      </label>
+      <label class="grid gap-2">
+        <span class="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Tỉnh/TP</span>
+        <select v-model="cityFilter" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold outline-none focus:border-avocado-500">
+          <option v-for="city in cityFilters" :key="city" :value="city">{{ city }}</option>
+        </select>
+      </label>
+      <label class="grid gap-2">
+        <span class="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Trạng thái mở cửa</span>
+        <select v-model="statusFilter" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold outline-none focus:border-avocado-500">
+          <option v-for="status in statusFilters" :key="status" :value="status">{{ status }}</option>
+        </select>
+      </label>
+      <label class="grid gap-2">
+        <span class="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Nổi bật</span>
+        <select v-model="featuredFilter" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold outline-none focus:border-avocado-500">
+          <option v-for="option in featuredFilters" :key="option" :value="option">{{ option }}</option>
+        </select>
+      </label>
     </div>
 
     <div class="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:block">

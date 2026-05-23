@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { LayoutDashboard, LogOut, Settings, User, UserCircle } from 'lucide-vue-next'
+import { ChevronRight, LayoutDashboard, LogOut, Settings, User, UserCircle } from 'lucide-vue-next'
 
 const emit = defineEmits(['navigate'])
 const route = useRoute()
@@ -18,7 +18,7 @@ const isUserLoggedIn = computed(() => Boolean(userToken.value))
 const isLoggedIn = computed(() => isAdminLoggedIn.value || isUserLoggedIn.value)
 const avatarLabel = computed(() => (isAdminLoggedIn.value ? 'A' : 'U'))
 const profilePath = computed(() => (isAdminLoggedIn.value ? '/admin/profile' : '/profile'))
-const changePasswordPath = computed(() => (isAdminLoggedIn.value ? '/admin/change-password' : '/change-password'))
+const changePasswordPath = computed(() => (isAdminLoggedIn.value ? '/admin/profile?tab=security' : '/profile?tab=security'))
 const loginPath = computed(() => (route.path.startsWith('/admin') ? '/admin/login' : '/login'))
 
 const syncAuthState = () => {
@@ -77,7 +77,7 @@ onBeforeUnmount(() => {
   <div ref="menuRef" class="relative">
     <button
       type="button"
-      class="flex h-9 w-9 items-center justify-center rounded-full border border-avocado-950/10 bg-white text-xs font-black text-avocado-900 shadow-sm transition hover:border-avocado-200 hover:bg-avocado-50 focus:outline-none focus:ring-4 focus:ring-avocado-100"
+      class="flex h-10 w-10 items-center justify-center rounded-full border border-avocado-950/10 bg-white text-sm font-black text-avocado-900 shadow-sm transition hover:border-avocado-200 hover:bg-avocado-50 focus:outline-none focus:ring-4 focus:ring-avocado-100"
       :aria-expanded="isOpen"
       aria-label="User menu"
       @click.stop="toggleMenu"
@@ -100,34 +100,43 @@ onBeforeUnmount(() => {
     >
       <div
         v-if="isOpen"
-        class="absolute right-0 z-[80] mt-3 w-56 overflow-hidden rounded-xl border border-avocado-100 bg-white py-2 shadow-2xl shadow-avocado-950/10"
+        class="absolute right-0 z-[80] mt-3 w-72 overflow-hidden rounded-2xl border border-avocado-100 bg-white p-2 shadow-2xl shadow-avocado-950/15"
       >
         <template v-if="isLoggedIn">
+          <div class="mb-1 rounded-2xl bg-avocado-50 px-4 py-3">
+            <p class="text-[11px] font-black uppercase tracking-[0.16em] text-avocado-600">Tài khoản</p>
+            <p class="mt-1 text-sm font-black text-avocado-950">
+              {{ isAdminLoggedIn ? 'ALOO Admin' : 'ALOO User' }}
+            </p>
+          </div>
           <button
-            class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-avocado-50 hover:text-avocado-800"
+            class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-avocado-50 hover:text-avocado-800"
             @click="navigateTo(profilePath)"
           >
             <UserCircle class="h-4 w-4 text-avocado-700" />
-            <span>{{ t('userMenu.profile') }}</span>
+            <span class="min-w-0 flex-1">{{ t('userMenu.profile') }}</span>
+            <ChevronRight class="h-4 w-4 text-slate-400" />
           </button>
           <button
             v-if="isAdminLoggedIn"
-            class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-avocado-50 hover:text-avocado-800"
+            class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-avocado-50 hover:text-avocado-800"
             @click="navigateTo('/admin')"
           >
             <LayoutDashboard class="h-4 w-4 text-avocado-700" />
-            <span>{{ t('userMenu.cms') }}</span>
+            <span class="min-w-0 flex-1">{{ t('userMenu.cms') }}</span>
+            <ChevronRight class="h-4 w-4 text-slate-400" />
           </button>
           <button
-            class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-avocado-50 hover:text-avocado-800"
+            class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-avocado-50 hover:text-avocado-800"
             @click="navigateTo(changePasswordPath)"
           >
             <Settings class="h-4 w-4 text-avocado-700" />
-            <span>{{ t('userMenu.changePassword') }}</span>
+            <span class="min-w-0 flex-1">{{ t('userMenu.changePassword') }}</span>
+            <ChevronRight class="h-4 w-4 text-slate-400" />
           </button>
           <div class="my-1 border-t border-slate-100"></div>
           <button
-            class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-black text-red-600 transition hover:bg-red-50"
+            class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-black text-red-600 transition hover:bg-red-50"
             @click="logout"
           >
             <LogOut class="h-4 w-4" />
@@ -137,7 +146,7 @@ onBeforeUnmount(() => {
 
         <button
           v-else
-          class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-black text-avocado-800 transition hover:bg-avocado-50"
+          class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-black text-avocado-800 transition hover:bg-avocado-50"
           @click="navigateTo(loginPath)"
         >
           <User class="h-4 w-4" />

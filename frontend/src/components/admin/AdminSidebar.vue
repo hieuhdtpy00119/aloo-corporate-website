@@ -3,11 +3,9 @@ import {
   FileText,
   FolderTree,
   Handshake,
-  KeyRound,
   LayoutDashboard,
   MapPin,
   Package,
-  UserCircle,
   Users,
 } from 'lucide-vue-next'
 
@@ -19,8 +17,6 @@ const menuItems = [
   { label: 'Quản lý địa điểm', path: '/admin/locations', icon: MapPin },
   { label: 'Đăng ký tư vấn', path: '/admin/registrations', icon: Users },
   { label: 'Nội dung nhượng quyền', path: '/admin/franchise-content', icon: Handshake },
-  { label: 'Thông tin cá nhân', path: '/admin/profile', icon: UserCircle },
-  { label: 'Đổi mật khẩu', path: '/admin/change-password', icon: KeyRound },
 ]
 
 const isActive = (path, currentPath) => {

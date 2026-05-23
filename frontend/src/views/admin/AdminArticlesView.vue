@@ -19,7 +19,6 @@ const page = ref(1)
 const perPage = 5
 const pendingDelete = ref(null)
 
-const articleStatuses = ['Tất cả', 'DRAFT', 'PENDING', 'REVIEWING', 'APPROVED', 'PUBLISHED', 'ARCHIVED']
 const categoryOptions = computed(() => [
   '',
   ...store.categories
@@ -31,7 +30,7 @@ const categoryOptions = computed(() => [
 const statusLabels = {
   DRAFT: 'Nháp',
   PENDING: 'Chờ duyệt',
-  REVIEWING: 'Đang review',
+  REVIEWING: 'Đang rà soát',
   APPROVED: 'Đã duyệt',
   PUBLISHED: 'Đã xuất bản',
   ARCHIVED: 'Lưu trữ',
@@ -40,6 +39,18 @@ const statusLabels = {
   'Đã đăng': 'Đã xuất bản',
   Ẩn: 'Lưu trữ',
 }
+
+const statusValues = {
+  Nháp: 'DRAFT',
+  'Chờ duyệt': 'PENDING',
+  'Đang rà soát': 'REVIEWING',
+  'Đang review': 'REVIEWING',
+  'Đã duyệt': 'APPROVED',
+  'Đã xuất bản': 'PUBLISHED',
+  'Lưu trữ': 'ARCHIVED',
+}
+
+const articleStatuses = ['Tất cả', 'Nháp', 'Chờ duyệt', 'Đang rà soát', 'Đã duyệt', 'Đã xuất bản', 'Lưu trữ']
 
 const normalizeStatus = (status) => {
   if (status === 'Đã đăng') return 'PUBLISHED'
@@ -86,7 +97,8 @@ const filteredArticles = computed(() => {
       .toLowerCase()
     const status = normalizeStatus(post.status)
     const matchesSearch = !keyword || haystack.includes(keyword)
-    const matchesStatus = statusFilter.value === 'Tất cả' || status === statusFilter.value
+    const selectedStatus = statusValues[statusFilter.value] || statusFilter.value
+    const matchesStatus = statusFilter.value === 'Tất cả' || status === selectedStatus
     const matchesCategory = !categoryFilter.value || post.category === categoryFilter.value
     return matchesSearch && matchesStatus && matchesCategory
   })
@@ -137,9 +149,12 @@ const deleteArticle = () => {
       v-model:search="search"
       v-model:status="statusFilter"
       v-model:extra-filter="categoryFilter"
+      search-label="Tìm bài viết"
       search-placeholder="Tìm theo tiêu đề, tác giả, tag..."
+      status-label="Trạng thái bài"
       :status-options="articleStatuses"
       :extra-options="categoryOptions"
+      extra-label="Danh mục"
       extra-placeholder="Tất cả danh mục"
     />
 
@@ -147,13 +162,13 @@ const deleteArticle = () => {
       <div class="overflow-x-auto">
         <table v-if="!isLoading && filteredArticles.length" class="w-full min-w-[980px] table-fixed whitespace-nowrap">
           <colgroup>
-            <col class="w-[30%]" />
+            <col class="w-[26%]" />
             <col class="w-[15%]" />
             <col class="w-[13%]" />
             <col class="w-[12%]" />
             <col class="w-[12%]" />
-            <col class="w-[8%]" />
-            <col class="w-[10%]" />
+            <col class="w-[9%]" />
+            <col class="w-[13%]" />
           </colgroup>
           <thead class="bg-slate-50 text-left text-sm font-black text-slate-600">
             <tr>
@@ -163,7 +178,7 @@ const deleteArticle = () => {
               <th class="px-5 py-4">Ngày đăng</th>
               <th class="px-5 py-4">Trạng thái</th>
               <th class="px-4 py-4 text-center">SEO</th>
-              <th class="px-4 py-4 text-left">Hành động</th>
+              <th class="px-4 py-4 text-center">Hành động</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 text-sm">
@@ -180,13 +195,13 @@ const deleteArticle = () => {
                   {{ statusLabels[post.status] || statusLabels[normalizeStatus(post.status)] || post.status }}
                 </span>
               </td>
-              <td class="px-5 py-4 text-right">
-                <span class="font-black" :class="getSeoScore(post) >= 70 ? 'text-green-700' : 'text-orange-600'">
+              <td class="px-4 py-4 text-center">
+                <span class="inline-flex min-w-10 justify-center font-black tabular-nums" :class="getSeoScore(post) >= 70 ? 'text-green-700' : 'text-orange-600'">
                   {{ getSeoScore(post) }}
                 </span>
               </td>
-              <td class="px-5 py-4">
-                <div class="flex justify-end gap-2">
+              <td class="px-4 py-4">
+                <div class="flex justify-center gap-2">
                   <button
                     type="button"
                     class="rounded-lg border border-avocado-200 px-3 py-2 font-bold text-avocado-700 hover:bg-avocado-50"
