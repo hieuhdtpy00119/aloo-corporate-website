@@ -114,16 +114,6 @@ const confirmDeleteCategory = async () => {
   }
 }
 
-const saveExistingCategoryStatus = async (category) => {
-  try {
-    await store.saveCategory(category)
-    toast.success('Đã cập nhật trạng thái danh mục')
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Không cập nhật được trạng thái')
-    store.fetchCategories()
-  }
-}
-
 const filteredCategories = computed(() => {
   const keyword = searchQuery.value.trim().toLowerCase()
   return store.categories
@@ -218,9 +208,9 @@ onMounted(() => {
                 <p class="truncate">{{ category.description || 'Chưa có mô tả' }}</p>
               </td>
               <td class="px-5 py-4">
-                <select v-model="category.status" class="rounded-full border px-3 py-1.5 text-sm font-bold outline-none" :class="statusClass(category.status)" @change="saveExistingCategoryStatus(category)">
-                  <option v-for="status in categoryStatuses" :key="status" :value="status">{{ statusLabels[status] }}</option>
-                </select>
+                <span class="inline-flex min-w-[122px] justify-center rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(category.status)">
+                  {{ statusLabels[category.status] || category.status }}
+                </span>
               </td>
               <td class="px-5 py-4">
                 <div class="flex justify-end gap-2">

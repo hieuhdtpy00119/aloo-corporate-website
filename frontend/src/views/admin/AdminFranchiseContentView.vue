@@ -7,6 +7,11 @@ import { useToastStore } from '../../stores/toastStore'
 const franchiseStore = useFranchiseContentStore()
 const toast = useToastStore()
 const statuses = ['ACTIVE', 'INACTIVE', 'HIDDEN']
+const statusLabels = {
+  ACTIVE: 'Đang hiển thị',
+  INACTIVE: 'Tạm ẩn',
+  HIDDEN: 'Đã ẩn',
+}
 
 const sectionMeta = {
   benefits: { title: 'Lợi ích', description: 'Các lợi ích nhượng quyền dành cho đối tác.' },
@@ -98,7 +103,7 @@ onMounted(() => {
             <div class="flex items-start justify-between gap-3">
               <h4 class="font-black text-avocado-950">{{ item.title }}</h4>
               <span class="rounded-full border px-3 py-1 text-xs font-black" :class="statusClass(item.status || 'ACTIVE')">
-                {{ item.status || 'ACTIVE' }}
+                {{ statusLabels[item.status || 'ACTIVE'] || item.status }}
               </span>
             </div>
             <p class="mt-2 text-sm leading-6 text-slate-600">
@@ -119,7 +124,7 @@ onMounted(() => {
           <label class="grid gap-2 text-sm font-bold text-slate-700">
             Trạng thái
             <select v-model="item.status" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500">
-              <option v-for="status in statuses" :key="status" :value="status">{{ status }}</option>
+              <option v-for="status in statuses" :key="status" :value="status">{{ statusLabels[status] }}</option>
             </select>
           </label>
           <template v-if="editingSection === 'costs'">

@@ -1,85 +1,63 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ChevronLeft, ChevronRight, MapPin, Award, Star, ArrowRight, Heart } from 'lucide-vue-next'
+import { useAppStore } from '../../stores/appStore'
 
+const store = useAppStore()
 const productRail = ref(null)
 
-const featuredCards = [
-  {
-    title: 'Kem bơ truyền thống',
-    description: 'Bơ chín xay mịn, kem sữa béo nhẹ và topping giòn thơm.',
-    cta: 'Xem sản phẩm',
-    to: '/products',
-    image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1400&q=85',
-    badge: 'Bán chạy nhất'
-  },
-  {
+const franchiseFeatureCard = {
     title: 'Mô hình nhượng quyền ALOO',
     description: 'Cửa hàng tinh gọn, nhận diện trẻ trung, quy trình dễ vận hành.',
     cta: 'Tìm hiểu ngay',
     to: '/franchise',
     image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1400&q=85',
     badge: 'Cơ hội hợp tác'
-  },
-]
+}
 
-const products = [
-  {
-    name: 'Kem bơ truyền thống',
-    description: 'Vị bơ béo mịn, topping dừa sấy.',
-    price: '39.000đ',
-    image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=85',
-    rating: 5
-  },
-  {
-    name: 'Kem bơ sầu riêng',
-    description: 'Bơ tươi kết hợp sầu riêng thơm đậm.',
-    price: '49.000đ',
-    image: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=900&q=85',
-    rating: 5
-  },
-  {
-    name: 'Sinh tố bơ',
-    description: 'Sinh tố mát lạnh, sánh mịn mỗi ngày.',
-    price: '35.000đ',
-    image: 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=900&q=85',
-    rating: 4.8
-  },
-  {
-    name: 'Combo kem bơ đặc biệt',
-    description: 'Combo kem bơ, topping và đồ uống.',
-    price: 'Từ 89.000đ',
-    image: 'https://images.unsplash.com/photo-1488900128323-21503983a07e?auto=format&fit=crop&w=900&q=85',
-    rating: 5
-  },
-]
+const activeProducts = computed(() =>
+  store.products
+    .filter((product) => ['ACTIVE', 'Đang bán'].includes(product.status))
+    .sort((a, b) => (a.sortOrder || a.id || 0) - (b.sortOrder || b.id || 0)),
+)
 
-const stores = [
-  {
-    name: 'ALOO Quy Nhơn',
-    address: '12 Xuân Diệu, TP. Quy Nhơn',
-    hours: '09:00 - 22:00',
-    mapUrl: 'https://maps.google.com/?q=Quy+Nhon',
-  },
-  {
-    name: 'ALOO Nha Trang',
-    address: '86 Trần Phú, TP. Nha Trang',
-    hours: '09:00 - 22:30',
-    mapUrl: 'https://maps.google.com/?q=Nha+Trang',
-  },
-  {
-    name: 'ALOO Đà Nẵng',
-    address: '82 Bạch Đằng, Hải Châu',
-    hours: '09:30 - 22:00',
-    mapUrl: 'https://maps.google.com/?q=Da+Nang',
-  },
-]
+const popularProducts = computed(() => activeProducts.value.slice(0, 8))
+
+const featuredCards = computed(() => [
+  ...activeProducts.value.slice(0, 1).map((product) => ({
+    title: product.name,
+    description: product.description || '',
+    cta: 'Xem sản phẩm',
+    to: '/products',
+    image: product.imageUrl || 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1400&q=85',
+    badge: product.category || 'Bán chạy nhất',
+  })),
+  franchiseFeatureCard,
+])
+
+const activeLocations = computed(() =>
+  store.locations
+    .filter((location) => ['ACTIVE', 'Đang hoạt động'].includes(location.status))
+    .sort((a, b) => {
+      if (a.featured !== b.featured) return a.featured ? -1 : 1
+      return (a.displayOrder || a.id || 0) - (b.displayOrder || b.id || 0)
+    })
+    .slice(0, 3),
+)
+
 const scrollProducts = (direction) => {
   productRail.value?.scrollBy({
     left: direction * 340,
     behavior: 'smooth',
   })
 }
+
+const productMeta = (product) =>
+  Number(product.price) > 0 ? product.priceDisplay : product.category || 'ALOO Signature'
+
+onMounted(() => {
+  Promise.allSettled([store.fetchProducts(), store.fetchLocations()])
+})
 </script>
 
 <template>
@@ -175,30 +153,47 @@ const scrollProducts = (direction) => {
         </div>
       </div>
 
-      <div ref="productRail" class="product-scrollbar flex snap-x gap-6 overflow-x-auto pb-8">
-        <article v-for="product in products" :key="product.name" class="min-w-[75vw] snap-start sm:min-w-[280px] lg:min-w-[290px] bg-white rounded-3xl p-4 shadow-sm border border-avocado-100/30 hover-lift group">
+      <p v-if="store.errors.products" class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-center text-sm font-bold text-red-700">
+        {{ store.errors.products }}
+      </p>
+      <div v-else-if="store.loading.products" class="product-scrollbar flex snap-x gap-6 overflow-x-auto pb-8">
+        <article v-for="i in 4" :key="i" class="min-w-[75vw] snap-start rounded-3xl border border-avocado-100/30 bg-white p-4 shadow-sm sm:min-w-[280px] lg:min-w-[290px]">
+          <div class="aspect-square animate-pulse rounded-2xl bg-slate-100"></div>
+          <div class="mt-4 space-y-3">
+            <div class="h-3 w-20 animate-pulse rounded bg-slate-100"></div>
+            <div class="h-5 w-4/5 animate-pulse rounded bg-slate-100"></div>
+            <div class="h-4 w-full animate-pulse rounded bg-slate-100"></div>
+          </div>
+        </article>
+      </div>
+      <div v-else-if="popularProducts.length" ref="productRail" class="product-scrollbar flex snap-x gap-6 overflow-x-auto pb-8">
+        <article v-for="product in popularProducts" :key="product.id" class="min-w-[75vw] snap-start sm:min-w-[280px] lg:min-w-[290px] bg-white rounded-3xl p-4 shadow-sm border border-avocado-100/30 hover-lift group">
           <div class="aspect-square overflow-hidden rounded-2xl bg-avocado-50/50 relative">
             <button class="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm grid place-items-center text-slate-400 hover:text-red-500 transition shadow-sm" aria-label="Yêu thích">
               <Heart class="h-4 w-4 fill-transparent" />
             </button>
-            <img :src="product.image" :alt="product.name" class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105" />
+            <img v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105" />
+            <div v-else class="grid h-full place-items-center text-xl font-black text-avocado-700">ALOO</div>
           </div>
           <div class="mt-4 space-y-1">
             <div class="flex items-center gap-1">
               <Star v-for="i in 5" :key="i" class="h-3 w-3 fill-cream-400 text-cream-400" />
-              <span class="text-xs text-slate-400 ml-1 font-semibold">{{ product.rating }}</span>
+              <span class="text-xs text-slate-400 ml-1 font-semibold">5.0</span>
             </div>
             <h3 class="text-base font-bold text-avocado-950 transition group-hover:text-avocado-800">{{ product.name }}</h3>
             <p class="text-xs leading-relaxed text-slate-400 h-8 line-clamp-2">{{ product.description }}</p>
           </div>
           <div class="mt-4 flex items-center justify-between border-t border-slate-50 pt-3">
-            <p class="text-base font-black text-avocado-800">{{ product.price }}</p>
+            <p class="text-base font-black text-avocado-800">{{ productMeta(product) }}</p>
             <RouterLink to="/products" class="rounded-full bg-avocado-50 border border-avocado-100 hover:bg-avocado-100 px-3.5 py-1.5 text-xs font-bold text-avocado-800 transition">
               Xem chi tiết
             </RouterLink>
           </div>
         </article>
       </div>
+      <p v-else class="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center text-sm font-bold text-slate-400">
+        Chưa có sản phẩm đang bán. Vào admin để thêm hoặc bật trạng thái sản phẩm.
+      </p>
     </section>
 
 
@@ -250,23 +245,37 @@ const scrollProducts = (direction) => {
           Xem tất cả hệ thống cửa hàng <ArrowRight class="h-4 w-4" />
         </RouterLink>
       </div>
-      <div class="grid gap-6 md:grid-cols-3">
-        <article v-for="store in stores" :key="store.name" class="rounded-3xl border border-avocado-100/40 bg-white p-6 shadow-sm hover-lift flex flex-col justify-between">
+      <p v-if="store.errors.locations" class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-center text-sm font-bold text-red-700">
+        {{ store.errors.locations }}
+      </p>
+      <div v-else-if="store.loading.locations" class="grid gap-6 md:grid-cols-3">
+        <article v-for="i in 3" :key="i" class="rounded-3xl border border-avocado-100/40 bg-white p-6 shadow-sm">
+          <div class="h-10 w-10 animate-pulse rounded-2xl bg-slate-100"></div>
+          <div class="mt-5 h-5 w-3/4 animate-pulse rounded bg-slate-100"></div>
+          <div class="mt-3 h-4 w-full animate-pulse rounded bg-slate-100"></div>
+          <div class="mt-3 h-4 w-2/3 animate-pulse rounded bg-slate-100"></div>
+        </article>
+      </div>
+      <div v-else-if="activeLocations.length" class="grid gap-6 md:grid-cols-3">
+        <article v-for="location in activeLocations" :key="location.id" class="rounded-3xl border border-avocado-100/40 bg-white p-6 shadow-sm hover-lift flex flex-col justify-between">
           <div>
             <div class="grid h-10 w-10 place-items-center rounded-2xl bg-avocado-50 text-avocado-700 shadow-inner">
               <MapPin class="h-5 w-5" />
             </div>
-            <h3 class="mt-5 text-lg font-bold text-avocado-950">{{ store.name }}</h3>
-            <p class="mt-2 text-sm leading-relaxed text-slate-500">{{ store.address }}</p>
-            <p class="mt-2 text-xs font-semibold text-slate-400 bg-slate-50 inline-block px-2.5 py-1 rounded-md">Giờ hoạt động: {{ store.hours }}</p>
+            <h3 class="mt-5 text-lg font-bold text-avocado-950">{{ location.name }}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-slate-500">{{ location.addressText }}</p>
+            <p class="mt-2 text-xs font-semibold text-slate-400 bg-slate-50 inline-block px-2.5 py-1 rounded-md">Giờ hoạt động: {{ location.openingHours || 'Đang cập nhật' }}</p>
           </div>
           <div class="mt-6 border-t border-slate-50 pt-4">
-            <a :href="store.mapUrl" target="_blank" rel="noreferrer" class="inline-flex w-full justify-center rounded-full border border-avocado-200 hover:border-avocado-300 hover:bg-avocado-50 px-4 py-2.5 text-xs font-bold text-avocado-800 transition">
+            <a :href="location.mapUrl || '/locations'" target="_blank" rel="noreferrer" class="inline-flex w-full justify-center rounded-full border border-avocado-200 hover:border-avocado-300 hover:bg-avocado-50 px-4 py-2.5 text-xs font-bold text-avocado-800 transition">
               Chỉ đường chi tiết
             </a>
           </div>
         </article>
       </div>
+      <p v-else class="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center text-sm font-bold text-slate-400">
+        Chưa có cửa hàng đang hoạt động. Vào admin để thêm hoặc bật trạng thái địa điểm.
+      </p>
     </section>
 
     <!-- Premium Call-to-action Franchise Section -->

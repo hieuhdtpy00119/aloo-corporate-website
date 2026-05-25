@@ -1,11 +1,17 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SectionTitle from '../../components/public/SectionTitle.vue'
 import CostCard from '../../components/public/CostCard.vue'
+import { useFranchiseContentStore } from '../../stores/franchiseContentStore'
 
-const { t, tm } = useI18n()
-const costItems = computed(() => tm('cost.items'))
+const { t } = useI18n()
+const franchiseContentStore = useFranchiseContentStore()
+const costItems = computed(() => franchiseContentStore.visibleCosts)
+
+onMounted(() => {
+  franchiseContentStore.fetchContent().catch(() => {})
+})
 </script>
 
 <template>
@@ -38,9 +44,18 @@ const costItems = computed(() => tm('cost.items'))
         :title="t('cost.title')"
         :description="t('cost.description')"
       />
-      <div class="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
+      <p v-if="franchiseContentStore.error" class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-center text-sm font-bold text-red-700">
+        {{ franchiseContentStore.error }}
+      </p>
+      <div v-else-if="franchiseContentStore.loading" class="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
+        <div v-for="i in 3" :key="i" class="h-56 animate-pulse rounded-3xl bg-white/70" />
+      </div>
+      <div v-else-if="costItems.length" class="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
         <CostCard v-for="item in costItems" :key="item.id" :item="item" />
       </div>
+      <p v-else class="rounded-2xl border border-slate-200 bg-white px-5 py-12 text-center text-sm font-bold text-slate-500">
+        Chưa có dữ liệu. Vui lòng thêm dữ liệu trong trang quản trị.
+      </p>
 
       <!-- Quick Consultation CTA -->
       <div class="mt-16 text-center">

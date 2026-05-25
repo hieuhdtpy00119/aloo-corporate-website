@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
-import { heroSlides, menuGroups, menuPoster, menuPosterByBranch } from '../data/productPageMock'
 import { heroBannerService, menuPosterService, resolveBackendAssetUrl } from '../services/cmsService'
 
-const clone = (value) => JSON.parse(JSON.stringify(value))
 
 const toBranchLabel = (branchKey) =>
   String(branchKey || '')
@@ -32,10 +30,10 @@ const normalizePoster = (poster) => ({
 
 export const useProductPageStore = defineStore('productPage', {
   state: () => ({
-    heroSlides: clone(heroSlides),
-    menuGroups: clone(menuGroups),
-    menuPoster: clone(menuPoster),
-    menuPosterByBranch: clone(menuPosterByBranch),
+    heroSlides: [],
+    menuGroups: [],
+    menuPoster: null,
+    menuPosterByBranch: {},
     loading: false,
     error: '',
   }),
@@ -66,13 +64,15 @@ export const useProductPageStore = defineStore('productPage', {
           menuPosterService.list(),
         ])
 
-        if (heroResult.status === 'fulfilled' && Array.isArray(heroResult.value.data) && heroResult.value.data.length) {
-          this.heroSlides = heroResult.value.data.map(normalizeHero)
+        if (heroResult.status === 'fulfilled') {
+          const heroData = Array.isArray(heroResult.value.data) ? heroResult.value.data : []
+          this.heroSlides = heroData.map(normalizeHero)
         }
 
-        if (posterResult.status === 'fulfilled' && Array.isArray(posterResult.value.data) && posterResult.value.data.length) {
-          const posters = posterResult.value.data.map(normalizePoster)
-          this.menuPoster = posters[0] || this.menuPoster
+        if (posterResult.status === 'fulfilled') {
+          const posterData = Array.isArray(posterResult.value.data) ? posterResult.value.data : []
+          const posters = posterData.map(normalizePoster)
+          this.menuPoster = posters[0] || null
           this.menuPosterByBranch = posters.reduce((acc, poster) => {
             acc[poster.branchKey] = poster
             return acc

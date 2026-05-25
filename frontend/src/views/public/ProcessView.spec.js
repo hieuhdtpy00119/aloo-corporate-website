@@ -1,19 +1,24 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it, vi } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ProcessView from './ProcessView.vue'
+import { useFranchiseContentStore } from '../../stores/franchiseContentStore'
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key) => key,
-    tm: (key) =>
-      key === 'franchise.steps'
-        ? [{ id: 1, title: 'Tu van', description: 'Khao sat mat bang' }]
-        : [],
   }),
 }))
 
 describe('ProcessView', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
   it('uses a consultation CTA that matches its destination', () => {
+    const store = useFranchiseContentStore()
+    vi.spyOn(store, 'fetchContent').mockResolvedValue()
+
     const wrapper = mount(ProcessView, {
       global: {
         stubs: {

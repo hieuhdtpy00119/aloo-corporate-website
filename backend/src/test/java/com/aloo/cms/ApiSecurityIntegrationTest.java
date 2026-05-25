@@ -9,17 +9,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.aloo.cms.entity.AdminUser;
+import com.aloo.cms.entity.UserRole;
+import com.aloo.cms.repository.AdminUserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -35,6 +40,28 @@ class ApiSecurityIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private AdminUserRepository adminUserRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @BeforeEach
+    void setUpAdminUser() {
+        if (adminUserRepository.existsByEmailIgnoreCase("admin@aloo.vn")) {
+            return;
+        }
+
+        AdminUser admin = new AdminUser();
+        admin.setEmail("admin@aloo.vn");
+        admin.setFullName("ALOO Test Admin");
+        admin.setPasswordHash(passwordEncoder.encode("123456"));
+        admin.setPhone("0900 888 168");
+        admin.setRole(UserRole.ADMIN);
+        admin.setStatus("ACTIVE");
+        adminUserRepository.save(admin);
+    }
 
     @Test
     void adminLoginReturnsJwtAndDoesNotLeakPasswordHash() throws Exception {

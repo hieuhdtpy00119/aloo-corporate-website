@@ -318,15 +318,15 @@ onMounted(() => {
     <div class="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:block">
       <EmptyState v-if="isLoading || filteredLocations.length === 0" :loading="isLoading" />
       <div class="overflow-x-auto xl:overflow-x-visible">
-        <table v-if="!isLoading && filteredLocations.length > 0" class="w-full min-w-[980px] table-fixed whitespace-nowrap text-left xl:min-w-0">
+        <table v-if="!isLoading && filteredLocations.length > 0" class="w-full min-w-[1080px] table-fixed whitespace-nowrap text-left xl:min-w-0">
           <colgroup>
             <col class="w-[6%]" />
             <col class="w-[19%]" />
-            <col class="w-[25%]" />
-            <col class="w-[11%]" />
+            <col class="w-[22%]" />
             <col class="w-[10%]" />
-            <col class="w-[11%]" />
-            <col class="w-[18%]" />
+            <col class="w-[10%]" />
+            <col class="w-[14%]" />
+            <col class="w-[19%]" />
           </colgroup>
           <thead class="bg-slate-50 text-xs font-black uppercase tracking-wide text-slate-500">
             <tr>
@@ -335,8 +335,8 @@ onMounted(() => {
               <th class="px-4 py-3 text-left">Địa chỉ</th>
               <th class="px-3 py-3 text-center">Giờ hoạt động</th>
               <th class="px-3 py-3 text-center">Điện thoại</th>
-              <th class="px-4 py-3 text-center">Trạng thái</th>
-              <th class="px-3 py-3 text-left">Hành động</th>
+              <th class="px-5 py-3 text-center">Trạng thái</th>
+              <th class="py-3 pl-7 pr-4 text-left">Hành động</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 text-sm">
@@ -362,13 +362,13 @@ onMounted(() => {
               </td>
               <td class="truncate px-3 py-4 text-center text-sm font-bold leading-5 text-slate-700">{{ location.openingHours || '-' }}</td>
               <td class="truncate px-3 py-4 text-center text-sm font-bold leading-5 text-slate-700">{{ location.phone }}</td>
-              <td class="px-4 py-4 text-center">
+              <td class="px-5 py-4 text-center">
                 <span class="inline-flex min-w-[126px] justify-center whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-black leading-4" :class="statusClass(location.status)">
                   {{ statusLabels[location.status] || location.status }}
                 </span>
               </td>
-              <td class="px-3 py-4 text-left">
-                <div class="inline-flex items-center justify-start gap-1.5 whitespace-nowrap">
+              <td class="py-4 pl-7 pr-4 text-left">
+                <div class="inline-flex items-center justify-start gap-2.5 whitespace-nowrap">
                   <button class="rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50" @click="previewLocation = location">Xem</button>
                   <button class="rounded-lg border border-avocado-200 px-2.5 py-2 text-xs font-bold text-avocado-700 hover:bg-avocado-50" @click="openEditModal(location)">Sửa</button>
                   <button class="rounded-lg border border-red-200 px-2.5 py-2 text-xs font-bold text-red-600 hover:bg-red-50" @click="pendingDeleteId = location.id">Xóa</button>

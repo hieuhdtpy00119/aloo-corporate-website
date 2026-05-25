@@ -1,11 +1,17 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SectionTitle from '../../components/public/SectionTitle.vue'
 import FranchiseStep from '../../components/public/FranchiseStep.vue'
+import { useFranchiseContentStore } from '../../stores/franchiseContentStore'
 
-const { t, tm } = useI18n()
-const franchiseSteps = computed(() => tm('franchise.steps'))
+const { t } = useI18n()
+const franchiseContentStore = useFranchiseContentStore()
+const franchiseSteps = computed(() => franchiseContentStore.visibleProcess)
+
+onMounted(() => {
+  franchiseContentStore.fetchContent().catch(() => {})
+})
 </script>
 
 <template>
@@ -38,9 +44,18 @@ const franchiseSteps = computed(() => tm('franchise.steps'))
         :title="t('process.title')"
         :description="t('process.description')"
       />
-      <div class="mx-auto grid gap-6 mt-10">
+      <p v-if="franchiseContentStore.error" class="mt-10 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-center text-sm font-bold text-red-700">
+        {{ franchiseContentStore.error }}
+      </p>
+      <div v-else-if="franchiseContentStore.loading" class="mx-auto mt-10 grid gap-6">
+        <div v-for="i in 3" :key="i" class="h-28 animate-pulse rounded-2xl bg-white/70" />
+      </div>
+      <div v-else-if="franchiseSteps.length" class="mx-auto grid gap-6 mt-10">
         <FranchiseStep v-for="step in franchiseSteps" :key="step.id" :step="step" />
       </div>
+      <p v-else class="mt-10 rounded-2xl border border-slate-200 bg-white px-5 py-12 text-center text-sm font-bold text-slate-500">
+        Chưa có dữ liệu. Vui lòng thêm dữ liệu trong trang quản trị.
+      </p>
 
       <!-- Quick Consultation CTA -->
       <div class="mt-16 text-center">

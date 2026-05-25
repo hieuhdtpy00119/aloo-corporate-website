@@ -62,6 +62,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/franchise-contents/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/hero-banners/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/menu-posters/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/brand-timelines/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/contact-messages").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/franchise-registrations").permitAll()
                         .anyRequest().hasRole("ADMIN")
@@ -105,3 +107,5 @@ public class SecurityConfig {
         return source;
     }
 }
+
+

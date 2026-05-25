@@ -27,6 +27,7 @@ import AdminFranchiseContentView from '../views/admin/AdminFranchiseContentView.
 import AdminLocationsView from '../views/admin/AdminLocationsView.vue'
 import AdminProfileView from '../views/admin/AdminProfileView.vue'
 import AdminChangePasswordView from '../views/admin/AdminChangePasswordView.vue'
+import AdminAccountsView from '../views/admin/AdminAccountsView.vue'
 import { resolveAuthRedirect } from './authGuard'
 
 const router = createRouter({
@@ -73,6 +74,7 @@ const router = createRouter({
         { path: 'posts/:id/edit', redirect: (to) => `/admin/articles/${to.params.id}/edit` },
         { path: 'locations', name: 'admin-locations', component: AdminLocationsView },
         { path: 'registrations', name: 'admin-registrations', component: AdminRegistrationsView },
+        { path: 'accounts', name: 'admin-accounts', component: AdminAccountsView },
         { path: 'profile', name: 'admin-profile', component: AdminProfileView },
         { path: 'change-password', name: 'admin-change-password', component: AdminChangePasswordView },
         {

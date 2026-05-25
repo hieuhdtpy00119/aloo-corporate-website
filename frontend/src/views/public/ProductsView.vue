@@ -3,9 +3,7 @@ import { computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { Sparkles, Star, Award, Heart } from 'lucide-vue-next'
 import AlooMenuPoster from '../../components/public/AlooMenuPoster.vue'
-import IngredientStrengthCards from '../../components/public/IngredientStrengthCards.vue'
 import ProductHeroSlider from '../../components/public/ProductHeroSlider.vue'
-import TasteSecretAccordion from '../../components/public/TasteSecretAccordion.vue'
 import { useAppStore } from '../../stores/appStore'
 import { useProductPageStore } from '../../stores/productPageStore'
 
@@ -30,8 +28,7 @@ onMounted(() => {
     <!-- Hero Slider -->
     <ProductHeroSlider :featured-products="featuredProducts" />
 
-    <!-- Strength Points -->
-    <IngredientStrengthCards />
+
 
     <!-- Interactive Menu Posters -->
     <AlooMenuPoster :poster="productPageStore.menuPoster" :posters-by-branch="productPageStore.menuPosterByBranch" />
@@ -49,7 +46,7 @@ onMounted(() => {
           </span>
           <h2 class="mt-4 text-3xl font-black tracking-tight text-avocado-950 md:text-4xl">Menu signature độc quyền ALOO</h2>
           <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-500">
-            Mỗi món uống đều được định lượng chuẩn chỉnh, pha chế tươi mới hàng ngày để đảm bảo vị thanh sạch tự nhiên nhất.
+            Dữ liệu sản phẩm được lấy trực tiếp từ backend. Nếu chưa có dữ liệu, vui lòng thêm sản phẩm trong trang quản trị.
           </p>
         </div>
 
@@ -106,13 +103,12 @@ onMounted(() => {
         </div>
 
         <p v-else class="rounded-2xl border border-slate-200 bg-white px-5 py-16 text-center text-sm font-bold text-slate-400 max-w-lg mx-auto shadow-sm">
-          Chưa có sản phẩm nào được hiển thị. Vui lòng quay lại sau.
+          Chưa có dữ liệu. Vui lòng thêm sản phẩm trong trang quản trị.
         </p>
       </div>
     </section>
 
-    <!-- Accordion secrets -->
-    <TasteSecretAccordion />
+
 
     <!-- Premium call-to-action nhượng quyền -->
     <section class="relative isolate flex min-h-[60vh] items-center bg-avocado-950 px-4 py-20 text-white sm:px-6 lg:px-8 overflow-hidden">

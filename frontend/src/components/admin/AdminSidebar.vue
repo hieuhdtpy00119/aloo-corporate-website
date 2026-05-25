@@ -7,6 +7,7 @@ import {
   MapPin,
   Package,
   Users,
+  UserCog,
 } from 'lucide-vue-next'
 
 const menuItems = [
@@ -16,6 +17,7 @@ const menuItems = [
   { label: 'Quản lý danh mục', path: '/admin/categories', icon: FolderTree },
   { label: 'Quản lý địa điểm', path: '/admin/locations', icon: MapPin },
   { label: 'Đăng ký tư vấn', path: '/admin/registrations', icon: Users },
+  { label: 'Quản lý tài khoản', path: '/admin/accounts', icon: UserCog },
   { label: 'Nội dung nhượng quyền', path: '/admin/franchise-content', icon: Handshake },
 ]
 

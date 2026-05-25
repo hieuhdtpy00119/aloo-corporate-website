@@ -3,7 +3,7 @@ import { reactive, ref } from 'vue'
 import SectionTitle from '../../components/public/SectionTitle.vue'
 import { useI18n } from 'vue-i18n'
 import { Phone, Mail, MapPin, Sparkles, Send } from 'lucide-vue-next'
-import { createFranchiseRegistration } from '../../services/franchiseRegistrationService'
+import { contactMessageService } from '../../services/cmsService'
 import { useToastStore } from '../../stores/toastStore'
 
 const { t } = useI18n()
@@ -77,13 +77,12 @@ async function submitContact() {
 
   isSubmitting.value = true
   try {
-    await createFranchiseRegistration({
+    await contactMessageService.create({
       fullName: form.fullName.trim(),
       phone: form.phone.trim(),
       email: form.email.trim() || null,
-      province: form.province.trim() || 'Liên hệ website',
-      expectedBudget: 0,
-      note: `[Lien he website] ${form.message.trim()}`,
+      subject: form.province.trim() || 'Liên hệ website',
+      message: form.message.trim(),
     })
     toast.success('Đã gửi liên hệ thành công')
     resetForm()
@@ -172,7 +171,7 @@ async function submitContact() {
             Điền thông tin bên dưới nếu bạn cần tư vấn nhanh về nhượng quyền, mặt bằng, menu hoặc hợp tác truyền thông.
           </p>
           <div class="rounded-2xl bg-avocado-50 p-5 text-sm leading-relaxed text-avocado-900">
-            Dữ liệu form được gửi về cùng luồng đăng ký tư vấn để đội ngũ vận hành xử lý tập trung trong CMS.
+            Dữ liệu form được lưu vào contact messages để đội ngũ vận hành xử lý trong CMS/API thật.
           </div>
         </div>
 
@@ -283,3 +282,6 @@ async function submitContact() {
     </section>
   </main>
 </template>
+
+
+

@@ -330,37 +330,6 @@ const confirmDeleteMenuPoster = async () => {
   }
 }
 
-const saveExistingProductStatus = async (product) => {
-  try {
-    await store.saveProduct(product)
-    toast.success('Đã cập nhật trạng thái sản phẩm')
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Không cập nhật được trạng thái')
-    store.fetchProducts()
-  }
-}
-
-const saveExistingPosterStatus = async (poster) => {
-  try {
-    const { data } = await menuPosterService.update(poster.id, {
-      branchKey: poster.branchKey,
-      title: poster.title,
-      subtitle: poster.subtitle || '',
-      imageUrl: poster.imageUrl || '',
-      altText: poster.altText || poster.title,
-      sortOrder: Number(poster.sortOrder || 0),
-      status: poster.status || 'ACTIVE',
-    })
-    const normalized = normalizeMenuPoster(data)
-    const index = menuPosters.value.findIndex((item) => item.id === normalized.id)
-    if (index !== -1) menuPosters.value.splice(index, 1, normalized)
-    toast.success('Đã cập nhật trạng thái menu')
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Không cập nhật được trạng thái menu')
-    fetchMenuPosters()
-  }
-}
-
 watch(
   () => form.name,
   (name) => {
@@ -494,14 +463,9 @@ onMounted(() => {
                 <span class="inline-block bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-lg font-medium">{{ product.category || '-' }}</span>
               </td>
               <td class="px-6 py-4">
-                <select 
-                  v-model="product.status" 
-                  class="rounded-full border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer shadow-inner transition" 
-                  :class="statusClass(product.status)" 
-                  @change="saveExistingProductStatus(product)"
-                >
-                  <option v-for="status in productStatuses" :key="status" :value="status">{{ statusLabels[status] }}</option>
-                </select>
+                <span class="inline-flex min-w-[92px] justify-center rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(product.status)">
+                  {{ statusLabels[product.status] || product.status }}
+                </span>
               </td>
               <td class="px-6 py-4">
                 <div class="flex justify-end gap-1.5">
@@ -571,14 +535,9 @@ onMounted(() => {
                 <p class="truncate text-slate-500">{{ poster.subtitle || poster.altText || 'Chưa có mô tả' }}</p>
               </td>
               <td class="px-6 py-4">
-                <select
-                  v-model="poster.status"
-                  class="rounded-full border px-3 py-1.5 text-xs font-bold outline-none cursor-pointer shadow-inner transition"
-                  :class="statusClass(poster.status)"
-                  @change="saveExistingPosterStatus(poster)"
-                >
-                  <option v-for="status in productStatuses" :key="status" :value="status">{{ statusLabels[status] }}</option>
-                </select>
+                <span class="inline-flex min-w-[92px] justify-center rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(poster.status)">
+                  {{ statusLabels[poster.status] || poster.status }}
+                </span>
               </td>
               <td class="px-6 py-4">
                 <div class="flex justify-end gap-1.5">

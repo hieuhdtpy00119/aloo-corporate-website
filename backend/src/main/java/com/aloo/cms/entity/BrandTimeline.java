@@ -17,35 +17,30 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "customer_users")
-public class CustomerUser {
+@Table(name = "brand_timelines")
+public class BrandTimeline {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 180)
-    private String email;
+    @Column(name = "timeline_year", nullable = false, length = 80)
+    private String year;
 
-    @Column(nullable = false)
-    private String passwordHash;
+    @Column(nullable = false, length = 220)
+    private String title;
 
-    @Column(nullable = false, length = 180)
-    private String fullName;
-
-    @Column(length = 40)
-    private String phone;
+    @Column(columnDefinition = "nvarchar(max)")
+    private String description;
 
     @Column(length = 600)
-    private String avatarUrl;
+    private String imageUrl;
 
-    @Column(nullable = false, length = 30)
-    private String role = "USER";
+    @Column(nullable = false)
+    private Integer sortOrder = 0;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 40)
     private String status = "ACTIVE";
-
-    private LocalDateTime lastLoginAt;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -65,3 +60,4 @@ public class CustomerUser {
         updatedAt = LocalDateTime.now();
     }
 }
+

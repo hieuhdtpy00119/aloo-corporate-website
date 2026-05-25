@@ -5,10 +5,11 @@ import com.aloo.cms.dto.ChangePasswordRequest;
 import com.aloo.cms.dto.LoginRequest;
 import com.aloo.cms.dto.UpdateProfileRequest;
 import com.aloo.cms.dto.UserResponse;
-import com.aloo.cms.entity.CustomerUser;
+import com.aloo.cms.entity.AdminUser;
+import com.aloo.cms.entity.UserRole;
 import com.aloo.cms.exception.BadRequestException;
 import com.aloo.cms.mapper.UserMapper;
-import com.aloo.cms.repository.CustomerUserRepository;
+import com.aloo.cms.repository.AdminUserRepository;
 import com.aloo.cms.security.JwtService;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class CustomerAuthService {
 
     private static final String BEARER_PREFIX = "Bearer ";
 
-    private final CustomerUserRepository customerUserRepository;
+    private final AdminUserRepository adminUserRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
@@ -31,7 +32,7 @@ public class CustomerAuthService {
     @Transactional
     public AuthResponse login(LoginRequest request) {
         String email = request.email().trim().toLowerCase();
-        CustomerUser user = customerUserRepository.findByEmailIgnoreCase(email)
+        AdminUser user = adminUserRepository.findByEmailIgnoreCaseAndRole(email, UserRole.USER)
                 .orElseThrow(() -> new BadCredentialsException("Email or password is incorrect"));
 
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
@@ -42,8 +43,8 @@ public class CustomerAuthService {
         }
 
         user.setLastLoginAt(LocalDateTime.now());
-        customerUserRepository.save(user);
-        String token = jwtService.generateToken(user.getEmail(), user.getRole());
+        adminUserRepository.save(user);
+        String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
         return AuthResponse.bearer(token, userMapper.toResponse(user));
     }
 
@@ -54,11 +55,11 @@ public class CustomerAuthService {
 
     @Transactional
     public UserResponse updateProfile(String authorizationHeader, UpdateProfileRequest request) {
-        CustomerUser user = currentUser(authorizationHeader);
+        AdminUser user = currentUser(authorizationHeader);
         String normalizedEmail = request.email().trim().toLowerCase();
 
         if (!user.getEmail().equalsIgnoreCase(normalizedEmail)
-                && customerUserRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+                && adminUserRepository.existsByEmailIgnoreCase(normalizedEmail)) {
             throw new BadRequestException("Email is already used");
         }
 
@@ -66,25 +67,25 @@ public class CustomerAuthService {
         user.setEmail(normalizedEmail);
         user.setPhone(nullable(request.phone()));
         user.setAvatarUrl(nullable(request.avatarUrl()));
-        return userMapper.toResponse(customerUserRepository.save(user));
+        return userMapper.toResponse(adminUserRepository.save(user));
     }
 
     @Transactional
     public void changePassword(String authorizationHeader, ChangePasswordRequest request) {
-        CustomerUser user = currentUser(authorizationHeader);
+        AdminUser user = currentUser(authorizationHeader);
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
             throw new BadRequestException("Current password is incorrect");
         }
 
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
-        customerUserRepository.save(user);
+        adminUserRepository.save(user);
     }
 
-    public CustomerUser currentUser(String authorizationHeader) {
+    public AdminUser currentUser(String authorizationHeader) {
         String token = tokenFrom(authorizationHeader);
         String email = jwtService.extractEmail(token);
-        CustomerUser user = customerUserRepository.findByEmailIgnoreCase(email)
+        AdminUser user = adminUserRepository.findByEmailIgnoreCaseAndRole(email, UserRole.USER)
                 .orElseThrow(() -> new BadCredentialsException("Invalid user token"));
 
         if (!jwtService.isTokenValidForEmail(token, user.getEmail())) {

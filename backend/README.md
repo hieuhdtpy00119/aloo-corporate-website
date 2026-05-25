@@ -13,49 +13,32 @@ Backend Spring Boot cho ALOO Franchise CMS.
 - Lombok
 - Jakarta Validation
 
-## Cấu hình
+## Cấu hình môi trường
 
-Database mặc định:
+Production bắt buộc set env, không có fallback mật khẩu/secret trong `application.properties`:
 
-```properties
-spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=ALOO_Franchise_CMS;encrypt=true;trustServerCertificate=true
-spring.datasource.username=sa
-spring.datasource.password=change-me
+```bash
+DB_URL=jdbc:sqlserver://<host>:1433;databaseName=ALOO_Franchise_CMS;encrypt=true;trustServerCertificate=false
+DB_USERNAME=<production-user>
+DB_PASSWORD=<production-password>
+JWT_SECRET=<random-secret-at-least-32-characters>
+CORS_ALLOWED_ORIGIN=https://your-domain.com
 ```
 
-Nên override bằng biến môi trường:
+Local dùng profile `local`, cấu hình nằm trong `application-local.properties`:
 
 ```powershell
-$env:DB_URL="jdbc:sqlserver://localhost:1433;databaseName=ALOO_Franchise_CMS;encrypt=true;trustServerCertificate=true"
-$env:DB_USERNAME="sa"
-$env:DB_PASSWORD="your-password"
-$env:JWT_SECRET="change-this-secret-to-at-least-32-characters"
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-File `application.properties` trong repo chỉ dùng placeholder. Không commit mật khẩu database, JWT secret hoặc credential production vào Git.
-
-Nếu muốn chạy demo local đúng với frontend hiện tại, set thêm trước lần chạy đầu:
-
-```powershell
-$env:ADMIN_PASSWORD="123456"
-$env:USER_PASSWORD="123456"
-```
+Không commit `.env`, mật khẩu database, JWT secret hoặc credential production vào Git.
 
 ## Rate limit
 
-Mặc định local dùng in-memory rate limit, không cần Redis:
+Mặc định local dùng in-memory rate limit, không cần set biến môi trường và không cần Redis:
 
 ```properties
 app.rate-limit.backend=memory
-```
-
-Khi deploy production nhiều instance, bật Redis để chia sẻ rate limit giữa các server:
-
-```powershell
-$env:RATE_LIMIT_BACKEND="redis"
-$env:REDIS_HOST="localhost"
-$env:REDIS_PORT="6379"
-$env:REDIS_PASSWORD=""
 ```
 
 Các endpoint đang được giới hạn:
@@ -65,37 +48,6 @@ Các endpoint đang được giới hạn:
 - Admin upload: 40 lần / 10 phút / IP
 - User upload: 30 lần / 10 phút / IP
 
-Nếu Redis lỗi, backend ghi warning và fallback tạm về in-memory để API không sập.
-
-Admin seed local khi bảng `users` đang trống và đã set biến môi trường demo:
-
-```text
-Email: admin@aloo.vn
-Password: 123456
-```
-
-Có thể đổi bằng:
-
-```powershell
-$env:ADMIN_EMAIL="admin@example.com"
-$env:ADMIN_PASSWORD="your-strong-password"
-$env:ADMIN_FULL_NAME="Admin"
-```
-
-User seed local khi bảng `customer_users` chưa có tài khoản và đã set biến môi trường demo:
-
-```text
-Email: user@aloo.vn
-Password: 123456
-```
-
-Có thể đổi bằng:
-
-```powershell
-$env:USER_EMAIL="user@example.com"
-$env:USER_PASSWORD="your-strong-password"
-$env:USER_FULL_NAME="ALOO User"
-```
 
 ## Chạy backend
 
@@ -108,7 +60,7 @@ sqlcmd -S localhost -E -C -i database/aloo_franchise_cms.sql
 Chạy app:
 
 ```powershell
-mvn spring-boot:run
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 Backend chạy tại:

@@ -4,17 +4,11 @@ import { computed, ref } from 'vue'
 const props = defineProps({
   poster: {
     type: Object,
-    default: () => ({
-      title: 'ALOO Menu',
-      subtitle: 'Menu Poster',
-      image: '',
-      alt: 'Poster menu ALOO',
-      status: 'ACTIVE',
-    }),
+    default: () => null,
   },
   postersByBranch: {
     type: Object,
-    default: () => ({}),
+    default: () => null,
   },
 })
 
@@ -29,12 +23,6 @@ const toBranchLabel = (branchKey) =>
 
 const branches = computed(() => {
   const keys = Object.keys(props.postersByBranch || {})
-  if (!keys.length) {
-    return [
-      { label: 'Quy Nhơn', value: 'quy-nhon' },
-      { label: 'Nha Trang', value: 'nha-trang' },
-    ]
-  }
   return keys.map((key) => ({
     label: props.postersByBranch[key]?.label || toBranchLabel(key),
     value: key,
@@ -61,7 +49,7 @@ const currentPoster = computed(() => {
 </script>
 
 <template>
-  <section v-if="currentPoster?.status === 'ACTIVE'" class="bg-gradient-to-b from-avocado-100/20 via-avocado-100/40 to-transparent px-4 py-16 sm:px-6 lg:px-8">
+  <section v-if="currentPoster?.status === 'ACTIVE' && currentPoster.image" class="bg-gradient-to-b from-avocado-100/20 via-avocado-100/40 to-transparent px-4 py-16 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-4xl text-center">
       <p class="text-xs font-bold uppercase tracking-[0.2em] text-avocado-600">{{ currentPoster.subtitle || 'Thực đơn' }}</p>
       <h2 class="mt-2 text-3xl font-black tracking-tight text-avocado-950 md:text-4xl">{{ currentPoster.title || 'Menu theo chi nhánh' }}</h2>

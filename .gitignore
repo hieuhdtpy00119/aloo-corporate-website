@@ -42,3 +42,8 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+# Local backend config / temporary tooling
+backend/src/main/resources/application-local.properties
+backend/maven.zip
+backend/apache-maven-*/
+

@@ -52,6 +52,9 @@ describe('UserLoginView', () => {
     })
 
     const wrapper = mount(UserLoginView)
+    const inputs = wrapper.findAll('input')
+    await inputs[0].setValue('user@aloo.vn')
+    await inputs[1].setValue('123456')
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 

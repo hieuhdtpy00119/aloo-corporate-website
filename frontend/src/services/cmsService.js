@@ -85,3 +85,34 @@ export const menuPosterService = {
   update: (id, payload) => api.put(`/menu-posters/${id}`, payload),
   remove: (id) => api.delete(`/menu-posters/${id}`),
 }
+
+export const accountService = {
+  listAdmins: () => api.get('/accounts/admins'),
+  createAdmin: (payload) => api.post('/accounts/admins', payload),
+  updateAdmin: (id, payload) => api.put(`/accounts/admins/${id}`, payload),
+  updateAdminStatus: (id, status) => api.patch(`/accounts/admins/${id}/status`, { status }),
+  changeAdminPassword: (id, password) => api.put(`/accounts/admins/${id}/password`, { password }),
+  removeAdmin: (id) => api.delete(`/accounts/admins/${id}`),
+  listCustomers: () => api.get('/accounts/customers'),
+  createCustomer: (payload) => api.post('/accounts/customers', payload),
+  updateCustomer: (id, payload) => api.put(`/accounts/customers/${id}`, payload),
+  updateCustomerStatus: (id, status) => api.patch(`/accounts/customers/${id}/status`, { status }),
+  changeCustomerPassword: (id, password) => api.put(`/accounts/customers/${id}/password`, { password }),
+  removeCustomer: (id) => api.delete(`/accounts/customers/${id}`),
+}
+
+export const contactMessageService = {
+  list: () => api.get('/contact-messages'),
+  get: (id) => api.get(`/contact-messages/${id}`),
+  create: (payload) => api.post('/contact-messages', payload),
+  updateStatus: (id, status) => api.patch(`/contact-messages/${id}/status`, { status }),
+  remove: (id) => api.delete(`/contact-messages/${id}`),
+}
+
+export const brandTimelineService = {
+  list: (activeOnly = false) => api.get('/brand-timelines', { params: { activeOnly } }),
+  get: (id) => api.get(`/brand-timelines/${id}`),
+  create: (payload) => api.post('/brand-timelines', payload),
+  update: (id, payload) => api.put(`/brand-timelines/${id}`, payload),
+  remove: (id) => api.delete(`/brand-timelines/${id}`),
+}

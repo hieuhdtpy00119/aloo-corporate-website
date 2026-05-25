@@ -9,45 +9,6 @@ const props = defineProps({
   },
 })
 
-const fallbackSlides = [
-  {
-    id: 1,
-    title: 'Kem bơ truyền thống',
-    subtitle: 'Signature ALOO',
-    description: 'Bơ sáp chín tự nhiên hòa cùng kem tươi mát lạnh, tạo vị béo mịn và thơm nhẹ.',
-    productImage: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1200&q=85',
-    bgImage: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1800&q=80',
-    tone: 'light',
-  },
-  {
-    id: 2,
-    title: 'Kem bơ sầu riêng',
-    subtitle: 'Tropical Bold',
-    description: 'Lớp bơ mịn kết hợp sầu riêng đậm vị, dành cho khách thích hương nhiệt đới rõ nét.',
-    productImage: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=1200&q=85',
-    bgImage: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=1800&q=80',
-    tone: 'dark',
-  },
-  {
-    id: 3,
-    title: 'Sinh tố bơ kem',
-    subtitle: 'Creamy Smoothie',
-    description: 'Sinh tố bơ sánh mịn, thêm viên kem vàng mát lạnh cho trải nghiệm nhẹ và dễ uống.',
-    productImage: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=1200&q=85',
-    bgImage: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=1800&q=80',
-    tone: 'light',
-  },
-  {
-    id: 4,
-    title: 'Kem bơ cacao',
-    subtitle: 'Cacao Edition',
-    description: 'Vị bơ béo nhẹ gặp cacao thơm dịu, tạo chiều sâu vị giác nhưng vẫn giữ cảm giác tươi mát.',
-    productImage: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=1200&q=85',
-    bgImage: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=1800&q=80',
-    tone: 'dark',
-  },
-]
-
 const activeIndex = ref(0)
 let timer = null
 
@@ -55,11 +16,11 @@ const slides = computed(() =>
   props.featuredProducts.slice(0, 4).map((product, index) => ({
     id: product.id || index + 1,
     title: product.name || product.title,
-    subtitle: product.subtitle || fallbackSlides[index]?.subtitle || 'ALOO Signature',
-    description: product.description || fallbackSlides[index]?.description,
-    productImage: product.imageUrl || product.image || product.productImage || fallbackSlides[index]?.productImage,
-    bgImage: product.imageUrl || product.image || product.bgImage || fallbackSlides[index]?.bgImage,
-    tone: product.tone || fallbackSlides[index]?.tone || 'light',
+    subtitle: product.subtitle || '',
+    description: product.description || '',
+    productImage: product.imageUrl || product.image || product.productImage || '',
+    bgImage: product.imageUrl || product.image || product.bgImage || '',
+    tone: product.tone || 'light',
   })),
 )
 const activeSlide = computed(() => slides.value[activeIndex.value] || null)

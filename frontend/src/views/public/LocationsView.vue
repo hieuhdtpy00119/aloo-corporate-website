@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SectionTitle from '../../components/public/SectionTitle.vue'
 import { useAppStore } from '../../stores/appStore'
-import { MapPin, Search, Phone, Clock, Compass } from 'lucide-vue-next'
+import { Car, Clock, Compass, CreditCard, MapPin, Phone, Search, Snowflake, Wifi } from 'lucide-vue-next'
 
 const { t } = useI18n()
 const store = useAppStore()
@@ -15,6 +15,7 @@ const normalizeLocation = (location) => ({
   addressText: location.addressText || location.address || '',
   city: location.city || location.province || '',
   imageUrl: location.imageUrl || '',
+  amenities: Array.isArray(location.amenities) ? location.amenities : [],
 })
 
 const locations = computed(() =>
@@ -43,6 +44,21 @@ const filteredLocations = computed(() => {
     return matchesProvince && matchesKeyword
   })
 })
+
+const amenityIcons = {
+  Wifi,
+  'Máy lạnh': Snowflake,
+  'Chỗ đậu xe': Car,
+  'Thanh toán thẻ': CreditCard,
+}
+
+const getAmenityIcon = (amenity) => amenityIcons[amenity] || MapPin
+
+const activeLocationCount = computed(() =>
+  locations.value.filter((location) => ['ACTIVE', 'Đang hoạt động'].includes(location.status)).length,
+)
+
+const featuredLocationCount = computed(() => locations.value.filter((location) => location.featured).length)
 
 onMounted(() => {
   store.fetchLocations().catch(() => {})
@@ -80,6 +96,21 @@ onMounted(() => {
         :description="t('locations.description')"
       />
 
+      <div class="mx-auto mb-10 grid max-w-4xl gap-3 sm:grid-cols-3">
+        <div class="rounded-3xl border border-avocado-100/40 bg-white px-5 py-4 text-center shadow-sm">
+          <p class="text-2xl font-black text-avocado-950">{{ locations.length }}</p>
+          <p class="mt-1 text-xs font-bold uppercase tracking-wider text-slate-400">Tổng chi nhánh</p>
+        </div>
+        <div class="rounded-3xl border border-emerald-100 bg-white px-5 py-4 text-center shadow-sm">
+          <p class="text-2xl font-black text-emerald-700">{{ activeLocationCount }}</p>
+          <p class="mt-1 text-xs font-bold uppercase tracking-wider text-slate-400">Đang hoạt động</p>
+        </div>
+        <div class="rounded-3xl border border-cream-200 bg-white px-5 py-4 text-center shadow-sm">
+          <p class="text-2xl font-black text-avocado-800">{{ featuredLocationCount }}</p>
+          <p class="mt-1 text-xs font-bold uppercase tracking-wider text-slate-400">Nổi bật</p>
+        </div>
+      </div>
+
       <!-- Search and Filter Bar -->
       <div class="mx-auto mb-12 grid max-w-4xl gap-4 rounded-3xl border border-avocado-100/30 bg-white p-4 shadow-sm md:grid-cols-[1fr_240px] items-center">
         <div class="relative flex-1">
@@ -112,57 +143,92 @@ onMounted(() => {
         <article
           v-for="location in filteredLocations"
           :key="location.id"
-          class="rounded-3xl border border-avocado-100/30 bg-white p-6 shadow-sm hover-lift flex flex-col justify-between"
+          class="group overflow-hidden rounded-3xl border border-avocado-100/30 bg-white shadow-sm hover-lift flex flex-col justify-between"
         >
           <div>
-            <div class="flex items-start justify-between gap-4 mb-5">
-              <div>
+            <div class="relative aspect-[4/3] overflow-hidden bg-avocado-50">
+              <img
+                v-if="location.imageUrl"
+                :src="location.imageUrl"
+                :alt="location.name"
+                class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              />
+              <div v-else class="grid h-full place-items-center text-2xl font-black text-avocado-700">ALOO</div>
+              <div class="absolute left-4 top-4 flex flex-wrap gap-2">
+                <span
+                  class="rounded-full px-3 py-1 text-[10px] font-black tracking-wider shadow-sm"
+                  :class="
+                    location.status === 'Đang hoạt động' || location.status === 'active' || location.status === 'ACTIVE'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-100/70'
+                      : 'bg-amber-50 text-amber-700 border border-amber-100/70'
+                  "
+                >
+                  {{ getStatusLabel(location.status) }}
+                </span>
+                <span v-if="location.featured" class="rounded-full border border-cream-200 bg-cream-100 px-3 py-1 text-[10px] font-black text-avocado-900 shadow-sm">
+                  Nổi bật
+                </span>
+              </div>
+            </div>
+
+            <div class="p-6">
+              <div class="mb-5">
                 <h3 class="text-lg font-bold text-avocado-950 leading-snug">{{ location.name }}</h3>
                 <p class="mt-1 text-xs font-bold text-avocado-600 tracking-wider uppercase inline-flex items-center gap-1">
                   <MapPin class="h-3.5 w-3.5" />
-                  {{ location.city }}
+                  {{ location.city }}<span v-if="location.district"> · {{ location.district }}</span>
                 </p>
               </div>
-              <span
-                class="rounded-full px-3 py-1 text-[10px] font-bold tracking-wider uppercase inline-block shadow-inner"
-                :class="
-                  location.status === 'Đang hoạt động' || location.status === 'active' || location.status === 'ACTIVE'
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100/50'
-                    : 'bg-amber-50 text-amber-700 border border-amber-100/50'
-                "
-              >
-                {{ getStatusLabel(location.status) }}
-              </span>
-            </div>
 
-            <div class="space-y-3.5 text-xs text-slate-500 border-t border-slate-50 pt-4">
-              <p class="flex gap-2">
-                <span class="font-bold text-slate-700 shrink-0">{{ t('common.address') }}:</span> 
-                <span class="leading-relaxed">{{ location.addressText }}</span>
-              </p>
-              <p class="flex items-center gap-2">
-                <Phone class="h-3.5 w-3.5 text-slate-400" />
-                <span class="font-bold text-slate-700 shrink-0 mr-1">{{ t('common.phone') }}:</span> 
-                <span>{{ location.phone }}</span>
-              </p>
-              <p class="flex items-center gap-2">
-                <Clock class="h-3.5 w-3.5 text-slate-400" />
-                <span class="font-bold text-slate-700 shrink-0 mr-1">{{ t('common.openingHours') }}:</span> 
-                <span>{{ location.openingHours }}</span>
-              </p>
+              <div class="space-y-3.5 text-xs text-slate-500 border-t border-slate-50 pt-4">
+                <p class="flex gap-2">
+                  <span class="font-bold text-slate-700 shrink-0">{{ t('common.address') }}:</span>
+                  <span class="leading-relaxed">{{ location.addressText }}</span>
+                </p>
+                <p class="flex items-center gap-2">
+                  <Phone class="h-3.5 w-3.5 text-slate-400" />
+                  <span class="font-bold text-slate-700 shrink-0 mr-1">{{ t('common.phone') }}:</span>
+                  <span>{{ location.phone }}</span>
+                </p>
+                <p class="flex items-center gap-2">
+                  <Clock class="h-3.5 w-3.5 text-slate-400" />
+                  <span class="font-bold text-slate-700 shrink-0 mr-1">{{ t('common.openingHours') }}:</span>
+                  <span>{{ location.openingHours }}</span>
+                </p>
+              </div>
+
+              <div v-if="location.amenities.length" class="mt-5 flex flex-wrap gap-2">
+                <span
+                  v-for="amenity in location.amenities.slice(0, 4)"
+                  :key="amenity"
+                  class="inline-flex items-center gap-1.5 rounded-full bg-avocado-50 px-3 py-1.5 text-[11px] font-bold text-avocado-800"
+                >
+                  <component :is="getAmenityIcon(amenity)" class="h-3.5 w-3.5" />
+                  {{ amenity }}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div class="mt-6 border-t border-slate-50 pt-4">
-            <a
-              :href="location.mapUrl"
-              target="_blank"
-              rel="noreferrer"
-              class="w-full text-center inline-flex justify-center items-center gap-1.5 rounded-full border border-avocado-200 hover:border-avocado-300 hover:bg-avocado-50/50 px-4 py-2.5 text-xs font-bold text-avocado-800 transition"
-            >
-              <Compass class="h-4 w-4" />
-              {{ t('common.viewMap') }}
-            </a>
+          <div class="mt-auto border-t border-slate-50 p-5">
+            <div class="grid gap-2 sm:grid-cols-2">
+              <a
+                :href="location.mapUrl"
+                target="_blank"
+                rel="noreferrer"
+                class="inline-flex justify-center items-center gap-1.5 rounded-full border border-avocado-200 hover:border-avocado-300 hover:bg-avocado-50/50 px-4 py-2.5 text-xs font-bold text-avocado-800 transition"
+              >
+                <Compass class="h-4 w-4" />
+                {{ t('common.viewMap') }}
+              </a>
+              <a
+                :href="`tel:${location.phone}`"
+                class="inline-flex justify-center items-center gap-1.5 rounded-full bg-avocado-800 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-avocado-900"
+              >
+                <Phone class="h-4 w-4" />
+                Gọi ngay
+              </a>
+            </div>
           </div>
         </article>
       </div>
@@ -173,4 +239,3 @@ onMounted(() => {
     </section>
   </main>
 </template>
-

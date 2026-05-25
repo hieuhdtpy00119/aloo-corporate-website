@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import BaseModal from '../../components/admin/BaseModal.vue'
 import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
@@ -18,13 +18,11 @@ const isLoading = computed(() => store.loading.registrations)
 const errorMessage = computed(() => store.errors.registrations)
 const currentPage = ref(1)
 const pageSize = 5
-const openStatusMenuId = ref(null)
 const registrationStatuses = ['Mới', 'Đã liên hệ', 'Đang tư vấn', 'Hoàn tất', 'Hủy']
 const statusFilters = ['Tất cả', ...registrationStatuses]
 
 const registrations = computed(() => store.registrations)
 
-// Demo data is local mock data; currency is formatted for UI display only.
 const formatCurrency = (value) => `${new Intl.NumberFormat('vi-VN').format(Number(value || 0))} đ`
 
 const statusClass = (status) => ({
@@ -51,22 +49,14 @@ const notifyStatusChange = () => {
   toast.success('Đã cập nhật trạng thái đăng ký')
 }
 
-const toggleStatusMenu = (registrationId) => {
-  openStatusMenuId.value = openStatusMenuId.value === registrationId ? null : registrationId
-}
-
 const updateRegistrationStatus = async (registration, status) => {
-  openStatusMenuId.value = null
   try {
-    await store.updateRegistrationStatus(registration, status)
+    const updated = await store.updateRegistrationStatus(registration, status)
+    selectedRegistration.value = updated
     notifyStatusChange()
   } catch (error) {
     toast.error(error.response?.data?.message || 'Không cập nhật được trạng thái')
   }
-}
-
-const closeStatusMenu = () => {
-  openStatusMenuId.value = null
 }
 
 const closeDetailModal = () => {
@@ -115,14 +105,9 @@ watch([searchQuery, statusFilter], () => {
 })
 
 onMounted(() => {
-  document.addEventListener('click', closeStatusMenu)
   store.fetchRegistrations().catch(() => {
     toast.error('Không tải được danh sách đăng ký tư vấn')
   })
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', closeStatusMenu)
 })
 </script>
 
@@ -179,33 +164,9 @@ onBeforeUnmount(() => {
               <td class="whitespace-nowrap px-3 py-2.5 text-sm text-slate-700">{{ registration.area }}</td>
               <td class="whitespace-nowrap px-3 py-2.5 text-right text-sm font-bold tabular-nums text-slate-800">{{ formatCurrency(registration.capital) }}</td>
               <td class="px-3 py-2.5 text-center text-sm">
-                <div class="relative inline-block text-left" @click.stop>
-                  <button
-                    type="button"
-                    class="flex h-9 w-full min-w-[180px] max-w-[200px] items-center justify-between gap-2 rounded-lg border px-3 text-sm font-black transition"
-                    :class="getStatusSelectClass(registration.status)"
-                    @click="toggleStatusMenu(registration.id)"
-                  >
-                    <span>{{ registration.status }}</span>
-                    <span class="text-xs">⌄</span>
-                  </button>
-                  <div
-                    v-if="openStatusMenuId === registration.id"
-                    class="absolute left-0 z-50 mt-2 w-[180px] overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 text-left shadow-2xl shadow-slate-900/12"
-                  >
-                    <button
-                      v-for="status in registrationStatuses"
-                      :key="status"
-                      type="button"
-                      class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-bold transition hover:bg-slate-50"
-                      :class="registration.status === status ? 'bg-avocado-50 text-avocado-800' : 'text-slate-700'"
-                      @click="updateRegistrationStatus(registration, status)"
-                    >
-                      <span>{{ status }}</span>
-                      <span v-if="registration.status === status" class="text-avocado-700">✓</span>
-                    </button>
-                  </div>
-                </div>
+                <span class="inline-flex min-w-[112px] justify-center rounded-full px-3 py-1.5 text-xs font-black" :class="statusClass(registration.status)">
+                  {{ registration.status }}
+                </span>
               </td>
               <td class="px-3 py-2.5 align-middle text-sm">
                 <div class="inline-flex min-w-[142px] items-center gap-2 whitespace-nowrap">
@@ -232,33 +193,9 @@ onBeforeUnmount(() => {
               <h3 class="font-black text-avocado-950">{{ registration.name }}</h3>
               <p class="mt-1 text-sm text-slate-600">{{ registration.phone }}</p>
             </div>
-            <div class="relative" @click.stop>
-              <button
-                type="button"
-                class="flex h-10 min-w-[150px] items-center justify-between gap-3 rounded-xl border px-3 text-sm font-black transition"
-                :class="getStatusSelectClass(registration.status)"
-                @click="toggleStatusMenu(registration.id)"
-              >
-                <span>{{ registration.status }}</span>
-                <span class="text-xs">⌄</span>
-              </button>
-              <div
-                v-if="openStatusMenuId === registration.id"
-                class="absolute right-0 z-50 mt-2 w-[190px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 text-left shadow-2xl shadow-slate-900/12"
-              >
-                <button
-                  v-for="status in registrationStatuses"
-                  :key="status"
-                  type="button"
-                  class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-bold transition hover:bg-slate-50"
-                  :class="registration.status === status ? 'bg-avocado-50 text-avocado-800' : 'text-slate-700'"
-                  @click="updateRegistrationStatus(registration, status)"
-                >
-                  <span>{{ status }}</span>
-                  <span v-if="registration.status === status" class="text-avocado-700">✓</span>
-                </button>
-              </div>
-            </div>
+            <span class="shrink-0 rounded-full px-3 py-1.5 text-xs font-black" :class="statusClass(registration.status)">
+              {{ registration.status }}
+            </span>
           </div>
           <div class="mt-4 grid gap-2 text-sm text-slate-700">
             <p><span class="font-bold text-slate-900">Email:</span> {{ registration.email }}</p>
@@ -313,6 +250,21 @@ onBeforeUnmount(() => {
               <span class="rounded-full px-3 py-1 text-xs font-bold" :class="statusClass(selectedRegistration.status)">
                 {{ selectedRegistration.status }}
               </span>
+            </dd>
+          </div>
+          <div class="rounded-lg bg-slate-50 p-4 sm:col-span-2">
+            <dt class="text-xs font-black uppercase text-slate-500">Cập nhật trạng thái</dt>
+            <dd class="mt-3 flex flex-wrap gap-2">
+              <button
+                v-for="status in registrationStatuses"
+                :key="status"
+                type="button"
+                class="rounded-full border px-3 py-2 text-xs font-black transition hover:-translate-y-0.5"
+                :class="selectedRegistration.status === status ? getStatusSelectClass(status) : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+                @click="updateRegistrationStatus(selectedRegistration, status)"
+              >
+                {{ status }}
+              </button>
             </dd>
           </div>
           <div class="rounded-lg bg-slate-50 p-4 sm:col-span-2">

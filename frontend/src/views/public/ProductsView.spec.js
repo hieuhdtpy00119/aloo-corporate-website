@@ -21,9 +21,7 @@ describe('ProductsView', () => {
         stubs: {
           RouterLink: { props: ['to'], template: '<a :href="to"><slot /></a>' },
           ProductHeroSlider: { template: '<section data-test="product-hero" />' },
-          IngredientStrengthCards: { template: '<section />' },
           AlooMenuPoster: { template: '<section />' },
-          TasteSecretAccordion: { template: '<section />' },
         },
       },
     })
@@ -69,6 +67,6 @@ describe('ProductsView', () => {
     store.errors.products = ''
     store.products = []
     wrapper = mountView()
-    expect(wrapper.text()).toContain('Chưa có sản phẩm nào được hiển thị')
+    expect(wrapper.text()).toContain('Chưa có dữ liệu')
   })
 })

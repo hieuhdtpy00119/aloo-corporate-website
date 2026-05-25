@@ -2,7 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ContactView from './ContactView.vue'
-import { createFranchiseRegistration } from '../../services/franchiseRegistrationService'
+import { contactMessageService } from '../../services/cmsService'
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -10,14 +10,14 @@ vi.mock('vue-i18n', () => ({
   }),
 }))
 
-vi.mock('../../services/franchiseRegistrationService', () => ({
-  createFranchiseRegistration: vi.fn(),
+vi.mock('../../services/cmsService', () => ({
+  contactMessageService: { create: vi.fn() },
 }))
 
 describe('ContactView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    createFranchiseRegistration.mockReset()
+    contactMessageService.create.mockReset()
   })
 
   const mountView = () =>
@@ -34,8 +34,8 @@ describe('ContactView', () => {
       },
     })
 
-  it('submits contact data through the franchise registration endpoint', async () => {
-    createFranchiseRegistration.mockResolvedValue({
+  it('submits contact data through the contact message endpoint', async () => {
+    contactMessageService.create.mockResolvedValue({
       data: {
         id: 10,
         status: 'NEW',
@@ -54,13 +54,12 @@ describe('ContactView', () => {
     await form.trigger('submit')
     await flushPromises()
 
-    expect(createFranchiseRegistration).toHaveBeenCalledWith({
+    expect(contactMessageService.create).toHaveBeenCalledWith({
       fullName: 'Nguyen Van A',
       phone: '0900123456',
       email: 'lead@example.com',
-      province: 'TP.HCM',
-      expectedBudget: 0,
-      note: '[Lien he website] Can tu van mo cua hang',
+      subject: 'TP.HCM',
+      message: 'Can tu van mo cua hang',
     })
     expect(inputs[0].element.value).toBe('')
   })
@@ -76,6 +75,8 @@ describe('ContactView', () => {
     await form.trigger('submit')
 
     expect(wrapper.text()).toContain('Số điện thoại không đúng định dạng')
-    expect(createFranchiseRegistration).not.toHaveBeenCalled()
+    expect(contactMessageService.create).not.toHaveBeenCalled()
   })
 })
+
+
