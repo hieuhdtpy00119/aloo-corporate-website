@@ -17,6 +17,20 @@ public record ProductRequest(
 
         String description,
 
+        String shortDescription,
+
+        String detailContent,
+
+        String ingredients,
+
+        String tasteProfile,
+
+        String servingSuggestion,
+
+        String gallery,
+
+        String faqs,
+
         @DecimalMin(value = "0.0", inclusive = true, message = "Price must be greater than or equal to 0")
         BigDecimal price,
 
@@ -31,7 +45,16 @@ public record ProductRequest(
         @Min(value = 0, message = "Sort order must be greater than or equal to 0")
         Integer sortOrder,
 
+        Boolean featured,
+
+        @Size(max = 260, message = "SEO title must be at most 260 characters")
+        String seoTitle,
+
+        @Size(max = 500, message = "SEO description must be at most 500 characters")
+        String seoDescription,
+
         @Size(max = 40, message = "Status must be at most 40 characters")
         String status
 ) {
 }
+

@@ -20,6 +20,7 @@ DROP TABLE IF EXISTS dbo.franchise_registrations;
 DROP TABLE IF EXISTS dbo.contact_messages;
 DROP TABLE IF EXISTS dbo.locations;
 DROP TABLE IF EXISTS dbo.menu_posters;
+DROP TABLE IF EXISTS dbo.home_sections;
 DROP TABLE IF EXISTS dbo.hero_banners;
 DROP TABLE IF EXISTS dbo.brand_timelines;
 DROP TABLE IF EXISTS dbo.categories;
@@ -71,10 +72,20 @@ CREATE TABLE dbo.products (
     name NVARCHAR(220) NOT NULL,
     slug NVARCHAR(240) NOT NULL,
     description NVARCHAR(MAX) NULL,
+    short_description NVARCHAR(MAX) NULL,
+    detail_content NVARCHAR(MAX) NULL,
+    ingredients NVARCHAR(MAX) NULL,
+    taste_profile NVARCHAR(MAX) NULL,
+    serving_suggestion NVARCHAR(MAX) NULL,
+    gallery NVARCHAR(MAX) NULL,
+    faqs NVARCHAR(MAX) NULL,
     price DECIMAL(18,2) NULL,
     image_url NVARCHAR(600) NULL,
     category NVARCHAR(180) NULL,
     sort_order INT NOT NULL CONSTRAINT df_products_sort_order DEFAULT 0,
+    featured BIT NOT NULL CONSTRAINT df_products_featured DEFAULT 0,
+    seo_title NVARCHAR(260) NULL,
+    seo_description NVARCHAR(500) NULL,
     status NVARCHAR(40) NOT NULL CONSTRAINT df_products_status DEFAULT N'ACTIVE',
     created_at DATETIME2(0) NOT NULL CONSTRAINT df_products_created_at DEFAULT GETDATE(),
     updated_at DATETIME2(0) NOT NULL CONSTRAINT df_products_updated_at DEFAULT GETDATE(),
@@ -224,6 +235,27 @@ CREATE TABLE dbo.hero_banners (
 );
 GO
 
+
+CREATE TABLE dbo.home_sections (
+    id BIGINT IDENTITY(1,1) NOT NULL,
+    section_key NVARCHAR(120) NOT NULL,
+    type NVARCHAR(60) NOT NULL CONSTRAINT df_home_sections_type DEFAULT N'FEATURED_CARD',
+    title NVARCHAR(220) NOT NULL,
+    subtitle NVARCHAR(180) NULL,
+    description NVARCHAR(MAX) NULL,
+    image_url NVARCHAR(600) NULL,
+    button_text NVARCHAR(120) NULL,
+    button_link NVARCHAR(600) NULL,
+    badge NVARCHAR(160) NULL,
+    sort_order INT NOT NULL CONSTRAINT df_home_sections_sort_order DEFAULT 0,
+    status NVARCHAR(40) NOT NULL CONSTRAINT df_home_sections_status DEFAULT N'ACTIVE',
+    created_at DATETIME2(0) NOT NULL CONSTRAINT df_home_sections_created_at DEFAULT GETDATE(),
+    updated_at DATETIME2(0) NOT NULL CONSTRAINT df_home_sections_updated_at DEFAULT GETDATE(),
+    CONSTRAINT pk_home_sections PRIMARY KEY (id),
+    CONSTRAINT ck_home_sections_status CHECK (status IN (N'ACTIVE', N'INACTIVE')),
+    CONSTRAINT ck_home_sections_type CHECK (type IN (N'FEATURED_CARD', N'CTA_CARD', N'PRODUCT_CARD', N'LOCATION_CARD'))
+);
+GO
 CREATE TABLE dbo.menu_posters (
     id BIGINT IDENTITY(1,1) NOT NULL,
     branch_key NVARCHAR(120) NOT NULL,
@@ -266,6 +298,7 @@ CREATE INDEX ix_contact_messages_status_created_at ON dbo.contact_messages(statu
 CREATE INDEX ix_locations_status_province ON dbo.locations(status, province, display_order);
 CREATE INDEX ix_franchise_contents_section ON dbo.franchise_contents(section_key, status, sort_order);
 CREATE INDEX ix_hero_banners_status_sort ON dbo.hero_banners(status, sort_order);
+CREATE INDEX ix_home_sections_status_sort ON dbo.home_sections(status, sort_order);
 CREATE INDEX ix_menu_posters_status_sort ON dbo.menu_posters(status, sort_order);
 CREATE INDEX ix_brand_timelines_status_sort ON dbo.brand_timelines(status, sort_order);
 GO

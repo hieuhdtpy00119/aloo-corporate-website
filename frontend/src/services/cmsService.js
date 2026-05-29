@@ -29,6 +29,7 @@ export const uploadService = {
 export const productService = {
   list: () => api.get('/products'),
   get: (id) => api.get(`/products/${id}`),
+  getBySlug: (slug) => api.get(`/products/slug/${slug}`),
   create: (payload) => api.post('/products', payload),
   update: (id, payload) => api.put(`/products/${id}`, payload),
   remove: (id) => api.delete(`/products/${id}`),
@@ -70,6 +71,13 @@ export const franchiseContentService = {
   update: (id, payload) => api.put(`/franchise-contents/${id}`, payload),
 }
 
+export const homeSectionService = {
+  list: (activeOnly = false) => api.get('/home-sections', { params: { activeOnly } }),
+  get: (id) => api.get(`/home-sections/${id}`),
+  create: (payload) => api.post('/home-sections', payload),
+  update: (id, payload) => api.put(`/home-sections/${id}`, payload),
+  remove: (id) => api.delete(`/home-sections/${id}`),
+}
 export const heroBannerService = {
   list: () => api.get('/hero-banners'),
   get: (id) => api.get(`/hero-banners/${id}`),
@@ -116,3 +124,4 @@ export const brandTimelineService = {
   update: (id, payload) => api.put(`/brand-timelines/${id}`, payload),
   remove: (id) => api.delete(`/brand-timelines/${id}`),
 }
+

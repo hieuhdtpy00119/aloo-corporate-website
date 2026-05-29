@@ -1,8 +1,8 @@
 package com.aloo.cms.controller;
 
-import com.aloo.cms.dto.ProductRequest;
-import com.aloo.cms.dto.ProductResponse;
-import com.aloo.cms.service.ProductService;
+import com.aloo.cms.dto.HomeSectionRequest;
+import com.aloo.cms.dto.HomeSectionResponse;
+import com.aloo.cms.service.HomeSectionService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,44 +15,39 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/home-sections")
 @RequiredArgsConstructor
-public class ProductController {
+public class HomeSectionController {
 
-    private final ProductService productService;
+    private final HomeSectionService homeSectionService;
 
     @GetMapping
-    public List<ProductResponse> findAll() {
-        return productService.findAll();
-    }
-
-    @GetMapping("/slug/{slug}")
-    public ProductResponse findBySlug(@PathVariable String slug) {
-        return productService.findBySlug(slug);
+    public List<HomeSectionResponse> findAll(@RequestParam(defaultValue = "false") boolean activeOnly) {
+        return homeSectionService.findAll(activeOnly);
     }
 
     @GetMapping("/{id}")
-    public ProductResponse findById(@PathVariable Long id) {
-        return productService.findById(id);
+    public HomeSectionResponse findById(@PathVariable Long id) {
+        return homeSectionService.findById(id);
     }
 
     @PostMapping
-    public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(request));
+    public ResponseEntity<HomeSectionResponse> create(@Valid @RequestBody HomeSectionRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(homeSectionService.create(request));
     }
 
     @PutMapping("/{id}")
-    public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
-        return productService.update(id, request);
+    public HomeSectionResponse update(@PathVariable Long id, @Valid @RequestBody HomeSectionRequest request) {
+        return homeSectionService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        productService.delete(id);
+        homeSectionService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
-

@@ -75,7 +75,64 @@ BEGIN
     ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'topping'), N'Topping sầu riêng', N'topping-sau-rieng', N'Topping sầu riêng đậm hương nhiệt đới.', 15000, N'https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?auto=format&fit=crop&w=900&q=85', 16, N'INACTIVE');
 END
 GO
-
+UPDATE dbo.products
+SET
+    short_description = COALESCE(short_description, N'Ly kem bơ signature với nền bơ sáp chín tự nhiên, kem tươi mát lạnh và topping giòn thơm.'),
+    detail_content = COALESCE(detail_content, N'ALOO thiết kế sản phẩm này như món chủ lực dễ nhớ, dễ bán lặp lại và dễ chuẩn hóa tại nhiều điểm bán. Công thức tập trung vào độ mịn của bơ, độ mát của kem và cảm giác giòn nhẹ từ topping để tạo trải nghiệm rõ ràng ngay từ muỗng đầu tiên.'),
+    ingredients = COALESCE(ingredients, N'Bơ sáp chín tự nhiên
+Kem tươi mát lạnh
+Sữa tươi
+Dừa sấy giòn
+Topping theo mùa'),
+    taste_profile = COALESCE(taste_profile, N'Béo mịn
+Ngọt thanh
+Mát lạnh
+Hậu vị bơ tự nhiên'),
+    serving_suggestion = COALESCE(serving_suggestion, N'Dùng ngon nhất khi vừa hoàn thiện
+Phù hợp buổi chiều hoặc sau bữa ăn
+Có thể thêm topping giòn để tăng kết cấu'),
+    gallery = COALESCE(gallery, N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1200&q=85
+https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=1200&q=85
+https://images.unsplash.com/photo-1488900128323-21503983a07e?auto=format&fit=crop&w=1200&q=85'),
+    faqs = COALESCE(faqs, N'Sản phẩm này có phù hợp trẻ em không? | Có, vị ngọt nhẹ và nguyên liệu dễ dùng cho nhiều nhóm khách.
+Có thể bán trong mô hình nhượng quyền không? | Có, đây là nhóm sản phẩm dễ chuẩn hóa quy trình và đào tạo.
+Có thể thay đổi topping không? | Có thể tùy điểm bán và mùa nguyên liệu.'),
+    featured = CASE WHEN sort_order <= 4 THEN 1 ELSE featured END,
+    seo_title = COALESCE(seo_title, name + N' | ALOO Kem Bơ'),
+    seo_description = COALESCE(seo_description, description)
+WHERE short_description IS NULL;
+GO
+UPDATE dbo.products
+SET
+    category_id = (SELECT TOP 1 id FROM dbo.categories WHERE slug = N'kem-bo'),
+    name = N'Kem bơ truyền thống',
+    slug = N'kem-bo-truyen-thong',
+    description = N'Bơ sáp xay mịn kết hợp kem tươi mát, thêm dừa sấy giòn thơm.',
+    price = 0,
+    image_url = N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=85',
+    sort_order = 1,
+    status = N'ACTIVE',
+    short_description = N'Kem bơ truyền thống là món đặc trưng của ALOO, nổi bật với vị bơ sáp béo mịn, kem sữa mát lạnh và topping dừa sấy giòn nhẹ. Sản phẩm phù hợp cho khách hàng yêu thích hương vị tự nhiên, thanh mát và dễ thưởng thức.',
+    taste_profile = N'Béo mịn, thơm bơ, ngọt nhẹ, mát lạnh, topping giòn.',
+    ingredients = CONCAT(N'Bơ sáp', CHAR(13)+CHAR(10), N'Kem sữa', CHAR(13)+CHAR(10), N'Sữa đặc', CHAR(13)+CHAR(10), N'Dừa sấy', CHAR(13)+CHAR(10), N'Đá xay'),
+    serving_suggestion = CONCAT(N'Dùng ngay khi còn lạnh.', CHAR(13)+CHAR(10), N'Phù hợp thưởng thức vào buổi chiều hoặc sau bữa ăn.', CHAR(13)+CHAR(10), N'Có thể thêm dừa sấy, trân châu hoặc sốt bơ để tăng hương vị.'),
+    detail_content = N'Kem bơ truyền thống được làm từ bơ sáp chọn lọc, xay mịn cùng kem sữa để tạo nên kết cấu béo mượt và hương vị thanh mát. Mỗi ly kem bơ mang đến cảm giác tự nhiên, dễ ăn và phù hợp với nhiều độ tuổi. Đây là sản phẩm chủ lực giúp khách hàng nhận diện hương vị đặc trưng của ALOO.',
+    gallery = CONCAT(N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=85', CHAR(13)+CHAR(10), N'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=85', CHAR(13)+CHAR(10), N'https://images.unsplash.com/photo-1505253213348-ce2e2ff1f1ec?auto=format&fit=crop&w=900&q=85'),
+    faqs = CONCAT(N'Kem bơ truyền thống có ngọt nhiều không? | Sản phẩm có vị ngọt nhẹ, béo mịn và dễ ăn.', CHAR(13)+CHAR(10), N'Sản phẩm có topping gì? | Mặc định có dừa sấy giòn, có thể thêm topping tùy chọn.', CHAR(13)+CHAR(10), N'Kem bơ nên dùng khi nào ngon nhất? | Ngon nhất khi dùng ngay sau khi nhận món, lúc còn lạnh.', CHAR(13)+CHAR(10), N'Sản phẩm phù hợp với ai? | Phù hợp với khách hàng yêu thích món tráng miệng mát lạnh, vị bơ tự nhiên.'),
+    featured = 1,
+    seo_title = N'Kem bơ truyền thống ALOO - Béo mịn, thơm bơ, mát lạnh',
+    seo_description = N'Thưởng thức kem bơ truyền thống ALOO với bơ sáp xay mịn, kem sữa mát lạnh và topping dừa sấy giòn thơm.',
+    updated_at = GETDATE()
+WHERE slug = N'kem-bo-truyen-thong';
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.home_sections)
+BEGIN
+    INSERT INTO dbo.home_sections (section_key, type, title, subtitle, description, image_url, button_text, button_link, badge, sort_order, status) VALUES
+    (N'featured-product', N'FEATURED_CARD', N'Kem bơ truyền thống', N'Tuyển chọn', N'Bơ sáp chín tự nhiên hòa cùng kem sữa mát lạnh và topping dừa sấy giòn thơm.', N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1400&q=85', N'Xem sản phẩm', N'/products/kem-bo-truyen-thong', N'Bán chạy nhất', 1, N'ACTIVE'),
+    (N'franchise-model', N'CTA_CARD', N'Mô hình nhượng quyền ALOO', N'Tuyển chọn', N'Cửa hàng tinh gọn, nhận diện trẻ trung, quy trình dễ vận hành cho đối tác mới.', N'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1400&q=85', N'Tìm hiểu ngay', N'/franchise', N'Cơ hội hợp tác', 2, N'ACTIVE'),
+    (N'new-store', N'LOCATION_CARD', N'Cửa hàng ALOO mới', N'Trải nghiệm trực tiếp', N'Không gian phục vụ nhanh, menu kem bơ signature và nhiều topping dễ chọn.', N'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1400&q=85', N'Xem hệ thống', N'/locations', N'Điểm đến mới', 3, N'INACTIVE');
+END
+GO
 IF NOT EXISTS (SELECT 1 FROM dbo.hero_banners)
 BEGIN
     INSERT INTO dbo.hero_banners (title, subtitle, description, background_image_url, product_image_url, thumbnail_image_url, tone, sort_order, status) VALUES
@@ -176,6 +233,9 @@ GO
 
 IF NOT EXISTS (SELECT 1 FROM dbo.contact_messages)
 BEGIN
+
+
+
     INSERT INTO dbo.contact_messages (full_name, email, phone, subject, message, status) VALUES
     (N'Nguyễn Khánh An', N'khanhan@example.com', N'0901111222', N'Hỏi thông tin sản phẩm', N'Tôi muốn biết sản phẩm nào phù hợp cho trẻ em.', N'NEW'),
     (N'Lê Hoàng Minh', N'hoangminh@example.com', N'0902222333', N'Góp ý cửa hàng', N'Cửa hàng phục vụ tốt, mong thêm lựa chọn ít ngọt.', N'READ'),
@@ -187,3 +247,4 @@ GO
 
 PRINT N'ALOO sample data inserted. Login admin/user password: 123456';
 GO
+

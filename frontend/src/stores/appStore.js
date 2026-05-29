@@ -86,10 +86,16 @@ export const useAppStore = defineStore('app', {
         image: imageUrl,
         imageUrl,
         price: product.price ?? 0,
-        priceDisplay:
-          product.price === null || product.price === undefined
-            ? ''
-            : `${new Intl.NumberFormat('vi-VN').format(Number(product.price))} đ`,
+        shortDescription: product.shortDescription || '',
+        detailContent: product.detailContent || '',
+        ingredients: product.ingredients || '',
+        tasteProfile: product.tasteProfile || '',
+        servingSuggestion: product.servingSuggestion || '',
+        gallery: product.gallery || '',
+        faqs: product.faqs || '',
+        featured: Boolean(product.featured),
+        seoTitle: product.seoTitle || '',
+        seoDescription: product.seoDescription || '',
         category: product.category || '',
         categoryId: product.categoryId || null,
         sortOrder: Number(product.sortOrder || product.id || 0),
@@ -224,11 +230,21 @@ export const useAppStore = defineStore('app', {
         name: product.name?.trim(),
         slug: product.slug?.trim() || slugify(product.name),
         description: product.description?.trim() || '',
-        price: Number(product.price || 0),
+        shortDescription: product.shortDescription?.trim() || '',
+        detailContent: product.detailContent || '',
+        ingredients: product.ingredients || '',
+        tasteProfile: product.tasteProfile || '',
+        servingSuggestion: product.servingSuggestion || '',
+        gallery: product.gallery || '',
+        faqs: product.faqs || '',
+        price: 0,
         imageUrl: product.imageUrl || product.image || '',
         categoryId: product.categoryId || null,
         category: product.category || '',
         sortOrder: Number(product.sortOrder || 0),
+        featured: Boolean(product.featured),
+        seoTitle: product.seoTitle?.trim() || '',
+        seoDescription: product.seoDescription?.trim() || '',
         status: product.status || 'ACTIVE',
       }
     },
@@ -358,3 +374,6 @@ export const useAppStore = defineStore('app', {
     },
   },
 })
+
+
+

@@ -138,25 +138,29 @@ const actionCards = computed(() => [
 
 const leadStatusBars = computed(() =>
   toProgressItems(countBy(store.registrations, (item) => item.status), [
-    'bg-blue-500',
-    'bg-avocado-600',
-    'bg-amber-500',
-    'bg-emerald-500',
-    'bg-slate-400',
+    'bg-gradient-to-r from-blue-600 to-cyan-400',
+    'bg-gradient-to-r from-brand-forest to-brand-lime',
+    'bg-gradient-to-r from-brand-brown to-brand-sand',
+    'bg-gradient-to-r from-emerald-600 to-teal-400',
+    'bg-gradient-to-r from-slate-400 to-slate-300',
   ]),
 )
 
 const postStatusBars = computed(() =>
   toProgressItems(countBy(store.posts, (item) => postStatusLabel(item.status)), [
-    'bg-avocado-600',
-    'bg-amber-500',
-    'bg-blue-500',
-    'bg-slate-400',
+    'bg-gradient-to-r from-brand-forest to-brand-lime',
+    'bg-gradient-to-r from-brand-brown to-brand-sand',
+    'bg-gradient-to-r from-blue-600 to-cyan-400',
+    'bg-gradient-to-r from-slate-400 to-slate-300',
   ]),
 )
 
 const productCategoryBars = computed(() =>
-  toProgressItems(countBy(store.products, (item) => item.category), ['bg-avocado-600', 'bg-blue-500']),
+  toProgressItems(countBy(store.products, (item) => item.category), [
+    'bg-gradient-to-r from-brand-forest to-brand-lime',
+    'bg-gradient-to-r from-brand-brown to-brand-sand',
+    'bg-gradient-to-r from-blue-600 to-cyan-450',
+  ]),
 )
 
 const analysisCards = computed(() => [
@@ -197,14 +201,14 @@ const recentPosts = computed(() =>
 
 const toneClasses = {
   success: {
-    card: 'border-avocado-100/50 bg-white hover:border-avocado-200',
-    icon: 'bg-avocado-50 text-avocado-700',
-    note: 'text-avocado-700',
+    card: 'border-brand-lime/20 bg-white hover:border-brand-lime/40',
+    icon: 'bg-brand-lime/10 text-brand-forest',
+    note: 'text-brand-forest',
   },
   warning: {
-    card: 'border-amber-100 bg-white hover:border-amber-200',
-    icon: 'bg-amber-50 text-amber-700',
-    note: 'text-amber-700',
+    card: 'border-brand-sand/20 bg-white hover:border-brand-sand/40',
+    icon: 'bg-brand-sand/10 text-brand-brown',
+    note: 'text-brand-brown',
   },
   info: {
     card: 'border-blue-100 bg-white hover:border-blue-200',

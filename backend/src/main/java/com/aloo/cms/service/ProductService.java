@@ -38,6 +38,12 @@ public class ProductService {
         return productMapper.toResponse(getProduct(id));
     }
 
+    @Transactional(readOnly = true)
+    public ProductResponse findBySlug(String slug) {
+        return productMapper.toResponse(productRepository.findBySlugAndStatus(slug.trim().toLowerCase(Locale.ROOT), "ACTIVE")
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found")));
+    }
+
     @Transactional
     public ProductResponse create(ProductRequest request) {
         ensureSlugAvailable(request.slug(), null);
@@ -110,3 +116,4 @@ public class ProductService {
                 .replaceAll("(^-|-$)", "");
     }
 }
+

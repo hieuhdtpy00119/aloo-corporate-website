@@ -22,6 +22,7 @@ const searchQuery = ref('')
 const statusFilter = ref('Tất cả')
 const currentPage = ref(1)
 const isUploadingImage = ref(false)
+const isUploadingGallery = ref(false)
 const pageSize = 6
 
 const showPosterModal = ref(false)
@@ -49,15 +50,41 @@ const categoryOptions = computed(() => [
   ...new Set(store.categories.filter((category) => category.status === 'ACTIVE').map((category) => category.name)),
 ])
 
-const form = reactive({
+const defaultProductForm = () => ({
   name: '',
   slug: '',
   description: '',
-  price: 0,
   imageUrl: '',
   category: '',
   status: 'ACTIVE',
+  shortDescription: '',
+  detailContent: '',
+  ingredients: '',
+  tasteProfile: '',
+  servingSuggestion: '',
+  gallery: '',
+  faqs: '',
+  featured: false,
+  seoTitle: '',
+  seoDescription: '',
 })
+
+const form = reactive(defaultProductForm())
+
+const formImagePreviewUrl = computed(() => resolveBackendAssetUrl(form.imageUrl || ''))
+const formGalleryLines = computed(() =>
+  String(form.gallery || '')
+    .split(/\r?\n/)
+    .map((url) => url.trim())
+    .filter(Boolean)
+)
+
+const formGalleryPreviewUrls = computed(() =>
+  formGalleryLines.value.map((url) => ({
+    raw: url,
+    preview: resolveBackendAssetUrl(url),
+  }))
+)
 
 const posterForm = reactive({
   branchKey: '',
@@ -78,15 +105,7 @@ const slugify = (value) =>
     .replace(/(^-|-$)/g, '')
 
 const resetForm = () => {
-  Object.assign(form, {
-    name: '',
-    slug: '',
-    description: '',
-    price: 0,
-    imageUrl: '',
-    category: '',
-    status: 'ACTIVE',
-  })
+  Object.assign(form, defaultProductForm())
   editingId.value = null
 }
 
@@ -124,13 +143,23 @@ const openEditModal = (product) => {
   mode.value = 'edit'
   editingId.value = product.id
   Object.assign(form, {
+    ...defaultProductForm(),
     name: product.name || '',
     slug: product.slug || '',
     description: product.description || '',
-    price: Number(product.price || 0),
     imageUrl: product.imageUrl || product.image || '',
     category: product.category || '',
     status: product.status || 'ACTIVE',
+    shortDescription: product.shortDescription || '',
+    detailContent: product.detailContent || '',
+    ingredients: product.ingredients || '',
+    tasteProfile: product.tasteProfile || '',
+    servingSuggestion: product.servingSuggestion || '',
+    gallery: product.gallery || '',
+    faqs: product.faqs || '',
+    featured: Boolean(product.featured),
+    seoTitle: product.seoTitle || '',
+    seoDescription: product.seoDescription || '',
   })
   showModal.value = true
 }
@@ -183,6 +212,84 @@ const handleImageFileChange = async (event) => {
   }
 }
 
+
+const allowedGalleryExtensions = ['jpg', 'jpeg', 'jfif', 'png', 'webp', 'gif']
+const maxGalleryFileSize = 5 * 1024 * 1024
+
+const imageUploadErrorMessage = (error) =>
+  error.response?.data?.message || error.response?.data?.error || error.message || 'Không tải được ảnh'
+
+const validateGalleryFile = (file) => {
+  const extension = file.name.split('.').pop()?.toLowerCase() || ''
+  if (!allowedGalleryExtensions.includes(extension)) {
+    return `Định dạng .${extension || 'không rõ'} chưa được hỗ trợ`
+  }
+  if (file.size > maxGalleryFileSize) {
+    return 'Ảnh vượt quá 5MB'
+  }
+  if (file.type && !file.type.startsWith('image/')) {
+    return 'File không phải ảnh'
+  }
+  return ''
+}
+
+const handleGalleryFilesChange = async (event) => {
+  const files = Array.from(event.target.files || [])
+  if (!files.length) return
+
+  const validFiles = []
+  const skippedFiles = []
+  files.forEach((file) => {
+    const reason = validateGalleryFile(file)
+    if (reason) skippedFiles.push(`${file.name}: ${reason}`)
+    else validFiles.push(file)
+  })
+
+  if (!validFiles.length) {
+    toast.error(skippedFiles.slice(0, 2).join('\n') || 'Không có ảnh hợp lệ để upload')
+    event.target.value = ''
+    return
+  }
+
+  isUploadingGallery.value = true
+  try {
+    const results = await Promise.allSettled(validFiles.map((file) => uploadService.image(file)))
+    const uploadedUrls = results
+      .filter((result) => result.status === 'fulfilled' && result.value.data?.url)
+      .map((result) => result.value.data.url)
+
+    const failedFiles = results
+      .map((result, index) => ({ result, file: validFiles[index] }))
+      .filter(({ result }) => result.status === 'rejected')
+      .map(({ result, file }) => `${file.name}: ${imageUploadErrorMessage(result.reason)}`)
+
+    if (uploadedUrls.length) {
+      const currentUrls = String(form.gallery || '')
+        .split(/\r?\n/)
+        .map((url) => url.trim())
+        .filter(Boolean)
+      form.gallery = [...currentUrls, ...uploadedUrls]
+        .filter((url, index, all) => all.indexOf(url) === index)
+        .join('\n')
+      toast.success(`Đã tải ${uploadedUrls.length} ảnh vào gallery`)
+    }
+
+    const errors = [...skippedFiles, ...failedFiles]
+    if (errors.length) {
+      toast.error(errors.slice(0, 2).join('\n'))
+    }
+  } finally {
+    isUploadingGallery.value = false
+    event.target.value = ''
+  }
+}
+
+const removeGalleryImage = (indexToRemove) => {
+  form.gallery = formGalleryLines.value
+    .filter((_, index) => index !== indexToRemove)
+    .join('\n')
+  toast.success('Đã xóa ảnh khỏi gallery')
+}
 const handlePosterImageFileChange = async (event) => {
   const file = event.target.files?.[0]
   if (!file) return
@@ -588,7 +695,7 @@ onMounted(() => {
     />
 
     <!-- Edit modal -->
-    <BaseModal :show="showModal" :title="mode === 'create' ? 'Thêm Sản Phẩm Mới' : 'Cập Nhật Sản Phẩm'" max-width="max-w-2xl" @close="closeModal">
+    <BaseModal :show="showModal" :title="mode === 'create' ? 'Thêm Sản Phẩm Mới' : 'Cập Nhật Sản Phẩm'" max-width="max-w-5xl" @close="closeModal">
       <form id="product-form" class="grid gap-5" @submit.prevent="saveProduct">
         <div class="grid gap-5 md:grid-cols-2">
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -600,17 +707,13 @@ onMounted(() => {
             <input v-model="form.slug" required class="admin-input-premium" placeholder="url-friendly-slug" />
           </label>
         </div>
-        <div class="grid gap-5 md:grid-cols-3">
+        <div class="grid gap-5 md:grid-cols-2">
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             Danh mục
             <input v-model="form.category" list="product-categories" class="admin-input-premium" placeholder="Chọn hoặc nhập danh mục" />
             <datalist id="product-categories">
               <option v-for="category in categoryOptions" :key="category" :value="category" />
             </datalist>
-          </label>
-          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-            Giá sản phẩm (VND) *
-            <input v-model.number="form.price" type="number" required min="0" class="admin-input-premium" placeholder="Nhập giá..." />
           </label>
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             Trạng thái
@@ -634,22 +737,107 @@ onMounted(() => {
           Hoặc tải ảnh mới từ máy tính
           <input
             type="file"
-            accept="image/*"
+            accept=".jpg,.jpeg,.jfif,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
             class="w-full text-xs font-bold text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white file:cursor-pointer hover:file:bg-avocado-700 transition"
-            :disabled="isUploadingImage"
+            :disabled="isUploadingImage || isUploadingGallery"
             @change="handleImageFileChange"
           />
           <span v-if="isUploadingImage" class="text-xs font-bold text-avocado-700 animate-pulse">Đang upload lên máy chủ...</span>
         </label>
 
-        <div v-if="form.imageUrl" class="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+        <div v-if="formImagePreviewUrl" class="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
           <p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Xem trước ảnh</p>
-          <img :src="form.imageUrl" alt="Xem trước sản phẩm" class="h-32 w-40 rounded-xl border border-slate-100 object-cover shadow-sm" />
+          <img :src="formImagePreviewUrl" alt="Xem trước sản phẩm" class="h-32 w-40 rounded-xl border border-slate-100 object-cover shadow-sm" />
         </div>
 
         <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-          Mô tả sản phẩm
-          <textarea v-model="form.description" rows="3" class="admin-input-premium resize-none" placeholder="Mô tả chi tiết nguyên liệu, dung tích..."></textarea>
+          Mô tả ngắn trên thẻ sản phẩm
+          <textarea v-model="form.description" rows="3" class="admin-input-premium resize-none" placeholder="Mô tả ngắn dùng ở danh sách sản phẩm..."></textarea>
+        </label>
+
+        <div class="grid gap-5 md:grid-cols-2">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Mô tả hero chi tiết
+            <textarea v-model="form.shortDescription" rows="4" class="admin-input-premium resize-none" placeholder="Một đoạn giới thiệu hấp dẫn cho trang chi tiết..."></textarea>
+          </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Hồ sơ hương vị
+            <textarea v-model="form.tasteProfile" rows="4" class="admin-input-premium resize-none" placeholder="Béo mịn, thơm bơ, ngọt nhẹ, topping giòn..."></textarea>
+          </label>
+        </div>
+
+        <div class="grid gap-5 md:grid-cols-2">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Nguyên liệu chính
+            <textarea v-model="form.ingredients" rows="5" class="admin-input-premium resize-none" placeholder="Mỗi dòng một nguyên liệu: Bơ sáp; Kem sữa; Dừa khô..."></textarea>
+          </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Gợi ý thưởng thức
+            <textarea v-model="form.servingSuggestion" rows="5" class="admin-input-premium resize-none" placeholder="Dùng ngay khi lạnh, phù hợp buổi chiều, thêm topping..."></textarea>
+          </label>
+        </div>
+
+        <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+          Nội dung landing page
+          <textarea v-model="form.detailContent" rows="6" class="admin-input-premium resize-none" placeholder="Viết câu chuyện sản phẩm, điểm khác biệt, quy trình chuẩn bị..."></textarea>
+        </label>
+
+        <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+          Gallery ảnh chi tiết
+          <textarea v-model="form.gallery" rows="4" class="admin-input-premium resize-none" placeholder="Mỗi dòng một URL ảnh"></textarea>
+          <input
+            type="file"
+            accept=".jpg,.jpeg,.jfif,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
+            multiple
+            class="w-full text-xs font-bold text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white file:cursor-pointer hover:file:bg-avocado-700 transition"
+            :disabled="isUploadingGallery"
+            @change="handleGalleryFilesChange"
+          />
+          <span v-if="isUploadingGallery" class="text-xs font-bold text-avocado-700 animate-pulse">Đang upload nhiều ảnh gallery...</span>
+          <span v-else class="text-[11px] font-semibold normal-case tracking-normal text-slate-400">Có thể chọn nhiều ảnh cùng lúc. URL ảnh sẽ tự thêm vào ô gallery.</span>
+          <div v-if="formGalleryPreviewUrls.length" class="grid grid-cols-3 gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3 sm:grid-cols-5">
+            <div
+              v-for="(item, index) in formGalleryPreviewUrls"
+              :key="item.raw"
+              class="group relative overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm"
+            >
+              <img
+                :src="item.preview"
+                alt="Gallery sản phẩm"
+                class="aspect-square w-full object-cover"
+              />
+              <button
+                type="button"
+                class="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-sm font-black text-red-600 shadow-md ring-1 ring-red-100 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
+                title="Xóa ảnh khỏi gallery"
+                aria-label="Xóa ảnh khỏi gallery"
+                @click="removeGalleryImage(index)"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        </label>
+
+        <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+          FAQ sản phẩm
+          <textarea v-model="form.faqs" rows="4" class="admin-input-premium resize-none" placeholder="Mỗi dòng: Câu hỏi | Câu trả lời"></textarea>
+        </label>
+
+        <div class="grid gap-5 md:grid-cols-2">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            SEO title
+            <input v-model="form.seoTitle" class="admin-input-premium" placeholder="Tiêu đề SEO cho sản phẩm" />
+          </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            SEO description
+            <input v-model="form.seoDescription" class="admin-input-premium" placeholder="Mô tả SEO ngắn" />
+          </label>
+        </div>
+
+        <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 px-4 py-3 text-sm font-black text-slate-700">
+          <input v-model="form.featured" type="checkbox" class="h-4 w-4 accent-avocado-700" />
+          Đánh dấu sản phẩm nổi bật
         </label>
       </form>
       <template #footer>
@@ -659,7 +847,7 @@ onMounted(() => {
             class="rounded-full bg-avocado-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:bg-avocado-700 disabled:cursor-not-allowed disabled:opacity-60 transition shadow-md" 
             form="product-form" 
             type="submit" 
-            :disabled="isUploadingImage"
+            :disabled="isUploadingImage || isUploadingGallery"
           >
             {{ mode === 'create' ? 'Tạo sản phẩm' : 'Lưu cập nhật' }}
           </button>
@@ -716,7 +904,7 @@ onMounted(() => {
           Hoặc tải ảnh menu từ máy tính
           <input
             type="file"
-            accept="image/*"
+            accept=".jpg,.jpeg,.jfif,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
             class="w-full text-xs font-bold text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white file:cursor-pointer hover:file:bg-avocado-700 transition"
             :disabled="isUploadingPosterImage"
             @change="handlePosterImageFileChange"
@@ -773,3 +961,6 @@ onMounted(() => {
   padding-left: 2.75rem;
 }
 </style>
+
+
+

@@ -61,6 +61,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/locations/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/franchise-contents/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/hero-banners/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/home-sections/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/menu-posters/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/brand-timelines/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contact-messages").permitAll()
@@ -107,5 +108,6 @@ public class SecurityConfig {
         return source;
     }
 }
+
 
 

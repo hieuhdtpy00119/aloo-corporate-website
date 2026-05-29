@@ -37,6 +37,27 @@ public class Product {
     @Column(columnDefinition = "nvarchar(max)")
     private String description;
 
+    @Column(columnDefinition = "nvarchar(max)")
+    private String shortDescription;
+
+    @Column(columnDefinition = "nvarchar(max)")
+    private String detailContent;
+
+    @Column(columnDefinition = "nvarchar(max)")
+    private String ingredients;
+
+    @Column(columnDefinition = "nvarchar(max)")
+    private String tasteProfile;
+
+    @Column(columnDefinition = "nvarchar(max)")
+    private String servingSuggestion;
+
+    @Column(columnDefinition = "nvarchar(max)")
+    private String gallery;
+
+    @Column(columnDefinition = "nvarchar(max)")
+    private String faqs;
+
     @Column(precision = 18, scale = 2)
     private BigDecimal price;
 
@@ -49,6 +70,15 @@ public class Product {
 
     @Column(nullable = false)
     private Integer sortOrder = 0;
+
+    @Column(nullable = false)
+    private Boolean featured = false;
+
+    @Column(length = 260)
+    private String seoTitle;
+
+    @Column(length = 500)
+    private String seoDescription;
 
     @Column(nullable = false, length = 40)
     private String status = "ACTIVE";
@@ -71,3 +101,4 @@ public class Product {
         updatedAt = LocalDateTime.now();
     }
 }
+

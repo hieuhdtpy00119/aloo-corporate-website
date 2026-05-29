@@ -50,11 +50,21 @@ class ProductServiceTest {
                 "Kem bo test",
                 "kem-bo-test",
                 "Mo ta",
+                "Mo ta hero",
+                "Noi dung chi tiet",
+                "Bo sap\nKem tuoi",
+                "Beo min\nMat lanh",
+                "Dung lanh",
+                "/uploads/gallery.jpg",
+                "Hoi? | Dap",
                 BigDecimal.ZERO,
                 "/uploads/product.jpg",
                 null,
                 "Kem bo",
                 1,
+                true,
+                "SEO title",
+                "SEO description",
                 "ACTIVE"
         ));
 
@@ -74,11 +84,21 @@ class ProductServiceTest {
                 "Kem bo",
                 "used-slug",
                 null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
                 BigDecimal.ZERO,
                 null,
                 null,
                 null,
                 0,
+                false,
+                null,
+                null,
                 "ACTIVE"
         );
 
@@ -87,3 +107,4 @@ class ProductServiceTest {
                 .hasMessage("Product slug is already used");
     }
 }
+

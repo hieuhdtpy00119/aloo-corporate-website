@@ -18,10 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class UploadService {
 
-    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp", "gif");
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "jfif", "png", "webp", "gif");
     private static final Map<String, Set<String>> ALLOWED_CONTENT_TYPES = Map.of(
             "jpg", Set.of("image/jpeg"),
             "jpeg", Set.of("image/jpeg"),
+            "jfif", Set.of("image/jpeg"),
             "png", Set.of("image/png"),
             "webp", Set.of("image/webp"),
             "gif", Set.of("image/gif")
@@ -44,7 +45,7 @@ public class UploadService {
         String originalName = StringUtils.cleanPath(file.getOriginalFilename() == null ? "image" : file.getOriginalFilename());
         String extension = extensionOf(originalName);
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw new BadRequestException("Only jpg, jpeg, png, webp and gif images are allowed");
+            throw new BadRequestException("Only jpg, jpeg, jfif, png, webp and gif images are allowed");
         }
         validateContentType(file, extension);
         validateMagicBytes(file, extension);
@@ -84,7 +85,7 @@ public class UploadService {
         }
 
         boolean valid = switch (extension) {
-            case "jpg", "jpeg" -> read >= 3
+            case "jpg", "jpeg", "jfif" -> read >= 3
                     && (header[0] & 0xff) == 0xff
                     && (header[1] & 0xff) == 0xd8
                     && (header[2] & 0xff) == 0xff;
@@ -129,3 +130,4 @@ public class UploadService {
         return fileName.substring(dotIndex + 1).toLowerCase();
     }
 }
+

@@ -4,6 +4,7 @@ import AdminLayout from '../layouts/AdminLayout.vue'
 import HomeView from '../views/public/HomeView.vue'
 import AboutView from '../views/public/AboutView.vue'
 import ProductsView from '../views/public/ProductsView.vue'
+import ProductDetailView from '../views/public/ProductDetailView.vue'
 import FranchiseView from '../views/public/FranchiseView.vue'
 import ProcessView from '../views/public/ProcessView.vue'
 import CostView from '../views/public/CostView.vue'
@@ -28,6 +29,7 @@ import AdminLocationsView from '../views/admin/AdminLocationsView.vue'
 import AdminProfileView from '../views/admin/AdminProfileView.vue'
 import AdminChangePasswordView from '../views/admin/AdminChangePasswordView.vue'
 import AdminAccountsView from '../views/admin/AdminAccountsView.vue'
+import AdminHomeSectionsView from '../views/admin/AdminHomeSectionsView.vue'
 import { resolveAuthRedirect } from './authGuard'
 
 const router = createRouter({
@@ -40,6 +42,7 @@ const router = createRouter({
         { path: '', name: 'home', component: HomeView },
         { path: 'about', name: 'about', component: AboutView },
         { path: 'products', name: 'products', component: ProductsView },
+        { path: 'products/:slug', name: 'product-detail', component: ProductDetailView },
         { path: 'franchise', name: 'franchise', component: FranchiseView },
         { path: 'process', name: 'process', component: ProcessView },
         { path: 'cost', name: 'cost', component: CostView },
@@ -65,6 +68,7 @@ const router = createRouter({
       children: [
         { path: '', name: 'admin-dashboard', component: AdminDashboardView },
         { path: 'products', name: 'admin-products', component: AdminProductsView },
+        { path: 'home-sections', name: 'admin-home-sections', component: AdminHomeSectionsView },
         { path: 'articles', name: 'admin-articles', component: AdminArticlesView },
         { path: 'articles/new', name: 'admin-article-new', component: AdminArticleEditorView },
         { path: 'articles/:id/edit', name: 'admin-article-edit', component: AdminArticleEditorView },
@@ -92,3 +96,4 @@ const router = createRouter({
 router.beforeEach((to) => resolveAuthRedirect(to))
 
 export default router
+
