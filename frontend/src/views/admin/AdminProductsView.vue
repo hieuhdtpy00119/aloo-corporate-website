@@ -5,7 +5,7 @@ import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
 import Pagination from '../../components/admin/Pagination.vue'
 import SearchFilterBar from '../../components/admin/SearchFilterBar.vue'
-import { menuPosterService, resolveBackendAssetUrl, uploadService } from '../../services/cmsService'
+import { heroBannerService, menuPosterService, resolveBackendAssetUrl, uploadService } from '../../services/cmsService'
 import { useAppStore } from '../../stores/appStore'
 import { useToastStore } from '../../stores/toastStore'
 import { Plus, Edit2, Trash2, Image, Link, ChevronRight } from 'lucide-vue-next'
@@ -36,6 +36,17 @@ const isLoadingMenuPosters = ref(false)
 const menuPosterError = ref('')
 const isUploadingPosterImage = ref(false)
 const menuPosters = ref([])
+const showHeroModal = ref(false)
+const heroMode = ref('create')
+const editingHeroId = ref(null)
+const pendingDeleteHeroId = ref(null)
+const heroSearchQuery = ref('')
+const heroStatusFilter = ref('Tất cả')
+const heroCurrentPage = ref(1)
+const isLoadingHeroBanners = ref(false)
+const heroBannerError = ref('')
+const isUploadingHeroImage = ref('')
+const heroBanners = ref([])
 
 const isLoading = computed(() => store.loading.products)
 const errorMessage = computed(() => store.errors.products)
@@ -44,7 +55,12 @@ const statusLabels = {
   ACTIVE: 'Đang bán',
   INACTIVE: 'Tạm ẩn',
 }
+const heroStatusLabels = {
+  ACTIVE: 'Đang hiển thị',
+  INACTIVE: 'Tạm ẩn',
+}
 const statusFilters = ['Tất cả', ...productStatuses.map((status) => statusLabels[status])]
+const heroStatusFilters = ['Tất cả', ...productStatuses.map((status) => heroStatusLabels[status])]
 const categoryOptions = computed(() => [
   '',
   ...new Set(store.categories.filter((category) => category.status === 'ACTIVE').map((category) => category.name)),
@@ -96,6 +112,20 @@ const posterForm = reactive({
   status: 'ACTIVE',
 })
 
+const heroForm = reactive({
+  title: '',
+  subtitle: '',
+  description: '',
+  backgroundImageUrl: '',
+  thumbnailImageUrl: '',
+  tone: 'light',
+  sortOrder: 0,
+  status: 'ACTIVE',
+})
+
+const heroBackgroundPreviewUrl = computed(() => resolveBackendAssetUrl(heroForm.backgroundImageUrl || ''))
+const heroThumbnailPreviewUrl = computed(() => resolveBackendAssetUrl(heroForm.thumbnailImageUrl || ''))
+
 const slugify = (value) =>
   value
     .toLowerCase()
@@ -120,6 +150,18 @@ const normalizeMenuPoster = (poster) => ({
   status: poster.status || 'ACTIVE',
 })
 
+const normalizeHeroBanner = (banner) => ({
+  ...banner,
+  title: banner.title || '',
+  subtitle: banner.subtitle || '',
+  description: banner.description || '',
+  backgroundImageUrl: resolveBackendAssetUrl(banner.backgroundImageUrl || ''),
+  thumbnailImageUrl: resolveBackendAssetUrl(banner.thumbnailImageUrl || ''),
+  tone: banner.tone || 'light',
+  sortOrder: Number(banner.sortOrder || 0),
+  status: banner.status || 'ACTIVE',
+})
+
 const resetPosterForm = () => {
   Object.assign(posterForm, {
     branchKey: '',
@@ -131,6 +173,20 @@ const resetPosterForm = () => {
     status: 'ACTIVE',
   })
   editingPosterId.value = null
+}
+
+const resetHeroForm = () => {
+  Object.assign(heroForm, {
+    title: '',
+    subtitle: '',
+    description: '',
+    backgroundImageUrl: '',
+    thumbnailImageUrl: '',
+    tone: 'light',
+    sortOrder: 0,
+    status: 'ACTIVE',
+  })
+  editingHeroId.value = null
 }
 
 const openCreateModal = () => {
@@ -193,6 +249,33 @@ const openEditPosterModal = (poster) => {
 const closePosterModal = () => {
   showPosterModal.value = false
   resetPosterForm()
+}
+
+const openCreateHeroModal = () => {
+  heroMode.value = 'create'
+  resetHeroForm()
+  showHeroModal.value = true
+}
+
+const openEditHeroModal = (banner) => {
+  heroMode.value = 'edit'
+  editingHeroId.value = banner.id
+  Object.assign(heroForm, {
+    title: banner.title || '',
+    subtitle: banner.subtitle || '',
+    description: banner.description || '',
+    backgroundImageUrl: banner.backgroundImageUrl || '',
+    thumbnailImageUrl: banner.thumbnailImageUrl || '',
+    tone: banner.tone || 'light',
+    sortOrder: Number(banner.sortOrder || 0),
+    status: banner.status || 'ACTIVE',
+  })
+  showHeroModal.value = true
+}
+
+const closeHeroModal = () => {
+  showHeroModal.value = false
+  resetHeroForm()
 }
 
 const handleImageFileChange = async (event) => {
@@ -307,13 +390,30 @@ const handlePosterImageFileChange = async (event) => {
   }
 }
 
+const handleHeroImageFileChange = async (event, field) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  isUploadingHeroImage.value = field
+  try {
+    const { data } = await uploadService.image(file)
+    heroForm[field] = data.url
+    toast.success('Đã tải ảnh banner lên backend')
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không tải được ảnh banner')
+  } finally {
+    isUploadingHeroImage.value = ''
+    event.target.value = ''
+  }
+}
+
 const statusClass = (status) =>
   status === 'ACTIVE'
     ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
     : 'border-slate-200 bg-slate-50 text-slate-500'
 
 const getStatusValue = (label) =>
-  Object.entries(statusLabels).find(([, value]) => value === label)?.[0] || label
+  [...Object.entries(statusLabels), ...Object.entries(heroStatusLabels)].find(([, value]) => value === label)?.[0] || label
 
 const filteredProducts = computed(() => {
   const keyword = searchQuery.value.trim().toLowerCase()
@@ -341,6 +441,16 @@ const filteredMenuPosters = computed(() => {
   })
 })
 
+const filteredHeroBanners = computed(() => {
+  const keyword = heroSearchQuery.value.trim().toLowerCase()
+  return heroBanners.value.filter((banner) => {
+    const haystack = [banner.title, banner.subtitle, banner.description].filter(Boolean).join(' ').toLowerCase()
+    const matchesSearch = !keyword || haystack.includes(keyword)
+    const matchesStatus = heroStatusFilter.value === 'Tất cả' || banner.status === getStatusValue(heroStatusFilter.value)
+    return matchesSearch && matchesStatus
+  })
+})
+
 const totalPages = computed(() => Math.max(1, Math.ceil(filteredProducts.value.length / pageSize)))
 const paginatedProducts = computed(() =>
   filteredProducts.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize),
@@ -348,6 +458,10 @@ const paginatedProducts = computed(() =>
 const totalPosterPages = computed(() => Math.max(1, Math.ceil(filteredMenuPosters.value.length / pageSize)))
 const paginatedMenuPosters = computed(() =>
   filteredMenuPosters.value.slice((posterCurrentPage.value - 1) * pageSize, posterCurrentPage.value * pageSize),
+)
+const totalHeroPages = computed(() => Math.max(1, Math.ceil(filteredHeroBanners.value.length / pageSize)))
+const paginatedHeroBanners = computed(() =>
+  filteredHeroBanners.value.slice((heroCurrentPage.value - 1) * pageSize, heroCurrentPage.value * pageSize),
 )
 
 const fetchMenuPosters = async () => {
@@ -361,6 +475,20 @@ const fetchMenuPosters = async () => {
     throw error
   } finally {
     isLoadingMenuPosters.value = false
+  }
+}
+
+const fetchHeroBanners = async () => {
+  isLoadingHeroBanners.value = true
+  heroBannerError.value = ''
+  try {
+    const { data } = await heroBannerService.list()
+    heroBanners.value = Array.isArray(data) ? data.map(normalizeHeroBanner) : []
+  } catch (error) {
+    heroBannerError.value = error.response?.data?.message || 'Không tải được banner trang sản phẩm'
+    throw error
+  } finally {
+    isLoadingHeroBanners.value = false
   }
 }
 
@@ -437,6 +565,49 @@ const confirmDeleteMenuPoster = async () => {
   }
 }
 
+const saveHeroBanner = async () => {
+  if (!heroForm.title.trim()) {
+    toast.error('Vui lòng nhập tiêu đề banner')
+    return
+  }
+
+  const payload = {
+    title: heroForm.title.trim(),
+    subtitle: '',
+    description: '',
+    backgroundImageUrl: heroForm.backgroundImageUrl,
+    thumbnailImageUrl: heroForm.thumbnailImageUrl,
+    tone: 'light',
+    sortOrder: Number(heroForm.sortOrder || 0),
+    status: heroForm.status || 'ACTIVE',
+  }
+
+  try {
+    const request = editingHeroId.value ? heroBannerService.update(editingHeroId.value, payload) : heroBannerService.create(payload)
+    const { data } = await request
+    const normalized = normalizeHeroBanner(data)
+    const index = heroBanners.value.findIndex((item) => item.id === normalized.id)
+    if (index === -1) heroBanners.value.unshift(normalized)
+    else heroBanners.value.splice(index, 1, normalized)
+    toast.success(heroMode.value === 'create' ? 'Đã thêm banner trang sản phẩm' : 'Đã cập nhật banner trang sản phẩm')
+    closeHeroModal()
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không lưu được banner trang sản phẩm')
+  }
+}
+
+const confirmDeleteHeroBanner = async () => {
+  try {
+    await heroBannerService.remove(pendingDeleteHeroId.value)
+    heroBanners.value = heroBanners.value.filter((item) => item.id !== pendingDeleteHeroId.value)
+    toast.success('Đã xóa banner trang sản phẩm')
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không xóa được banner trang sản phẩm')
+  } finally {
+    pendingDeleteHeroId.value = null
+  }
+}
+
 watch(
   () => form.name,
   (name) => {
@@ -452,8 +623,12 @@ watch([posterSearchQuery, posterStatusFilter], () => {
   posterCurrentPage.value = 1
 })
 
+watch([heroSearchQuery, heroStatusFilter], () => {
+  heroCurrentPage.value = 1
+})
+
 onMounted(() => {
-  Promise.allSettled([store.fetchProducts(), store.fetchCategories(), fetchMenuPosters()]).then((results) => {
+  Promise.allSettled([store.fetchProducts(), store.fetchCategories(), fetchHeroBanners()]).then((results) => {
     if (results.some((result) => result.status === 'rejected')) {
       toast.error('Không tải được một phần dữ liệu sản phẩm')
     }
@@ -472,10 +647,10 @@ onMounted(() => {
       </div>
       <button 
         class="rounded-full bg-avocado-600 hover:bg-avocado-700 px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-white transition flex items-center justify-center gap-2 shadow-lg shadow-avocado-600/10" 
-        @click="activeTab === 'products' ? openCreateModal() : openCreatePosterModal()"
+        @click="activeTab === 'products' ? openCreateModal() : openCreateHeroModal()"
       >
         <Plus class="h-4.5 w-4.5" />
-        {{ activeTab === 'products' ? 'Thêm sản phẩm' : 'Thêm menu' }}
+        {{ activeTab === 'products' ? 'Thêm sản phẩm' : 'Thêm banner' }}
       </button>
     </div>
 
@@ -491,10 +666,10 @@ onMounted(() => {
       <button
         type="button"
         class="flex-1 rounded-2xl px-5 py-3 text-xs font-black uppercase tracking-wider transition sm:flex-none"
-        :class="activeTab === 'menu' ? 'bg-avocado-900 text-white shadow-sm' : 'text-slate-500 hover:bg-avocado-50 hover:text-avocado-900'"
-        @click="activeTab = 'menu'"
+        :class="activeTab === 'hero' ? 'bg-avocado-900 text-white shadow-sm' : 'text-slate-500 hover:bg-avocado-50 hover:text-avocado-900'"
+        @click="activeTab = 'hero'"
       >
-        Menu hiển thị
+        Banner trang sản phẩm
       </button>
     </div>
 
@@ -511,19 +686,19 @@ onMounted(() => {
 
     <SearchFilterBar
       v-else
-      v-model:search="posterSearchQuery"
-      v-model:status="posterStatusFilter"
-      search-label="Tìm menu"
-      search-placeholder="Tìm tên menu, chi nhánh, khu vực..."
+      v-model:search="heroSearchQuery"
+      v-model:status="heroStatusFilter"
+      search-label="Tìm banner"
+      search-placeholder="Tìm tiêu đề, nhãn nhỏ, mô tả..."
       status-label="Trạng thái hiển thị"
-      :status-options="statusFilters"
+      :status-options="heroStatusFilters"
     />
     
     <p v-if="activeTab === 'products' && errorMessage" class="rounded-2xl bg-red-50 border border-red-200/50 px-4 py-3 text-xs font-bold text-red-700">
       {{ errorMessage }}
     </p>
-    <p v-if="activeTab === 'menu' && menuPosterError" class="rounded-2xl bg-red-50 border border-red-200/50 px-4 py-3 text-xs font-bold text-red-700">
-      {{ menuPosterError }}
+    <p v-if="activeTab === 'hero' && heroBannerError" class="rounded-2xl bg-red-50 border border-red-200/50 px-4 py-3 text-xs font-bold text-red-700">
+      {{ heroBannerError }}
     </p>
 
     <!-- Table content -->
@@ -599,7 +774,7 @@ onMounted(() => {
       <EmptyState v-if="isLoading || filteredProducts.length === 0" :loading="isLoading" message="Không có sản phẩm phù hợp" />
     </div>
 
-    <div v-else class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+    <div v-else-if="activeTab === 'menu'" class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
       <div class="overflow-x-auto">
         <table v-if="!isLoadingMenuPosters && filteredMenuPosters.length" class="w-full min-w-[920px] table-fixed whitespace-nowrap text-left">
           <colgroup>
@@ -671,6 +846,68 @@ onMounted(() => {
       <EmptyState v-if="isLoadingMenuPosters || filteredMenuPosters.length === 0" :loading="isLoadingMenuPosters" message="Không có menu hiển thị phù hợp" />
     </div>
 
+    <div v-else class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+      <div class="overflow-x-auto">
+        <table v-if="!isLoadingHeroBanners && filteredHeroBanners.length" class="w-full min-w-[920px] table-fixed whitespace-nowrap text-left">
+          <colgroup>
+            <col class="w-[10%]" />
+            <col class="w-[30%]" />
+            <col class="w-[14%]" />
+            <col class="w-[12%]" />
+            <col class="w-[14%]" />
+            <col class="w-[10%]" />
+            <col class="w-[10%]" />
+          </colgroup>
+          <thead class="bg-slate-50/50 border-b border-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <tr>
+              <th class="px-6 py-4">Ảnh</th>
+              <th class="px-6 py-4">Nội dung</th>
+              <th class="px-6 py-4">Ảnh nền</th>
+              <th class="px-6 py-4">Tông màu</th>
+              <th class="px-6 py-4">Trạng thái</th>
+              <th class="px-6 py-4">Thứ tự</th>
+              <th class="px-6 py-4 text-right">Hành động</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50 text-xs">
+            <tr v-for="banner in paginatedHeroBanners" :key="banner.id" class="hover:bg-slate-50/30 transition">
+              <td class="px-6 py-4">
+                <img v-if="banner.thumbnailImageUrl || banner.backgroundImageUrl" :src="banner.thumbnailImageUrl || banner.backgroundImageUrl" :alt="banner.title" class="h-12 w-14 rounded-xl object-cover border border-slate-100 shadow-sm" />
+                <div v-else class="grid h-12 w-14 place-items-center rounded-xl bg-slate-50 border border-slate-100 text-[9px] font-bold text-slate-400">
+                  <Image class="h-4 w-4" />
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <p class="truncate font-bold text-xs text-avocado-950">{{ banner.title }}</p>
+                <p class="mt-1 truncate text-[10px] text-slate-400">{{ banner.subtitle || banner.description || 'Chưa có mô tả' }}</p>
+              </td>
+              <td class="px-6 py-4">
+                <span class="font-semibold text-slate-500">{{ banner.backgroundImageUrl ? 'Đã có' : 'Chưa có' }}</span>
+              </td>
+              <td class="px-6 py-4 font-semibold text-slate-500">{{ banner.tone === 'dark' ? 'Tối' : 'Sáng' }}</td>
+              <td class="px-6 py-4">
+                <span class="inline-flex min-w-[92px] justify-center rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(banner.status)">
+                  {{ heroStatusLabels[banner.status] || banner.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 font-semibold text-slate-500">{{ banner.sortOrder }}</td>
+              <td class="px-6 py-4">
+                <div class="flex justify-end gap-1.5">
+                  <button class="rounded-xl border border-avocado-100/50 p-2 font-bold text-avocado-700 hover:bg-avocado-50/50 transition" title="Sửa" @click="openEditHeroModal(banner)">
+                    <Edit2 class="h-3.5 w-3.5" />
+                  </button>
+                  <button class="rounded-xl border border-red-100 p-2 font-bold text-red-600 hover:bg-red-50 transition" title="Xóa" @click="pendingDeleteHeroId = banner.id">
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <EmptyState v-if="isLoadingHeroBanners || filteredHeroBanners.length === 0" :loading="isLoadingHeroBanners" message="Không có banner trang sản phẩm phù hợp" />
+    </div>
+
     <!-- Pagination -->
     <Pagination
       v-if="activeTab === 'products'"
@@ -684,7 +921,7 @@ onMounted(() => {
     />
 
     <Pagination
-      v-else
+      v-else-if="activeTab === 'menu'"
       :page="posterCurrentPage"
       :total-pages="totalPosterPages"
       :visible-count="paginatedMenuPosters.length"
@@ -692,6 +929,17 @@ onMounted(() => {
       label="menu"
       @prev="posterCurrentPage = Math.max(1, posterCurrentPage - 1)"
       @next="posterCurrentPage = Math.min(totalPosterPages, posterCurrentPage + 1)"
+    />
+
+    <Pagination
+      v-else
+      :page="heroCurrentPage"
+      :total-pages="totalHeroPages"
+      :visible-count="paginatedHeroBanners.length"
+      :total-count="filteredHeroBanners.length"
+      label="banner"
+      @prev="heroCurrentPage = Math.max(1, heroCurrentPage - 1)"
+      @next="heroCurrentPage = Math.min(totalHeroPages, heroCurrentPage + 1)"
     />
 
     <!-- Edit modal -->
@@ -932,8 +1180,63 @@ onMounted(() => {
       </template>
     </BaseModal>
 
+    <BaseModal :show="showHeroModal" :title="heroMode === 'create' ? 'Thêm banner trang sản phẩm' : 'Cập nhật banner trang sản phẩm'" max-width="max-w-5xl" @close="closeHeroModal">
+      <form id="hero-form" class="grid gap-5" @submit.prevent="saveHeroBanner">
+        <div class="grid gap-5 md:grid-cols-2">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Tên banner nội bộ *
+            <input v-model="heroForm.title" required class="admin-input-premium" placeholder="Banner menu mùa hè" />
+          </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Thứ tự hiển thị
+            <input v-model.number="heroForm.sortOrder" type="number" min="0" class="admin-input-premium" />
+          </label>
+        </div>
+
+        <div class="grid gap-5 md:grid-cols-2">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Trạng thái
+            <select v-model="heroForm.status" class="admin-input-premium cursor-pointer">
+              <option value="ACTIVE">Đang hiển thị</option>
+              <option value="INACTIVE">Tạm ẩn</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grid gap-5 lg:grid-cols-2">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Ảnh nền
+            <input v-model="heroForm.backgroundImageUrl" class="admin-input-premium" placeholder="https://... hoặc /uploads/..." />
+            <span class="text-[11px] font-semibold normal-case tracking-normal text-slate-400">
+              Khuyến nghị: desktop 1920x720 hoặc 1920x800. Trên mobile ảnh sẽ crop giữa theo tỉ lệ dọc, không đặt chữ/sản phẩm sát mép.
+            </span>
+            <input type="file" accept=".jpg,.jpeg,.jfif,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" class="w-full text-xs font-bold text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white" :disabled="Boolean(isUploadingHeroImage)" @change="handleHeroImageFileChange($event, 'backgroundImageUrl')" />
+            <span v-if="isUploadingHeroImage === 'backgroundImageUrl'" class="text-xs font-bold text-avocado-700 animate-pulse">Đang upload ảnh nền...</span>
+            <img v-if="heroBackgroundPreviewUrl" :src="heroBackgroundPreviewUrl" alt="Xem trước ảnh nền" class="h-28 w-full rounded-xl border border-slate-100 object-cover" />
+          </label>
+
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Ảnh thumbnail
+            <input v-model="heroForm.thumbnailImageUrl" class="admin-input-premium" placeholder="https://... hoặc /uploads/..." />
+            <input type="file" accept=".jpg,.jpeg,.jfif,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" class="w-full text-xs font-bold text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white" :disabled="Boolean(isUploadingHeroImage)" @change="handleHeroImageFileChange($event, 'thumbnailImageUrl')" />
+            <span v-if="isUploadingHeroImage === 'thumbnailImageUrl'" class="text-xs font-bold text-avocado-700 animate-pulse">Đang upload thumbnail...</span>
+            <img v-if="heroThumbnailPreviewUrl" :src="heroThumbnailPreviewUrl" alt="Xem trước thumbnail" class="h-28 w-full rounded-xl border border-slate-100 object-cover" />
+          </label>
+        </div>
+      </form>
+      <template #footer>
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <button class="rounded-full border border-slate-200 px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-slate-50 transition" @click="closeHeroModal">Hủy bỏ</button>
+          <button class="rounded-full bg-avocado-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:bg-avocado-700 disabled:cursor-not-allowed disabled:opacity-60 transition shadow-md" form="hero-form" type="submit" :disabled="Boolean(isUploadingHeroImage)">
+            {{ heroMode === 'create' ? 'Tạo banner' : 'Lưu cập nhật' }}
+          </button>
+        </div>
+      </template>
+    </BaseModal>
+
     <ConfirmModal :show="Boolean(pendingDeleteId)" @cancel="pendingDeleteId = null" @confirm="confirmDeleteProduct" />
     <ConfirmModal :show="Boolean(pendingDeletePosterId)" @cancel="pendingDeletePosterId = null" @confirm="confirmDeleteMenuPoster" />
+    <ConfirmModal :show="Boolean(pendingDeleteHeroId)" title="Xóa banner trang sản phẩm?" message="Banner này sẽ bị xóa khỏi slider đầu trang sản phẩm. Hành động này không thể hoàn tác." confirm-text="Xóa banner" @cancel="pendingDeleteHeroId = null" @confirm="confirmDeleteHeroBanner" />
   </section>
 </template>
 

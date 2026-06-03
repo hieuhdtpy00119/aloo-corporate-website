@@ -6,6 +6,7 @@ import { homeSectionService, resolveBackendAssetUrl } from '../../services/cmsSe
 
 const store = useAppStore()
 const productRail = ref(null)
+const featuredRail = ref(null)
 
 const homeSections = ref([])
 const homeSectionsLoading = ref(false)
@@ -23,7 +24,6 @@ const featuredCards = computed(() =>
   homeSections.value
     .filter((section) => section.status === 'ACTIVE')
     .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-    .slice(0, 4)
     .map((section) => ({
       title: section.title,
       description: section.description || section.subtitle || '',
@@ -51,6 +51,13 @@ const scrollProducts = (direction) => {
   })
 }
 
+const scrollFeatured = (direction) => {
+  featuredRail.value?.scrollBy({
+    left: direction * 420,
+    behavior: 'smooth',
+  })
+}
+
 const productMeta = (product) => product.category || 'ALOO Signature'
 
 const fetchHomeSections = async () => {
@@ -74,7 +81,7 @@ onMounted(() => {
 <template>
   <section class="bg-brand-cream/10">
     <!-- Hero Banner with Glassmorphic Content Card Overlay -->
-    <div class="relative h-[85vh] min-h-[600px] w-full overflow-hidden bg-brand-dark">
+    <div class="relative h-[88vh] min-h-[660px] w-full overflow-hidden bg-brand-dark">
       <img
         class="absolute inset-0 h-full w-full object-cover opacity-50 mix-blend-luminosity scale-[1.01]"
         src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=2200&q=90"
@@ -114,19 +121,29 @@ onMounted(() => {
 
     <!-- Featured Section -->
     <section class="mx-auto max-w-[1280px] px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mb-12 text-center sm:text-left flex flex-col sm:flex-row sm:items-end justify-between border-b border-brand-forest/5 pb-4">
+      <div class="mb-10 flex flex-col justify-between gap-4 border-b border-brand-forest/5 pb-4 text-center sm:flex-row sm:items-end sm:text-left">
         <div>
           <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">Tuyển chọn</span>
           <h2 class="mt-2 text-3xl font-black text-brand-dark lg:text-4xl">Nổi bật hôm nay</h2>
         </div>
-        <p class="text-sm text-brand-muted mt-2 sm:mt-0 font-medium">Bí quyết tự nhiên từ nguyên liệu vườn sạch</p>
+        <div class="flex items-center justify-center gap-3 sm:justify-end">
+          <p class="text-sm font-medium text-brand-muted">Bí quyết tự nhiên từ nguyên liệu vườn sạch</p>
+          <div v-if="featuredCards.length > 1" class="hidden gap-2.5 sm:flex">
+            <button class="grid h-10 w-10 place-items-center rounded-full border border-brand-forest/10 bg-white text-brand-dark shadow-sm transition hover:border-brand-forest/20 hover:bg-brand-cream active:scale-95" aria-label="Cuộn nổi bật sang trái" @click="scrollFeatured(-1)">
+              <ChevronLeft class="h-5 w-5" />
+            </button>
+            <button class="grid h-10 w-10 place-items-center rounded-full border border-brand-forest/10 bg-white text-brand-dark shadow-sm transition hover:border-brand-forest/20 hover:bg-brand-cream active:scale-95" aria-label="Cuộn nổi bật sang phải" @click="scrollFeatured(1)">
+              <ChevronRight class="h-5 w-5" />
+            </button>
+          </div>
+        </div>
       </div>
 
       <p v-if="homeSectionsError" class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-center text-sm font-bold text-red-700">{{ homeSectionsError }}</p>
-      <div v-else-if="homeSectionsLoading" class="grid gap-8 lg:grid-cols-2">
-        <div v-for="i in 2" :key="i" class="overflow-hidden rounded-3xl border border-brand-forest/5 bg-white shadow-sm">
-          <div class="aspect-[16/9] animate-pulse bg-slate-100"></div>
-          <div class="space-y-3 p-6">
+      <div v-else-if="homeSectionsLoading" class="featured-scrollbar flex snap-x gap-5 overflow-x-auto pb-6">
+        <div v-for="i in 3" :key="i" class="min-w-[82vw] snap-start overflow-hidden rounded-3xl border border-brand-forest/5 bg-white shadow-sm sm:min-w-[360px] lg:min-w-[400px]">
+          <div class="aspect-[5/3] animate-pulse bg-slate-100"></div>
+          <div class="space-y-3 p-5">
             <div class="h-5 w-2/3 animate-pulse rounded bg-slate-100"></div>
             <div class="h-4 w-full animate-pulse rounded bg-slate-100"></div>
           </div>
@@ -135,26 +152,26 @@ onMounted(() => {
       <p v-else-if="!featuredCards.length" class="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center text-sm font-bold text-slate-400">
         Chưa có nội dung nổi bật. Vào admin để thêm block trang chủ.
       </p>
-      <div v-else class="grid gap-8 lg:grid-cols-2">
+      <div v-else ref="featuredRail" class="featured-scrollbar flex snap-x gap-5 overflow-x-auto pb-6">
         <RouterLink
           v-for="card in featuredCards"
           :key="card.title"
           :to="card.to"
-          class="group overflow-hidden rounded-3xl bg-white shadow-sm hover-lift flex flex-col border border-brand-forest/5"
+          class="group flex min-w-[82vw] snap-start flex-col overflow-hidden rounded-3xl border border-brand-forest/5 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl sm:min-w-[360px] lg:min-w-[400px]"
         >
-          <div class="aspect-[16/9] overflow-hidden relative">
+          <div class="relative aspect-[5/3] overflow-hidden">
             <div class="absolute top-4 left-4 z-10 rounded-full bg-brand-dark/80 backdrop-blur-md px-3.5 py-1.5 text-xs font-bold text-brand-lime">
               {{ card.badge }}
             </div>
             <img v-if="card.image" :src="card.image" :alt="card.title" class="h-full w-full object-cover transition duration-500 group-hover:scale-103" />
             <div v-else class="grid h-full place-items-center bg-brand-lime/10 text-2xl font-black text-brand-forest">ALOO</div>
           </div>
-          <div class="p-6 flex-1 flex flex-col justify-between">
+          <div class="flex flex-1 flex-col justify-between p-5">
             <div>
               <h3 class="text-xl font-bold text-brand-dark transition group-hover:text-brand-forest">{{ card.title }}</h3>
-              <p class="mt-2.5 text-sm leading-relaxed text-brand-muted font-medium">{{ card.description }}</p>
+              <p class="mt-2.5 line-clamp-2 min-h-11 text-sm font-medium leading-relaxed text-brand-muted">{{ card.description }}</p>
             </div>
-            <div class="mt-6 flex items-center justify-between border-t border-slate-50 pt-4">
+            <div class="mt-5 flex items-center justify-between border-t border-slate-50 pt-4">
               <span class="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-brand-forest group-hover:text-brand-lime transition">
                 {{ card.cta }} <ArrowRight class="h-4 w-4 transition transform group-hover:translate-x-1" />
               </span>
@@ -334,25 +351,30 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.featured-scrollbar,
 .product-scrollbar {
   scrollbar-color: #5BBD2F #F7F4EE;
   scrollbar-width: thin;
 }
 
+.featured-scrollbar::-webkit-scrollbar,
 .product-scrollbar::-webkit-scrollbar {
   height: 8px;
 }
 
+.featured-scrollbar::-webkit-scrollbar-track,
 .product-scrollbar::-webkit-scrollbar-track {
   border-radius: 999px;
   background: #F7F4EE;
 }
 
+.featured-scrollbar::-webkit-scrollbar-thumb,
 .product-scrollbar::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: #c1f0ab;
 }
 
+.featured-scrollbar::-webkit-scrollbar-thumb:hover,
 .product-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #5BBD2F;
 }

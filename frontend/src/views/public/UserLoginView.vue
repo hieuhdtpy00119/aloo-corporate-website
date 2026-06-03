@@ -1,15 +1,20 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { LogIn, UserRound } from 'lucide-vue-next'
+import { Chrome, LogIn, UserRound } from 'lucide-vue-next'
 import { loginAdmin } from '../../services/authService'
 import { loginUser } from '../../services/userAuthService'
+import { googleLoginUrl } from '../../services/oauthService'
 
 const router = useRouter()
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 const isSubmitting = ref(false)
+
+const handleGoogleLogin = () => {
+  window.location.assign(googleLoginUrl())
+}
 
 const validateLogin = () => {
   const normalizedEmail = email.value.trim().toLowerCase()
@@ -105,6 +110,21 @@ const handleLogin = async () => {
         </p>
 
         <div class="mt-7 grid gap-5">
+          <button
+            type="button"
+            class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 font-black text-slate-700 transition hover:border-avocado-200 hover:bg-avocado-50"
+            @click="handleGoogleLogin"
+          >
+            <Chrome class="h-5 w-5 text-avocado-700" />
+            Đăng nhập bằng Google
+          </button>
+
+          <div class="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+            <span class="h-px flex-1 bg-slate-100"></span>
+            hoặc
+            <span class="h-px flex-1 bg-slate-100"></span>
+          </div>
+
           <label class="grid gap-2 text-sm font-bold text-slate-700">
             Email
             <input v-model.trim="email" type="email" required class="rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100" />

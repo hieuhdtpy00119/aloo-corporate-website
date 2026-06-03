@@ -5,7 +5,7 @@ import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
 import Pagination from '../../components/admin/Pagination.vue'
 import SearchFilterBar from '../../components/admin/SearchFilterBar.vue'
-import { homeSectionService, resolveBackendAssetUrl, uploadService } from '../../services/cmsService'
+import { homeSectionService, postService, productService, resolveBackendAssetUrl, uploadService } from '../../services/cmsService'
 import { useToastStore } from '../../stores/toastStore'
 
 const toast = useToastStore()
@@ -21,6 +21,11 @@ const searchQuery = ref('')
 const statusFilter = ref('Tất cả')
 const currentPage = ref(1)
 const isUploadingImage = ref(false)
+const isLoadingLinkOptions = ref(false)
+const linkType = ref('CUSTOM')
+const linkTarget = ref('')
+const products = ref([])
+const posts = ref([])
 const pageSize = 6
 
 const statusLabels = {
@@ -35,6 +40,23 @@ const typeLabels = {
   PRODUCT_CARD: 'Card sản phẩm',
   LOCATION_CARD: 'Card cửa hàng',
 }
+const staticLinkOptions = [
+  { label: 'Trang chủ', value: '/' },
+  { label: 'Sản phẩm', value: '/products' },
+  { label: 'Hệ thống cửa hàng', value: '/locations' },
+  { label: 'Nhượng quyền', value: '/franchise' },
+  { label: 'Về ALOO', value: '/about' },
+  { label: 'Blog', value: '/blog' },
+  { label: 'Đăng ký tư vấn', value: '/consultation' },
+  { label: 'Liên hệ', value: '/contact' },
+]
+const linkTypeOptions = [
+  { value: 'NONE', label: 'Không hiển thị nút' },
+  { value: 'STATIC', label: 'Trang có sẵn' },
+  { value: 'PRODUCT', label: 'Sản phẩm cụ thể' },
+  { value: 'POST', label: 'Bài viết cụ thể' },
+  { value: 'CUSTOM', label: 'Link tùy chỉnh' },
+]
 
 const defaultForm = () => ({
   sectionKey: '',
@@ -52,6 +74,13 @@ const defaultForm = () => ({
 
 const form = reactive(defaultForm())
 const imagePreviewUrl = computed(() => resolveBackendAssetUrl(form.imageUrl || ''))
+const resolvedButtonLink = computed(() => {
+  if (linkType.value === 'NONE') return ''
+  if (linkType.value === 'STATIC') return linkTarget.value
+  if (linkType.value === 'PRODUCT') return linkTarget.value ? `/products/${linkTarget.value}` : ''
+  if (linkType.value === 'POST') return linkTarget.value ? `/blog/${linkTarget.value}` : ''
+  return form.buttonLink.trim()
+})
 
 const slugify = (value) =>
   value
@@ -70,7 +99,50 @@ const getStatusValue = (label) => Object.entries(statusLabels).find(([, value]) 
 
 const resetForm = () => {
   Object.assign(form, defaultForm())
+  linkType.value = 'CUSTOM'
+  linkTarget.value = ''
   editingId.value = null
+}
+
+const inferLinkSelection = (link = '') => {
+  const normalized = String(link || '').trim()
+  if (!normalized) {
+    linkType.value = 'NONE'
+    linkTarget.value = ''
+    return
+  }
+  if (staticLinkOptions.some((option) => option.value === normalized)) {
+    linkType.value = 'STATIC'
+    linkTarget.value = normalized
+    return
+  }
+  if (normalized.startsWith('/products/')) {
+    linkType.value = 'PRODUCT'
+    linkTarget.value = normalized.replace('/products/', '')
+    return
+  }
+  if (normalized.startsWith('/blog/')) {
+    linkType.value = 'POST'
+    linkTarget.value = normalized.replace('/blog/', '')
+    return
+  }
+  linkType.value = 'CUSTOM'
+  linkTarget.value = ''
+}
+
+const handleLinkTypeChange = () => {
+  if (linkType.value === 'NONE') {
+    linkTarget.value = ''
+    return
+  }
+  if (linkType.value === 'STATIC') {
+    linkTarget.value = '/products'
+    if (!form.buttonText.trim()) form.buttonText = 'Xem thêm'
+    return
+  }
+  linkTarget.value = ''
+  if (linkType.value === 'PRODUCT' && !form.buttonText.trim()) form.buttonText = 'Xem sản phẩm'
+  if (linkType.value === 'POST' && !form.buttonText.trim()) form.buttonText = 'Đọc bài viết'
 }
 
 const normalizeSection = (section) => ({
@@ -91,6 +163,19 @@ const fetchSections = async () => {
     errorMessage.value = error.response?.data?.message || 'Không tải được nội dung trang chủ'
   } finally {
     isLoading.value = false
+  }
+}
+
+const fetchLinkOptions = async () => {
+  isLoadingLinkOptions.value = true
+  try {
+    const [productResponse, postResponse] = await Promise.all([productService.list(), postService.list()])
+    products.value = Array.isArray(productResponse.data) ? productResponse.data : []
+    posts.value = Array.isArray(postResponse.data) ? postResponse.data : []
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Không tải được danh sách link gợi ý')
+  } finally {
+    isLoadingLinkOptions.value = false
   }
 }
 
@@ -117,6 +202,7 @@ const openEditModal = (section) => {
     sortOrder: Number(section.sortOrder || 0),
     status: section.status || 'ACTIVE',
   })
+  inferLinkSelection(section.buttonLink || '')
   showModal.value = true
 }
 
@@ -147,6 +233,10 @@ const saveSection = async () => {
     toast.error('Vui lòng nhập mã block và tiêu đề')
     return
   }
+  if (linkType.value !== 'NONE' && form.buttonText.trim() && !resolvedButtonLink.value) {
+    toast.error('Vui lòng chọn hoặc nhập link cho nút')
+    return
+  }
 
   const payload = {
     sectionKey: form.sectionKey.trim(),
@@ -155,8 +245,8 @@ const saveSection = async () => {
     subtitle: form.subtitle.trim(),
     description: form.description.trim(),
     imageUrl: form.imageUrl,
-    buttonText: form.buttonText.trim(),
-    buttonLink: form.buttonLink.trim(),
+    buttonText: linkType.value === 'NONE' ? '' : form.buttonText.trim(),
+    buttonLink: resolvedButtonLink.value,
     badge: form.badge.trim(),
     sortOrder: Number(form.sortOrder || 0),
     status: form.status,
@@ -219,7 +309,10 @@ watch([searchQuery, statusFilter], () => {
   currentPage.value = 1
 })
 
-onMounted(fetchSections)
+onMounted(() => {
+  fetchSections()
+  fetchLinkOptions()
+})
 </script>
 
 <template>
@@ -301,7 +394,16 @@ onMounted(fetchSections)
       </div>
     </div>
 
-    <Pagination v-if="filteredSections.length" v-model:page="currentPage" :total-pages="totalPages" :total-items="filteredSections.length" label="block" />
+    <Pagination
+      v-if="filteredSections.length"
+      :page="currentPage"
+      :total-pages="totalPages"
+      :visible-count="paginatedSections.length"
+      :total-count="filteredSections.length"
+      label="block"
+      @prev="currentPage = Math.max(1, currentPage - 1)"
+      @next="currentPage = Math.min(totalPages, currentPage + 1)"
+    />
 
     <BaseModal :show="showModal" :title="mode === 'create' ? 'Thêm block trang chủ' : 'Cập nhật block trang chủ'" max-width="max-w-5xl" @close="closeModal">
       <form id="home-section-form" class="grid gap-6" @submit.prevent="saveSection">
@@ -355,13 +457,52 @@ onMounted(fetchSections)
         <section class="grid gap-4 rounded-2xl bg-slate-50 p-5 md:grid-cols-2">
           <h3 class="text-lg font-black text-avocado-950 md:col-span-2">Nút điều hướng</h3>
           <label class="grid min-w-0 gap-2 text-sm font-bold text-slate-700">
-                  Text nút
+            Text nút
             <input v-model="form.buttonText" class="admin-input" placeholder="Xem sản phẩm" />
-                </label>
+          </label>
           <label class="grid min-w-0 gap-2 text-sm font-bold text-slate-700">
-                  Link nút
-            <input v-model="form.buttonLink" class="admin-input" placeholder="/products/kem-bo-truyen-thong" />
-                </label>
+            Kiểu liên kết
+            <select v-model="linkType" class="admin-input cursor-pointer" @change="handleLinkTypeChange">
+              <option v-for="option in linkTypeOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
+            </select>
+          </label>
+
+          <label v-if="linkType === 'STATIC'" class="grid min-w-0 gap-2 text-sm font-bold text-slate-700 md:col-span-2">
+            Chọn trang
+            <select v-model="linkTarget" class="admin-input cursor-pointer">
+              <option v-for="option in staticLinkOptions" :key="option.value" :value="option.value">{{ option.label }} - {{ option.value }}</option>
+            </select>
+          </label>
+
+          <label v-else-if="linkType === 'PRODUCT'" class="grid min-w-0 gap-2 text-sm font-bold text-slate-700 md:col-span-2">
+            Chọn sản phẩm
+            <select v-model="linkTarget" class="admin-input cursor-pointer" :disabled="isLoadingLinkOptions">
+              <option value="">Chọn sản phẩm để gắn link</option>
+              <option v-for="product in products" :key="product.id" :value="String(product.slug || product.id)">
+                {{ product.name }} - /products/{{ product.slug }}
+              </option>
+            </select>
+          </label>
+
+          <label v-else-if="linkType === 'POST'" class="grid min-w-0 gap-2 text-sm font-bold text-slate-700 md:col-span-2">
+            Chọn bài viết
+            <select v-model="linkTarget" class="admin-input cursor-pointer" :disabled="isLoadingLinkOptions">
+              <option value="">Chọn bài viết để gắn link</option>
+              <option v-for="post in posts" :key="post.id" :value="String(post.slug || post.id)">
+                {{ post.title }} - /blog/{{ post.slug || post.id }}
+              </option>
+            </select>
+          </label>
+
+          <label v-else-if="linkType === 'CUSTOM'" class="grid min-w-0 gap-2 text-sm font-bold text-slate-700 md:col-span-2">
+            Link tùy chỉnh
+            <input v-model="form.buttonLink" class="admin-input" placeholder="/products/kem-bo-truyen-thong hoặc https://..." />
+          </label>
+
+          <div v-if="linkType !== 'NONE'" class="rounded-xl border border-avocado-100 bg-white px-4 py-3 text-sm font-semibold text-slate-600 md:col-span-2">
+            Link sẽ lưu:
+            <span class="font-black text-avocado-800">{{ resolvedButtonLink || 'Chưa chọn link' }}</span>
+          </div>
         </section>
 
         <section class="grid gap-4 rounded-2xl bg-slate-50 p-5 md:grid-cols-[minmax(0,1fr)_260px]">

@@ -14,6 +14,7 @@ import LocationsView from '../views/public/LocationsView.vue'
 import BlogView from '../views/public/BlogView.vue'
 import BlogDetailView from '../views/public/BlogDetailView.vue'
 import UserLoginView from '../views/public/UserLoginView.vue'
+import OAuthCallbackView from '../views/public/OAuthCallbackView.vue'
 import UserProfileView from '../views/public/UserProfileView.vue'
 import UserChangePasswordView from '../views/public/UserChangePasswordView.vue'
 import NotFoundView from '../views/public/NotFoundView.vue'
@@ -61,6 +62,7 @@ const router = createRouter({
         },
       ],
     },
+    { path: '/oauth/callback', name: 'oauth-callback', component: OAuthCallbackView },
     { path: '/admin/login', name: 'admin-login', component: AdminLoginView },
     {
       path: '/admin',

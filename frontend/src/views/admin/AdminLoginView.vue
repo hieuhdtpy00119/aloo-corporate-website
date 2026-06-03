@@ -2,13 +2,18 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { loginAdmin } from '../../services/authService'
-import { Lock, Mail, ArrowLeft, ShieldAlert } from 'lucide-vue-next'
+import { Chrome, Lock, Mail, ArrowLeft, ShieldAlert } from 'lucide-vue-next'
+import { googleLoginUrl } from '../../services/oauthService'
 
 const router = useRouter()
 const email = ref('admin@aloo.vn')
 const password = ref('')
 const errorMessage = ref('')
 const isSubmitting = ref(false)
+
+const handleGoogleLogin = () => {
+  window.location.assign(googleLoginUrl())
+}
 
 const handleLogin = async () => {
   if (isSubmitting.value) return
@@ -74,6 +79,21 @@ const handleLogin = async () => {
         </div>
 
         <div class="mt-8 space-y-5">
+          <button
+            type="button"
+            class="flex w-full items-center justify-center gap-2 rounded-full border border-slate-100 bg-white px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-700 transition hover:border-avocado-200 hover:bg-avocado-50"
+            @click="handleGoogleLogin"
+          >
+            <Chrome class="h-4.5 w-4.5 text-avocado-700" />
+            Đăng nhập bằng Google
+          </button>
+
+          <div class="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-slate-300">
+            <span class="h-px flex-1 bg-slate-100"></span>
+            hoặc
+            <span class="h-px flex-1 bg-slate-100"></span>
+          </div>
+
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             Email
             <div class="relative">
@@ -103,4 +123,3 @@ const handleLogin = async () => {
     </div>
   </main>
 </template>
-

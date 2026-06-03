@@ -18,6 +18,7 @@ const categoryFilter = ref('')
 const page = ref(1)
 const perPage = 5
 const pendingDelete = ref(null)
+const isLoading = computed(() => store.loading.posts)
 
 const categoryOptions = computed(() => [
   '',

@@ -39,7 +39,10 @@ const uploadAndInsertImage = async (file, position = null) => {
 const editor = useEditor({
   content: props.modelValue,
   extensions: [
-    StarterKit,
+    StarterKit.configure({
+      link: false,
+      underline: false,
+    }),
     Underline,
     TextAlign.configure({
       types: ['heading', 'paragraph'],
