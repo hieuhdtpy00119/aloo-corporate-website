@@ -57,17 +57,16 @@ describe('api axios instance', () => {
     expect(config.headers.Authorization).toBe('Bearer admin.jwt.token')
   })
 
-  it('attaches user JWT for user-auth requests', async () => {
+  it('uses admin JWT for testimonial requests', async () => {
     await loadApi()
     localStorage.setItem('admin_token', 'admin.jwt.token')
-    localStorage.setItem('user_token', 'user.jwt.token')
 
     const config = axiosMock.handlers.request({
-      url: '/user-auth/me',
+      url: '/admin/testimonials',
       headers: {},
     })
 
-    expect(config.headers.Authorization).toBe('Bearer user.jwt.token')
+    expect(config.headers.Authorization).toBe('Bearer admin.jwt.token')
   })
 
   it('does not overwrite an explicit Authorization header', async () => {

@@ -43,6 +43,11 @@ public class FranchiseRegistration {
     @Column(columnDefinition = "nvarchar(max)")
     private String note;
 
+    private LocalDateTime lastContactedAt;
+
+    @Column(length = 180)
+    private String assignedTo;
+
     @Column(nullable = false, length = 40)
     private String status = "NEW";
 

@@ -1,8 +1,8 @@
 package com.aloo.cms.controller;
 
-import com.aloo.cms.dto.LocationRequest;
-import com.aloo.cms.dto.LocationResponse;
-import com.aloo.cms.service.LocationService;
+import com.aloo.cms.dto.StoreRequest;
+import com.aloo.cms.dto.StoreResponse;
+import com.aloo.cms.service.StoreService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,33 +15,38 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/locations")
+@RequestMapping("/api/admin/stores")
 @RequiredArgsConstructor
-public class LocationController {
+public class AdminStoreController {
 
-    private final LocationService locationService;
+    private final StoreService storeService;
 
     @GetMapping
-    public List<LocationResponse> findAll() {
-        return locationService.findAll();
+    public List<StoreResponse> findAll(
+            @RequestParam(required = false) String province,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Boolean featured
+    ) {
+        return storeService.findAll(province, status, featured);
     }
 
     @PostMapping
-    public ResponseEntity<LocationResponse> create(@Valid @RequestBody LocationRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(locationService.create(request));
+    public ResponseEntity<StoreResponse> create(@Valid @RequestBody StoreRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(storeService.create(request));
     }
 
     @PutMapping("/{id}")
-    public LocationResponse update(@PathVariable Long id, @Valid @RequestBody LocationRequest request) {
-        return locationService.update(id, request);
+    public StoreResponse update(@PathVariable Long id, @Valid @RequestBody StoreRequest request) {
+        return storeService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        locationService.delete(id);
+        storeService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -1,17 +1,25 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { Search, Sparkles, Award } from 'lucide-vue-next'
-import ProductHeroSlider from '../../components/public/ProductHeroSlider.vue'
+import { Search, Award } from 'lucide-vue-next'
 import { useAppStore } from '../../stores/appStore'
-import { useProductPageStore } from '../../stores/productPageStore'
 
 const store = useAppStore()
-const productPageStore = useProductPageStore()
 const activeCategory = ref('Tất cả')
 const searchQuery = ref('')
 const currentPage = ref(1)
+const productSectionRef = ref(null)
 const pageSize = 12
+const categoryIconMap = [
+  { match: ['kem bơ', 'bơ'], icon: '🥑' },
+  { match: ['cà phê', 'coffee'], icon: '☕' },
+  { match: ['sinh tố', 'smoothie'], icon: '🥤' },
+  { match: ['nước ép', 'juice'], icon: '🧃' },
+  { match: ['trà trái cây', 'fruit tea', 'trà'], icon: '🍹' },
+  { match: ['topping'], icon: '✨' },
+  { match: ['ăn vặt', 'snack'], icon: '🍿' },
+  { match: ['kem'], icon: '🍦' },
+]
 
 const products = computed(() =>
   store.products
@@ -23,6 +31,17 @@ const categories = computed(() => {
   const cats = new Set(products.value.map((p) => p.category || 'Sản phẩm khác'))
   return ['Tất cả', ...Array.from(cats)]
 })
+
+const categoryIcon = (category) => {
+  if (category === 'Tất cả') return '✨'
+  const normalized = String(category || '').toLowerCase()
+  return categoryIconMap.find((item) => item.match.some((keyword) => normalized.includes(keyword)))?.icon || '🍦'
+}
+
+const categoryCount = (category) =>
+  category === 'Tất cả'
+    ? products.value.length
+    : products.value.filter((product) => (product.category || 'Sản phẩm khác') === category).length
 
 const filteredProducts = computed(() => {
   const keyword = searchQuery.value.trim().toLowerCase()
@@ -44,14 +63,6 @@ const paginatedProducts = computed(() => {
   return filteredProducts.value.slice(start, start + pageSize)
 })
 
-const featuredProducts = computed(() =>
-  products.value.slice(0, 4),
-)
-
-const heroSlides = computed(() =>
-  productPageStore.visibleHeroSlides.length ? productPageStore.visibleHeroSlides : featuredProducts.value,
-)
-
 const selectCategory = (category) => {
   activeCategory.value = category
   currentPage.value = 1
@@ -62,33 +73,31 @@ const setSearchQuery = (event) => {
   currentPage.value = 1
 }
 
+const scrollToProductSection = async () => {
+  await nextTick()
+  productSectionRef.value?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  })
+}
+
+const goToPage = async (page) => {
+  const nextPage = Math.min(totalPages.value, Math.max(1, page))
+  if (nextPage === currentPage.value) return
+  currentPage.value = nextPage
+  await scrollToProductSection()
+}
+
 onMounted(() => {
-  Promise.allSettled([store.fetchProducts(), productPageStore.fetchProductPageContent()])
+  store.fetchProducts()
 })
 </script>
 
 <template>
   <main class="overflow-hidden bg-brand-cream/20 text-brand-dark">
-    <!-- Hero Slider -->
-    <ProductHeroSlider :featured-products="heroSlides" />
-
     <!-- Product List / Order Section -->
-    <section id="product-list" class="bg-white px-4 py-20 sm:px-6 lg:px-8 relative">
-      <!-- Top decorative smooth background fade -->
-      <div class="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-brand-cream/10 to-transparent"></div>
-
-      <div class="mx-auto max-w-[1280px] relative z-10">
-        <div class="mb-14 text-center">
-          <span class="text-xs font-black uppercase tracking-[0.25em] text-brand-forest bg-brand-lime/10 border border-brand-lime/20 px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5">
-            <Sparkles class="h-3.5 w-3.5 text-brand-sand fill-brand-sand/50" />
-            Khám phá sản phẩm
-          </span>
-          <h2 class="mt-4 text-3xl font-black tracking-tight text-brand-dark md:text-4xl font-display">Sản phẩm đặc trưng của ALOO</h2>
-          <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-brand-muted">
-            Tìm nhanh các món nổi bật, nguyên liệu và hương vị đặc trưng đang được ALOO phục vụ.
-          </p>
-        </div>
-
+    <section id="product-list" ref="productSectionRef" class="relative scroll-mt-24 bg-[#F8FAF7] px-4 py-16 sm:px-6 lg:px-8">
+      <div class="relative z-10 mx-auto max-w-[1320px]">
         <p v-if="store.errors.products" class="rounded-2xl bg-red-50 border border-red-200 px-5 py-4 text-sm font-semibold text-red-700 max-w-lg mx-auto text-center shadow-sm">
           {{ store.errors.products }}
         </p>
@@ -102,102 +111,105 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-else-if="products.length" class="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside class="lg:sticky lg:top-28 lg:self-start">
-            <div class="rounded-3xl border border-brand-forest/5 bg-brand-cream/30 p-4">
-              <label class="grid gap-2 text-xs font-black uppercase tracking-wider text-brand-muted lg:hidden">
-                Danh mục
-                <select
-                  class="rounded-2xl border border-brand-forest/10 bg-white px-4 py-3 text-sm font-bold normal-case tracking-normal text-brand-dark outline-none focus:border-brand-forest"
-                  :value="activeCategory"
-                  @change="selectCategory($event.target.value)"
+        <div v-else-if="products.length" class="filter-panel grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start">
+          <aside class="lg:sticky lg:top-28">
+            <div class="rounded-[24px] bg-white/90 p-4 shadow-[0_16px_42px_rgba(13,43,26,0.05)] ring-1 ring-[#E8EEE8]">
+              <p class="px-2 text-xs font-black uppercase tracking-[0.18em] text-brand-sand">Danh mục sản phẩm</p>
+              <div class="mt-4 flex gap-2 overflow-x-auto pb-1 lg:block lg:space-y-2 lg:overflow-visible lg:pb-0">
+                <button
+                  v-for="cat in categories"
+                  :key="cat"
+                  type="button"
+                  class="flex min-w-max items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-black transition duration-200 lg:w-full lg:min-w-0"
+                  :class="
+                    activeCategory === cat
+                      ? 'border-transparent bg-[#0D7A43] text-white shadow-[0_12px_28px_rgba(13,122,67,0.18)]'
+                      : 'border border-[#E8EEE8] bg-transparent text-brand-forest hover:bg-brand-lime/10'
+                  "
+                  @click="selectCategory(cat)"
                 >
-                  <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-                </select>
-              </label>
-
-              <div class="hidden lg:block">
-                <p class="px-3 text-xs font-black uppercase tracking-[0.2em] text-brand-sand">Danh mục</p>
-                <div class="mt-3 max-h-[430px] space-y-1 overflow-y-auto pr-1">
-                  <button
-                    v-for="cat in categories"
-                    :key="cat"
-                    type="button"
-                    class="flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-left text-sm font-bold transition"
-                    :class="
-                      activeCategory === cat
-                        ? 'bg-brand-forest text-white shadow-sm'
-                        : 'text-brand-muted hover:bg-white hover:text-brand-forest'
-                    "
-                    @click="selectCategory(cat)"
+                  <span class="min-w-0 flex-1 truncate">{{ cat }}</span>
+                  <span
+                    class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black"
+                    :class="activeCategory === cat ? 'bg-white/18 text-white' : 'bg-brand-lime/14 text-brand-muted'"
                   >
-                    <span class="truncate">{{ cat }}</span>
-                    <span class="ml-3 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-black">
-                      {{ cat === 'Tất cả' ? products.length : products.filter((product) => (product.category || 'Sản phẩm khác') === cat).length }}
-                    </span>
-                  </button>
-                </div>
+                    {{ categoryCount(cat) }}
+                  </span>
+                </button>
               </div>
             </div>
           </aside>
 
-          <div>
-            <div class="mb-6 flex flex-col gap-4 rounded-3xl border border-brand-forest/5 bg-brand-cream/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div class="min-w-0">
+            <div class="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p class="text-xs font-black uppercase tracking-[0.2em] text-brand-sand">Danh sách sản phẩm</p>
-                <h3 class="mt-1 text-2xl font-black text-brand-dark font-display">{{ activeCategory }}</h3>
-                <p class="mt-1 text-sm font-semibold text-brand-muted">{{ filteredProducts.length }} món phù hợp</p>
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-brand-sand">Danh sách sản phẩm</p>
+                <h3 class="mt-1.5 text-2xl font-black leading-tight tracking-tight text-brand-dark font-display sm:text-3xl">
+                  {{ activeCategory === 'Tất cả' ? 'Tất cả sản phẩm' : activeCategory }}
+                </h3>
+                <p class="mt-1 text-sm font-semibold text-brand-muted">{{ filteredProducts.length }} sản phẩm đang phục vụ</p>
               </div>
-              <label class="relative block w-full sm:max-w-sm">
-                <Search class="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
+              <label class="relative block w-full sm:max-w-[390px]">
+                <Search class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-forest/65 transition" />
                 <input
                   :value="searchQuery"
                   type="search"
-                  class="w-full rounded-2xl border border-brand-forest/10 bg-white py-3 pl-11 pr-4 text-sm font-semibold text-brand-dark outline-none transition focus:border-brand-forest focus:ring-4 focus:ring-brand-lime/10"
+                  class="h-12 w-full rounded-full border border-[#E8EEE8] bg-white py-0 pl-11 pr-5 text-sm font-semibold text-brand-dark outline-none transition duration-300 placeholder:text-brand-muted/70 focus:border-[#0D7A43] focus:shadow-[0_12px_28px_rgba(13,122,67,0.1)] focus:ring-4 focus:ring-brand-lime/15"
                   placeholder="Tìm sản phẩm..."
                   @input="setSearchQuery"
                 />
               </label>
             </div>
 
-            <div v-if="filteredProducts.length" class="grid gap-3 xl:grid-cols-2">
+            <div v-if="filteredProducts.length" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               <article
                 v-for="product in paginatedProducts"
                 :key="product.id"
-                class="group grid min-h-[112px] grid-cols-[88px_minmax(0,1fr)] gap-4 rounded-2xl border border-brand-forest/5 bg-white p-3 shadow-sm transition hover:border-brand-forest/15 hover:shadow-md"
+                class="product-card group flex flex-col overflow-hidden rounded-[28px] border border-brand-forest/7 bg-white p-3 shadow-sm shadow-brand-forest/5 transition duration-500 hover:-translate-y-2 hover:border-brand-forest/14 hover:shadow-xl hover:shadow-brand-forest/10"
               >
-                <div class="h-[88px] overflow-hidden rounded-xl bg-brand-cream/40">
-                  <img v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
-                  <div v-else class="grid h-full place-items-center bg-brand-lime/10 text-xs font-black tracking-wider text-brand-forest">ALOO</div>
+                <div class="relative aspect-[4/3] overflow-hidden rounded-[24px] bg-brand-cream/50">
+                  <img v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                  <div v-else class="relative grid h-full place-items-center overflow-hidden bg-[radial-gradient(circle_at_30%_20%,rgba(198,240,171,0.58),transparent_36%),linear-gradient(135deg,#FAF8F2,#EEF7EA)] px-5 text-center">
+                    <div class="absolute -right-8 -top-8 h-32 w-32 rounded-full border border-brand-forest/8"></div>
+                    <div class="absolute -bottom-10 -left-8 h-36 w-36 rounded-full bg-brand-lime/20 blur-2xl"></div>
+                    <span class="absolute right-5 top-5 rounded-full bg-white/70 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-brand-forest shadow-sm">
+                      ALOO
+                    </span>
+                    <div class="relative z-10">
+                      <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-white/80 text-2xl shadow-sm shadow-brand-forest/8 ring-1 ring-brand-forest/5">
+                        {{ categoryIcon(product.category || 'Sản phẩm') }}
+                      </div>
+                      <p class="mt-3 text-[11px] font-black uppercase tracking-[0.18em] text-brand-forest/70">Đang cập nhật ảnh</p>
+                    </div>
+                  </div>
                 </div>
 
-                <div class="flex min-w-0 flex-col justify-between gap-3">
-                  <div class="min-w-0">
-                    <span class="inline-flex rounded-full bg-brand-lime/15 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand-forest">
+                <div class="flex flex-col px-2 pb-2 pt-3.5">
+                  <div>
+                    <span class="inline-flex rounded-full bg-brand-lime/15 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-brand-forest">
                       {{ product.category || 'Sản phẩm' }}
                     </span>
-                    <h4 class="mt-1 truncate text-base font-black leading-tight text-brand-dark transition group-hover:text-brand-forest">{{ product.name }}</h4>
-                    <p class="mt-1 line-clamp-1 text-xs font-medium leading-relaxed text-brand-muted">
-                      {{ product.shortDescription || product.description }}
-                    </p>
+                    <h4 class="mt-3 text-xl font-black leading-tight text-brand-dark transition group-hover:text-brand-forest">{{ product.name }}</h4>
+                    <div class="mt-2.5 inline-flex rounded-full bg-brand-cream/70 px-3 py-1 text-[11px] font-black text-brand-muted">
+                      Chưa có đánh giá
+                    </div>
                   </div>
 
-                  <div class="flex items-center justify-between gap-3">
-                    <span class="text-[11px] font-black uppercase tracking-wider text-brand-sand">ALOO</span>
-                    <RouterLink :to="product.slug ? `/products/${product.slug}` : '/products'" class="shrink-0 rounded-full border border-brand-forest/10 bg-brand-cream px-3 py-1.5 text-center text-xs font-bold text-brand-forest shadow-inner transition hover:bg-brand-lime/20">
-                      Chi tiết
+                  <div class="pt-4">
+                    <RouterLink :to="product.slug ? `/products/${product.slug}` : '/products'" class="inline-flex w-full items-center justify-center rounded-full bg-brand-forest px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-brand-forest/12 transition hover:bg-brand-dark">
+                      Khám phá
                     </RouterLink>
                   </div>
                 </div>
               </article>
             </div>
 
-            <div v-if="filteredProducts.length && totalPages > 1" class="mt-8 flex flex-wrap items-center justify-center gap-2">
+            <div v-if="filteredProducts.length && totalPages > 1" class="mt-10 flex flex-wrap items-center justify-center gap-2">
               <button
                 type="button"
-                class="rounded-full border border-brand-forest/10 bg-white px-4 py-2 text-xs font-black text-brand-forest transition disabled:cursor-not-allowed disabled:opacity-40"
+                class="rounded-full border border-brand-forest/10 bg-white px-5 py-2.5 text-xs font-black text-brand-forest transition hover:bg-brand-lime/12 disabled:cursor-not-allowed disabled:opacity-40"
                 :disabled="currentPage === 1"
-                @click="currentPage = Math.max(1, currentPage - 1)"
+                @click="goToPage(currentPage - 1)"
               >
                 Trước
               </button>
@@ -205,17 +217,17 @@ onMounted(() => {
                 v-for="page in totalPages"
                 :key="page"
                 type="button"
-                class="grid h-9 w-9 place-items-center rounded-full border text-xs font-black transition"
-                :class="currentPage === page ? 'border-brand-forest bg-brand-forest text-white' : 'border-brand-forest/10 bg-white text-brand-forest hover:bg-brand-lime/15'"
-                @click="currentPage = page"
+                class="grid h-10 w-10 place-items-center rounded-full border text-xs font-black transition hover:-translate-y-0.5"
+                :class="currentPage === page ? 'border-brand-forest bg-brand-forest text-white shadow-lg shadow-brand-forest/15' : 'border-brand-forest/10 bg-white text-brand-forest hover:bg-brand-lime/15'"
+                @click="goToPage(page)"
               >
                 {{ page }}
               </button>
               <button
                 type="button"
-                class="rounded-full border border-brand-forest/10 bg-white px-4 py-2 text-xs font-black text-brand-forest transition disabled:cursor-not-allowed disabled:opacity-40"
+                class="rounded-full border border-brand-forest/10 bg-white px-5 py-2.5 text-xs font-black text-brand-forest transition hover:bg-brand-lime/12 disabled:cursor-not-allowed disabled:opacity-40"
                 :disabled="currentPage === totalPages"
-                @click="currentPage = Math.min(totalPages, currentPage + 1)"
+                @click="goToPage(currentPage + 1)"
               >
                 Sau
               </button>
@@ -259,3 +271,35 @@ onMounted(() => {
     </section>
   </main>
 </template>
+
+<style scoped>
+.product-card {
+  animation: productFadeUp 420ms ease-out both;
+}
+
+.filter-panel {
+  animation: filterFadeIn 360ms ease-out both;
+}
+
+@keyframes productFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes filterFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>

@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Menu, X } from 'lucide-vue-next'
 import LanguageSwitcher from './LanguageSwitcher.vue'
-import UserMenu from './UserMenu.vue'
+import { trackEvent } from '../../services/analyticsService'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -48,13 +48,13 @@ onBeforeUnmount(() => {
 <template>
   <header
     :class="[
-      'sticky top-0 z-50 transition-all duration-300',
+      'sticky top-0 z-50 h-16 border-b transition-colors duration-300',
       isScrolled
-        ? 'glass-navbar py-2 shadow-md shadow-brand-forest/5 border-b border-brand-forest/5'
-        : 'bg-transparent py-4 border-b border-transparent'
+        ? 'glass-navbar border-brand-forest/5 shadow-md shadow-brand-forest/5'
+        : 'bg-white border-brand-forest/5 shadow-sm shadow-brand-forest/5'
     ]"
   >
-    <nav class="mx-auto flex w-full max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
+    <nav class="mx-auto flex h-full w-full max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
       <RouterLink
         to="/"
         class="flex shrink-0 items-center outline-none ring-brand-lime focus-visible:rounded-xl focus-visible:ring-2 focus-visible:ring-offset-4 transition transform hover:scale-[1.03]"
@@ -90,10 +90,10 @@ onBeforeUnmount(() => {
         <RouterLink
           to="/consultation"
           class="rounded-full bg-avocado-700 px-6 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-brand-forest/15 transition-all duration-300 transform hover:-translate-y-0.5 hover:bg-avocado-800 hover:shadow-xl hover:shadow-brand-forest/25"
+          @click="trackEvent('click_franchise_cta', { location: 'navbar' })"
         >
           {{ t('nav.consultation') }}
         </RouterLink>
-        <UserMenu />
       </div>
 
       <button
@@ -164,18 +164,14 @@ onBeforeUnmount(() => {
             <RouterLink
               to="/consultation"
               class="block w-full rounded-full bg-brand-forest px-4 py-3.5 text-center text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-brand-forest/15 hover:bg-brand-dark transition active:scale-98"
-              @click="closeDrawer"
+              @click="trackEvent('click_franchise_cta', { location: 'mobile_nav' }); closeDrawer()"
             >
               {{ t('nav.consultation') }}
             </RouterLink>
           </div>
 
-          <div class="mt-4 flex justify-center border-t border-slate-100/80 pt-4">
-            <UserMenu @navigate="closeDrawer" />
-          </div>
         </div>
       </aside>
     </div>
   </header>
 </template>
-

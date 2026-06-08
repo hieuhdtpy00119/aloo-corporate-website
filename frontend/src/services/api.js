@@ -10,10 +10,7 @@ api.interceptors.request.use((config) => {
     return config
   }
 
-  const url = String(config.url || '')
-  const token = url.startsWith('/user-auth')
-    ? localStorage.getItem('user_token')
-    : localStorage.getItem('admin_token')
+  const token = localStorage.getItem('admin_token')
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -26,22 +23,13 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const path = window.location.pathname
-      const requestUrl = String(error.config?.url || '')
-
-      if (requestUrl.startsWith('/user-auth')) {
-        localStorage.removeItem('user_token')
-        localStorage.removeItem('user_user')
-      } else {
-        localStorage.removeItem('admin_token')
-        localStorage.removeItem('admin_user')
-      }
+      localStorage.removeItem('admin_token')
+      localStorage.removeItem('admin_user')
 
       window.dispatchEvent(new Event('aloo-auth-change'))
 
       if (path.startsWith('/admin') && path !== '/admin/login') {
         window.location.assign('/admin/login')
-      } else if ((path === '/profile' || path === '/change-password') && path !== '/login') {
-        window.location.assign('/login')
       }
     }
 

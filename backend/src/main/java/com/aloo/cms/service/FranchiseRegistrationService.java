@@ -7,6 +7,7 @@ import com.aloo.cms.entity.FranchiseRegistration;
 import com.aloo.cms.exception.ResourceNotFoundException;
 import com.aloo.cms.mapper.FranchiseRegistrationMapper;
 import com.aloo.cms.repository.FranchiseRegistrationRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class FranchiseRegistrationService {
+
+    private static final List<String> STATUSES = List.of("NEW", "CONTACTED", "CONSULTING", "POTENTIAL", "SIGNED", "REJECTED");
 
     private final FranchiseRegistrationRepository registrationRepository;
     private final FranchiseRegistrationMapper registrationMapper;
@@ -43,7 +46,16 @@ public class FranchiseRegistrationService {
     @Transactional
     public FranchiseRegistrationResponse updateStatus(Long id, RegistrationStatusUpdateRequest request) {
         FranchiseRegistration registration = getRegistration(id);
-        registration.setStatus(request.status().trim().toUpperCase(Locale.ROOT));
+        registration.setStatus(normalizeStatus(request.status()));
+        if (request.note() != null) {
+            registration.setNote(request.note().trim());
+        }
+        if (request.assignedTo() != null) {
+            registration.setAssignedTo(request.assignedTo().trim());
+        }
+        if (request.lastContactedAt() != null && !request.lastContactedAt().isBlank()) {
+            registration.setLastContactedAt(LocalDateTime.parse(request.lastContactedAt().trim()));
+        }
         return registrationMapper.toResponse(registrationRepository.save(registration));
     }
 
@@ -56,5 +68,19 @@ public class FranchiseRegistrationService {
     private FranchiseRegistration getRegistration(Long id) {
         return registrationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Franchise registration not found"));
+    }
+
+    private String normalizeStatus(String status) {
+        String normalized = status == null ? "" : status.trim().toUpperCase(Locale.ROOT);
+        if ("DONE".equals(normalized) || "COMPLETED".equals(normalized)) {
+            return "SIGNED";
+        }
+        if ("CANCELED".equals(normalized) || "CANCELLED".equals(normalized)) {
+            return "REJECTED";
+        }
+        if (!STATUSES.contains(normalized)) {
+            throw new IllegalArgumentException("Franchise registration status is invalid");
+        }
+        return normalized;
     }
 }

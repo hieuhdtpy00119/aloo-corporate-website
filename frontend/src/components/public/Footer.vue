@@ -1,3 +1,7 @@
+<script setup>
+import { trackEvent } from '../../services/analyticsService'
+</script>
+
 <template>
   <footer class="bg-gradient-to-br from-brand-dark via-brand-dark/95 to-brand-dark/90 text-white/90 border-t border-brand-forest/10 relative overflow-hidden">
     <!-- Subtle top decorative glowing border -->
@@ -12,9 +16,9 @@
           Thương hiệu kem bơ thuần Việt, kết hợp nguồn nông sản sạch với công nghệ hiện đại. Mang trải nghiệm kem tươi ngon lành và cơ hội nhượng quyền phát triển tới mọi miền.
         </p>
         <div class="flex gap-3">
-          <a href="#" class="grid h-10 w-10 place-items-center rounded-full bg-white/5 border border-white/10 text-sm font-semibold transition duration-300 hover:bg-brand-lime hover:text-brand-dark hover:border-brand-lime hover:shadow-lg hover:shadow-brand-lime/20">f</a>
-          <a href="#" class="grid h-10 w-10 place-items-center rounded-full bg-white/5 border border-white/10 text-sm font-semibold transition duration-300 hover:bg-brand-lime hover:text-brand-dark hover:border-brand-lime hover:shadow-lg hover:shadow-brand-lime/20">ig</a>
-          <a href="#" class="grid h-10 w-10 place-items-center rounded-full bg-white/5 border border-white/10 text-sm font-semibold transition duration-300 hover:bg-brand-lime hover:text-brand-dark hover:border-brand-lime hover:shadow-lg hover:shadow-brand-lime/20">yt</a>
+          <a href="#" class="grid h-10 w-10 place-items-center rounded-full bg-white/5 border border-white/10 text-sm font-semibold transition duration-300 hover:bg-brand-lime hover:text-brand-dark hover:border-brand-lime hover:shadow-lg hover:shadow-brand-lime/20" @click.prevent="trackEvent('click_social_link', { channel: 'facebook' })">f</a>
+          <a href="#" class="grid h-10 w-10 place-items-center rounded-full bg-white/5 border border-white/10 text-sm font-semibold transition duration-300 hover:bg-brand-lime hover:text-brand-dark hover:border-brand-lime hover:shadow-lg hover:shadow-brand-lime/20" @click.prevent="trackEvent('click_social_link', { channel: 'instagram' })">ig</a>
+          <a href="#" class="grid h-10 w-10 place-items-center rounded-full bg-white/5 border border-white/10 text-sm font-semibold transition duration-300 hover:bg-brand-lime hover:text-brand-dark hover:border-brand-lime hover:shadow-lg hover:shadow-brand-lime/20" @click.prevent="trackEvent('click_social_link', { channel: 'youtube' })">yt</a>
         </div>
       </div>
 
@@ -34,7 +38,6 @@
           <RouterLink to="/consultation" class="text-white/70 transition-all duration-300 hover:text-brand-lime hover:translate-x-1 font-semibold text-brand-lime">Đăng ký tư vấn</RouterLink>
           <RouterLink to="/contact" class="text-white/70 transition-all duration-300 hover:text-brand-lime hover:translate-x-1">Liên hệ trực tiếp</RouterLink>
           <RouterLink to="/blog" class="text-white/70 transition-all duration-300 hover:text-brand-lime hover:translate-x-1">Tin tức & Khuyến mãi</RouterLink>
-          <RouterLink to="/login" class="text-white/70 transition-all duration-300 hover:text-brand-lime hover:translate-x-1">Tài khoản thành viên</RouterLink>
         </div>
       </div>
 
@@ -62,4 +65,3 @@
     </div>
   </footer>
 </template>
-

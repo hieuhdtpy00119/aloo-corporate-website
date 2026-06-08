@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useAppStore } from '../../stores/appStore'
 import { useToastStore } from '../../stores/toastStore'
 import { createFranchiseRegistration } from '../../services/franchiseRegistrationService'
+import { trackEvent } from '../../services/analyticsService'
 import { Send } from 'lucide-vue-next'
 
 const { t } = useI18n()
@@ -42,6 +43,7 @@ const submitForm = async () => {
   try {
     const { data } = await createFranchiseRegistration(payload)
     store.addRegistration(data)
+    trackEvent('submit_franchise_form', { province: payload.province })
     toast.success(t('consultation.success'))
     resetForm()
   } catch (error) {

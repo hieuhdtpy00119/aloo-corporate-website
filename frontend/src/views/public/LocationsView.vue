@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import SectionTitle from '../../components/public/SectionTitle.vue'
 import { useAppStore } from '../../stores/appStore'
@@ -16,6 +17,7 @@ const normalizeLocation = (location) => ({
   city: location.city || location.province || '',
   imageUrl: location.imageUrl || '',
   amenities: Array.isArray(location.amenities) ? location.amenities : [],
+  links: Array.isArray(location.links) ? location.links : [],
 })
 
 const locations = computed(() =>
@@ -53,6 +55,8 @@ const amenityIcons = {
 }
 
 const getAmenityIcon = (amenity) => amenityIcons[amenity] || MapPin
+const getOrderLink = (location) =>
+  location.links.find((link) => ['ORDER', 'SHOPEEFOOD', 'GRABFOOD', 'DELIVERY'].includes(String(link.type || '').toUpperCase()))
 
 const activeLocationCount = computed(() =>
   locations.value.filter((location) => ['ACTIVE', 'Đang hoạt động'].includes(location.status)).length,
@@ -212,7 +216,15 @@ onMounted(() => {
 
           <div class="mt-auto border-t border-slate-50 p-5">
             <div class="grid gap-2 sm:grid-cols-2">
+              <RouterLink
+                v-if="location.slug"
+                :to="`/locations/${location.slug}`"
+                class="inline-flex justify-center items-center gap-1.5 rounded-full border border-avocado-200 hover:border-avocado-300 hover:bg-avocado-50/50 px-4 py-2.5 text-xs font-bold text-avocado-800 transition"
+              >
+                Chi tiết
+              </RouterLink>
               <a
+                v-if="location.mapUrl"
                 :href="location.mapUrl"
                 target="_blank"
                 rel="noreferrer"
@@ -222,6 +234,16 @@ onMounted(() => {
                 {{ t('common.viewMap') }}
               </a>
               <a
+                v-if="getOrderLink(location)"
+                :href="getOrderLink(location).url"
+                target="_blank"
+                rel="noreferrer"
+                class="inline-flex justify-center items-center gap-1.5 rounded-full border border-cream-200 bg-cream-100 px-4 py-2.5 text-xs font-bold text-avocado-900 transition hover:bg-cream-200"
+              >
+                Đặt món
+              </a>
+              <a
+                v-if="location.phone"
                 :href="`tel:${location.phone}`"
                 class="inline-flex justify-center items-center gap-1.5 rounded-full bg-avocado-800 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-avocado-900"
               >

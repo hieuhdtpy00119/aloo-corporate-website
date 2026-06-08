@@ -13,11 +13,16 @@ GO
 
 DROP TABLE IF EXISTS dbo.post_related_posts;
 DROP TABLE IF EXISTS dbo.post_images;
+DROP TABLE IF EXISTS dbo.testimonials;
+DROP TABLE IF EXISTS dbo.store_gallery;
+DROP TABLE IF EXISTS dbo.store_business_hours;
+DROP TABLE IF EXISTS dbo.store_menu_posters;
 DROP TABLE IF EXISTS dbo.products;
 DROP TABLE IF EXISTS dbo.posts;
 DROP TABLE IF EXISTS dbo.franchise_contents;
 DROP TABLE IF EXISTS dbo.franchise_registrations;
 DROP TABLE IF EXISTS dbo.contact_messages;
+DROP TABLE IF EXISTS dbo.stores;
 DROP TABLE IF EXISTS dbo.locations;
 DROP TABLE IF EXISTS dbo.menu_posters;
 DROP TABLE IF EXISTS dbo.home_sections;
@@ -159,8 +164,10 @@ CREATE TABLE dbo.franchise_registrations (
     status NVARCHAR(40) NOT NULL CONSTRAINT df_franchise_registrations_status DEFAULT N'NEW',
     created_at DATETIME2(0) NOT NULL CONSTRAINT df_franchise_registrations_created_at DEFAULT GETDATE(),
     updated_at DATETIME2(0) NOT NULL CONSTRAINT df_franchise_registrations_updated_at DEFAULT GETDATE(),
+    last_contacted_at DATETIME2(0) NULL,
+    assigned_to NVARCHAR(180) NULL,
     CONSTRAINT pk_franchise_registrations PRIMARY KEY (id),
-    CONSTRAINT ck_franchise_registrations_status CHECK (status IN (N'NEW', N'CONTACTED', N'CONSULTING', N'DONE', N'COMPLETED', N'CANCELED', N'CANCELLED'))
+    CONSTRAINT ck_franchise_registrations_status CHECK (status IN (N'NEW', N'CONTACTED', N'CONSULTING', N'POTENTIAL', N'SIGNED', N'REJECTED'))
 );
 GO
 
@@ -179,24 +186,84 @@ CREATE TABLE dbo.contact_messages (
 );
 GO
 
-CREATE TABLE dbo.locations (
+CREATE TABLE dbo.stores (
     id BIGINT IDENTITY(1,1) NOT NULL,
+    store_code NVARCHAR(50) NOT NULL,
     name NVARCHAR(180) NOT NULL,
+    slug NVARCHAR(220) NOT NULL,
     address NVARCHAR(500) NOT NULL,
     province NVARCHAR(120) NOT NULL,
     district NVARCHAR(120) NULL,
-    phone NVARCHAR(40) NULL,
-    opening_hours NVARCHAR(180) NULL,
-    map_url NVARCHAR(1000) NULL,
-    image_url NVARCHAR(600) NULL,
-    amenities_json NVARCHAR(MAX) NULL,
-    display_order INT NOT NULL CONSTRAINT df_locations_display_order DEFAULT 0,
-    featured BIT NOT NULL CONSTRAINT df_locations_featured DEFAULT 0,
-    status NVARCHAR(40) NOT NULL CONSTRAINT df_locations_status DEFAULT N'ACTIVE',
-    created_at DATETIME2(0) NOT NULL CONSTRAINT df_locations_created_at DEFAULT GETDATE(),
-    updated_at DATETIME2(0) NOT NULL CONSTRAINT df_locations_updated_at DEFAULT GETDATE(),
-    CONSTRAINT pk_locations PRIMARY KEY (id),
-    CONSTRAINT ck_locations_status CHECK (status IN (N'ACTIVE', N'COMING_SOON', N'TEMPORARILY_CLOSED', N'MAINTENANCE', N'INACTIVE'))
+    ward NVARCHAR(120) NULL,
+    latitude DECIMAL(10,7) NULL,
+    longitude DECIMAL(10,7) NULL,
+    phone NVARCHAR(80) NULL,
+    email NVARCHAR(180) NULL,
+    google_map_url NVARCHAR(600) NULL,
+    store_type NVARCHAR(40) NOT NULL CONSTRAINT df_stores_store_type DEFAULT N'STANDARD',
+    description NVARCHAR(MAX) NULL,
+    cover_image_url NVARCHAR(600) NULL,
+    featured BIT NOT NULL CONSTRAINT df_stores_featured DEFAULT 0,
+    display_order INT NOT NULL CONSTRAINT df_stores_display_order DEFAULT 0,
+    status NVARCHAR(40) NOT NULL CONSTRAINT df_stores_status DEFAULT N'ACTIVE',
+    created_at DATETIME2(0) NOT NULL CONSTRAINT df_stores_created_at DEFAULT GETDATE(),
+    updated_at DATETIME2(0) NOT NULL CONSTRAINT df_stores_updated_at DEFAULT GETDATE(),
+    CONSTRAINT pk_stores PRIMARY KEY (id),
+    CONSTRAINT uq_stores_store_code UNIQUE (store_code),
+    CONSTRAINT uq_stores_slug UNIQUE (slug),
+    CONSTRAINT ck_stores_store_type CHECK (store_type IN (N'FLAGSHIP', N'STANDARD', N'KIOSK', N'FRANCHISE', N'POPUP')),
+    CONSTRAINT ck_stores_status CHECK (status IN (N'ACTIVE', N'COMING_SOON', N'TEMPORARILY_CLOSED', N'MAINTENANCE', N'INACTIVE'))
+);
+GO
+
+CREATE TABLE dbo.store_gallery (
+    id BIGINT IDENTITY(1,1) NOT NULL,
+    store_id BIGINT NOT NULL,
+    image_url NVARCHAR(600) NOT NULL,
+    alt_text NVARCHAR(260) NULL,
+    sort_order INT NOT NULL CONSTRAINT df_store_gallery_sort_order DEFAULT 0,
+    CONSTRAINT pk_store_gallery PRIMARY KEY (id),
+    CONSTRAINT fk_store_gallery_store FOREIGN KEY (store_id) REFERENCES dbo.stores(id) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE dbo.store_business_hours (
+    id BIGINT IDENTITY(1,1) NOT NULL,
+    store_id BIGINT NOT NULL,
+    day_of_week INT NOT NULL,
+    open_time TIME NULL,
+    close_time TIME NULL,
+    is_closed BIT NOT NULL CONSTRAINT df_store_business_hours_is_closed DEFAULT 0,
+    CONSTRAINT pk_store_business_hours PRIMARY KEY (id),
+    CONSTRAINT fk_store_business_hours_store FOREIGN KEY (store_id) REFERENCES dbo.stores(id) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE dbo.store_menu_posters (
+    id BIGINT IDENTITY(1,1) NOT NULL,
+    store_id BIGINT NOT NULL,
+    title NVARCHAR(220) NOT NULL,
+    image_url NVARCHAR(600) NOT NULL,
+    sort_order INT NOT NULL CONSTRAINT df_store_menu_posters_sort_order DEFAULT 0,
+    is_active BIT NOT NULL CONSTRAINT df_store_menu_posters_is_active DEFAULT 1,
+    CONSTRAINT pk_store_menu_posters PRIMARY KEY (id),
+    CONSTRAINT fk_store_menu_posters_store FOREIGN KEY (store_id) REFERENCES dbo.stores(id) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE dbo.testimonials (
+    id BIGINT IDENTITY(1,1) NOT NULL,
+    customer_name NVARCHAR(100) NOT NULL,
+    avatar_url NVARCHAR(500) NULL,
+    rating INT NOT NULL,
+    content NVARCHAR(MAX) NOT NULL,
+    store_name NVARCHAR(180) NULL,
+    is_visible BIT NOT NULL CONSTRAINT df_testimonials_is_visible DEFAULT 1,
+    sort_order INT NOT NULL CONSTRAINT df_testimonials_sort_order DEFAULT 0,
+    created_at DATETIME2(0) NOT NULL CONSTRAINT df_testimonials_created_at DEFAULT GETDATE(),
+    updated_at DATETIME2(0) NOT NULL CONSTRAINT df_testimonials_updated_at DEFAULT GETDATE(),
+    CONSTRAINT pk_testimonials PRIMARY KEY (id),
+    CONSTRAINT ck_testimonials_rating CHECK (rating BETWEEN 1 AND 5)
 );
 GO
 
@@ -291,11 +358,16 @@ GO
 CREATE INDEX ix_users_role_status ON dbo.users(role, status, created_at DESC);
 CREATE INDEX ix_categories_type_status ON dbo.categories(type, status, sort_order);
 CREATE INDEX ix_products_status_category ON dbo.products(status, category_id, sort_order);
+CREATE INDEX ix_testimonials_visible_sort ON dbo.testimonials(is_visible, sort_order, created_at DESC);
 CREATE INDEX ix_posts_status_published_at ON dbo.posts(status, published_at DESC);
 CREATE INDEX ix_posts_category ON dbo.posts(category_id);
 CREATE INDEX ix_registrations_status_created_at ON dbo.franchise_registrations(status, created_at DESC);
 CREATE INDEX ix_contact_messages_status_created_at ON dbo.contact_messages(status, created_at DESC);
-CREATE INDEX ix_locations_status_province ON dbo.locations(status, province, display_order);
+CREATE INDEX ix_stores_status_province ON dbo.stores(status, province, display_order);
+CREATE INDEX ix_stores_featured_status ON dbo.stores(featured, status, display_order);
+CREATE INDEX ix_store_gallery_store_sort ON dbo.store_gallery(store_id, sort_order);
+CREATE INDEX ix_store_business_hours_store_day ON dbo.store_business_hours(store_id, day_of_week);
+CREATE INDEX ix_store_menu_posters_store_sort ON dbo.store_menu_posters(store_id, is_active, sort_order);
 CREATE INDEX ix_franchise_contents_section ON dbo.franchise_contents(section_key, status, sort_order);
 CREATE INDEX ix_hero_banners_status_sort ON dbo.hero_banners(status, sort_order);
 CREATE INDEX ix_home_sections_status_sort ON dbo.home_sections(status, sort_order);

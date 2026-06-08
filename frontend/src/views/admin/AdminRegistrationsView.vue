@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import BaseModal from '../../components/admin/BaseModal.vue'
 import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
@@ -18,8 +18,14 @@ const isLoading = computed(() => store.loading.registrations)
 const errorMessage = computed(() => store.errors.registrations)
 const currentPage = ref(1)
 const pageSize = 5
-const registrationStatuses = ['Mới', 'Đã liên hệ', 'Đang tư vấn', 'Hoàn tất', 'Hủy']
+const registrationStatuses = ['Mới', 'Đã liên hệ', 'Đang tư vấn', 'Tiềm năng', 'Đã ký', 'Từ chối']
 const statusFilters = ['Tất cả', ...registrationStatuses]
+const leadForm = reactive({
+  status: 'Mới',
+  note: '',
+  lastContactedAt: '',
+  assignedTo: '',
+})
 
 const registrations = computed(() => store.registrations)
 
@@ -29,20 +35,28 @@ const statusClass = (status) => ({
   'bg-blue-50 text-blue-700 ring-1 ring-blue-100': status === 'Mới',
   'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100': status === 'Đã liên hệ',
   'bg-amber-50 text-amber-700 ring-1 ring-amber-100': status === 'Đang tư vấn',
-  'bg-purple-50 text-purple-700 ring-1 ring-purple-100': status === 'Hoàn tất',
-  'bg-slate-100 text-slate-600 ring-1 ring-slate-200': status === 'Hủy',
+  'bg-orange-50 text-orange-700 ring-1 ring-orange-100': status === 'Tiềm năng',
+  'bg-purple-50 text-purple-700 ring-1 ring-purple-100': status === 'Đã ký',
+  'bg-slate-100 text-slate-600 ring-1 ring-slate-200': status === 'Từ chối',
 })
 
 const getStatusSelectClass = (status) => ({
   'bg-blue-50 text-blue-700 border-blue-200': status === 'Mới',
   'bg-emerald-50 text-emerald-700 border-emerald-200': status === 'Đã liên hệ',
   'bg-amber-50 text-amber-700 border-amber-200': status === 'Đang tư vấn',
-  'bg-purple-50 text-purple-700 border-purple-200': status === 'Hoàn tất',
-  'bg-red-50 text-red-700 border-red-200': status === 'Hủy',
+  'bg-orange-50 text-orange-700 border-orange-200': status === 'Tiềm năng',
+  'bg-purple-50 text-purple-700 border-purple-200': status === 'Đã ký',
+  'bg-red-50 text-red-700 border-red-200': status === 'Từ chối',
 })
 
 const showDetail = (registration) => {
   selectedRegistration.value = registration
+  Object.assign(leadForm, {
+    status: registration.status || 'Mới',
+    note: registration.note || '',
+    lastContactedAt: registration.lastContactedAt ? String(registration.lastContactedAt).replace(' ', 'T').slice(0, 16) : '',
+    assignedTo: registration.assignedTo || '',
+  })
 }
 
 const notifyStatusChange = () => {
@@ -51,12 +65,22 @@ const notifyStatusChange = () => {
 
 const updateRegistrationStatus = async (registration, status) => {
   try {
-    const updated = await store.updateRegistrationStatus(registration, status)
+    const updated = await store.updateRegistrationStatus(registration, status, {
+      note: leadForm.note,
+      lastContactedAt: leadForm.lastContactedAt || null,
+      assignedTo: leadForm.assignedTo,
+    })
     selectedRegistration.value = updated
+    showDetail(updated)
     notifyStatusChange()
   } catch (error) {
     toast.error(error.response?.data?.message || 'Không cập nhật được trạng thái')
   }
+}
+
+const saveLeadCare = () => {
+  if (!selectedRegistration.value) return
+  updateRegistrationStatus(selectedRegistration.value, leadForm.status)
 }
 
 const closeDetailModal = () => {
@@ -247,23 +271,27 @@ onMounted(() => {
           <div class="rounded-lg bg-slate-50 p-4 sm:col-span-2">
             <dt class="text-xs font-black uppercase text-slate-500">Trạng thái</dt>
             <dd class="mt-2">
-              <span class="rounded-full px-3 py-1 text-xs font-bold" :class="statusClass(selectedRegistration.status)">
-                {{ selectedRegistration.status }}
-              </span>
+              <select v-model="leadForm.status" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-avocado-500">
+                <option v-for="status in registrationStatuses" :key="status" :value="status">{{ status }}</option>
+              </select>
             </dd>
           </div>
           <div class="rounded-lg bg-slate-50 p-4 sm:col-span-2">
-            <dt class="text-xs font-black uppercase text-slate-500">Cập nhật trạng thái</dt>
-            <dd class="mt-3 flex flex-wrap gap-2">
-              <button
-                v-for="status in registrationStatuses"
-                :key="status"
-                type="button"
-                class="rounded-full border px-3 py-2 text-xs font-black transition hover:-translate-y-0.5"
-                :class="selectedRegistration.status === status ? getStatusSelectClass(status) : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
-                @click="updateRegistrationStatus(selectedRegistration, status)"
-              >
-                {{ status }}
+            <dt class="text-xs font-black uppercase text-slate-500">Chăm sóc lead</dt>
+            <dd class="mt-3 grid gap-3">
+              <div class="grid gap-3 sm:grid-cols-2">
+                <label class="grid gap-1">
+                  <span class="text-xs font-bold text-slate-500">Lần liên hệ cuối</span>
+                  <input v-model="leadForm.lastContactedAt" type="datetime-local" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-avocado-500" />
+                </label>
+                <label class="grid gap-1">
+                  <span class="text-xs font-bold text-slate-500">Người phụ trách</span>
+                  <input v-model="leadForm.assignedTo" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-avocado-500" placeholder="Tên admin hoặc sale" />
+                </label>
+              </div>
+              <textarea v-model="leadForm.note" rows="4" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-avocado-500" placeholder="Ghi chú chăm sóc lead"></textarea>
+              <button type="button" class="w-fit rounded-xl bg-avocado-800 px-5 py-3 text-sm font-black text-white hover:bg-avocado-950" @click="saveLeadCare">
+                Lưu chăm sóc lead
               </button>
             </dd>
           </div>

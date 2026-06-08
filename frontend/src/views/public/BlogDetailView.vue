@@ -2,10 +2,11 @@
 import { computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '../../stores/appStore'
+import { setSeoMeta } from '../../services/seoService'
 
 const route = useRoute()
 const store = useAppStore()
-const routeIdentifier = computed(() => String(route.params.id || ''))
+const routeIdentifier = computed(() => String(route.params.slug || route.params.id || ''))
 
 const post = computed(() =>
   store.posts.find(
@@ -57,6 +58,15 @@ watch(
   post,
   (value) => {
     document.title = value ? `${value.seoTitle || value.title} | ALOO` : 'Không tìm thấy bài viết | ALOO'
+    if (value) {
+      setSeoMeta({
+        title: `${value.seoTitle || value.title} | ALOO`,
+        description: value.seoDescription || value.metaDescription || value.excerpt || 'Bài viết ALOO.',
+        image: value.thumbnailUrl || value.image || '/logo-aloo.png',
+        url: window.location.href,
+        type: 'article',
+      })
+    }
   },
   { immediate: true },
 )

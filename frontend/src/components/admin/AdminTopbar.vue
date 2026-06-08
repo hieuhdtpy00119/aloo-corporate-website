@@ -1,5 +1,4 @@
 <script setup>
-import UserMenu from '../public/UserMenu.vue'
 import { ExternalLink } from 'lucide-vue-next'
 </script>
 
@@ -17,9 +16,6 @@ import { ExternalLink } from 'lucide-vue-next'
         <ExternalLink class="h-3.5 w-3.5" />
         Xem Website
       </RouterLink>
-      <div class="h-8 w-px bg-slate-100 hidden sm:block"></div>
-      <UserMenu />
     </div>
   </header>
 </template>
-

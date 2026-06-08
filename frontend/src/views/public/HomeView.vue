@@ -1,8 +1,9 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { ChevronLeft, ChevronRight, MapPin, Award, Star, ArrowRight, Heart } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, MapPin, Award, ArrowRight, Heart } from 'lucide-vue-next'
 import { useAppStore } from '../../stores/appStore'
 import { homeSectionService, resolveBackendAssetUrl } from '../../services/cmsService'
+import CustomerFeedbackSection from '../../components/public/CustomerFeedbackSection.vue'
 
 const store = useAppStore()
 const productRail = ref(null)
@@ -81,42 +82,19 @@ onMounted(() => {
 <template>
   <section class="bg-brand-cream/10">
     <!-- Hero Banner with Glassmorphic Content Card Overlay -->
-    <div class="relative h-[88vh] min-h-[660px] w-full overflow-hidden bg-brand-dark">
-      <img
-        class="absolute inset-0 h-full w-full object-cover opacity-50 mix-blend-luminosity scale-[1.01]"
-        src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=2200&q=90"
-        alt="ALOO Kem Bơ Thuần Việt"
-      />
-      
-      <!-- Gradient overlay for readability -->
-      <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/40 to-transparent"></div>
-      <div class="absolute inset-0 bg-gradient-to-r from-brand-dark/80 via-transparent to-transparent"></div>
-
-      <!-- Hero Content -->
-      <div class="absolute inset-0 flex items-center justify-start px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto w-full max-w-[1280px]">
-          <div class="max-w-2xl glass-panel-dark text-white p-8 sm:p-10 rounded-3xl border border-white/10 shadow-2xl relative">
-            <div class="absolute -top-3 left-8 bg-brand-lime text-brand-dark text-xs font-black tracking-widest uppercase px-3 py-1 rounded-full shadow-md">
-              Thương hiệu số 1 về Kem Bơ
-            </div>
-            <h1 class="text-4xl sm:text-5xl font-black leading-tight text-white mt-2 font-display">
-              ALOO — Kem Bơ <br />
-              <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-lime to-brand-sand">Thuần Việt</span>
-            </h1>
-            <p class="mt-4 text-base leading-relaxed text-white/80">
-              Sự kết hợp hoàn hảo giữa những quả bơ chín sáp xay mịn, kem dừa ngọt thanh mát lạnh cùng topping dừa khô giòn rụm. Hương vị truyền thống, diện mạo trẻ trung!
-            </p>
-            <div class="mt-8 flex flex-wrap gap-4">
-              <RouterLink to="/products" class="rounded-full bg-brand-lime text-brand-dark font-black px-6 py-3.5 hover:bg-brand-lime/90 transition duration-300 transform hover:-translate-y-0.5 shadow-lg shadow-brand-lime/20 text-sm">
-                Khám phá Menu
-              </RouterLink>
-              <RouterLink to="/consultation" class="rounded-full border border-white/20 bg-white/5 backdrop-blur-sm text-white font-bold px-6 py-3.5 hover:bg-white/10 transition duration-300 transform hover:-translate-y-0.5 text-sm">
-                Nhượng quyền ngay
-              </RouterLink>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="relative h-[64vh] min-h-[460px] w-full overflow-hidden bg-brand-dark">
+      <video
+        class="absolute inset-0 h-full w-full object-contain"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=2200&q=90"
+        aria-label="ALOO Kem Bơ Thuần Việt"
+      >
+        <source src="/videos/aloo-home-hero.mp4" type="video/mp4" />
+      </video>
     </div>
 
     <!-- Featured Section -->
@@ -221,10 +199,6 @@ onMounted(() => {
             <div v-else class="grid h-full place-items-center text-xl font-black text-brand-forest bg-brand-lime/10">ALOO</div>
           </div>
           <div class="mt-4 space-y-1.5">
-            <div class="flex items-center gap-1">
-              <Star v-for="i in 5" :key="i" class="h-3 w-3 fill-brand-sand text-brand-sand" />
-              <span class="text-xs text-brand-muted ml-1 font-bold">5.0</span>
-            </div>
             <h3 class="text-base font-bold text-brand-dark transition group-hover:text-brand-forest">{{ product.name }}</h3>
             <p class="text-xs leading-relaxed text-brand-muted font-medium h-8 line-clamp-2">{{ product.description }}</p>
           </div>
@@ -279,6 +253,8 @@ onMounted(() => {
         </div>
       </div>
     </section>
+
+    <CustomerFeedbackSection />
 
     <!-- Location Finder Section -->
     <section class="mx-auto max-w-[1280px] px-4 py-20 sm:px-6 lg:px-8">

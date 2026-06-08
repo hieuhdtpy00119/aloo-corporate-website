@@ -35,6 +35,17 @@ export const productService = {
   remove: (id) => api.delete(`/products/${id}`),
 }
 
+export const feedbackService = {
+  listVisible: () => api.get('/testimonials'),
+  featured: () => api.get('/testimonials'),
+  adminList: () => api.get('/admin/testimonials'),
+  adminGet: (id) => api.get(`/admin/testimonials/${id}`),
+  create: (payload) => api.post('/admin/testimonials', payload),
+  update: (id, payload) => api.put(`/admin/testimonials/${id}`, payload),
+  updateVisible: (id, visible) => api.patch(`/admin/testimonials/${id}/visible`, { featured: visible }),
+  remove: (id) => api.delete(`/admin/testimonials/${id}`),
+}
+
 export const postService = {
   list: () => api.get('/posts'),
   get: (id) => api.get(`/posts/${id}`),
@@ -55,15 +66,17 @@ export const registrationService = {
   list: () => api.get('/franchise-registrations'),
   get: (id) => api.get(`/franchise-registrations/${id}`),
   create: (payload) => api.post('/franchise-registrations', payload),
-  updateStatus: (id, status) => api.patch(`/franchise-registrations/${id}/status`, { status }),
+  updateStatus: (id, status, extra = {}) => api.patch(`/franchise-registrations/${id}/status`, { status, ...extra }),
   remove: (id) => api.delete(`/franchise-registrations/${id}`),
 }
 
 export const locationService = {
-  list: () => api.get('/locations'),
-  create: (payload) => api.post('/locations', payload),
-  update: (id, payload) => api.put(`/locations/${id}`, payload),
-  remove: (id) => api.delete(`/locations/${id}`),
+  list: (params = {}) => api.get('/stores', { params }),
+  getBySlug: (slug) => api.get(`/stores/${slug}`),
+  featured: () => api.get('/stores/featured'),
+  create: (payload) => api.post('/admin/stores', payload),
+  update: (id, payload) => api.put(`/admin/stores/${id}`, payload),
+  remove: (id) => api.delete(`/admin/stores/${id}`),
 }
 
 export const franchiseContentService = {

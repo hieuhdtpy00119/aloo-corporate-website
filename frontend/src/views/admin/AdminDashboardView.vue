@@ -21,6 +21,62 @@ const selectedRange = ref('7 ngày qua')
 
 const timeRanges = ['Hôm nay', '7 ngày qua', '30 ngày qua', 'Tháng này']
 
+const parseDate = (value) => {
+  if (!value) return null
+  const date = new Date(String(value).replace(' ', 'T'))
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+const getItemDate = (item) =>
+  parseDate(item.updatedAt || item.createdAt || item.publishedAt || item.date || item.lastContactedAt)
+
+const rangeStart = computed(() => {
+  const now = new Date()
+  const start = new Date(now)
+
+  if (selectedRange.value === 'Hôm nay') {
+    start.setHours(0, 0, 0, 0)
+    return start
+  }
+
+  if (selectedRange.value === '30 ngày qua') {
+    start.setDate(now.getDate() - 29)
+    start.setHours(0, 0, 0, 0)
+    return start
+  }
+
+  if (selectedRange.value === 'Tháng này') {
+    return new Date(now.getFullYear(), now.getMonth(), 1)
+  }
+
+  start.setDate(now.getDate() - 6)
+  start.setHours(0, 0, 0, 0)
+  return start
+})
+
+const isInsideSelectedRange = (item) => {
+  const itemDate = getItemDate(item)
+  if (!itemDate) return true
+  return itemDate >= rangeStart.value
+}
+
+const scopedRegistrations = computed(() => store.registrations.filter(isInsideSelectedRange))
+const scopedPosts = computed(() => store.posts.filter(isInsideSelectedRange))
+const scopedProducts = computed(() => store.products.filter(isInsideSelectedRange))
+const scopedLocations = computed(() => store.locations.filter(isInsideSelectedRange))
+
+const scopedRecordCount = computed(
+  () =>
+    scopedRegistrations.value.length +
+    scopedPosts.value.length +
+    scopedProducts.value.length +
+    scopedLocations.value.length,
+)
+
+const totalRecordCount = computed(
+  () => store.registrations.length + store.posts.length + store.products.length + store.locations.length,
+)
+
 const articleStatusLabels = {
   DRAFT: 'Nháp',
   PENDING: 'Chờ duyệt',
@@ -67,19 +123,19 @@ const toProgressItems = (record, colors = []) => {
 }
 
 const leadsNeedingAction = computed(() =>
-  store.registrations.filter((item) => item.status === 'Mới' || item.status === 'Đang tư vấn').length,
+  scopedRegistrations.value.filter((item) => ['Mới', 'NEW', 'Đang tư vấn', 'CONSULTING'].includes(item.status)).length,
 )
 
 const postsNeedingAction = computed(() =>
-  store.posts.filter((post) => pendingPostStatuses.has(normalizePostStatus(post.status))).length,
+  scopedPosts.value.filter((post) => pendingPostStatuses.has(normalizePostStatus(post.status))).length,
 )
 
 const productsOnSale = computed(() =>
-  store.products.filter((product) => ['ACTIVE', 'Đang bán'].includes(product.status)).length,
+  scopedProducts.value.filter((product) => ['ACTIVE', 'Đang bán'].includes(product.status)).length,
 )
 
 const activeLocations = computed(() =>
-  store.locations.filter((location) => location.status === 'ACTIVE').length,
+  scopedLocations.value.filter((location) => location.status === 'ACTIVE').length,
 )
 
 const kpiCards = computed(() => [
@@ -87,7 +143,7 @@ const kpiCards = computed(() => [
     label: 'Lead cần xử lý',
     value: leadsNeedingAction.value,
     description: 'Lead mới hoặc đang tư vấn',
-    note: '+2 phản hồi nhanh',
+    note: `${scopedRegistrations.value.length}/${store.registrations.length} lead`,
     icon: AlertCircle,
     tone: 'warning',
   },
@@ -95,7 +151,7 @@ const kpiCards = computed(() => [
     label: 'Bài viết chờ duyệt',
     value: postsNeedingAction.value,
     description: 'Nội dung chưa xuất bản',
-    note: 'Cần kiểm tra nội dung',
+    note: `${scopedPosts.value.length}/${store.posts.length} bài`,
     icon: FileClock,
     tone: 'info',
   },
@@ -103,7 +159,7 @@ const kpiCards = computed(() => [
     label: 'Sản phẩm đang bán',
     value: productsOnSale.value,
     description: 'Sản phẩm public đang bật',
-    note: 'Danh mục ổn định',
+    note: `${scopedProducts.value.length}/${store.products.length} sản phẩm`,
     icon: Package,
     tone: 'success',
   },
@@ -111,7 +167,7 @@ const kpiCards = computed(() => [
     label: 'Địa điểm hoạt động',
     value: activeLocations.value,
     description: 'Cửa hàng đang hoạt động',
-    note: 'Hệ thống đang mở',
+    note: `${scopedLocations.value.length}/${store.locations.length} địa điểm`,
     icon: MapPin,
     tone: 'success',
   },
@@ -137,7 +193,7 @@ const actionCards = computed(() => [
 ])
 
 const leadStatusBars = computed(() =>
-  toProgressItems(countBy(store.registrations, (item) => item.status), [
+  toProgressItems(countBy(scopedRegistrations.value, (item) => item.status), [
     'bg-gradient-to-r from-blue-600 to-cyan-400',
     'bg-gradient-to-r from-brand-forest to-brand-lime',
     'bg-gradient-to-r from-brand-brown to-brand-sand',
@@ -147,7 +203,7 @@ const leadStatusBars = computed(() =>
 )
 
 const postStatusBars = computed(() =>
-  toProgressItems(countBy(store.posts, (item) => postStatusLabel(item.status)), [
+  toProgressItems(countBy(scopedPosts.value, (item) => postStatusLabel(item.status)), [
     'bg-gradient-to-r from-brand-forest to-brand-lime',
     'bg-gradient-to-r from-brand-brown to-brand-sand',
     'bg-gradient-to-r from-blue-600 to-cyan-400',
@@ -156,7 +212,7 @@ const postStatusBars = computed(() =>
 )
 
 const productCategoryBars = computed(() =>
-  toProgressItems(countBy(store.products, (item) => item.category), [
+  toProgressItems(countBy(scopedProducts.value, (item) => item.category), [
     'bg-gradient-to-r from-brand-forest to-brand-lime',
     'bg-gradient-to-r from-brand-brown to-brand-sand',
     'bg-gradient-to-r from-blue-600 to-cyan-450',
@@ -181,16 +237,29 @@ const analysisCards = computed(() => [
   },
 ])
 
-const leadPriority = { Mới: 0, 'Đang tư vấn': 1, 'Đã liên hệ': 2, 'Hoàn tất': 3, Hủy: 4 }
+const leadPriority = {
+  Mới: 0,
+  NEW: 0,
+  'Đang tư vấn': 1,
+  CONSULTING: 1,
+  'Đã liên hệ': 2,
+  CONTACTED: 2,
+  'Tiềm năng': 3,
+  POTENTIAL: 3,
+  'Đã ký': 4,
+  SIGNED: 4,
+  'Từ chối': 5,
+  REJECTED: 5,
+}
 
 const recentRegistrations = computed(() =>
-  [...store.registrations]
+  [...scopedRegistrations.value]
     .sort((a, b) => (leadPriority[a.status] ?? 9) - (leadPriority[b.status] ?? 9))
     .slice(0, 5),
 )
 
 const recentPosts = computed(() =>
-  [...store.posts]
+  [...scopedPosts.value]
     .sort((a, b) => {
       const pendingA = pendingPostStatuses.has(normalizePostStatus(a.status)) ? 0 : 1
       const pendingB = pendingPostStatuses.has(normalizePostStatus(b.status)) ? 0 : 1
@@ -218,11 +287,11 @@ const toneClasses = {
 }
 
 const leadStatusClass = (status) => ({
-  'border-blue-200 bg-blue-50 text-blue-700': status === 'Mới',
-  'border-avocado-200 bg-avocado-50 text-avocado-700': status === 'Đã liên hệ',
-  'border-amber-200 bg-amber-50 text-amber-700': status === 'Đang tư vấn',
-  'border-emerald-200 bg-emerald-50 text-emerald-700': status === 'Hoàn tất',
-  'border-slate-200 bg-slate-100 text-slate-600': status === 'Hủy',
+  'border-blue-200 bg-blue-50 text-blue-700': ['Mới', 'NEW'].includes(status),
+  'border-avocado-200 bg-avocado-50 text-avocado-700': ['Đã liên hệ', 'CONTACTED'].includes(status),
+  'border-amber-200 bg-amber-50 text-amber-700': ['Đang tư vấn', 'CONSULTING', 'Tiềm năng', 'POTENTIAL'].includes(status),
+  'border-emerald-200 bg-emerald-50 text-emerald-700': ['Đã ký', 'SIGNED'].includes(status),
+  'border-slate-200 bg-slate-100 text-slate-600': ['Từ chối', 'REJECTED'].includes(status),
 })
 
 const postStatusClass = (status) => {
@@ -252,7 +321,7 @@ const postStatusClass = (status) => {
           </span>
           <h1 class="mt-2 text-2xl sm:text-3xl font-black text-avocado-950">Dashboard tổng quan</h1>
           <p class="mt-1 text-sm text-slate-400">
-            Theo dõi nhanh hoạt động kinh doanh, lead tư vấn & dữ liệu bài viết hệ thống.
+            Đang xem {{ scopedRecordCount }}/{{ totalRecordCount }} bản ghi trong phạm vi {{ selectedRange.toLowerCase() }}.
           </p>
         </div>
 
@@ -275,7 +344,7 @@ const postStatusClass = (status) => {
     <section class="space-y-4">
       <div>
         <h2 class="text-base font-bold text-avocado-950">Chỉ số vận hành chính</h2>
-        <p class="text-xs text-slate-400">Các chỉ số thống kê tổng hợp của hệ thống.</p>
+        <p class="text-xs text-slate-400">Các chỉ số thống kê theo phạm vi {{ selectedRange.toLowerCase() }}.</p>
       </div>
 
       <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -341,7 +410,7 @@ const postStatusClass = (status) => {
     <section class="space-y-4">
       <div>
         <h2 class="text-base font-bold text-avocado-950">Cơ cấu & Phân bổ dữ liệu</h2>
-        <p class="text-xs text-slate-400">Tỷ trọng các nhóm đối tượng trong hệ thống.</p>
+        <p class="text-xs text-slate-400">Tỷ trọng các nhóm đối tượng trong phạm vi {{ selectedRange.toLowerCase() }}.</p>
       </div>
 
       <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -374,7 +443,7 @@ const postStatusClass = (status) => {
     <section class="space-y-4">
       <div>
         <h2 class="text-base font-bold text-avocado-950">Dữ liệu cập nhật mới nhất</h2>
-        <p class="text-xs text-slate-400">Danh sách lead mới và bài viết vừa cập nhật.</p>
+        <p class="text-xs text-slate-400">Danh sách lead và bài viết trong phạm vi {{ selectedRange.toLowerCase() }}.</p>
       </div>
 
       <div class="grid gap-5 xl:grid-cols-2">
@@ -477,4 +546,3 @@ const postStatusClass = (status) => {
     </section>
   </section>
 </template>
-

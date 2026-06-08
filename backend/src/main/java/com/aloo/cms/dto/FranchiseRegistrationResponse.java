@@ -11,6 +11,8 @@ public record FranchiseRegistrationResponse(
         String province,
         BigDecimal expectedBudget,
         String note,
+        LocalDateTime lastContactedAt,
+        String assignedTo,
         String status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

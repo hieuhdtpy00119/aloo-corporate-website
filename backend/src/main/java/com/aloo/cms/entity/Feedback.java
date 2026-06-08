@@ -17,53 +17,37 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "locations")
-public class Location {
+@Table(name = "testimonials")
+public class Feedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 180)
-    private String name;
+    @Column(nullable = false, length = 100)
+    private String customerName;
 
-    @Column(nullable = false, length = 500)
-    private String address;
+    @Column(length = 500)
+    private String avatarUrl;
 
-    @Column(nullable = false, length = 120)
-    private String province;
+    @Column(nullable = false)
+    private Integer rating;
 
-    @Column(length = 120)
-    private String district;
-
-    @Column(length = 40)
-    private String phone;
+    @Column(columnDefinition = "nvarchar(max)", nullable = false)
+    private String content;
 
     @Column(length = 180)
-    private String openingHours;
+    private String storeName;
 
-    @Column(length = 1000)
-    private String mapUrl;
-
-    @Column(length = 600)
-    private String imageUrl;
-
-    @Column(columnDefinition = "nvarchar(max)")
-    private String amenitiesJson;
+    @Column(name = "is_visible", nullable = false)
+    private Boolean visible = true;
 
     @Column(nullable = false)
-    private Integer displayOrder = 0;
-
-    @Column(nullable = false)
-    private Boolean featured = false;
-
-    @Column(nullable = false, length = 40)
-    private String status = "ACTIVE";
+    private Integer sortOrder = 0;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist

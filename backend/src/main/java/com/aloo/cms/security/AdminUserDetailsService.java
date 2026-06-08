@@ -20,5 +20,11 @@ public class AdminUserDetailsService implements UserDetailsService {
                 .map(CustomUserDetails::new)
                 .orElseThrow(() -> new UsernameNotFoundException("Admin user not found"));
     }
+
+    public UserDetails loadAnyUserByUsername(String username) throws UsernameNotFoundException {
+        return adminUserRepository.findByEmailIgnoreCase(username)
+                .map(CustomUserDetails::new)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
 }
 

@@ -15,6 +15,7 @@ dist/
 dist-ssr/
 backend/target/
 backend/uploads/
+uploads/
 backend/*.log
 
 # Environment variables

@@ -22,7 +22,6 @@ const statuses = [
   { value: 'PUBLISHED', label: 'Đã xuất bản' },
   { value: 'ARCHIVED', label: 'Lưu trữ' },
 ]
-const articleTypes = ['Tin tức', 'Review địa điểm', 'Bài SEO', 'Câu chuyện thương hiệu', 'Hướng dẫn nhượng quyền']
 const articleCategories = computed(() =>
   store.categories
     .filter((category) => category.type === 'ARTICLE' && category.status === 'ACTIVE')
@@ -47,7 +46,6 @@ const createDefaultForm = () => ({
   author: 'ALOO Editorial',
   source: '',
   sourceLink: '',
-  articleType: 'Bài SEO',
   category: articleCategories.value[0]?.name || 'Review',
   status: 'DRAFT',
   publishedAt: new Date().toISOString().slice(0, 10),
@@ -81,7 +79,6 @@ const hydrateForm = () => {
     form.author = source.author || 'ALOO Editorial'
     form.source = source.source || ''
     form.sourceLink = source.sourceLink || ''
-    form.articleType = source.articleType || 'Bài SEO'
     form.category = source.category || 'Review'
     form.status = normalizeStatus(source.status)
     form.publishedAt = String(source.publishedAt || source.date || new Date().toISOString()).slice(0, 10)
@@ -210,6 +207,10 @@ const removeGalleryImage = (image) => {
   form.gallery = form.gallery.filter((item) => item !== image)
 }
 
+const removeThumbnailImage = () => {
+  form.image = ''
+}
+
 const validateForm = () => {
   if (!form.title.trim()) {
     toast.error('Vui lòng nhập tiêu đề bài viết')
@@ -229,7 +230,6 @@ const buildPayload = (status) => ({
   author: form.author.trim(),
   source: form.source.trim(),
   sourceLink: form.sourceLink.trim(),
-  articleType: form.articleType,
   category: form.category,
   status,
   publishedAt: form.publishedAt,
@@ -318,12 +318,6 @@ onMounted(async () => {
               <input v-model="form.author" class="admin-input" />
             </label>
             <label class="space-y-2">
-              <span class="text-sm font-black text-slate-700">Loại bài viết</span>
-              <select v-model="form.articleType" class="admin-input">
-                <option v-for="type in articleTypes" :key="type" :value="type">{{ type }}</option>
-              </select>
-            </label>
-            <label class="space-y-2">
               <span class="text-sm font-black text-slate-700">Nguồn</span>
               <input v-model="form.source" class="admin-input" placeholder="ALOO / Báo chí / Cộng tác viên" />
             </label>
@@ -339,17 +333,17 @@ onMounted(async () => {
         </div>
 
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-            <div>
+          <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px] md:items-start">
+            <div class="max-w-xl">
               <h2 class="text-xl font-black text-avocado-950">Upload ảnh</h2>
               <p class="mt-1 text-sm text-slate-500">Ảnh upload được lưu vào backend và dùng lại ở public blog.</p>
             </div>
-            <div class="flex flex-wrap gap-2">
-              <label class="rounded-xl border border-avocado-200 px-4 py-3 text-sm font-black text-avocado-700 hover:bg-avocado-50">
+            <div class="grid gap-2 sm:grid-cols-2 md:grid-cols-1">
+              <label class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl border border-avocado-200 px-4 py-3 text-center text-sm font-black text-avocado-700 transition hover:bg-avocado-50">
                 {{ isUploadingImages ? 'Đang upload...' : 'Upload ảnh đại diện' }}
                 <input type="file" accept="image/*" class="hidden" :disabled="isUploadingImages" @change="handleThumbnailUpload" />
               </label>
-              <label class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-700 hover:bg-slate-50">
+              <label class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-center text-sm font-black text-slate-700 transition hover:bg-slate-50">
                 {{ isUploadingImages ? 'Đang upload...' : 'Upload gallery' }}
                 <input ref="galleryInput" type="file" accept="image/*" multiple class="hidden" :disabled="isUploadingImages" @change="handleGalleryUpload" />
               </label>
@@ -357,9 +351,17 @@ onMounted(async () => {
           </div>
 
           <div class="mt-5 grid gap-4 lg:grid-cols-[280px_1fr]">
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+            <div class="group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
               <img v-if="form.image" :src="form.image" alt="Article thumbnail" class="h-48 w-full object-cover" />
               <div v-else class="flex h-48 items-center justify-center text-sm font-bold text-slate-400">Chưa có ảnh đại diện</div>
+              <button
+                v-if="form.image"
+                type="button"
+                class="absolute right-3 top-3 rounded-xl bg-white/95 px-3 py-2 text-xs font-black text-red-600 shadow-sm ring-1 ring-red-100 transition hover:bg-red-50"
+                @click="removeThumbnailImage"
+              >
+                Xóa ảnh
+              </button>
             </div>
             <div>
               <label class="space-y-2">

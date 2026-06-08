@@ -142,7 +142,9 @@ Authorization: Bearer <user-token>
 - `GET /api/posts`
 - `GET /api/posts/{id}`
 - `GET /api/posts/slug/{slug}`
-- `GET /api/locations`
+- `GET /api/stores`
+- `GET /api/stores/featured`
+- `GET /api/stores/{slug}`
 - `GET /api/franchise-contents`
 - `GET /api/hero-banners`
 - `GET /api/menu-posters`
@@ -167,9 +169,10 @@ Authorization: Bearer <user-token>
 - `GET /api/franchise-registrations/{id}`
 - `PATCH /api/franchise-registrations/{id}/status`
 - `DELETE /api/franchise-registrations/{id}`
-- `POST /api/locations`
-- `PUT /api/locations/{id}`
-- `DELETE /api/locations/{id}`
+- `GET /api/admin/stores`
+- `POST /api/admin/stores`
+- `PUT /api/admin/stores/{id}`
+- `DELETE /api/admin/stores/{id}`
 - `PUT /api/franchise-contents/{id}`
 - `POST /api/hero-banners`
 - `PUT /api/hero-banners/{id}`

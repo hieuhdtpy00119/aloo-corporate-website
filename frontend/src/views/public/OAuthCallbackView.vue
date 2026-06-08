@@ -32,19 +32,15 @@ onMounted(() => {
     return
   }
 
-  if (role === 'ADMIN') {
-    localStorage.setItem('admin_token', token)
-    localStorage.setItem('admin_user', JSON.stringify(user))
-    window.dispatchEvent(new Event('aloo-auth-change'))
-    router.replace('/admin')
+  if (role !== 'ADMIN') {
+    errorMessage.value = 'Tài khoản Google này không có quyền quản trị'
     return
   }
 
-  localStorage.setItem('user_token', token)
-  localStorage.setItem('user_user', JSON.stringify(user))
-  localStorage.setItem('user_role', role || 'USER')
+  localStorage.setItem('admin_token', token)
+  localStorage.setItem('admin_user', JSON.stringify(user))
   window.dispatchEvent(new Event('aloo-auth-change'))
-  router.replace('/profile')
+  router.replace('/admin')
 })
 </script>
 
@@ -58,7 +54,7 @@ onMounted(() => {
       </p>
       <RouterLink
         v-if="errorMessage"
-        to="/login"
+        to="/admin/login"
         class="mt-6 inline-flex rounded-full bg-avocado-700 px-6 py-3 text-sm font-black text-white transition hover:bg-avocado-800"
       >
         Đăng nhập lại

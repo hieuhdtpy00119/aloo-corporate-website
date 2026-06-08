@@ -29,6 +29,8 @@ public class FranchiseRegistrationMapper {
                 registration.getProvince(),
                 registration.getExpectedBudget(),
                 registration.getNote(),
+                registration.getLastContactedAt(),
+                registration.getAssignedTo(),
                 registration.getStatus(),
                 registration.getCreatedAt(),
                 registration.getUpdatedAt()

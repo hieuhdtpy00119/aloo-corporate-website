@@ -44,7 +44,6 @@ describe('Navbar', () => {
         plugins: [router],
         stubs: {
           LanguageSwitcher: { template: '<div />' },
-          UserMenu: { template: '<div />' },
         },
       },
     })

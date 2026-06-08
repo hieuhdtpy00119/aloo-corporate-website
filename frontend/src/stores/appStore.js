@@ -12,18 +12,22 @@ const registrationStatusToUi = {
   NEW: 'Mới',
   CONTACTED: 'Đã liên hệ',
   CONSULTING: 'Đang tư vấn',
-  DONE: 'Hoàn tất',
-  COMPLETED: 'Hoàn tất',
-  CANCELED: 'Hủy',
-  CANCELLED: 'Hủy',
+  POTENTIAL: 'Tiềm năng',
+  SIGNED: 'Đã ký',
+  REJECTED: 'Từ chối',
+  DONE: 'Đã ký',
+  COMPLETED: 'Đã ký',
+  CANCELED: 'Từ chối',
+  CANCELLED: 'Từ chối',
 }
 
 const registrationStatusToApi = {
   Mới: 'NEW',
   'Đã liên hệ': 'CONTACTED',
   'Đang tư vấn': 'CONSULTING',
-  'Hoàn tất': 'DONE',
-  Hủy: 'CANCELED',
+  'Tiềm năng': 'POTENTIAL',
+  'Đã ký': 'SIGNED',
+  'Từ chối': 'REJECTED',
 }
 
 const normalizeDate = (value) => {
@@ -100,6 +104,8 @@ export const useAppStore = defineStore('app', {
         categoryId: product.categoryId || null,
         sortOrder: Number(product.sortOrder || product.id || 0),
         status: product.status || 'ACTIVE',
+        createdAt: normalizeDate(product.createdAt),
+        updatedAt: normalizeDate(product.updatedAt),
       }
     },
     normalizeCategory(category) {
@@ -153,22 +159,41 @@ export const useAppStore = defineStore('app', {
         expectedBudget: registration.expectedBudget ?? registration.capital ?? 0,
         createdAt: normalizeDate(registration.createdAt),
         updatedAt: normalizeDate(registration.updatedAt),
+        lastContactedAt: normalizeDate(registration.lastContactedAt),
+        assignedTo: registration.assignedTo || '',
         status,
       }
     },
     normalizeLocation(location) {
-      const imageUrl = resolveBackendAssetUrl(location.imageUrl || '')
+      const imageUrl = resolveBackendAssetUrl(location.coverImageUrl || location.imageUrl || '')
       return {
         ...location,
+        storeCode: location.storeCode || '',
+        slug: location.slug || '',
         addressText: location.address || location.addressText || '',
         city: location.province || location.city || '',
         province: location.province || location.city || '',
         district: location.district || '',
+        ward: location.ward || '',
+        latitude: location.latitude ?? null,
+        longitude: location.longitude ?? null,
+        email: location.email || '',
+        storeType: location.storeType || 'STANDARD',
+        description: location.description || '',
+        coverImageUrl: imageUrl,
         imageUrl,
+        galleryJson: location.galleryJson || '[]',
+        amenitiesJson: location.amenitiesJson || '[]',
+        menuPostersJson: location.menuPostersJson || '[]',
+        linksJson: location.linksJson || '[]',
+        links: Array.isArray(location.links) ? location.links : [],
+        mapUrl: location.mapUrl || location.links?.find?.((link) => link.type === 'GOOGLE_MAPS')?.url || '',
         amenities: Array.isArray(location.amenities) ? location.amenities : [],
         displayOrder: Number(location.displayOrder || location.id || 1),
         featured: Boolean(location.featured),
         status: location.status || 'ACTIVE',
+        createdAt: normalizeDate(location.createdAt),
+        updatedAt: normalizeDate(location.updatedAt),
       }
     },
     async runLoad(key, request, assign) {
@@ -329,15 +354,29 @@ export const useAppStore = defineStore('app', {
     },
     buildLocationPayload(location) {
       return {
+        storeCode: location.storeCode?.trim() || `ALOO-${Date.now()}`,
         name: location.name?.trim(),
+        slug: location.slug?.trim() || slugify(location.name),
         address: location.address || location.addressText || '',
         province: location.province || location.city || '',
         district: location.district || '',
+        ward: location.ward || '',
+        latitude: location.latitude || null,
+        longitude: location.longitude || null,
         phone: location.phone || '',
+        email: location.email || '',
         openingHours: location.openingHours || '',
-        mapUrl: location.mapUrl || '',
-        imageUrl: location.imageUrl || '',
-        amenities: Array.isArray(location.amenities) ? location.amenities : [],
+        storeType: location.storeType || 'STANDARD',
+        description: location.description || '',
+        coverImageUrl: location.coverImageUrl || location.imageUrl || '',
+        galleryJson: location.galleryJson || '[]',
+        amenitiesJson:
+          location.amenitiesJson ||
+          (Array.isArray(location.amenities) ? JSON.stringify(location.amenities) : '[]'),
+        menuPostersJson: location.menuPostersJson || '[]',
+        linksJson:
+          location.linksJson ||
+          (location.mapUrl ? JSON.stringify([{ type: 'GOOGLE_MAPS', title: 'Xem bản đồ', url: location.mapUrl }]) : '[]'),
         displayOrder: Number(location.displayOrder || 0),
         featured: Boolean(location.featured),
         status: location.status || 'ACTIVE',
@@ -357,9 +396,9 @@ export const useAppStore = defineStore('app', {
       await locationService.remove(id)
       this.locations = this.locations.filter((item) => item.id !== id)
     },
-    async updateRegistrationStatus(registration, status) {
+    async updateRegistrationStatus(registration, status, extra = {}) {
       const apiStatus = registrationStatusToApi[status] || status
-      const { data } = await registrationService.updateStatus(registration.id, apiStatus)
+      const { data } = await registrationService.updateStatus(registration.id, apiStatus, extra)
       const normalized = this.normalizeRegistration(data)
       const index = this.registrations.findIndex((item) => item.id === normalized.id)
       if (index !== -1) this.registrations.splice(index, 1, normalized)

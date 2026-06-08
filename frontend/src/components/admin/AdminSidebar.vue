@@ -9,6 +9,7 @@ import {
   Images,
   MapPin,
   Package,
+  Star,
   Users,
   UserCog,
   LogOut,
@@ -21,10 +22,11 @@ const adminInfo = ref(null)
 const menuItems = [
   { label: 'Dashboard', path: '/admin', icon: LayoutDashboard },
   { label: 'Quản lý sản phẩm', path: '/admin/products', icon: Package },
+  { label: 'Cảm nhận khách hàng', path: '/admin/feedbacks', icon: Star },
   { label: 'Trang chủ CMS', path: '/admin/home-sections', icon: Images },
   { label: 'Quản lý bài viết', path: '/admin/articles', icon: FileText },
   { label: 'Quản lý danh mục', path: '/admin/categories', icon: FolderTree },
-  { label: 'Quản lý địa điểm', path: '/admin/locations', icon: MapPin },
+  { label: 'Hệ thống cửa hàng', path: '/admin/locations', icon: MapPin },
   { label: 'Đăng ký tư vấn', path: '/admin/registrations', icon: Users },
   { label: 'Quản lý tài khoản', path: '/admin/accounts', icon: UserCog },
   { label: 'Nội dung nhượng quyền', path: '/admin/franchise-content', icon: Handshake },
@@ -46,8 +48,7 @@ const fetchAdminInfo = async () => {
 
 const logout = () => {
   localStorage.removeItem('admin_token')
-  localStorage.removeItem('user_token')
-  localStorage.removeItem('user_role')
+  localStorage.removeItem('admin_user')
   window.dispatchEvent(new Event('aloo-auth-change'))
   router.push('/')
 }

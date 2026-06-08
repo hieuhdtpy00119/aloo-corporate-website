@@ -32,16 +32,20 @@ BEGIN
 END
 GO
 
-IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE slug = N'kem-bo')
+IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE type = N'PRODUCT' AND slug = N'kem')
 BEGIN
     INSERT INTO dbo.categories (name, slug, type, description, sort_order, status, language_code) VALUES
-    (N'Kem bơ', N'kem-bo', N'PRODUCT', N'Nhóm sản phẩm kem bơ chủ lực.', 1, N'ACTIVE', N'vi'),
-    (N'Đồ uống', N'do-uong', N'PRODUCT', N'Sinh tố, trà và đồ uống theo mùa.', 2, N'ACTIVE', N'vi'),
-    (N'Combo', N'combo', N'PRODUCT', N'Combo sản phẩm cho nhóm khách hàng.', 3, N'ACTIVE', N'vi'),
-    (N'Topping', N'topping', N'PRODUCT', N'Topping dùng kèm kem bơ và đồ uống.', 4, N'ACTIVE', N'vi'),
-    (N'Mùa vụ', N'mua-vu', N'PRODUCT', N'Sản phẩm theo mùa và phiên bản giới hạn.', 5, N'INACTIVE', N'vi');
+    (N'Kem', N'kem', N'PRODUCT', N'Các món kem ly theo menu ALOO.', 1, N'ACTIVE', N'vi'),
+    (N'Kem bơ', N'kem-bo', N'PRODUCT', N'Các món kem bơ signature ALOO.', 2, N'ACTIVE', N'vi'),
+    (N'Thiên đường bơ ngon', N'thien-duong-bo-ngon', N'PRODUCT', N'Sinh tố và chè bơ trong nhóm bơ đặc trưng.', 3, N'ACTIVE', N'vi'),
+    (N'Cà phê', N'ca-phe', N'PRODUCT', N'Cà phê và đồ uống pha chế theo menu.', 4, N'ACTIVE', N'vi'),
+    (N'Sinh tố', N'sinh-to', N'PRODUCT', N'Các món sinh tố trái cây tươi mát.', 5, N'ACTIVE', N'vi'),
+    (N'Nước ép nguyên chất', N'nuoc-ep-nguyen-chat', N'PRODUCT', N'Nước ép trái cây nguyên chất.', 6, N'ACTIVE', N'vi'),
+    (N'Nước ép mix', N'nuoc-ep-mix', N'PRODUCT', N'Nước ép phối nhiều loại trái cây.', 7, N'ACTIVE', N'vi'),
+    (N'Trà trái cây', N'tra-trai-cay', N'PRODUCT', N'Trà trái cây thanh mát.', 8, N'ACTIVE', N'vi'),
+    (N'Topping', N'topping', N'PRODUCT', N'Topping ăn kèm kem bơ, kem ly và sinh tố.', 9, N'ACTIVE', N'vi'),
+    (N'Ăn vặt', N'an-vat', N'PRODUCT', N'Món ăn vặt bán kèm tại cửa hàng.', 10, N'ACTIVE', N'vi');
 END
-
 IF NOT EXISTS (SELECT 1 FROM dbo.categories WHERE slug = N'tin-tuc')
 BEGIN
     INSERT INTO dbo.categories (name, slug, type, description, sort_order, status, language_code) VALUES
@@ -56,79 +60,236 @@ GO
 
 IF NOT EXISTS (SELECT 1 FROM dbo.products)
 BEGIN
-    INSERT INTO dbo.products (category_id, name, slug, description, price, image_url, sort_order, status) VALUES
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ truyền thống', N'kem-bo-truyen-thong', N'Bơ sáp xay mịn, kem tươi mát và topping dừa sấy.', 39000, N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=85', 1, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ sầu riêng', N'kem-bo-sau-rieng', N'Nền bơ mềm mịn kết hợp sầu riêng đậm vị.', 49000, N'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=900&q=85', 2, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ cacao', N'kem-bo-cacao', N'Vị bơ béo nhẹ, cacao thơm dịu và hạt giòn.', 45000, N'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=900&q=85', 3, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ dừa non', N'kem-bo-dua-non', N'Bơ sáp phối dừa non, vị béo thanh và mát.', 47000, N'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=900&q=85', 4, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ matcha', N'kem-bo-matcha', N'Kem bơ phối matcha nhẹ, hậu vị thanh và thơm.', 46000, N'https://images.unsplash.com/photo-1570197788417-0e82375c9371?auto=format&fit=crop&w=900&q=85', 5, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ phô mai', N'kem-bo-pho-mai', N'Lớp phô mai béo mặn nhẹ cân bằng vị bơ.', 52000, N'https://images.unsplash.com/photo-1488900128323-21503983a07e?auto=format&fit=crop&w=900&q=85', 6, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'do-uong'), N'Sinh tố bơ kem', N'sinh-to-bo-kem', N'Sinh tố bơ sánh mịn thêm viên kem tươi.', 35000, N'https://images.unsplash.com/photo-1577805947697-89e18249d767?auto=format&fit=crop&w=900&q=85', 7, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'do-uong'), N'Trà bơ nhiệt đới', N'tra-bo-nhiet-doi', N'Trà trái cây nhẹ kết hợp hương bơ tươi.', 42000, N'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=85', 8, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'do-uong'), N'Cà phê kem bơ', N'ca-phe-kem-bo', N'Cà phê đậm vị phủ lớp kem bơ mềm.', 44000, N'https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=900&q=85', 9, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'do-uong'), N'Soda bơ chanh', N'soda-bo-chanh', N'Soda chanh nhẹ, hương bơ tươi lạ miệng.', 39000, N'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=900&q=85', 10, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'combo'), N'Combo Signature', N'combo-signature', N'Kem bơ truyền thống, topping và thức uống nhỏ.', 89000, N'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=900&q=85', 11, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'combo'), N'Combo Gia đình', N'combo-gia-dinh', N'Gói 4 phần kem bơ cho nhóm bạn hoặc gia đình.', 159000, N'https://images.unsplash.com/photo-1488900128323-21503983a07e?auto=format&fit=crop&w=900&q=85', 12, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'combo'), N'Combo Nhượng quyền dùng thử', N'combo-nhuong-quyen-dung-thu', N'Bộ sản phẩm mẫu dành cho đối tác khảo sát menu.', 129000, N'https://images.unsplash.com/photo-1534432182912-63863115e106?auto=format&fit=crop&w=900&q=85', 13, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'topping'), N'Topping dừa sấy', N'topping-dua-say', N'Dừa sấy giòn, thơm nhẹ dùng kèm kem bơ.', 9000, N'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=900&q=85', 14, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'topping'), N'Topping cacao', N'topping-cacao', N'Cacao đắng nhẹ cân bằng vị ngọt.', 9000, N'https://images.unsplash.com/photo-1606312619070-d48b4c652a52?auto=format&fit=crop&w=900&q=85', 15, N'ACTIVE'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'topping'), N'Topping sầu riêng', N'topping-sau-rieng', N'Topping sầu riêng đậm hương nhiệt đới.', 15000, N'https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?auto=format&fit=crop&w=900&q=85', 16, N'INACTIVE');
+INSERT INTO dbo.products
+(category_id, name, slug, description, short_description, price, image_url, category, sort_order, featured, status)
+VALUES
+
+/* KEM */
+((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Kem dừa', N'kem-dua',
+ N'Kem vị dừa mát lạnh, thơm béo nhẹ.', N'Coconut ice cream', 18000, NULL, N'Kem', 1, 1, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Kem dâu', N'kem-dau',
+ N'Kem vị dâu chua ngọt, dễ ăn.', N'Strawberry ice cream', 18000, NULL, N'Kem', 2, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Kem socola', N'kem-socola',
+ N'Kem socola đậm vị, phù hợp khách thích vị cacao.', N'Chocolate ice cream', 18000, NULL, N'Kem', 3, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Kem khoai môn', N'kem-khoai-mon',
+ N'Kem khoai môn thơm nhẹ, béo mịn.', N'Taro ice cream', 18000, NULL, N'Kem', 4, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Kem sắc màu tùy chọn', N'kem-sac-mau-tuy-chon',
+ N'Kem nhiều màu, khách có thể chọn vị theo sở thích.', N'Colorful ice cream', 25000, NULL, N'Kem', 5, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Trái cây tươi dầm kem', N'trai-cay-tuoi-dam-kem',
+ N'Trái cây tươi ăn kèm kem mát lạnh.', N'Mixed fresh fruit with ice cream', 28000, NULL, N'Kem', 6, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Buffet kem như ý', N'buffet-kem-nhu-y',
+ N'Buffet kem nhiều vị, phù hợp nhóm khách thích trải nghiệm đa dạng.', N'Buffet ice cream', 49000, NULL, N'Kem', 7, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Kem ốc quế tùy vị', N'kem-oc-que-tuy-vi',
+ N'Kem ốc quế tùy chọn vị.', N'Ice cream cone', 12000, NULL, N'Kem', 8, 0, N'ACTIVE'),
+
+
+/* KEM BƠ */
+((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ ALOO đặc biệt', N'kem-bo-aloo-dac-biet',
+ N'Kem bơ signature với bơ sáp chín tự nhiên, kem tươi mát lạnh và topping giòn thơm.', N'ALOO Premium Avocado Ice Cream', 38000, NULL, N'Kem bơ', 9, 1, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ dừa', N'kem-bo-dua',
+ N'Kem bơ kết hợp dừa, vị béo mát và thơm nhẹ.', N'Avocado Coconut Ice Cream', 25000, NULL, N'Kem bơ', 10, 1, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ mãng cầu', N'kem-bo-mang-cau',
+ N'Kem bơ phối mãng cầu, vị chua nhẹ cân bằng độ béo.', N'Soursop & Avocado Ice Cream', 31000, NULL, N'Kem bơ', 11, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ xoài', N'kem-bo-xoai',
+ N'Kem bơ kết hợp xoài chín, hương vị nhiệt đới.', N'Mango & Avocado Ice Cream', 31000, NULL, N'Kem bơ', 12, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ sầu riêng', N'kem-bo-sau-rieng',
+ N'Kem bơ kết hợp sầu riêng đậm vị.', N'Durian & Avocado Ice Cream', 33000, NULL, N'Kem bơ', 13, 1, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ sắc màu', N'kem-bo-sac-mau',
+ N'Kem bơ nhiều màu, phù hợp khách thích món bắt mắt.', N'Colorful Avocado Ice Cream', 38000, NULL, N'Kem bơ', 14, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem sầu riêng tươi', N'kem-sau-rieng-tuoi',
+ N'Kem sầu riêng tươi thơm béo, vị đặc trưng.', N'Fresh Durian Ice Cream', 42000, NULL, N'Kem bơ', 15, 0, N'ACTIVE'),
+
+
+/* THIÊN ĐƯỜNG BƠ NGON */
+((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Sinh tố bơ', N'sinh-to-bo',
+ N'Sinh tố bơ sánh mịn, vị bơ tự nhiên.', N'Avocado smoothie', 29000, NULL, N'Thiên đường bơ ngon', 16, 1, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Sinh tố bơ mãng cầu', N'sinh-to-bo-mang-cau',
+ N'Sinh tố bơ mix mãng cầu, vị chua ngọt dễ uống.', N'Avocado & Soursop Smoothie', 32000, NULL, N'Thiên đường bơ ngon', 17, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Sinh tố bơ xoài', N'sinh-to-bo-xoai',
+ N'Sinh tố bơ mix xoài chín.', N'Avocado & Mango Smoothie', 32000, NULL, N'Thiên đường bơ ngon', 18, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Sinh tố bơ cafe', N'sinh-to-bo-cafe',
+ N'Sinh tố bơ kết hợp cà phê, béo nhẹ và thơm.', N'Avocado & Coffee Smoothie', 32000, NULL, N'Thiên đường bơ ngon', 19, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Sinh tố bơ sầu riêng', N'sinh-to-bo-sau-rieng',
+ N'Sinh tố bơ sầu riêng đậm vị nhiệt đới.', N'Avocado & Durian Smoothie', 35000, NULL, N'Thiên đường bơ ngon', 20, 1, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Sinh tố bơ dâu', N'sinh-to-bo-dau',
+ N'Sinh tố bơ dâu, vị béo và chua ngọt hài hòa.', N'Avocado & Strawberry Smoothie', 35000, NULL, N'Thiên đường bơ ngon', 21, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Bơ dầm', N'bo-dam',
+ N'Bơ dầm sữa đặc, món tráng miệng béo mịn.', N'Mashed Avocado with Condensed Milk', 35000, NULL, N'Thiên đường bơ ngon', 22, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Chè bơ', N'che-bo',
+ N'Chè bơ kiểu Việt, mát lạnh và thơm bơ.', N'Vietnamese Avocado Dessert', 29000, NULL, N'Thiên đường bơ ngon', 23, 0, N'ACTIVE'),
+
+
+/* CÀ PHÊ */
+((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Cà phê đen', N'ca-phe-den',
+ N'Cà phê đen pha phin hoặc pha máy.', N'Black coffee', 18000, NULL, N'Cà phê', 24, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Cà phê sữa', N'ca-phe-sua',
+ N'Cà phê sữa pha phin hoặc pha máy.', N'Condensed milk coffee', 21000, NULL, N'Cà phê', 25, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Bạc xỉu', N'bac-xiu',
+ N'Bạc xỉu nóng hoặc đá, vị sữa nhiều hơn cà phê.', N'Vietnamese white coffee', 28000, NULL, N'Cà phê', 26, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Cà phê kem sữa dừa', N'ca-phe-kem-sua-dua',
+ N'Cà phê kết hợp kem sữa dừa béo thơm.', N'Milk coffee with coconut cream', 32000, NULL, N'Cà phê', 27, 1, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Cacao nóng đá', N'cacao-nong-da',
+ N'Cacao sữa dùng nóng hoặc đá.', N'Cocoa with milk', 25000, NULL, N'Cà phê', 28, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Matcha Latte', N'matcha-latte',
+ N'Matcha latte thơm nhẹ, hậu vị thanh.', N'Matcha Latte', 28000, NULL, N'Cà phê', 29, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Sữa chua đá', N'sua-chua-da',
+ N'Sữa chua đá mát lạnh, dễ uống.', N'Iced yogurt', 22000, NULL, N'Cà phê', 30, 0, N'ACTIVE'),
+
+
+/* SINH TỐ */
+((SELECT id FROM dbo.categories WHERE slug = N'sinh-to'), N'Rau má bơ', N'rau-ma-bo',
+ N'Sinh tố rau má bơ thanh mát.', N'Pennywort avocado smoothie', 21000, NULL, N'Sinh tố', 31, 1, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'sinh-to'), N'Sinh tố xoài', N'sinh-to-xoai',
+ N'Sinh tố xoài chín thơm ngọt.', N'Mango smoothie', 27000, NULL, N'Sinh tố', 32, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'sinh-to'), N'Sinh tố dâu', N'sinh-to-dau',
+ N'Sinh tố dâu chua ngọt, mát lạnh.', N'Strawberry smoothie', 30000, NULL, N'Sinh tố', 33, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'sinh-to'), N'Sinh tố mãng cầu', N'sinh-to-mang-cau',
+ N'Sinh tố mãng cầu vị chua nhẹ.', N'Soursop smoothie', 31000, NULL, N'Sinh tố', 34, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'sinh-to'), N'Sinh tố sầu riêng', N'sinh-to-sau-rieng',
+ N'Sinh tố sầu riêng đậm vị, béo thơm.', N'Durian smoothie', 38000, NULL, N'Sinh tố', 35, 0, N'ACTIVE'),
+
+
+/* NƯỚC ÉP NGUYÊN CHẤT */
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép ổi', N'nuoc-ep-oi',
+ N'Nước ép ổi nguyên chất.', N'Guava juice', 22000, NULL, N'Nước ép nguyên chất', 36, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép cóc', N'nuoc-ep-coc',
+ N'Nước ép cóc chua nhẹ, thanh mát.', N'Ambarella juice', 22000, NULL, N'Nước ép nguyên chất', 37, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép dưa hấu', N'nuoc-ep-dua-hau',
+ N'Nước ép dưa hấu ngọt mát.', N'Watermelon juice', 22000, NULL, N'Nước ép nguyên chất', 38, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép thơm', N'nuoc-ep-thom',
+ N'Nước ép thơm vị chua ngọt.', N'Pineapple juice', 25000, NULL, N'Nước ép nguyên chất', 39, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép cà rốt', N'nuoc-ep-ca-rot',
+ N'Nước ép cà rốt nguyên chất.', N'Carrot juice', 23000, NULL, N'Nước ép nguyên chất', 40, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước chanh mật ong', N'nuoc-chanh-mat-ong',
+ N'Nước chanh mật ong thanh mát.', N'Honey lemon', 22000, NULL, N'Nước ép nguyên chất', 41, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước chanh dây', N'nuoc-chanh-day',
+ N'Nước chanh dây chua ngọt.', N'Passion fruit juice', 22000, NULL, N'Nước ép nguyên chất', 42, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép cà chua', N'nuoc-ep-ca-chua',
+ N'Nước ép cà chua nguyên chất.', N'Tomato juice', 23000, NULL, N'Nước ép nguyên chất', 43, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép táo', N'nuoc-ep-tao',
+ N'Nước ép táo tươi.', N'Apple juice', 30000, NULL, N'Nước ép nguyên chất', 44, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép cam', N'nuoc-ep-cam',
+ N'Nước ép cam tươi.', N'Orange juice', 27000, NULL, N'Nước ép nguyên chất', 45, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép dâu tây', N'nuoc-ep-dau-tay',
+ N'Nước ép dâu tây chua ngọt.', N'Strawberry juice', 28000, NULL, N'Nước ép nguyên chất', 46, 0, N'ACTIVE'),
+
+
+/* NƯỚC ÉP MIX */
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Thơm ổi', N'thom-oi',
+ N'Nước ép mix thơm và ổi.', N'Pineapple - Guava', 25000, NULL, N'Nước ép mix', 47, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Cóc ổi', N'coc-oi',
+ N'Nước ép mix cóc và ổi.', N'Ambarella - Guava', 24000, NULL, N'Nước ép mix', 48, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Cam cà rốt', N'cam-ca-rot',
+ N'Nước ép mix cam và cà rốt.', N'Orange - Carrot', 24000, NULL, N'Nước ép mix', 49, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Thơm cà rốt', N'thom-ca-rot',
+ N'Nước ép mix thơm và cà rốt.', N'Pineapple - Carrot', 25000, NULL, N'Nước ép mix', 50, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Táo thơm', N'tao-thom',
+ N'Nước ép mix táo và thơm.', N'Apple - Pineapple', 28000, NULL, N'Nước ép mix', 51, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Cam táo', N'cam-tao',
+ N'Nước ép mix cam và táo.', N'Orange - Apple', 28000, NULL, N'Nước ép mix', 52, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Cam dâu', N'cam-dau',
+ N'Nước ép mix cam và dâu.', N'Orange - Strawberry', 27000, NULL, N'Nước ép mix', 53, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Dưa hấu dâu', N'dua-hau-dau',
+ N'Nước ép mix dưa hấu và dâu.', N'Watermelon - Strawberry', 27000, NULL, N'Nước ép mix', 54, 0, N'ACTIVE'),
+
+
+/* TRÀ TRÁI CÂY */
+((SELECT id FROM dbo.categories WHERE slug = N'tra-trai-cay'), N'Trà tắc mật ong', N'tra-tac-mat-ong',
+ N'Trà tắc mật ong dùng nóng hoặc đá.', N'Honey kumquat tea', 21000, NULL, N'Trà trái cây', 55, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'tra-trai-cay'), N'Trà đào cam', N'tra-dao-cam',
+ N'Trà đào cam vị trái cây thanh mát.', N'Peach orange tea', 27000, NULL, N'Trà trái cây', 56, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'tra-trai-cay'), N'Trà trái cây nhiệt đới', N'tra-trai-cay-nhiet-doi',
+ N'Trà trái cây nhiệt đới nhiều tầng hương vị.', N'Tropical fruit tea', 27000, NULL, N'Trà trái cây', 57, 1, N'ACTIVE'),
+
+
+/* TOPPING */
+((SELECT id FROM dbo.categories WHERE slug = N'topping'), N'Kem viên', N'kem-vien',
+ N'Topping kem viên ăn kèm.', N'Ice cream scoop', 9000, NULL, N'Topping', 58, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'topping'), N'Bơ thêm', N'bo-them',
+ N'Topping bơ thêm cho món kem hoặc sinh tố.', N'Avocado added', 9000, NULL, N'Topping', 59, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'topping'), N'Sầu riêng thêm', N'sau-rieng-them',
+ N'Topping sầu riêng thêm.', N'Durian added', 9000, NULL, N'Topping', 60, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'topping'), N'Dừa khô 40g', N'dua-kho-40g',
+ N'Dừa khô giòn dùng kèm.', N'Dried coconut 40g', 9000, NULL, N'Topping', 61, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'topping'), N'Bánh quế 4 cái', N'banh-que-4-cai',
+ N'Bánh quế giòn ăn kèm kem.', N'Wafer biscuits 4 pieces', 9000, NULL, N'Topping', 62, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'topping'), N'Hạnh nhân 20g', N'hanh-nhan-20g',
+ N'Hạnh nhân giòn thơm.', N'Almonds 20g', 9000, NULL, N'Topping', 63, 0, N'ACTIVE'),
+
+
+/* ĂN VẶT */
+((SELECT id FROM dbo.categories WHERE slug = N'an-vat'), N'Hạt dưa hạt hướng dương', N'hat-dua-hat-huong-duong',
+ N'Hạt dưa và hạt hướng dương ăn vặt.', N'Watermelon seeds - Sunflower seeds', 15000, NULL, N'Ăn vặt', 64, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'an-vat'), N'Bánh tráng trộn', N'banh-trang-tron',
+ N'Bánh tráng trộn vị đậm đà.', N'Mixed rice paper salad', 25000, NULL, N'Ăn vặt', 65, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'an-vat'), N'Mực xé tẩm gia vị', N'muc-xe-tam-gia-vi',
+ N'Mực xé tẩm gia vị ăn vặt.', N'Seasoned shredded squid', 23000, NULL, N'Ăn vặt', 66, 0, N'ACTIVE'),
+
+((SELECT id FROM dbo.categories WHERE slug = N'an-vat'), N'Trái cây hộp xắt lát', N'trai-cay-hop-xat-lat',
+ N'Trái cây hộp xắt lát tiện dùng.', N'Sliced canned fruit', 28000, NULL, N'Ăn vặt', 67, 0, N'ACTIVE');
 END
 GO
-UPDATE dbo.products
-SET
-    short_description = COALESCE(short_description, N'Ly kem bơ signature với nền bơ sáp chín tự nhiên, kem tươi mát lạnh và topping giòn thơm.'),
-    detail_content = COALESCE(detail_content, N'ALOO thiết kế sản phẩm này như món chủ lực dễ nhớ, dễ bán lặp lại và dễ chuẩn hóa tại nhiều điểm bán. Công thức tập trung vào độ mịn của bơ, độ mát của kem và cảm giác giòn nhẹ từ topping để tạo trải nghiệm rõ ràng ngay từ muỗng đầu tiên.'),
-    ingredients = COALESCE(ingredients, N'Bơ sáp chín tự nhiên
-Kem tươi mát lạnh
-Sữa tươi
-Dừa sấy giòn
-Topping theo mùa'),
-    taste_profile = COALESCE(taste_profile, N'Béo mịn
-Ngọt thanh
-Mát lạnh
-Hậu vị bơ tự nhiên'),
-    serving_suggestion = COALESCE(serving_suggestion, N'Dùng ngon nhất khi vừa hoàn thiện
-Phù hợp buổi chiều hoặc sau bữa ăn
-Có thể thêm topping giòn để tăng kết cấu'),
-    gallery = COALESCE(gallery, N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1200&q=85
-https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=1200&q=85
-https://images.unsplash.com/photo-1488900128323-21503983a07e?auto=format&fit=crop&w=1200&q=85'),
-    faqs = COALESCE(faqs, N'Sản phẩm này có phù hợp trẻ em không? | Có, vị ngọt nhẹ và nguyên liệu dễ dùng cho nhiều nhóm khách.
-Có thể bán trong mô hình nhượng quyền không? | Có, đây là nhóm sản phẩm dễ chuẩn hóa quy trình và đào tạo.
-Có thể thay đổi topping không? | Có thể tùy điểm bán và mùa nguyên liệu.'),
-    featured = CASE WHEN sort_order <= 4 THEN 1 ELSE featured END,
-    seo_title = COALESCE(seo_title, name + N' | ALOO Kem Bơ'),
-    seo_description = COALESCE(seo_description, description)
-WHERE short_description IS NULL;
-GO
-UPDATE dbo.products
-SET
-    category_id = (SELECT TOP 1 id FROM dbo.categories WHERE slug = N'kem-bo'),
-    name = N'Kem bơ truyền thống',
-    slug = N'kem-bo-truyen-thong',
-    description = N'Bơ sáp xay mịn kết hợp kem tươi mát, thêm dừa sấy giòn thơm.',
-    price = 0,
-    image_url = N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=85',
-    sort_order = 1,
-    status = N'ACTIVE',
-    short_description = N'Kem bơ truyền thống là món đặc trưng của ALOO, nổi bật với vị bơ sáp béo mịn, kem sữa mát lạnh và topping dừa sấy giòn nhẹ. Sản phẩm phù hợp cho khách hàng yêu thích hương vị tự nhiên, thanh mát và dễ thưởng thức.',
-    taste_profile = N'Béo mịn, thơm bơ, ngọt nhẹ, mát lạnh, topping giòn.',
-    ingredients = CONCAT(N'Bơ sáp', CHAR(13)+CHAR(10), N'Kem sữa', CHAR(13)+CHAR(10), N'Sữa đặc', CHAR(13)+CHAR(10), N'Dừa sấy', CHAR(13)+CHAR(10), N'Đá xay'),
-    serving_suggestion = CONCAT(N'Dùng ngay khi còn lạnh.', CHAR(13)+CHAR(10), N'Phù hợp thưởng thức vào buổi chiều hoặc sau bữa ăn.', CHAR(13)+CHAR(10), N'Có thể thêm dừa sấy, trân châu hoặc sốt bơ để tăng hương vị.'),
-    detail_content = N'Kem bơ truyền thống được làm từ bơ sáp chọn lọc, xay mịn cùng kem sữa để tạo nên kết cấu béo mượt và hương vị thanh mát. Mỗi ly kem bơ mang đến cảm giác tự nhiên, dễ ăn và phù hợp với nhiều độ tuổi. Đây là sản phẩm chủ lực giúp khách hàng nhận diện hương vị đặc trưng của ALOO.',
-    gallery = CONCAT(N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=85', CHAR(13)+CHAR(10), N'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=85', CHAR(13)+CHAR(10), N'https://images.unsplash.com/photo-1505253213348-ce2e2ff1f1ec?auto=format&fit=crop&w=900&q=85'),
-    faqs = CONCAT(N'Kem bơ truyền thống có ngọt nhiều không? | Sản phẩm có vị ngọt nhẹ, béo mịn và dễ ăn.', CHAR(13)+CHAR(10), N'Sản phẩm có topping gì? | Mặc định có dừa sấy giòn, có thể thêm topping tùy chọn.', CHAR(13)+CHAR(10), N'Kem bơ nên dùng khi nào ngon nhất? | Ngon nhất khi dùng ngay sau khi nhận món, lúc còn lạnh.', CHAR(13)+CHAR(10), N'Sản phẩm phù hợp với ai? | Phù hợp với khách hàng yêu thích món tráng miệng mát lạnh, vị bơ tự nhiên.'),
-    featured = 1,
-    seo_title = N'Kem bơ truyền thống ALOO - Béo mịn, thơm bơ, mát lạnh',
-    seo_description = N'Thưởng thức kem bơ truyền thống ALOO với bơ sáp xay mịn, kem sữa mát lạnh và topping dừa sấy giòn thơm.',
-    updated_at = GETDATE()
-WHERE slug = N'kem-bo-truyen-thong';
-GO
+
 IF NOT EXISTS (SELECT 1 FROM dbo.home_sections)
 BEGIN
     INSERT INTO dbo.home_sections (section_key, type, title, subtitle, description, image_url, button_text, button_link, badge, sort_order, status) VALUES
-    (N'featured-product', N'FEATURED_CARD', N'Kem bơ truyền thống', N'Tuyển chọn', N'Bơ sáp chín tự nhiên hòa cùng kem sữa mát lạnh và topping dừa sấy giòn thơm.', N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1400&q=85', N'Xem sản phẩm', N'/products/kem-bo-truyen-thong', N'Bán chạy nhất', 1, N'ACTIVE'),
+    (N'featured-product', N'FEATURED_CARD', N'Kem bơ ALOO đặc biệt', N'Tuyển chọn', N'Kem bơ signature với bơ sáp chín tự nhiên, kem tươi mát lạnh và topping giòn thơm.', N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1400&q=85', N'Xem sản phẩm', N'/products/kem-bo-aloo-dac-biet', N'Bán chạy nhất', 1, N'ACTIVE'),
     (N'franchise-model', N'CTA_CARD', N'Mô hình nhượng quyền ALOO', N'Tuyển chọn', N'Cửa hàng tinh gọn, nhận diện trẻ trung, quy trình dễ vận hành cho đối tác mới.', N'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1400&q=85', N'Tìm hiểu ngay', N'/franchise', N'Cơ hội hợp tác', 2, N'ACTIVE'),
     (N'new-store', N'LOCATION_CARD', N'Cửa hàng ALOO mới', N'Trải nghiệm trực tiếp', N'Không gian phục vụ nhanh, menu kem bơ signature và nhiều topping dễ chọn.', N'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1400&q=85', N'Xem hệ thống', N'/locations', N'Điểm đến mới', 3, N'INACTIVE');
 END
@@ -136,10 +297,10 @@ GO
 IF NOT EXISTS (SELECT 1 FROM dbo.hero_banners)
 BEGIN
     INSERT INTO dbo.hero_banners (title, subtitle, description, background_image_url, product_image_url, thumbnail_image_url, tone, sort_order, status) VALUES
-    (N'Kem bơ truyền thống', N'Signature ALOO', N'Bơ sáp chín tự nhiên hòa cùng kem tươi mát lạnh.', N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1800&q=85', N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1200&q=85', N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=300&q=80', N'light', 1, N'ACTIVE'),
+    (N'Kem bơ ALOO đặc biệt', N'Signature ALOO', N'Kem bơ signature với bơ sáp chín tự nhiên, kem tươi mát lạnh và topping giòn thơm.', N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1800&q=85', N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1200&q=85', N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=300&q=80', N'light', 1, N'ACTIVE'),
     (N'Kem bơ sầu riêng', N'Tropical Bold', N'Lớp bơ mịn kết hợp sầu riêng đậm vị.', N'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=1800&q=85', N'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=1200&q=85', N'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=300&q=80', N'dark', 2, N'ACTIVE'),
-    (N'Sinh tố bơ kem', N'Creamy Smoothie', N'Sinh tố bơ sánh mịn thêm viên kem vàng mát lạnh.', N'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=1800&q=85', N'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=1200&q=85', N'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=300&q=80', N'light', 3, N'ACTIVE'),
-    (N'Combo mùa hè', N'Summer Set', N'Bộ menu mát lạnh cho nhóm bạn và gia đình.', N'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1800&q=85', N'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=85', N'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=300&q=80', N'light', 4, N'INACTIVE');
+    (N'Sinh tố bơ', N'Creamy Smoothie', N'Sinh tố bơ sánh mịn, vị bơ tự nhiên.', N'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=1800&q=85', N'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=1200&q=85', N'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=300&q=80', N'light', 3, N'ACTIVE'),
+    (N'Trà trái cây nhiệt đới', N'Tropical Tea', N'Trà trái cây nhiệt đới nhiều tầng hương vị.', N'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1800&q=85', N'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=85', N'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=300&q=80', N'light', 4, N'INACTIVE');
 END
 GO
 
@@ -153,17 +314,91 @@ BEGIN
 END
 GO
 
-IF NOT EXISTS (SELECT 1 FROM dbo.locations)
+IF NOT EXISTS (SELECT 1 FROM dbo.stores)
 BEGIN
-    INSERT INTO dbo.locations (name, address, province, district, phone, opening_hours, map_url, image_url, amenities_json, display_order, featured, status) VALUES
-    (N'ALOO Nguyễn Trãi', N'128 Nguyễn Trãi, Phường Bến Thành', N'TP.HCM', N'Quận 1', N'0900 888 168', N'09:00 - 22:00', N'https://maps.google.com/?q=128+Nguyen+Trai+TPHCM', N'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=900&q=85', N'["Wifi","Máy lạnh","Thanh toán thẻ","Mang đi"]', 1, 1, N'ACTIVE'),
-    (N'ALOO Phú Mỹ Hưng', N'45 Nguyễn Đức Cảnh, Khu Phú Mỹ Hưng', N'TP.HCM', N'Quận 7', N'0901 222 168', N'10:00 - 22:30', N'https://maps.google.com/?q=45+Nguyen+Duc+Canh+Quan+7', N'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&q=85', N'["Wifi","Chỗ đậu xe","Thanh toán thẻ","Mang đi"]', 2, 1, N'ACTIVE'),
-    (N'ALOO Thảo Điền', N'26 Xuân Thủy, Phường Thảo Điền', N'TP.HCM', N'Thủ Đức', N'0901 555 168', N'09:00 - 22:30', N'https://maps.google.com/?q=26+Xuan+Thuy+Thao+Dien', N'https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=900&q=85', N'["Wifi","Máy lạnh","Chỗ đậu xe"]', 3, 1, N'ACTIVE'),
-    (N'ALOO Hải Châu', N'82 Bạch Đằng, Quận Hải Châu', N'Đà Nẵng', N'Hải Châu', N'0902 333 168', N'09:30 - 22:00', N'https://maps.google.com/?q=82+Bach+Dang+Da+Nang', N'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=900&q=85', N'["Wifi","Máy lạnh","Mang đi"]', 4, 0, N'COMING_SOON'),
-    (N'ALOO Ninh Kiều', N'19 Mậu Thân, Quận Ninh Kiều', N'Cần Thơ', N'Ninh Kiều', N'0903 444 168', N'09:00 - 21:30', N'https://maps.google.com/?q=19+Mau+Than+Can+Tho', N'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=900&q=85', N'["Wifi","Máy lạnh","Thanh toán thẻ"]', 5, 0, N'ACTIVE'),
-    (N'ALOO Hoàn Kiếm', N'36 Lý Thường Kiệt, Quận Hoàn Kiếm', N'Hà Nội', N'Hoàn Kiếm', N'0904 555 168', N'10:00 - 22:00', N'https://maps.google.com/?q=36+Ly+Thuong+Kiet+Ha+Noi', N'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=900&q=85', N'["Wifi","Máy lạnh","Chỗ đậu xe"]', 6, 1, N'MAINTENANCE'),
-    (N'ALOO Quy Nhơn', N'22 Xuân Diệu, TP. Quy Nhơn', N'Bình Định', N'Quy Nhơn', N'0905 666 168', N'09:00 - 22:00', N'https://maps.google.com/?q=22+Xuan+Dieu+Quy+Nhon', N'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=900&q=85', N'["Wifi","Mang đi"]', 7, 1, N'ACTIVE'),
-    (N'ALOO Nha Trang', N'15 Trần Phú, TP. Nha Trang', N'Khánh Hòa', N'Nha Trang', N'0906 777 168', N'09:00 - 22:00', N'https://maps.google.com/?q=15+Tran+Phu+Nha+Trang', N'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=900&q=85', N'["Wifi","Máy lạnh","Mang đi"]', 8, 0, N'TEMPORARILY_CLOSED');
+    INSERT INTO dbo.stores
+    (store_code, name, slug, address, province, district, ward, latitude, longitude, phone, email, google_map_url, store_type, description, cover_image_url, featured, display_order, status)
+    VALUES
+    (
+        N'ALOO-QN-001',
+        N'Kem Bơ ALoo - 395 Nguyễn Huệ',
+        N'kem-bo-aloo-395-nguyen-hue',
+        N'395 Nguyễn Huệ, P. Trần Phú, TP. Quy Nhơn, Bình Định',
+        N'Bình Định',
+        N'Quy Nhơn',
+        N'Trần Phú',
+        NULL,
+        NULL,
+        N'0935 113 589 / 0383 869 253',
+        NULL,
+        N'https://maps.google.com/?q=Kem+Bơ+ALoo+395+Nguyễn+Huệ+Quy+Nhơn',
+        N'FLAGSHIP',
+        N'Chi nhánh ALOO Quy Nhơn tại Nguyễn Huệ, một trong các điểm bán chính của thương hiệu kem bơ ALOO.',
+        NULL,
+        1,
+        1,
+        N'ACTIVE'
+    ),
+    (
+        N'ALOO-QN-002',
+        N'Kem Bơ ALoo - 174 Nguyễn Thị Định',
+        N'kem-bo-aloo-174-nguyen-thi-dinh',
+        N'174 Nguyễn Thị Định, TP. Quy Nhơn, Bình Định',
+        N'Bình Định',
+        N'Quy Nhơn',
+        NULL,
+        NULL,
+        NULL,
+        N'0935 113 589 / 0383 869 253',
+        NULL,
+        N'https://maps.google.com/?q=Kem+Bơ+ALoo+174+Nguyễn+Thị+Định+Quy+Nhơn',
+        N'STANDARD',
+        N'Chi nhánh ALOO tại Nguyễn Thị Định, phục vụ kem bơ, nước ép và sinh tố tại cửa hàng.',
+        NULL,
+        1,
+        2,
+        N'ACTIVE'
+    ),
+    (
+        N'ALOO-NT-001',
+        N'Kem Bơ ALoo - 120 Hoàng Hoa Thám',
+        N'kem-bo-aloo-120-hoang-hoa-tham',
+        N'120 Hoàng Hoa Thám, P. Lộc Thọ, TP. Nha Trang, Khánh Hòa',
+        N'Khánh Hòa',
+        N'Nha Trang',
+        N'Lộc Thọ',
+        NULL,
+        NULL,
+        N'0935 113 589 / 0984 666 077',
+        NULL,
+        N'https://maps.google.com/?q=Kem+Bơ+ALoo+120+Hoàng+Hoa+Thám+Nha+Trang',
+        N'STANDARD',
+        N'Chi nhánh ALOO Nha Trang tại Hoàng Hoa Thám, phục vụ khách trải nghiệm menu kem bơ tại cửa hàng.',
+        NULL,
+        1,
+        3,
+        N'ACTIVE'
+    ),
+    (
+        N'ALOO-NT-002',
+        N'Kem Bơ ALoo - 42 Lê Thánh Tôn',
+        N'kem-bo-aloo-42-le-thanh-ton',
+        N'42 Lê Thánh Tôn, Phố Ẩm Thực Phan Bội Châu, TP. Nha Trang, Khánh Hòa',
+        N'Khánh Hòa',
+        N'Nha Trang',
+        NULL,
+        NULL,
+        NULL,
+        N'02583 510 777',
+        NULL,
+        N'https://maps.google.com/?q=Kem+Bơ+ALoo+42+Lê+Thánh+Tôn+Nha+Trang',
+        N'STANDARD',
+        N'Chi nhánh ALOO Nha Trang tại Lê Thánh Tôn, thuộc khu phố ẩm thực Phan Bội Châu.',
+        NULL,
+        1,
+        4,
+        N'ACTIVE'
+    );
 END
 GO
 
@@ -204,7 +439,7 @@ BEGIN
     ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'cau-chuyen-thuong-hieu'), N'Câu chuyện kem bơ thuần Việt của ALOO', N'cau-chuyen-kem-bo-thuan-viet-cua-aloo', N'Hành trình xây dựng hương vị kem bơ gần gũi với người Việt.', N'<h2>Giới thiệu</h2><p>ALOO phát triển từ ý tưởng đưa món kem bơ quen thuộc vào mô hình cửa hàng hiện đại.</p>', N'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=1200&q=85', N'ALOO Editorial', N'ALOO', N'Câu chuyện thương hiệu', N'PUBLISHED', DATEADD(day, -1, @now), N'Câu chuyện kem bơ thuần Việt của ALOO', N'Hành trình xây dựng hương vị kem bơ gần gũi với người Việt.', N'kem bơ,ALOO,thương hiệu', N'kem bơ,ALOO,thương hiệu'),
     ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'nhuong-quyen'), N'Mô hình nhượng quyền kiosk kem bơ cần chuẩn bị gì?', N'mo-hinh-nhuong-quyen-kiosk-kem-bo-can-gi', N'Các hạng mục cần chuẩn bị trước khi mở kiosk kem bơ.', N'<h2>Mặt bằng</h2><p>Kiosk cần vị trí dễ nhìn, lưu lượng ổn định và đủ không gian bảo quản nguyên liệu.</p>', N'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=85', N'ALOO Franchise Team', N'ALOO', N'Hướng dẫn nhượng quyền', N'PUBLISHED', DATEADD(day, -2, @now), N'Mô hình nhượng quyền kiosk kem bơ cần chuẩn bị gì?', N'Checklist chuẩn bị mô hình kiosk kem bơ.', N'nhượng quyền,kiosk,vận hành', N'nhượng quyền,kiosk,vận hành'),
     ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'review'), N'Review kem bơ truyền thống ALOO', N'review-kem-bo-truyen-thong-aloo', N'Món signature giữ vị bơ sáp tự nhiên, kem mát và topping cân bằng.', N'<h2>Vị bơ</h2><p>Phần bơ được xay mịn, giữ độ béo tự nhiên nhưng không quá ngọt.</p>', N'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=1200&q=85', N'ALOO Editorial', N'ALOO', N'Review địa điểm', N'PUBLISHED', DATEADD(day, -3, @now), N'Review kem bơ truyền thống ALOO', N'Đánh giá món kem bơ truyền thống ALOO.', N'review,kem bơ,sản phẩm', N'review,kem bơ,sản phẩm'),
-    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'van-hanh'), N'Vận hành cửa hàng kem bơ trong giờ cao điểm', N'van-hanh-cua-hang-kem-bo-gio-cao-diem', N'Chuẩn bị nguyên liệu, phân vai nhân sự và tối ưu luồng order.', N'<h2>Chuẩn bị trước ca</h2><p>Nguyên liệu cần được chia sẵn theo định lượng để giảm thời gian thao tác.</p>', N'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=85', N'ALOO Franchise Team', N'ALOO', N'Hướng dẫn vận hành', N'PUBLISHED', DATEADD(day, -4, @now), N'Vận hành cửa hàng kem bơ trong giờ cao điểm', N'Kinh nghiệm vận hành cửa hàng kem bơ khi đông khách.', N'vận hành,cửa hàng,giờ cao điểm', N'vận hành,cửa hàng,giờ cao điểm'),
+    ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'van-hanh'), N'Vận hành cửa hàng kem bơ trong giờ cao điểm', N'van-hanh-cua-hang-kem-bo-gio-cao-diem', N'Chuẩn bị nguyên liệu, phân vai nhân sự và tối ưu luồng phục vụ.', N'<h2>Chuẩn bị trước ca</h2><p>Nguyên liệu cần được chia sẵn theo định lượng để giảm thời gian thao tác.</p>', N'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=85', N'ALOO Franchise Team', N'ALOO', N'Hướng dẫn vận hành', N'PUBLISHED', DATEADD(day, -4, @now), N'Vận hành cửa hàng kem bơ trong giờ cao điểm', N'Kinh nghiệm vận hành cửa hàng kem bơ khi đông khách.', N'vận hành,cửa hàng,giờ cao điểm', N'vận hành,cửa hàng,giờ cao điểm'),
     ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'tin-tuc'), N'ALOO cập nhật menu mùa hè', N'aloo-cap-nhat-menu-mua-he', N'Một số món lạnh và topping mới được bổ sung cho mùa hè.', N'<h2>Menu mùa hè</h2><p>Các món ưu tiên vị mát, thao tác nhanh và nguyên liệu dễ kiểm soát.</p>', N'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=1200&q=85', N'ALOO Editorial', N'ALOO', N'Tin tức', N'PUBLISHED', DATEADD(day, -5, @now), N'ALOO cập nhật menu mùa hè', N'Cập nhật menu mùa hè của ALOO.', N'menu,tin tức,mùa hè', N'menu,tin tức,mùa hè'),
     ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'nhuong-quyen'), N'Cách chọn mặt bằng bán kem bơ hiệu quả', N'cach-chon-mat-bang-ban-kem-bo', N'Mặt bằng tốt cần phù hợp thói quen mua đồ ăn vặt.', N'<h2>Lưu lượng khách</h2><p>Khu dân cư, trường học, văn phòng là nhóm vị trí đáng cân nhắc.</p>', N'https://images.unsplash.com/photo-1521305916504-4a1121188589?auto=format&fit=crop&w=1200&q=85', N'ALOO Franchise Team', N'ALOO', N'Bài SEO', N'PUBLISHED', DATEADD(day, -6, @now), N'Cách chọn mặt bằng bán kem bơ hiệu quả', N'Kinh nghiệm chọn mặt bằng bán kem bơ.', N'mặt bằng,kinh doanh,nhượng quyền', N'mặt bằng,kinh doanh,nhượng quyền'),
     ((SELECT TOP 1 id FROM dbo.categories WHERE slug = N'cau-chuyen-thuong-hieu'), N'Nhận diện thương hiệu ALOO tại điểm bán', N'nhan-dien-thuong-hieu-aloo-tai-diem-ban', N'Màu sắc, menu và trưng bày giúp khách nhận ra ALOO nhanh hơn.', N'<h2>Nhận diện</h2><p>Bộ nhận diện cần rõ ràng từ xa, dễ nhớ và đồng bộ giữa các điểm bán.</p>', N'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1200&q=85', N'ALOO Editorial', N'ALOO', N'Câu chuyện thương hiệu', N'PUBLISHED', DATEADD(day, -7, @now), N'Nhận diện thương hiệu ALOO tại điểm bán', N'Cách ALOO xây dựng nhận diện tại cửa hàng.', N'nhận diện,thương hiệu,cửa hàng', N'nhận diện,thương hiệu,cửa hàng'),
@@ -223,8 +458,8 @@ BEGIN
     (N'Nguyễn Minh Anh', N'0918246579', N'minhanh@example.com', N'TP.HCM', 350000000, N'Muốn mở kiosk gần khu chung cư, cần tư vấn mặt bằng.', N'NEW'),
     (N'Trần Quang Huy', N'0936728145', N'quanghuy@example.com', N'Đà Nẵng', 500000000, N'Đã có mặt bằng mặt tiền, muốn tìm hiểu gói cửa hàng tiêu chuẩn.', N'CONTACTED'),
     (N'Lê Thu Hà', N'0974512386', N'thuha@example.com', N'Cần Thơ', 250000000, N'Quan tâm mô hình xe đẩy/kiosk.', N'CONSULTING'),
-    (N'Phạm Gia Huy', N'0907638219', N'giahuy@example.com', N'Hà Nội', 700000000, N'Muốn mở flagship mini tại khu văn phòng.', N'DONE'),
-    (N'Đỗ Mai Linh', N'0928415763', N'mailinh@example.com', N'Bình Dương', 180000000, N'Tạm dừng kế hoạch do chưa tìm được mặt bằng phù hợp.', N'CANCELED'),
+    (N'Phạm Gia Huy', N'0907638219', N'giahuy@example.com', N'Hà Nội', 700000000, N'Muốn mở flagship mini tại khu văn phòng.', N'SIGNED'),
+    (N'Đỗ Mai Linh', N'0928415763', N'mailinh@example.com', N'Bình Dương', 180000000, N'Tạm dừng kế hoạch do chưa tìm được mặt bằng phù hợp.', N'REJECTED'),
     (N'Võ Thành Nam', N'0987654321', N'thanhnam@example.com', N'Khánh Hòa', 420000000, N'Có mặt bằng gần biển, cần tư vấn thiết kế nhận diện.', N'NEW'),
     (N'Hoàng Bảo Ngọc', N'0966123456', N'baongoc@example.com', N'Bình Định', 300000000, N'Quan tâm khu vực Quy Nhơn, muốn xem menu poster chi nhánh.', N'CONTACTED'),
     (N'Bùi Quốc Việt', N'0944556677', N'quocviet@example.com', N'Đồng Nai', 550000000, N'Cần báo giá thiết bị và chi phí nguyên liệu ban đầu.', N'CONSULTING');
@@ -245,6 +480,8 @@ BEGIN
 END
 GO
 
-PRINT N'ALOO sample data inserted. Login admin/user password: 123456';
+PRINT N'ALOO sample data inserted. Login admin password: 123456';
 GO
+
+
 

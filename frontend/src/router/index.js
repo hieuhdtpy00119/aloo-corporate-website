@@ -11,16 +11,15 @@ import CostView from '../views/public/CostView.vue'
 import ConsultationView from '../views/public/ConsultationView.vue'
 import ContactView from '../views/public/ContactView.vue'
 import LocationsView from '../views/public/LocationsView.vue'
+import StoreDetailView from '../views/public/StoreDetailView.vue'
 import BlogView from '../views/public/BlogView.vue'
 import BlogDetailView from '../views/public/BlogDetailView.vue'
-import UserLoginView from '../views/public/UserLoginView.vue'
 import OAuthCallbackView from '../views/public/OAuthCallbackView.vue'
-import UserProfileView from '../views/public/UserProfileView.vue'
-import UserChangePasswordView from '../views/public/UserChangePasswordView.vue'
 import NotFoundView from '../views/public/NotFoundView.vue'
 import AdminLoginView from '../views/admin/AdminLoginView.vue'
 import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
 import AdminProductsView from '../views/admin/AdminProductsView.vue'
+import AdminFeedbackView from '../views/admin/AdminFeedbackView.vue'
 import AdminRegistrationsView from '../views/admin/AdminRegistrationsView.vue'
 import AdminArticlesView from '../views/admin/AdminArticlesView.vue'
 import AdminArticleEditorView from '../views/admin/AdminArticleEditorView.vue'
@@ -32,9 +31,22 @@ import AdminChangePasswordView from '../views/admin/AdminChangePasswordView.vue'
 import AdminAccountsView from '../views/admin/AdminAccountsView.vue'
 import AdminHomeSectionsView from '../views/admin/AdminHomeSectionsView.vue'
 import { resolveAuthRedirect } from './authGuard'
+import { trackPageview } from '../services/analyticsService'
+import { routeSeo, setSeoMeta } from '../services/seoService'
 
 const router = createRouter({
   history: createWebHistory(),
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) return savedPosition
+    if (to.hash) {
+      return {
+        el: to.hash,
+        top: 96,
+        behavior: 'smooth',
+      }
+    }
+    return { top: 0, left: 0 }
+  },
   routes: [
     {
       path: '/',
@@ -48,18 +60,11 @@ const router = createRouter({
         { path: 'process', name: 'process', component: ProcessView },
         { path: 'cost', name: 'cost', component: CostView },
         { path: 'locations', name: 'locations', component: LocationsView },
+        { path: 'locations/:slug', name: 'store-detail', component: StoreDetailView },
         { path: 'blog', name: 'blog', component: BlogView },
-        { path: 'blog/:id', name: 'blog-detail', component: BlogDetailView },
+        { path: 'blog/:slug', name: 'blog-detail', component: BlogDetailView },
         { path: 'consultation', name: 'consultation', component: ConsultationView },
         { path: 'contact', name: 'contact', component: ContactView },
-        { path: 'login', name: 'user-login', component: UserLoginView },
-        { path: 'profile', name: 'user-profile', component: UserProfileView, meta: { requiresUser: true } },
-        {
-          path: 'change-password',
-          name: 'user-change-password',
-          component: UserChangePasswordView,
-          meta: { requiresUser: true },
-        },
       ],
     },
     { path: '/oauth/callback', name: 'oauth-callback', component: OAuthCallbackView },
@@ -70,6 +75,7 @@ const router = createRouter({
       children: [
         { path: '', name: 'admin-dashboard', component: AdminDashboardView },
         { path: 'products', name: 'admin-products', component: AdminProductsView },
+        { path: 'feedbacks', name: 'admin-feedbacks', component: AdminFeedbackView },
         { path: 'home-sections', name: 'admin-home-sections', component: AdminHomeSectionsView },
         { path: 'articles', name: 'admin-articles', component: AdminArticlesView },
         { path: 'articles/new', name: 'admin-article-new', component: AdminArticleEditorView },
@@ -96,6 +102,12 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => resolveAuthRedirect(to))
+
+router.afterEach((to) => {
+  const exactSeo = routeSeo[to.path]
+  if (exactSeo) setSeoMeta(exactSeo)
+  trackPageview(to.fullPath)
+})
 
 export default router
 
