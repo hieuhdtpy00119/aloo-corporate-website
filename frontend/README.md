@@ -13,9 +13,21 @@ Frontend website and admin CMS demo for **ALOO - Kem Bơ Thuần Việt**.
 
 ## Requirements
 
-- Node.js 18+ recommended
+- Node.js 22.11.0 or newer
 - npm
 - Git
+
+## Node Version Manager
+
+Use Node Version Manager to switch to the Node.js version required by this project.
+
+```bash
+nvm install 22.11.0
+nvm use 22.11.0
+node -v
+```
+
+This project also includes `.nvmrc`, so Node Version Manager can read the expected version from the repository.
 
 ## Download Project
 
