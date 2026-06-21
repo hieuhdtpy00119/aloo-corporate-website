@@ -4,7 +4,7 @@ const adminEmail = process.env.E2E_ADMIN_EMAIL || 'admin@aloo.vn'
 const adminPassword = process.env.E2E_ADMIN_PASSWORD || '123456'
 
 async function loginAdmin(page) {
-  await page.goto('/admin/login')
+  await page.goto('/login')
   await page.locator('input[type="email"]').fill(adminEmail)
   await page.locator('input[type="password"]').fill(adminPassword)
   await page.getByRole('button', { name: /xac thuc tai khoan|xác thực tài khoản/i }).click()

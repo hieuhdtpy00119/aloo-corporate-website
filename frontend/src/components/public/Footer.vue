@@ -1,66 +1,137 @@
 <script setup>
+import { MessageCircle, Phone } from 'lucide-vue-next'
 import { trackEvent } from '../../services/analyticsService'
+
+const navigationGroups = [
+  {
+    title: 'Điều hướng',
+    links: [
+      { label: 'Trang chủ', to: '/' },
+      { label: 'Hệ thống cửa hàng', to: '/locations' },
+      { label: 'Sản phẩm & Menu', to: '/products' },
+      { label: 'Về ALOO', to: '/about' },
+      { label: 'Blog', to: '/blog' },
+    ],
+  },
+  {
+    title: 'Hợp tác',
+    links: [
+      { label: 'Nhượng quyền', to: '/franchise' },
+      { label: 'Đăng ký tư vấn', to: '/consultation', highlight: true },
+      { label: 'Liên hệ trực tiếp', to: '/contact' },
+    ],
+  },
+]
+
+const contactLinks = [
+  {
+    label: 'Hotline/Zalo',
+    value: '093 511 3589',
+    href: 'tel:0935113589',
+    icon: Phone,
+  },
+  {
+    label: 'Zalo tư vấn',
+    value: '038 386 9235',
+    href: 'tel:0383869235',
+    icon: MessageCircle,
+  },
+]
+
+const socialLinks = [
+  {
+    label: 'Facebook',
+    channel: 'facebook',
+    href: 'https://www.facebook.com/alooquynhon',
+  },
+  {
+    label: 'Fanpage',
+    channel: 'facebook_page',
+    href: 'https://www.facebook.com/alookembongonquynhon',
+  },
+  {
+    label: 'TikTok',
+    channel: 'tiktok',
+    href: 'https://www.tiktok.com/@alookemboxinchao',
+  },
+]
 </script>
 
 <template>
-  <footer class="bg-gradient-to-br from-brand-dark via-brand-dark/95 to-brand-dark/90 text-white/90 border-t border-brand-forest/10 relative overflow-hidden">
-    <!-- Subtle top decorative glowing border -->
+  <footer class="relative overflow-hidden border-t border-brand-forest/10 bg-brand-dark text-white/90">
     <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-lime/30 to-transparent"></div>
 
-    <div class="mx-auto grid max-w-[1280px] gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1.6fr_1fr_1fr_1fr] lg:px-8 relative z-10">
-      <div class="space-y-6">
+    <div class="relative z-10 mx-auto grid max-w-[1240px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-2 lg:grid-cols-[1.35fr_0.7fr_0.7fr_0.95fr] lg:px-8">
+      <div class="max-w-md space-y-5">
         <RouterLink to="/" class="inline-block transition transform hover:scale-[1.02]">
-          <img src="/logo-aloo.png" alt="ALOO Kem Bơ" class="h-12 w-auto max-w-[190px] object-contain object-left brightness-110" width="220" height="56" />
+          <img
+            src="/logo-aloo.png"
+            alt="ALOO Kem Bơ"
+            class="h-12 w-auto max-w-[190px] object-contain object-left brightness-110"
+            width="220"
+            height="56"
+          />
         </RouterLink>
-        <p class="max-w-sm text-sm leading-7 text-white/70">
-          Thương hiệu kem bơ thuần Việt, kết hợp nguồn nông sản sạch với công nghệ hiện đại. Mang trải nghiệm kem tươi ngon lành và cơ hội nhượng quyền phát triển tới mọi miền.
+        <p class="text-sm leading-7 text-white/70">
+          Kem bơ thuần Việt với nguyên liệu chọn lọc, quy trình vận hành gọn và trải nghiệm nhất quán tại từng điểm bán.
         </p>
-        <div class="flex gap-3">
-          <a href="#" class="grid h-10 w-10 place-items-center rounded-full bg-white/5 border border-white/10 text-sm font-semibold transition duration-300 hover:bg-brand-lime hover:text-brand-dark hover:border-brand-lime hover:shadow-lg hover:shadow-brand-lime/20" @click.prevent="trackEvent('click_social_link', { channel: 'facebook' })">f</a>
-          <a href="#" class="grid h-10 w-10 place-items-center rounded-full bg-white/5 border border-white/10 text-sm font-semibold transition duration-300 hover:bg-brand-lime hover:text-brand-dark hover:border-brand-lime hover:shadow-lg hover:shadow-brand-lime/20" @click.prevent="trackEvent('click_social_link', { channel: 'instagram' })">ig</a>
-          <a href="#" class="grid h-10 w-10 place-items-center rounded-full bg-white/5 border border-white/10 text-sm font-semibold transition duration-300 hover:bg-brand-lime hover:text-brand-dark hover:border-brand-lime hover:shadow-lg hover:shadow-brand-lime/20" @click.prevent="trackEvent('click_social_link', { channel: 'youtube' })">yt</a>
+        <div class="flex flex-wrap gap-2.5">
+          <a
+            v-for="link in socialLinks"
+            :key="link.href"
+            :href="link.href"
+            target="_blank"
+            rel="noreferrer"
+            class="inline-flex min-h-10 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 text-xs font-bold transition duration-300 hover:border-brand-lime hover:bg-brand-lime hover:text-brand-dark hover:shadow-lg hover:shadow-brand-lime/20"
+            @click="trackEvent('click_social_link', { channel: link.channel })"
+          >
+            {{ link.label }}
+          </a>
+        </div>
+      </div>
+
+      <div v-for="group in navigationGroups" :key="group.title">
+        <h3 class="text-xs font-black uppercase tracking-[0.15em] text-brand-sand">{{ group.title }}</h3>
+        <div class="mt-5 grid gap-3 text-sm">
+          <RouterLink
+            v-for="link in group.links"
+            :key="link.to"
+            :to="link.to"
+            :class="[
+              'transition-all duration-300 hover:translate-x-1 hover:text-brand-lime',
+              link.highlight ? 'font-black text-brand-lime' : 'text-white/70',
+            ]"
+          >
+            {{ link.label }}
+          </RouterLink>
         </div>
       </div>
 
       <div>
-        <h3 class="font-black text-xs uppercase tracking-[0.15em] text-brand-sand">Thương hiệu</h3>
-        <div class="mt-6 grid gap-3.5 text-sm">
-          <RouterLink to="/products" class="text-white/70 transition-all duration-300 hover:text-brand-lime hover:translate-x-1">Sản phẩm & Menu</RouterLink>
-          <RouterLink to="/about" class="text-white/70 transition-all duration-300 hover:text-brand-lime hover:translate-x-1">Câu chuyện của chúng tôi</RouterLink>
-          <RouterLink to="/locations" class="text-white/70 transition-all duration-300 hover:text-brand-lime hover:translate-x-1">Tìm cửa hàng</RouterLink>
-          <RouterLink to="/franchise" class="text-white/70 transition-all duration-300 hover:text-brand-lime hover:translate-x-1">Nhượng quyền</RouterLink>
-        </div>
-      </div>
-
-      <div>
-        <h3 class="font-black text-xs uppercase tracking-[0.15em] text-brand-sand">Đồng hành</h3>
-        <div class="mt-6 grid gap-3.5 text-sm">
-          <RouterLink to="/consultation" class="text-white/70 transition-all duration-300 hover:text-brand-lime hover:translate-x-1 font-semibold text-brand-lime">Đăng ký tư vấn</RouterLink>
-          <RouterLink to="/contact" class="text-white/70 transition-all duration-300 hover:text-brand-lime hover:translate-x-1">Liên hệ trực tiếp</RouterLink>
-          <RouterLink to="/blog" class="text-white/70 transition-all duration-300 hover:text-brand-lime hover:translate-x-1">Tin tức & Khuyến mãi</RouterLink>
-        </div>
-      </div>
-
-      <div>
-        <h3 class="font-black text-xs uppercase tracking-[0.15em] text-brand-sand">Thông tin liên hệ</h3>
-        <div class="mt-6 space-y-4 text-sm text-white/70">
-          <p class="flex items-center gap-2">
-            <span class="text-brand-sand font-semibold">Hotline:</span> 0900 888 168
-          </p>
-          <p class="flex items-center gap-2">
-            <span class="text-brand-sand font-semibold">Email:</span> franchise@aloo.vn
-          </p>
-          <p class="flex items-center gap-2 flex-wrap">
-            <span class="text-brand-sand font-semibold">Địa chỉ:</span> TP. Hồ Chí Minh, Việt Nam
-          </p>
+        <h3 class="text-xs font-black uppercase tracking-[0.15em] text-brand-sand">Liên hệ</h3>
+        <div class="mt-5 grid gap-3 text-sm">
+          <a
+            v-for="contact in contactLinks"
+            :key="contact.href"
+            :href="contact.href"
+            class="flex items-center gap-3 text-white transition hover:text-brand-lime"
+          >
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/5 text-brand-lime">
+              <component :is="contact.icon" class="h-4 w-4" aria-hidden="true" />
+            </span>
+            <span>
+              <span class="block text-xs font-bold uppercase tracking-[0.12em] text-white/40">{{ contact.label }}</span>
+              <span class="font-black">{{ contact.value }}</span>
+            </span>
+          </a>
         </div>
       </div>
     </div>
 
     <div class="border-t border-white/5 py-6 text-center text-xs text-white/40 bg-black/10 relative z-10">
-      <div class="mx-auto max-w-[1280px] px-4 flex flex-col gap-3 sm:flex-row sm:justify-between items-center">
+      <div class="mx-auto max-w-[1240px] px-4 flex flex-col gap-3 sm:flex-row sm:justify-between items-center">
         <p>© 2026 ALOO. Bảo lưu mọi quyền.</p>
-        <p class="text-white/30 tracking-wider">Kem Bơ Thuần Việt — Sạch, Lành & Đậm Vị</p>
+        <p class="text-white/30 tracking-wider">Kem Bơ Thuần Việt - Sạch, Lành & Đậm Vị</p>
       </div>
     </div>
   </footer>

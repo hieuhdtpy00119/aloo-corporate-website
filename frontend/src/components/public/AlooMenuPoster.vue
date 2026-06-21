@@ -72,7 +72,7 @@ const currentPoster = computed(() => {
           <span class="bg-white/90 backdrop-blur-sm text-avocado-950 text-xs font-bold px-4 py-2 rounded-full shadow-lg">Xem chi tiết</span>
         </div>
         
-        <div class="overflow-hidden rounded-2xl bg-[#fffaf0]">
+        <div class="overflow-hidden rounded-2xl bg-cream-50">
           <Transition name="fade" mode="out-in">
             <img
               v-if="currentPoster.image"

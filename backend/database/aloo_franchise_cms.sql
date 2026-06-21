@@ -40,6 +40,7 @@ CREATE TABLE dbo.users (
     phone NVARCHAR(40) NULL,
     avatar_url NVARCHAR(600) NULL,
     role NVARCHAR(30) NOT NULL CONSTRAINT df_users_role DEFAULT N'USER',
+    admin_profile NVARCHAR(30) NULL,
     status NVARCHAR(30) NOT NULL CONSTRAINT df_users_status DEFAULT N'ACTIVE',
     last_login_at DATETIME2(0) NULL,
     created_at DATETIME2(0) NOT NULL CONSTRAINT df_users_created_at DEFAULT GETDATE(),
@@ -182,7 +183,7 @@ CREATE TABLE dbo.contact_messages (
     created_at DATETIME2(0) NOT NULL CONSTRAINT df_contact_messages_created_at DEFAULT GETDATE(),
     updated_at DATETIME2(0) NOT NULL CONSTRAINT df_contact_messages_updated_at DEFAULT GETDATE(),
     CONSTRAINT pk_contact_messages PRIMARY KEY (id),
-    CONSTRAINT ck_contact_messages_status CHECK (status IN (N'NEW', N'READ', N'REPLIED', N'ARCHIVED'))
+    CONSTRAINT ck_contact_messages_status CHECK (status I (N'NEW', N'READ', N'REPLIED', N'ARCHIVED'))
 );
 GO
 
@@ -356,6 +357,22 @@ CREATE TABLE dbo.brand_timelines (
 GO
 
 CREATE INDEX ix_users_role_status ON dbo.users(role, status, created_at DESC);
+GO
+
+CREATE TABLE dbo.audit_logs (
+    id BIGINT IDENTITY(1,1) NOT NULL,
+    actor_email NVARCHAR(180) NOT NULL,
+    action NVARCHAR(80) NOT NULL,
+    entity_type NVARCHAR(80) NOT NULL,
+    entity_id NVARCHAR(80) NULL,
+    details NVARCHAR(1000) NULL,
+    created_at DATETIME2(0) NOT NULL CONSTRAINT df_audit_logs_created_at DEFAULT GETDATE(),
+    CONSTRAINT pk_audit_logs PRIMARY KEY (id)
+);
+GO
+
+CREATE INDEX ix_audit_logs_created_at ON dbo.audit_logs(created_at DESC, id DESC);
+GO
 CREATE INDEX ix_categories_type_status ON dbo.categories(type, status, sort_order);
 CREATE INDEX ix_products_status_category ON dbo.products(status, category_id, sort_order);
 CREATE INDEX ix_testimonials_visible_sort ON dbo.testimonials(is_visible, sort_order, created_at DESC);
@@ -371,6 +388,7 @@ CREATE INDEX ix_store_menu_posters_store_sort ON dbo.store_menu_posters(store_id
 CREATE INDEX ix_franchise_contents_section ON dbo.franchise_contents(section_key, status, sort_order);
 CREATE INDEX ix_hero_banners_status_sort ON dbo.hero_banners(status, sort_order);
 CREATE INDEX ix_home_sections_status_sort ON dbo.home_sections(status, sort_order);
+CREATE UNIQUE INDEX ux_home_sections_section_key ON dbo.home_sections(section_key);
 CREATE INDEX ix_menu_posters_status_sort ON dbo.menu_posters(status, sort_order);
 CREATE INDEX ix_brand_timelines_status_sort ON dbo.brand_timelines(status, sort_order);
 GO

@@ -1,0 +1,821 @@
+{
+  "products": {
+    "title": "Products & display",
+    "description": "Manage products, product page banners and branch menu posters.",
+    "tabs": {
+      "products": "Products",
+      "hero": "Product banners",
+      "menu": "Menu posters"
+    },
+    "addProduct": "Add product",
+    "addHero": "Add banner",
+    "addPoster": "Add menu",
+    "previewPublic": "View product",
+    "editProduct": "Edit product",
+    "createProduct": "Add product",
+    "empty": "No matching products",
+    "emptyMenu": "No matching menu posters",
+    "emptyHero": "No matching product page banners",
+    "status": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Hidden",
+      "visible": "Visible"
+    },
+    "toasts": {
+      "imageUploaded": "Product image uploaded",
+      "imageUploadError": "Could not upload product image",
+      "galleryUploaded": "Uploaded {count} gallery images",
+      "galleryRemoved": "Removed image from gallery",
+      "menuImageUploaded": "Menu image uploaded",
+      "menuImageError": "Could not upload menu image",
+      "cropError": "An error occurred while cropping the image",
+      "cropExtractError": "An error occurred while extracting the crop area",
+      "cropSuccess": "Image cropped and uploaded successfully",
+      "cropUploadError": "Could not upload cropped image",
+      "bannerUploaded": "Banner image uploaded",
+      "bannerUploadError": "Could not upload banner image",
+      "nameSlugRequired": "Enter product name and slug",
+      "productCreated": "Product created",
+      "productUpdated": "Product updated",
+      "productSaveError": "Could not save product",
+      "productDeleted": "Product deleted",
+      "productDeleteError": "Could not delete product",
+      "posterFieldsRequired": "Enter branch key and menu title",
+      "posterCreated": "Menu poster created",
+      "posterUpdated": "Menu poster updated",
+      "posterSaveError": "Could not save menu poster",
+      "posterDeleted": "Menu poster deleted",
+      "posterDeleteError": "Could not delete menu poster",
+      "heroTitleRequired": "Enter banner title",
+      "heroCreated": "Product page banner created",
+      "heroUpdated": "Product page banner updated",
+      "heroSaveError": "Could not save product page banner",
+      "heroDeleted": "Product page banner deleted",
+      "heroDeleteError": "Could not delete product page banner",
+      "partialLoadError": "Some product data could not be loaded",
+      "galleryNoValid": "No valid images to upload"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saveCreate": "Create",
+      "saveUpdate": "Save changes"
+    },
+    "eyebrow": "Products Catalog",
+    "filters": {
+      "productsSearchLabel": "Search products",
+      "productsSearchPlaceholder": "Search name, slug, category...",
+      "productsStatusLabel": "Sale status",
+      "heroSearchLabel": "Search banners",
+      "heroSearchPlaceholder": "Search title, subtitle, description...",
+      "heroStatusLabel": "Display status",
+      "menuSearchLabel": "Search menus",
+      "menuSearchPlaceholder": "Search menu name, branch, description...",
+      "menuStatusLabel": "Display status"
+    },
+    "columns": {
+      "products": {
+        "image": "Image",
+        "name": "Product",
+        "slug": "Slug",
+        "category": "Category",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "menu": {
+        "image": "Image",
+        "menu": "Menu",
+        "branch": "Branch",
+        "description": "Description",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "hero": {
+        "image": "Image",
+        "content": "Content",
+        "background": "Background",
+        "tone": "Tone",
+        "status": "Status",
+        "sortOrder": "Order",
+        "actions": "Actions"
+      }
+    },
+    "modals": {
+      "createProduct": "Add new product",
+      "editProduct": "Update product",
+      "createPoster": "Add display menu",
+      "editPoster": "Update display menu",
+      "createHero": "Add product page banner",
+      "editHero": "Update product page banner",
+      "cropper": "Crop banner background"
+    },
+    "fields": {
+      "name": "Product name *",
+      "slug": "Slug *",
+      "category": "Category",
+      "status": "Status",
+      "imageUrl": "Image URL",
+      "uploadImage": "Or upload a new image from your computer",
+      "shortDescription": "Short description on product card",
+      "heroDescription": "Detailed hero description",
+      "tasteProfile": "Taste profile",
+      "ingredients": "Main ingredients",
+      "servingSuggestion": "Serving suggestions",
+      "detailContent": "Landing page content",
+      "gallery": "Detail image gallery",
+      "faqs": "Product FAQ",
+      "seoTitle": "SEO title",
+      "seoDescription": "SEO description",
+      "featured": "Mark as featured product",
+      "branchKey": "Branch / region code *",
+      "menuTitle": "Menu name *",
+      "menuSubtitle": "Short description",
+      "sortOrder": "Order",
+      "altText": "Alt text",
+      "menuImageUrl": "Menu image URL",
+      "uploadMenuImage": "Or upload menu image from your computer",
+      "bannerTitle": "Internal banner name *",
+      "displayOrder": "Display order",
+      "backgroundImage": "Background image"
+    },
+    "placeholders": {
+      "name": "Enter product name...",
+      "slug": "url-friendly-slug",
+      "category": "Select or enter category",
+      "imageUrl": "https://...",
+      "shortDescription": "Short description for product listing...",
+      "heroDescription": "An engaging intro for the detail page...",
+      "tasteProfile": "Creamy, buttery, lightly sweet, crispy toppings...",
+      "ingredients": "One ingredient per line: Avocado; Cream; Coconut...",
+      "servingSuggestion": "Serve chilled, great for afternoon, add toppings...",
+      "detailContent": "Product story, differentiators, preparation process...",
+      "gallery": "One image URL per line",
+      "faqs": "One per line: Question | Answer",
+      "seoTitle": "SEO title for product",
+      "seoDescription": "Short SEO description",
+      "branchKey": "quy-nhon, nha-trang...",
+      "menuTitle": "ALOO Menu Quy Nhon",
+      "menuSubtitle": "Menu by branch or region",
+      "altText": "Menu image description for SEO",
+      "bannerTitle": "Summer menu banner",
+      "backgroundImage": "https://... or /uploads/..."
+    },
+    "misc": {
+      "noDescription": "No description yet",
+      "sortOrder": "Order: {order}",
+      "hasBackgroundYes": "Yes",
+      "hasBackgroundNo": "No",
+      "toneDark": "Dark",
+      "toneLight": "Light",
+      "imagePreview": "Image preview",
+      "productImagePreview": "Product preview",
+      "menuPreview": "Menu preview",
+      "heroBgPreview": "Background preview",
+      "galleryAlt": "Product gallery",
+      "cropSourceAlt": "Source image for cropping",
+      "uploading": "Uploading to server...",
+      "uploadingGallery": "Uploading gallery images...",
+      "uploadingMenu": "Uploading menu image...",
+      "uploadingHeroBg": "Uploading background image...",
+      "galleryMultiHint": "You can select multiple images at once. URLs will be added to the gallery field automatically.",
+      "removeGalleryImage": "Remove image from gallery",
+      "cropperDescription": "Drag the sliders below to adjust the crop frame. The dashed green border is the area that will be extracted.",
+      "cropRatioLabel": "Frame ratio:",
+      "ratio21x9": "Wide 21:9 (Banners)",
+      "ratio16x9": "Standard 16:9",
+      "ratio4x3": "4:3 ratio",
+      "ratioFree": "Freeform",
+      "cropPosX": "Horizontal position (X): {value}%",
+      "cropPosY": "Vertical position (Y): {value}%",
+      "cropWidth": "Frame width: {value}%",
+      "cropHeight": "Frame height: {value}%",
+      "cropAndUpload": "Crop & upload",
+      "heroBgHint": "Recommended: desktop 1920x720 or 1920x800. On mobile the image crops vertically from the center — avoid placing text/products near the edges.",
+      "slugLocked": "Slug cannot be changed after creation to avoid breaking public URLs."
+    },
+    "uploadErrors": {
+      "imageUploadFailed": "Could not upload image",
+      "unsupportedFormat": ".{extension} format is not supported",
+      "unknownExtension": "unknown",
+      "fileTooLarge": "Image exceeds 5MB",
+      "notAnImage": "File is not an image",
+      "menuLoadFailed": "Could not load display menus",
+      "heroLoadFailed": "Could not load product page banners"
+    },
+    "paginationLabels": {
+      "products": "product",
+      "menu": "menu",
+      "banner": "banner"
+    },
+    "confirmDelete": {
+      "heroTitle": "Delete product page banner?",
+      "heroMessage": "This banner will be removed from the product page slider. This action cannot be undone.",
+      "heroConfirm": "Delete banner"
+    }
+  },
+  "homeSections": {
+    "title": "Homepage blocks",
+    "description": "Create featured cards, CTAs and dynamic links on the homepage.",
+    "add": "Add block",
+    "edit": "Edit block",
+    "create": "Add new block",
+    "empty": "No matching blocks",
+    "emptyTitle": "No homepage blocks yet",
+    "emptyDescription": "Add the first block to show in the featured section.",
+    "loading": "Loading homepage content...",
+    "paginationLabel": "blocks",
+    "previewHomepage": "View homepage",
+    "filters": {
+      "searchLabel": "Search blocks",
+      "searchPlaceholder": "Search title, block key, description",
+      "typeLabel": "Block type",
+      "typeAll": "All types"
+    },
+    "columns": {
+      "image": "Image",
+      "content": "Content",
+      "type": "Type",
+      "link": "Link",
+      "sortOrder": "Order",
+      "updatedAt": "Updated",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "linkCell": {
+      "noButton": "No button",
+      "noLink": "No link"
+    },
+    "formSections": {
+      "basic": "Basic information",
+      "content": "Display content",
+      "button": "Navigation button",
+      "image": "Image",
+      "preview": "Homepage card preview"
+    },
+    "fields": {
+      "title": "Title",
+      "sectionKey": "Block key",
+      "sectionKeyLocked": "Block key cannot be changed after creation.",
+      "type": "Block type",
+      "sortOrder": "Order",
+      "status": "Status",
+      "subtitle": "Eyebrow label",
+      "badge": "Image badge",
+      "description": "Description",
+      "buttonText": "Button text",
+      "linkType": "Link type",
+      "staticPage": "Select page",
+      "product": "Select product",
+      "post": "Select article",
+      "customLink": "Custom link",
+      "linkPreview": "Link to save",
+      "linkPending": "No link selected",
+      "imageUrl": "Image URL",
+      "imageFile": "Choose image file",
+      "uploading": "Uploading to server..."
+    },
+    "placeholders": {
+      "title": "Traditional avocado ice cream",
+      "sectionKey": "featured-product",
+      "subtitle": "Featured",
+      "badge": "Best seller",
+      "description": "Short description shown on the card...",
+      "buttonText": "View product",
+      "customLink": "/products/example or https://...",
+      "imageUrl": "https://... or /uploads/...",
+      "selectProduct": "Select a product link",
+      "selectPost": "Select an article link"
+    },
+    "defaults": {
+      "subtitle": "Featured",
+      "buttonText": "Learn more",
+      "previewBadge": "ALOO",
+      "noImage": "No image"
+    },
+    "preview": {
+      "alt": "Block preview"
+    },
+    "confirmDelete": {
+      "title": "Delete homepage block?",
+      "message": "This block will be removed from the homepage CMS. This action cannot be undone.",
+      "confirm": "Delete block"
+    },
+    "status": {
+      "ACTIVE": "Visible",
+      "INACTIVE": "Hidden"
+    },
+    "types": {
+      "FEATURED_CARD": "Featured card",
+      "CTA_CARD": "CTA card",
+      "PRODUCT_CARD": "Product card",
+      "LOCATION_CARD": "Store card"
+    },
+    "linkTypes": {
+      "NONE": "No button",
+      "STATIC": "Existing page",
+      "PRODUCT": "Specific product",
+      "POST": "Specific article",
+      "CUSTOM": "Custom link"
+    },
+    "staticLinks": {
+      "home": "Home",
+      "products": "Products",
+      "locations": "Store locator",
+      "franchise": "Franchise",
+      "about": "About ALOO",
+      "blog": "Blog",
+      "consultation": "Consultation",
+      "contact": "Contact"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "saveCreate": "Create",
+      "saveUpdate": "Save changes"
+    },
+    "toasts": {
+      "imageUploaded": "Homepage block image uploaded",
+      "imageError": "Could not upload image",
+      "requiredFields": "Enter block key and title",
+      "linkRequired": "Select or enter a button link",
+      "linkOptionsError": "Could not load link suggestions",
+      "created": "Homepage block created",
+      "updated": "Homepage block updated",
+      "saveError": "Could not save homepage block",
+      "deleted": "Homepage block deleted",
+      "deleteError": "Could not delete homepage block",
+      "loadError": "Could not load homepage content",
+      "duplicateKey": "Block key is already used"
+    }
+  },
+  "locations": {
+    "title": "Store locator",
+    "description": "Manage locations, amenities, status and public store pages.",
+    "add": "Add store",
+    "edit": "Edit store",
+    "create": "Add new store",
+    "preview": "Preview",
+    "empty": "No matching stores",
+    "status": {
+      "ACTIVE": "Active",
+      "COMING_SOON": "Opening soon",
+      "TEMPORARILY_CLOSED": "Temporarily closed",
+      "MAINTENANCE": "Under maintenance",
+      "INACTIVE": "Hidden"
+    },
+    "amenities": {
+      "wifi": "Wifi",
+      "ac": "Air conditioning",
+      "parking": "Parking",
+      "card": "Card payment",
+      "takeaway": "Takeaway"
+    },
+    "toasts": {
+      "imageUploaded": "Store image uploaded",
+      "imageError": "Could not upload store image",
+      "created": "Store created",
+      "updated": "Store updated",
+      "saveError": "Could not save store",
+      "deleted": "Store deleted",
+      "deleteError": "Could not delete store",
+      "loadError": "Could not load stores"
+    },
+    "eyebrow": "Store Locator CMS",
+    "filters": {
+      "searchLabel": "Search stores",
+      "searchPlaceholder": "Search store, address, district...",
+      "cityLabel": "Province / city",
+      "statusLabel": "Opening status",
+      "featuredLabel": "Featured",
+      "featuredYes": "Featured",
+      "featuredNo": "Not featured"
+    },
+    "columns": {
+      "image": "Image",
+      "name": "Store name",
+      "address": "Address",
+      "hours": "Hours",
+      "phone": "Phone",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "saveCreate": "Add new",
+      "saveUpdate": "Save changes",
+      "viewMap": "View map",
+      "callNow": "Call now"
+    },
+    "sections": {
+      "basic": "Basic information",
+      "map": "Map & area",
+      "promo": "Promotion"
+    },
+    "fields": {
+      "storeCode": "Store code",
+      "name": "Store name",
+      "slug": "Slug",
+      "phone": "Phone",
+      "email": "Email",
+      "addressText": "Display address",
+      "openingHours": "Opening hours",
+      "storeType": "Store type",
+      "description": "Description",
+      "mapUrl": "Google Maps URL",
+      "city": "City",
+      "district": "District",
+      "ward": "Ward",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "coverImageUrl": "Cover image URL",
+      "uploadImage": "Choose store image file",
+      "amenities": "Amenities",
+      "galleryText": "Gallery images",
+      "menuPostersText": "Menu poster",
+      "linkTitle": "Link title",
+      "linkUrl": "Link URL",
+      "displayOrder": "Display order",
+      "featured": "Featured store",
+      "status": "Status"
+    },
+    "placeholders": {
+      "storeCode": "ALOO-QN-001",
+      "slug": "kem-bo-aloo-395-nguyen-hue",
+      "openingHours": "09:00 - 22:00",
+      "galleryText": "Enter one image URL per line",
+      "menuPostersText": "Enter one poster/menu URL per line",
+      "linkTitle": "View map",
+      "linkUrl": "https://maps.google.com/..."
+    },
+    "preview": {
+      "title": "Store preview",
+      "hours": "Opening hours:",
+      "phone": "Phone:"
+    },
+    "validation": {
+      "storeCode": "Store code is required",
+      "name": "Store name is required",
+      "slug": "Slug is required",
+      "addressText": "Address is required",
+      "city": "Province/city is required",
+      "phone": "Phone must be at most 80 characters",
+      "mapUrl": "Invalid Google Maps URL",
+      "linkUrl": "Invalid link URL",
+      "galleryText": "Each gallery line must be a valid URL",
+      "menuPostersText": "Each menu poster line must be a valid URL",
+      "openingHours": "Opening hours are required for active stores",
+      "displayOrder": "Display order must be a number"
+    },
+    "storeTypes": {
+      "FLAGSHIP": "Flagship",
+      "STANDARD": "Standard",
+      "KIOSK": "Kiosk",
+      "FRANCHISE": "Franchise",
+      "POPUP": "Pop-up"
+    },
+    "paginationLabel": "store",
+    "defaults": {
+      "linkTitle": "View map"
+    },
+    "imagePreview": {
+      "uploading": "Uploading to server...",
+      "loadFailed": "Could not load image",
+      "noImage": "No image yet"
+    },
+    "featuredBadge": "Featured",
+    "hints": {
+      "galleryText": "Use when you want to show multiple detail images for the store.",
+      "menuPostersText": "If the store has its own menu poster, enter the image link here."
+    }
+  },
+  "feedbacks": {
+    "title": "Testimonial CMS",
+    "description": "Manage customer testimonials shown on the website.",
+    "add": "Add testimonial",
+    "edit": "Update testimonial",
+    "create": "Add testimonial",
+    "empty": "No testimonials yet",
+    "searchPlaceholder": "Search by name, branch, content...",
+    "visible": "On",
+    "hidden": "Off",
+    "columns": {
+      "customer": "Customer",
+      "content": "Content",
+      "rating": "Rating",
+      "visible": "Visible",
+      "sortOrder": "Order",
+      "actions": "Actions"
+    },
+    "fields": {
+      "customerName": "Customer name",
+      "storeName": "Store name",
+      "avatarUrl": "Avatar URL",
+      "rating": "Rating",
+      "content": "Content",
+      "sortOrder": "Order"
+    },
+    "filters": {
+      "all": "All",
+      "visible": "Visible",
+      "hidden": "Hidden"
+    },
+    "toasts": {
+      "loadError": "Could not load testimonials",
+      "requiredFields": "Enter customer name and content",
+      "created": "Testimonial created",
+      "updated": "Testimonial updated",
+      "saveError": "Could not save testimonial",
+      "visibilityOn": "Visibility enabled",
+      "visibilityOff": "Testimonial hidden",
+      "visibilityError": "Could not update visibility",
+      "deleted": "Testimonial deleted",
+      "deleteError": "Could not delete testimonial"
+    },
+    "actions": {
+      "toggleVisible": "Show/hide",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "fieldsPublicVisible": "Public visibility",
+    "paginationLabel": "testimonial"
+  },
+  "leads": {
+    "title": "Consultation registrations",
+    "description": "Prospective customers and franchise consultation processing status.",
+    "empty": "No matching leads",
+    "emptyTable": "No consultation registrations yet.",
+    "searchLabel": "Search leads",
+    "searchPlaceholder": "Search name, phone, email, area",
+    "statusLabel": "Consultation status",
+    "detailTitle": "Consultation registration details",
+    "registrationId": "Registration #{id}",
+    "assignedPlaceholder": "Admin or sales name",
+    "notePlaceholder": "Lead care notes",
+    "paginationLabel": "registration",
+    "status": {
+      "NEW": "New",
+      "CONTACTED": "Contacted",
+      "CONSULTING": "Consulting",
+      "POTENTIAL": "Potential",
+      "SIGNED": "Signed",
+      "REJECTED": "Rejected"
+    },
+    "columns": {
+      "name": "Full name",
+      "phone": "Phone",
+      "email": "Email",
+      "area": "Area",
+      "capital": "Capital",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "fields": {
+      "name": "Full name",
+      "phone": "Phone",
+      "email": "Email",
+      "areaOpen": "Preferred store area",
+      "capital": "Expected capital",
+      "registeredAt": "Registered at",
+      "status": "Status",
+      "leadCare": "Lead care",
+      "lastContact": "Last contact",
+      "assignedTo": "Assigned to",
+      "note": "Notes"
+    },
+    "actions": {
+      "detail": "Details",
+      "viewDetail": "View details",
+      "delete": "Delete",
+      "saveLeadCare": "Save lead care"
+    },
+    "toasts": {
+      "statusUpdated": "Registration status updated",
+      "statusError": "Could not update status",
+      "deleted": "Consultation registration deleted",
+      "deleteError": "Could not delete registration",
+      "loadError": "Could not load consultation registrations"
+    }
+  },
+  "articleEditor": {
+    "createTitle": "Create article",
+    "editTitle": "Edit article",
+    "backToList": "← Back to list",
+    "exit": "Exit",
+    "saveDraft": "Save draft",
+    "saveAndPublish": "Save & publish",
+    "publish": "Publish",
+    "publishing": "Publishing...",
+    "upload": {
+      "title": "Upload images",
+      "uploading": "Uploading...",
+      "cover": "Upload cover image",
+      "gallery": "Upload gallery",
+      "removeImage": "Remove image"
+    },
+    "statuses": {
+      "DRAFT": "Draft",
+      "PENDING": "Pending",
+      "REVIEWING": "Reviewing",
+      "APPROVED": "Approved",
+      "PUBLISHED": "Published",
+      "ARCHIVED": "Archived"
+    },
+    "fields": {
+      "title": "Article title",
+      "slug": "SEO slug",
+      "category": "Category",
+      "author": "Author",
+      "source": "Source",
+      "sourceLink": "Source link",
+      "excerpt": "Short description",
+      "content": "Article content",
+      "coverImage": "Cover image",
+      "gallery": "Image gallery",
+      "status": "Status",
+      "publishedAt": "Publish date",
+      "featured": "Featured on blog",
+      "metaTitle": "Meta title",
+      "metaDescription": "Meta description",
+      "metaKeywords": "Meta keywords"
+    },
+    "placeholders": {
+      "title": "Example: ALOO avocado ice cream review in Quy Nhon",
+      "slug": "review-aloo-kem-bo-quy-nhon",
+      "source": "ALOO / Press / Contributor",
+      "sourceLink": "https://...",
+      "excerpt": "Short summary for blog listing and SEO.",
+      "image": "https://...",
+      "metaKeywords": "avocado ice cream, Quy Nhon, ALOO"
+    },
+    "toasts": {
+      "coverUploaded": "Cover image uploaded",
+      "coverError": "Could not upload cover image",
+      "galleryUploaded": "Gallery uploaded",
+      "galleryError": "Could not upload gallery",
+      "titleRequired": "Enter article title",
+      "slugRequired": "Enter SEO slug",
+      "published": "Article saved and published",
+      "draftSaved": "Draft saved",
+      "saveError": "Could not save article"
+    }
+  },
+  "categories": {
+    "description": "Manage categories used for blog and article filters.",
+    "add": "Add category",
+    "empty": "No matching categories",
+    "noDescription": "No description",
+    "paginationLabel": "categories",
+    "backToArticles": "← {label}",
+    "filters": {
+      "searchLabel": "Search categories",
+      "searchPlaceholder": "Search name, slug, description"
+    },
+    "columns": {
+      "name": "Category name",
+      "slug": "Slug",
+      "description": "Description",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Hidden"
+    },
+    "fields": {
+      "name": "Category name",
+      "slug": "Slug",
+      "status": "Status",
+      "description": "Short description"
+    },
+    "modals": {
+      "create": "Add category",
+      "edit": "Edit category"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "saveCreate": "Create",
+      "saveUpdate": "Save changes"
+    },
+    "toasts": {
+      "created": "Category created",
+      "updated": "Category updated",
+      "saveError": "Could not save category",
+      "deleted": "Category deleted",
+      "deleteError": "Could not delete category",
+      "loadError": "Could not load categories"
+    }
+  },
+  "franchise": {
+    "title": "Franchise page content",
+    "description": "Manage hero, advantages, models, process, FAQ and CTA blocks shown on `/franchise`.",
+    "add": "Add block",
+    "previewPublic": "View franchise page",
+    "empty": "No matching franchise blocks",
+    "paginationLabel": "blocks",
+    "filters": {
+      "searchLabel": "Search content",
+      "searchPlaceholder": "Search title, section, JSON...",
+      "sectionLabel": "Section",
+      "sectionAll": "All sections"
+    },
+    "columns": {
+      "section": "Section",
+      "title": "Title",
+      "amount": "Value",
+      "sortOrder": "Order",
+      "note": "Note",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "sections": {
+      "hero": "Hero",
+      "advantages": "Advantages",
+      "models": "Models",
+      "investment": "Investment",
+      "profit": "Reference profit",
+      "process": "Process",
+      "founder_story": "Founder story",
+      "faq": "FAQ",
+      "cta": "CTA",
+      "costs": "Costs",
+      "benefits": "Benefits"
+    },
+    "status": {
+      "ACTIVE": "Visible",
+      "INACTIVE": "Hidden",
+      "HIDDEN": "Hidden"
+    },
+    "fields": {
+      "section": "Section",
+      "title": "Title",
+      "amount": "Value / amount",
+      "sortOrder": "Order",
+      "status": "Status",
+      "note": "Internal note",
+      "content": "Structured content"
+    },
+    "contentFields": {
+      "title": "Title",
+      "subtitle": "Subtitle",
+      "description": "Description",
+      "image": "Image (URL)",
+      "buttonText": "Primary button",
+      "buttonLink": "Primary link",
+      "secondaryButtonText": "Secondary button",
+      "secondaryButtonLink": "Secondary link",
+      "icon": "Icon",
+      "modelName": "Model name",
+      "area": "Area",
+      "investment": "Investment",
+      "featured": "Featured",
+      "itemName": "Item",
+      "kioskValue": "Kiosk value",
+      "standardValue": "Standard value",
+      "flagshipValue": "Flagship value",
+      "note": "Note",
+      "metric": "Metric",
+      "value": "Value",
+      "stepNumber": "Step number",
+      "founderName": "Founder name",
+      "storyContent": "Story content",
+      "question": "Question",
+      "answer": "Answer",
+      "amount": "Amount",
+      "body": "Content"
+    },
+    "placeholders": {
+      "content": "{\"description\":\"...\"}"
+    },
+    "modals": {
+      "create": "Add franchise block",
+      "edit": "Edit franchise block"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "saveCreate": "Create",
+      "saveUpdate": "Save changes"
+    },
+    "toasts": {
+      "created": "Franchise content added",
+      "updated": "Franchise content updated",
+      "saveError": "Could not save franchise content",
+      "invalidJson": "Invalid JSON content",
+      "requiredFields": "Please fill in all required fields",
+      "deleted": "Franchise content deleted",
+      "deleteError": "Could not delete franchise content",
+      "loadError": "Could not load franchise content"
+    }
+  }
+}

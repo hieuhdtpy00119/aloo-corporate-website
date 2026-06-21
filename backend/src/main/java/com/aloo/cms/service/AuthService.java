@@ -63,7 +63,9 @@ public class AuthService {
         user.setFullName(request.fullName().trim());
         user.setEmail(normalizedEmail);
         user.setPhone(nullable(request.phone()));
-        user.setAvatarUrl(nullable(request.avatarUrl()));
+        if (request.avatarUrl() != null) {
+            user.setAvatarUrl(nullable(request.avatarUrl()));
+        }
         return userMapper.toResponse(adminUserRepository.save(user));
     }
 

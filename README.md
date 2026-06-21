@@ -45,7 +45,7 @@ backend/database/aloo_franchise_cms.sql
 backend/database/aloo_franchise_cms_sample_data.sql  # dữ liệu mẫu local/demo
 ```
 
-## Google Login
+## Đăng nhập Google
 
 Để bật đăng nhập bằng Google, tạo OAuth Client trong Google Cloud Console với loại **Web application**.
 

@@ -1,6 +1,7 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   AlertCircle,
   ArrowUpRight,
@@ -11,15 +12,47 @@ import {
   MapPin,
   Package,
   Phone,
+  RefreshCw,
   Users,
   TrendingUp
 } from 'lucide-vue-next'
 import { useAppStore } from '../../stores/appStore'
+import EmptyState from '../../components/admin/EmptyState.vue'
+import {
+  articleStatusLabel,
+  getArticleStatusBadgeClass,
+  normalizeArticleStatus,
+  pendingArticleStatuses,
+} from '../../utils/articleStatus'
+import { ADMIN_SCOPES, canAccessAdminSession } from '../../utils/adminAccess'
+import { getLeadStatusPriority, getLeadStatusBadgeClass, isLeadNeedingAction, leadStatusLabel, normalizeLeadStatusCode } from '../../utils/leadStatus'
+import { adminPaths } from '../../constants/adminPaths'
 
 const store = useAppStore()
-const selectedRange = ref('7 ngày qua')
+const { t, locale } = useI18n()
+const permissions = computed(() => canAccessAdminSession())
+const lastUpdatedAt = ref(null)
+const isRefreshing = ref(false)
 
-const timeRanges = ['Hôm nay', '7 ngày qua', '30 ngày qua', 'Tháng này']
+const RANGE = {
+  TODAY: 'today',
+  WEEK: 'week',
+  MONTH30: 'month30',
+  THIS_MONTH: 'thisMonth',
+}
+const selectedRange = ref(RANGE.WEEK)
+
+const timeRangeOptions = computed(() => [
+  { key: RANGE.TODAY, label: t('admin.dashboard.ranges.today') },
+  { key: RANGE.WEEK, label: t('admin.dashboard.ranges.week') },
+  { key: RANGE.MONTH30, label: t('admin.dashboard.ranges.month30') },
+  { key: RANGE.THIS_MONTH, label: t('admin.dashboard.ranges.thisMonth') },
+])
+
+const selectedRangeLabel = computed(() => {
+  const match = timeRangeOptions.value.find((item) => item.key === selectedRange.value)
+  return match?.label || ''
+})
 
 const parseDate = (value) => {
   if (!value) return null
@@ -34,18 +67,18 @@ const rangeStart = computed(() => {
   const now = new Date()
   const start = new Date(now)
 
-  if (selectedRange.value === 'Hôm nay') {
+  if (selectedRange.value === RANGE.TODAY) {
     start.setHours(0, 0, 0, 0)
     return start
   }
 
-  if (selectedRange.value === '30 ngày qua') {
+  if (selectedRange.value === RANGE.MONTH30) {
     start.setDate(now.getDate() - 29)
     start.setHours(0, 0, 0, 0)
     return start
   }
 
-  if (selectedRange.value === 'Tháng này') {
+  if (selectedRange.value === RANGE.THIS_MONTH) {
     return new Date(now.getFullYear(), now.getMonth(), 1)
   }
 
@@ -56,56 +89,39 @@ const rangeStart = computed(() => {
 
 const isInsideSelectedRange = (item) => {
   const itemDate = getItemDate(item)
-  if (!itemDate) return true
+  if (!itemDate) return false
   return itemDate >= rangeStart.value
 }
 
+const isLoading = computed(() => {
+  const access = permissions.value
+  return (
+    (access[ADMIN_SCOPES.crm] && store.loading.registrations) ||
+    (access[ADMIN_SCOPES.content] && (store.loading.posts || store.loading.products)) ||
+    (access[ADMIN_SCOPES.stores] && store.loading.locations)
+  )
+})
+
+const loadErrors = computed(() => {
+  const access = permissions.value
+  return [
+    access[ADMIN_SCOPES.crm] ? store.errors.registrations : '',
+    access[ADMIN_SCOPES.content] ? store.errors.posts : '',
+    access[ADMIN_SCOPES.content] ? store.errors.products : '',
+    access[ADMIN_SCOPES.stores] ? store.errors.locations : '',
+  ].filter(Boolean)
+})
+
+const hasLoadError = computed(() => loadErrors.value.length > 0)
+
 const scopedRegistrations = computed(() => store.registrations.filter(isInsideSelectedRange))
 const scopedPosts = computed(() => store.posts.filter(isInsideSelectedRange))
-const scopedProducts = computed(() => store.products.filter(isInsideSelectedRange))
-const scopedLocations = computed(() => store.locations.filter(isInsideSelectedRange))
 
-const scopedRecordCount = computed(
-  () =>
-    scopedRegistrations.value.length +
-    scopedPosts.value.length +
-    scopedProducts.value.length +
-    scopedLocations.value.length,
-)
-
-const totalRecordCount = computed(
-  () => store.registrations.length + store.posts.length + store.products.length + store.locations.length,
-)
-
-const articleStatusLabels = {
-  DRAFT: 'Nháp',
-  PENDING: 'Chờ duyệt',
-  REVIEWING: 'Đang review',
-  APPROVED: 'Đã duyệt',
-  PUBLISHED: 'Đã xuất bản',
-  ARCHIVED: 'Lưu trữ',
-  'Bản nháp': 'Nháp',
-  'Lên lịch': 'Chờ duyệt',
-  'Đã đăng': 'Đã xuất bản',
-  Ẩn: 'Lưu trữ',
-}
-
-const normalizePostStatus = (status) => {
-  if (status === 'Đã đăng') return 'PUBLISHED'
-  if (status === 'Bản nháp') return 'DRAFT'
-  if (status === 'Lên lịch') return 'PENDING'
-  if (status === 'Ẩn') return 'ARCHIVED'
-  return status || 'DRAFT'
-}
-
-const postStatusLabel = (status) =>
-  articleStatusLabels[status] || articleStatusLabels[normalizePostStatus(status)] || status
-
-const pendingPostStatuses = new Set(['DRAFT', 'PENDING', 'REVIEWING'])
+const postStatusLabel = articleStatusLabel
 
 const countBy = (items, keyFn) =>
   items.reduce((result, item) => {
-    const label = keyFn(item) || 'Khác'
+    const label = keyFn(item) || t('admin.dashboard.misc.other')
     result[label] = (result[label] || 0) + 1
     return result
   }, {})
@@ -123,77 +139,103 @@ const toProgressItems = (record, colors = []) => {
 }
 
 const leadsNeedingAction = computed(() =>
-  scopedRegistrations.value.filter((item) => ['Mới', 'NEW', 'Đang tư vấn', 'CONSULTING'].includes(item.status)).length,
+  scopedRegistrations.value.filter((item) => isLeadNeedingAction(item.status)).length,
 )
 
 const postsNeedingAction = computed(() =>
-  scopedPosts.value.filter((post) => pendingPostStatuses.has(normalizePostStatus(post.status))).length,
+  scopedPosts.value.filter((post) => pendingArticleStatuses.has(normalizeArticleStatus(post.status))).length,
 )
 
 const productsOnSale = computed(() =>
-  scopedProducts.value.filter((product) => ['ACTIVE', 'Đang bán'].includes(product.status)).length,
+  store.products.filter((product) => ['ACTIVE', 'Đang bán'].includes(product.status)).length,
 )
 
 const activeLocations = computed(() =>
-  scopedLocations.value.filter((location) => location.status === 'ACTIVE').length,
+  store.locations.filter((location) => location.status === 'ACTIVE').length,
 )
 
 const kpiCards = computed(() => [
   {
-    label: 'Lead cần xử lý',
+    label: t('admin.dashboard.kpi.leadsLabel'),
     value: leadsNeedingAction.value,
-    description: 'Lead mới hoặc đang tư vấn',
-    note: `${scopedRegistrations.value.length}/${store.registrations.length} lead`,
+    description: t('admin.dashboard.kpi.leadsDescription'),
+    note: t('admin.dashboard.kpi.leadsNote', {
+      scoped: scopedRegistrations.value.length,
+      total: store.registrations.length,
+    }),
     icon: AlertCircle,
     tone: 'warning',
+    to: adminPaths.crm.leads,
+    scope: ADMIN_SCOPES.crm,
   },
   {
-    label: 'Bài viết chờ duyệt',
+    label: t('admin.dashboard.kpi.postsLabel'),
     value: postsNeedingAction.value,
-    description: 'Nội dung chưa xuất bản',
-    note: `${scopedPosts.value.length}/${store.posts.length} bài`,
+    description: t('admin.dashboard.kpi.postsDescription'),
+    note: t('admin.dashboard.kpi.postsNote', {
+      scoped: scopedPosts.value.length,
+      total: store.posts.length,
+    }),
     icon: FileClock,
     tone: 'info',
+    to: adminPaths.content.articles,
+    scope: ADMIN_SCOPES.content,
   },
   {
-    label: 'Sản phẩm đang bán',
+    label: t('admin.dashboard.kpi.productsLabel'),
     value: productsOnSale.value,
-    description: 'Sản phẩm public đang bật',
-    note: `${scopedProducts.value.length}/${store.products.length} sản phẩm`,
+    description: t('admin.dashboard.kpi.productsDescription'),
+    note: t('admin.dashboard.kpi.productsNote', { total: store.products.length }),
+    snapshot: t('admin.dashboard.kpi.snapshotHint'),
     icon: Package,
     tone: 'success',
+    to: adminPaths.content.products,
+    scope: ADMIN_SCOPES.content,
   },
   {
-    label: 'Địa điểm hoạt động',
+    label: t('admin.dashboard.kpi.locationsLabel'),
     value: activeLocations.value,
-    description: 'Cửa hàng đang hoạt động',
-    note: `${scopedLocations.value.length}/${store.locations.length} địa điểm`,
+    description: t('admin.dashboard.kpi.locationsDescription'),
+    note: t('admin.dashboard.kpi.locationsNote', { total: store.locations.length }),
+    snapshot: t('admin.dashboard.kpi.snapshotHint'),
     icon: MapPin,
     tone: 'success',
+    to: adminPaths.stores.locations,
+    scope: ADMIN_SCOPES.stores,
   },
 ])
+
+const visibleKpiCards = computed(() =>
+  kpiCards.value.filter((card) => permissions.value[card.scope]),
+)
 
 const actionCards = computed(() => [
   {
-    title: `${leadsNeedingAction.value} lead đang chờ phản hồi`,
-    description: 'Ưu tiên liên hệ khách hàng mới và lead đang trong giai đoạn tư vấn.',
-    to: '/admin/registrations',
-    action: 'Xem danh sách lead',
+    title: t('admin.dashboard.actions.leadsTitle', { count: leadsNeedingAction.value }),
+    description: t('admin.dashboard.actions.leadsDescription'),
+    to: adminPaths.crm.leads,
+    action: t('admin.dashboard.actions.leadsAction'),
     icon: Users,
     tone: 'warning',
+    scope: ADMIN_SCOPES.crm,
   },
   {
-    title: `${postsNeedingAction.value} bài viết chưa xuất bản`,
-    description: 'Kiểm tra bản nháp, bài lên lịch và các nội dung đang chờ duyệt.',
-    to: '/admin/articles',
-    action: 'Xem danh sách bài viết',
+    title: t('admin.dashboard.actions.postsTitle', { count: postsNeedingAction.value }),
+    description: t('admin.dashboard.actions.postsDescription'),
+    to: adminPaths.content.articles,
+    action: t('admin.dashboard.actions.postsAction'),
     icon: FileText,
     tone: 'info',
+    scope: ADMIN_SCOPES.content,
   },
 ])
 
+const visibleActionCards = computed(() =>
+  actionCards.value.filter((card) => permissions.value[card.scope]),
+)
+
 const leadStatusBars = computed(() =>
-  toProgressItems(countBy(scopedRegistrations.value, (item) => item.status), [
+  toProgressItems(countBy(scopedRegistrations.value, (item) => leadStatusLabel(item.status, t)), [
     'bg-gradient-to-r from-blue-600 to-cyan-400',
     'bg-gradient-to-r from-brand-forest to-brand-lime',
     'bg-gradient-to-r from-brand-brown to-brand-sand',
@@ -212,57 +254,49 @@ const postStatusBars = computed(() =>
 )
 
 const productCategoryBars = computed(() =>
-  toProgressItems(countBy(scopedProducts.value, (item) => item.category), [
+  toProgressItems(countBy(store.products, (item) => item.category), [
     'bg-gradient-to-r from-brand-forest to-brand-lime',
     'bg-gradient-to-r from-brand-brown to-brand-sand',
-    'bg-gradient-to-r from-blue-600 to-cyan-450',
+    'bg-gradient-to-r from-blue-600 to-cyan-400',
   ]),
 )
 
 const analysisCards = computed(() => [
   {
-    title: 'Lead theo trạng thái',
-    subtitle: 'Tỷ trọng lead theo pipeline tư vấn',
+    title: t('admin.dashboard.analysis.leadsTitle'),
+    subtitle: t('admin.dashboard.analysis.leadsSubtitle'),
     items: leadStatusBars.value,
+    scope: ADMIN_SCOPES.crm,
   },
   {
-    title: 'Bài viết theo trạng thái',
-    subtitle: 'Tình trạng nội dung trong CMS',
+    title: t('admin.dashboard.analysis.postsTitle'),
+    subtitle: t('admin.dashboard.analysis.postsSubtitle'),
     items: postStatusBars.value,
+    scope: ADMIN_SCOPES.content,
   },
   {
-    title: 'Sản phẩm theo danh mục',
-    subtitle: 'Cơ cấu danh mục sản phẩm',
+    title: t('admin.dashboard.analysis.productsTitle'),
+    subtitle: t('admin.dashboard.analysis.productsSubtitle'),
     items: productCategoryBars.value,
+    scope: ADMIN_SCOPES.content,
   },
 ])
 
-const leadPriority = {
-  Mới: 0,
-  NEW: 0,
-  'Đang tư vấn': 1,
-  CONSULTING: 1,
-  'Đã liên hệ': 2,
-  CONTACTED: 2,
-  'Tiềm năng': 3,
-  POTENTIAL: 3,
-  'Đã ký': 4,
-  SIGNED: 4,
-  'Từ chối': 5,
-  REJECTED: 5,
-}
+const visibleAnalysisCards = computed(() =>
+  analysisCards.value.filter((card) => permissions.value[card.scope]),
+)
 
 const recentRegistrations = computed(() =>
   [...scopedRegistrations.value]
-    .sort((a, b) => (leadPriority[a.status] ?? 9) - (leadPriority[b.status] ?? 9))
+    .sort((a, b) => getLeadStatusPriority(a.status) - getLeadStatusPriority(b.status))
     .slice(0, 5),
 )
 
 const recentPosts = computed(() =>
   [...scopedPosts.value]
     .sort((a, b) => {
-      const pendingA = pendingPostStatuses.has(normalizePostStatus(a.status)) ? 0 : 1
-      const pendingB = pendingPostStatuses.has(normalizePostStatus(b.status)) ? 0 : 1
+      const pendingA = pendingArticleStatuses.has(normalizeArticleStatus(a.status)) ? 0 : 1
+      const pendingB = pendingArticleStatuses.has(normalizeArticleStatus(b.status)) ? 0 : 1
       return pendingA - pendingB
     })
     .slice(0, 5),
@@ -286,72 +320,123 @@ const toneClasses = {
   },
 }
 
-const leadStatusClass = (status) => ({
-  'border-blue-200 bg-blue-50 text-blue-700': ['Mới', 'NEW'].includes(status),
-  'border-avocado-200 bg-avocado-50 text-avocado-700': ['Đã liên hệ', 'CONTACTED'].includes(status),
-  'border-amber-200 bg-amber-50 text-amber-700': ['Đang tư vấn', 'CONSULTING', 'Tiềm năng', 'POTENTIAL'].includes(status),
-  'border-emerald-200 bg-emerald-50 text-emerald-700': ['Đã ký', 'SIGNED'].includes(status),
-  'border-slate-200 bg-slate-100 text-slate-600': ['Từ chối', 'REJECTED'].includes(status),
+const leadStatusClass = (status) => getLeadStatusBadgeClass(status)
+
+const postStatusClass = getArticleStatusBadgeClass
+
+const formattedLastUpdated = computed(() => {
+  if (!lastUpdatedAt.value) return ''
+  const currentLocale = typeof locale === 'string' ? locale : locale?.value || 'vi'
+  return new Intl.DateTimeFormat(currentLocale === 'en' ? 'en-GB' : 'vi-VN', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(lastUpdatedAt.value)
 })
 
-const postStatusClass = (status) => {
-  switch (normalizePostStatus(status)) {
-    case 'PUBLISHED':
-      return 'border-avocado-200 bg-avocado-50 text-avocado-700'
-    case 'PENDING':
-    case 'REVIEWING':
-      return 'border-blue-200 bg-blue-50 text-blue-700'
-    case 'ARCHIVED':
-      return 'border-slate-200 bg-slate-100 text-slate-600'
-    default:
-      return 'border-amber-200 bg-amber-50 text-amber-700'
+const refreshDashboard = async () => {
+  if (isRefreshing.value) return
+  isRefreshing.value = true
+  try {
+    await store.fetchAdminData()
+    lastUpdatedAt.value = new Date()
+  } finally {
+    isRefreshing.value = false
   }
 }
+
+watch(isLoading, (loading) => {
+  if (!loading) lastUpdatedAt.value = new Date()
+})
+
+onMounted(() => {
+  if (!isLoading.value) lastUpdatedAt.value = new Date()
+})
 </script>
 
 <template>
-  <section class="space-y-8 pb-10">
-    <!-- Dashboard Header -->
-    <div class="rounded-3xl border border-avocado-100/30 bg-white p-6 sm:p-8 shadow-sm">
-      <div class="flex flex-col justify-between gap-5 xl:flex-row xl:items-center">
-        <div>
-          <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-avocado-600">
-            <TrendingUp class="h-3 w-3" />
-            ALOO Franchise CMS
-          </span>
-          <h1 class="mt-2 text-2xl sm:text-3xl font-black text-avocado-950">Dashboard tổng quan</h1>
-          <p class="mt-1 text-sm text-slate-400">
-            Đang xem {{ scopedRecordCount }}/{{ totalRecordCount }} bản ghi trong phạm vi {{ selectedRange.toLowerCase() }}.
-          </p>
-        </div>
+  <section>
+    <div class="aloo-admin-header max-xl:!grid-cols-1">
+      <div class="min-w-0">
+        <p class="aloo-eyebrow inline-flex items-center gap-1">
+          <TrendingUp class="h-3 w-3" />
+          {{ t('admin.dashboard.badge') }}
+        </p>
+        <h1 class="aloo-title aloo-title--admin mt-2">{{ t('admin.dashboard.title') }}</h1>
+        <p class="aloo-copy mt-2">
+          {{ t('admin.dashboard.scopeTime', { range: selectedRangeLabel }) }}
+        </p>
+        <p v-if="formattedLastUpdated" class="mt-1 text-xs font-semibold text-slate-500">
+          {{ t('admin.dashboard.lastUpdated', { time: formattedLastUpdated }) }}
+        </p>
+      </div>
 
-        <div class="flex flex-wrap gap-1 rounded-2xl bg-slate-50 border border-slate-100 p-1">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center max-xl:pt-2">
+        <button
+          type="button"
+          class="aloo-btn aloo-btn--secondary inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+          :disabled="isRefreshing || isLoading"
+          @click="refreshDashboard"
+        >
+          <RefreshCw class="h-3.5 w-3.5" :class="isRefreshing ? 'animate-spin' : ''" />
+          {{ isRefreshing ? t('admin.dashboard.refreshing') : t('admin.dashboard.refresh') }}
+        </button>
+
+        <div class="flex flex-wrap gap-1 rounded-2xl border border-slate-100 bg-slate-50 p-1">
           <button
-            v-for="range in timeRanges"
-            :key="range"
+            v-for="range in timeRangeOptions"
+            :key="range.key"
             type="button"
             class="rounded-xl px-4 py-2 text-xs font-bold transition"
-            :class="selectedRange === range ? 'bg-white text-avocado-800 shadow-sm border border-slate-100' : 'text-slate-500 hover:text-avocado-800'"
-            @click="selectedRange = range"
+            :class="selectedRange === range.key ? 'border border-slate-100 bg-white text-avocado-800 shadow-sm' : 'text-slate-500 hover:text-avocado-800'"
+            @click="selectedRange = range.key"
           >
-            {{ range }}
+            {{ range.label }}
           </button>
         </div>
       </div>
     </div>
 
+    <div
+      v-if="hasLoadError"
+      class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
+      role="alert"
+    >
+      <p>{{ t('admin.dashboard.loadErrorTitle') }}</p>
+      <ul class="mt-2 list-disc pl-5 text-xs font-medium text-red-600">
+        <li v-for="error in loadErrors" :key="error">{{ error }}</li>
+      </ul>
+    </div>
+
+    <div
+      v-if="isLoading"
+      class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4"
+      aria-busy="true"
+      :aria-label="t('admin.dashboard.loading')"
+    >
+      <div v-for="index in 4" :key="index" class="animate-pulse rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+        <div class="h-3 w-24 rounded bg-slate-100"></div>
+        <div class="mt-6 h-10 w-16 rounded bg-slate-100"></div>
+        <div class="mt-6 h-px bg-slate-50"></div>
+        <div class="mt-4 flex justify-between gap-3">
+          <div class="h-3 w-28 rounded bg-slate-100"></div>
+          <div class="h-3 w-16 rounded bg-slate-100"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- KPIs Grid -->
-    <section class="space-y-4">
+    <section v-if="visibleKpiCards.length" class="space-y-4">
       <div>
-        <h2 class="text-base font-bold text-avocado-950">Chỉ số vận hành chính</h2>
-        <p class="text-xs text-slate-400">Các chỉ số thống kê theo phạm vi {{ selectedRange.toLowerCase() }}.</p>
+        <h2 class="text-base font-bold text-avocado-950">{{ t('admin.dashboard.kpi.sectionTitle') }}</h2>
+        <p class="text-xs text-slate-400">{{ t('admin.dashboard.kpi.sectionSubtitle', { range: selectedRangeLabel }) }}</p>
       </div>
 
       <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        <article
-          v-for="card in kpiCards"
+        <RouterLink
+          v-for="card in visibleKpiCards"
           :key="card.label"
-          class="rounded-3xl border p-6 shadow-sm hover-lift transition"
+          :to="card.to"
+          class="block rounded-3xl border p-6 shadow-sm transition hover-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-avocado-500"
           :class="toneClasses[card.tone].card"
         >
           <div class="flex items-start justify-between gap-4">
@@ -364,24 +449,27 @@ const postStatusClass = (status) => {
             </div>
           </div>
           <div class="mt-5 h-px bg-slate-50"></div>
-          <div class="mt-4 flex items-center justify-between text-xs">
+          <div class="mt-4 flex items-center justify-between gap-2 text-xs">
             <span class="text-slate-400">{{ card.description }}</span>
-            <span class="font-bold uppercase tracking-wider" :class="toneClasses[card.tone].note">{{ card.note }}</span>
+            <span class="text-right font-bold uppercase tracking-wider" :class="toneClasses[card.tone].note">
+              <span v-if="card.snapshot" class="mr-1 normal-case">{{ card.snapshot }} ·</span>
+              {{ card.note }}
+            </span>
           </div>
-        </article>
+        </RouterLink>
       </div>
     </section>
 
     <!-- Action Cards -->
-    <section class="space-y-4">
+    <section v-if="visibleActionCards.length" class="space-y-4">
       <div>
-        <h2 class="text-base font-bold text-avocado-950">Đầu việc cần ưu tiên</h2>
-        <p class="text-xs text-slate-400">Các thông báo cần xử lý nhanh chóng trong ca làm việc.</p>
+        <h2 class="text-base font-bold text-avocado-950">{{ t('admin.dashboard.actions.sectionTitle') }}</h2>
+        <p class="text-xs text-slate-400">{{ t('admin.dashboard.actions.sectionSubtitle') }}</p>
       </div>
 
       <div class="grid gap-5 lg:grid-cols-2">
         <RouterLink
-          v-for="item in actionCards"
+          v-for="item in visibleActionCards"
           :key="item.title"
           :to="item.to"
           class="group rounded-3xl border bg-white p-6 shadow-sm hover-lift transition border-slate-100 hover:border-avocado-100"
@@ -407,15 +495,15 @@ const postStatusClass = (status) => {
     </section>
 
     <!-- Visual Analysis Grid -->
-    <section class="space-y-4">
+    <section v-if="visibleAnalysisCards.length" class="space-y-4">
       <div>
-        <h2 class="text-base font-bold text-avocado-950">Cơ cấu & Phân bổ dữ liệu</h2>
-        <p class="text-xs text-slate-400">Tỷ trọng các nhóm đối tượng trong phạm vi {{ selectedRange.toLowerCase() }}.</p>
+        <h2 class="text-base font-bold text-avocado-950">{{ t('admin.dashboard.analysis.sectionTitle') }}</h2>
+        <p class="text-xs text-slate-400">{{ t('admin.dashboard.analysis.sectionSubtitle', { range: selectedRangeLabel }) }}</p>
       </div>
 
       <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         <article
-          v-for="card in analysisCards"
+          v-for="card in visibleAnalysisCards"
           :key="card.title"
           class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm"
         >
@@ -440,27 +528,31 @@ const postStatusClass = (status) => {
     </section>
 
     <!-- Recent Data Table views -->
-    <section class="space-y-4">
+    <section v-if="permissions[ADMIN_SCOPES.crm] || permissions[ADMIN_SCOPES.content]" class="space-y-4">
       <div>
-        <h2 class="text-base font-bold text-avocado-950">Dữ liệu cập nhật mới nhất</h2>
-        <p class="text-xs text-slate-400">Danh sách lead và bài viết trong phạm vi {{ selectedRange.toLowerCase() }}.</p>
+        <h2 class="text-base font-bold text-avocado-950">{{ t('admin.dashboard.recent.sectionTitle') }}</h2>
+        <p class="text-xs text-slate-400">{{ t('admin.dashboard.recent.sectionSubtitle', { range: selectedRangeLabel }) }}</p>
       </div>
 
       <div class="grid gap-5 xl:grid-cols-2">
         <!-- New Leads -->
-        <article class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm flex flex-col justify-between">
+        <article v-if="permissions[ADMIN_SCOPES.crm]" class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between gap-4 border-b border-slate-50 px-6 py-5">
               <div>
-                <h3 class="font-bold text-sm text-avocado-950">Lead Đăng Ký Tư Vấn</h3>
-                <p class="text-xs text-slate-400 mt-1">Các yêu cầu nhượng quyền vừa nhận.</p>
+                <h3 class="font-bold text-sm text-avocado-950">{{ t('admin.dashboard.recent.leadsTitle') }}</h3>
+                <p class="text-xs text-slate-400 mt-1">{{ t('admin.dashboard.recent.leadsSubtitle') }}</p>
               </div>
-              <RouterLink to="/admin/registrations" class="text-xs font-bold text-avocado-700 hover:text-avocado-900 transition">
-                Xem tất cả
+              <RouterLink :to="adminPaths.crm.leads" class="text-xs font-bold text-avocado-700 hover:text-avocado-900 transition">
+                {{ t('admin.dashboard.recent.leadsViewAll') }}
               </RouterLink>
             </div>
 
             <div class="divide-y divide-slate-50">
+              <EmptyState
+                v-if="!isLoading && !recentRegistrations.length"
+                :message="t('admin.dashboard.emptyLeads')"
+              />
               <div
                 v-for="lead in recentRegistrations"
                 :key="lead.id"
@@ -482,12 +574,12 @@ const postStatusClass = (status) => {
                 </div>
                 <div class="flex items-center justify-between gap-3 md:justify-end">
                   <span class="rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider" :class="leadStatusClass(lead.status)">
-                    {{ lead.status }}
+                    {{ leadStatusLabel(lead.status, t) }}
                   </span>
                   <RouterLink
-                    to="/admin/registrations"
+                    :to="adminPaths.crm.leadDetail(lead.id)"
                     class="grid h-8 w-8 place-items-center rounded-xl border border-avocado-100 text-avocado-700 hover:bg-avocado-50 transition"
-                    aria-label="Xem chi tiết lead"
+                    :aria-label="t('admin.dashboard.recent.leadsDetailAria')"
                   >
                     <ChevronRight class="h-4 w-4" />
                   </RouterLink>
@@ -498,19 +590,23 @@ const postStatusClass = (status) => {
         </article>
 
         <!-- New Posts -->
-        <article class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm flex flex-col justify-between">
+        <article v-if="permissions[ADMIN_SCOPES.content]" class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between gap-4 border-b border-slate-50 px-6 py-5">
               <div>
-                <h3 class="font-bold text-sm text-avocado-950">Bài Viết & Tin Tức</h3>
-                <p class="text-xs text-slate-400 mt-1">Cập nhật tiến trình viết bài.</p>
+                <h3 class="font-bold text-sm text-avocado-950">{{ t('admin.dashboard.recent.postsTitle') }}</h3>
+                <p class="text-xs text-slate-400 mt-1">{{ t('admin.dashboard.recent.postsSubtitle') }}</p>
               </div>
-              <RouterLink to="/admin/articles" class="text-xs font-bold text-avocado-700 hover:text-avocado-900 transition">
-                Quản lý bài viết
+              <RouterLink :to="adminPaths.content.articles" class="text-xs font-bold text-avocado-700 hover:text-avocado-900 transition">
+                {{ t('admin.dashboard.recent.postsManage') }}
               </RouterLink>
             </div>
 
             <div class="divide-y divide-slate-50">
+              <EmptyState
+                v-if="!isLoading && !recentPosts.length"
+                :message="t('admin.dashboard.emptyPosts')"
+              />
               <div
                 v-for="post in recentPosts"
                 :key="post.id"
@@ -522,7 +618,7 @@ const postStatusClass = (status) => {
                     <span class="rounded-full bg-avocado-50 border border-avocado-100/30 px-2 py-0.5 text-avocado-700">{{ post.category }}</span>
                     <span class="inline-flex items-center gap-1">
                       <Clock3 class="h-3 w-3" />
-                      {{ post.updatedAt || post.publishedAt || post.date || 'Chưa đặt lịch' }}
+                      {{ post.updatedAt || post.publishedAt || post.date || t('admin.dashboard.misc.notScheduled') }}
                     </span>
                   </div>
                 </div>
@@ -531,9 +627,9 @@ const postStatusClass = (status) => {
                     {{ postStatusLabel(post.status) }}
                   </span>
                   <RouterLink
-                    to="/admin/articles"
+                    :to="adminPaths.content.articleEdit(post.id)"
                     class="grid h-8 w-8 place-items-center rounded-xl border border-avocado-100 text-avocado-700 hover:bg-avocado-50 transition"
-                    aria-label="Quản lý bài viết"
+                    :aria-label="t('admin.dashboard.recent.postsManageAria')"
                   >
                     <ChevronRight class="h-4 w-4" />
                   </RouterLink>

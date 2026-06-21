@@ -8,11 +8,32 @@ export const resolveBackendAssetUrl = (url) => {
   return url
 }
 
+export const normalizeStorageAssetUrl = (url) => {
+  if (!url) return ''
+  const value = String(url).trim()
+  const origin = backendOrigin()
+  if (origin && value.startsWith(origin)) {
+    const relative = value.slice(origin.length)
+    return relative || value
+  }
+  return value
+}
+
+const isAdminUser = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem('admin_user') || 'null')
+    return String(user?.role || '').toUpperCase() === 'ADMIN'
+  } catch {
+    return false
+  }
+}
+
 export const uploadService = {
   image: async (file) => {
     const formData = new FormData()
     formData.append('file', file)
-    const response = await api.post('/uploads/images', formData, {
+    const uploadPath = isAdminUser() ? '/uploads/images' : '/auth/profile/avatar'
+    const response = await api.post(uploadPath, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
 
@@ -70,6 +91,13 @@ export const registrationService = {
   remove: (id) => api.delete(`/franchise-registrations/${id}`),
 }
 
+export const franchiseContentService = {
+  list: () => api.get('/franchise-contents'),
+  create: (payload) => api.post('/franchise-contents', payload),
+  update: (id, payload) => api.put(`/franchise-contents/${id}`, payload),
+  remove: (id) => api.delete(`/franchise-contents/${id}`),
+}
+
 export const locationService = {
   list: (params = {}) => api.get('/stores', { params }),
   getBySlug: (slug) => api.get(`/stores/${slug}`),
@@ -77,11 +105,6 @@ export const locationService = {
   create: (payload) => api.post('/admin/stores', payload),
   update: (id, payload) => api.put(`/admin/stores/${id}`, payload),
   remove: (id) => api.delete(`/admin/stores/${id}`),
-}
-
-export const franchiseContentService = {
-  list: () => api.get('/franchise-contents'),
-  update: (id, payload) => api.put(`/franchise-contents/${id}`, payload),
 }
 
 export const homeSectionService = {
@@ -105,6 +128,10 @@ export const menuPosterService = {
   create: (payload) => api.post('/menu-posters', payload),
   update: (id, payload) => api.put(`/menu-posters/${id}`, payload),
   remove: (id) => api.delete(`/menu-posters/${id}`),
+}
+
+export const auditLogService = {
+  list: (params = {}) => api.get('/admin/audit-logs', { params }),
 }
 
 export const accountService = {

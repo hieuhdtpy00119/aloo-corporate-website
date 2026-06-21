@@ -23,6 +23,8 @@ public record AccountUserRequest(
         @Size(min = 6, max = 120, message = "Password must be from 6 to 120 characters")
         String password,
 
-        String status
+        String status,
+
+        String adminProfile
 ) {
 }

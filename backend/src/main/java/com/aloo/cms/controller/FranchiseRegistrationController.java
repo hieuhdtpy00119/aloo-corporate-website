@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -33,16 +34,19 @@ public class FranchiseRegistrationController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') and @adminScope.has('crm')")
     public List<FranchiseRegistrationResponse> findAll() {
         return registrationService.findAll();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') and @adminScope.has('crm')")
     public FranchiseRegistrationResponse findById(@PathVariable Long id) {
         return registrationService.findById(id);
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN') and @adminScope.has('crm')")
     public FranchiseRegistrationResponse updateStatus(
             @PathVariable Long id,
             @Valid @RequestBody RegistrationStatusUpdateRequest request
@@ -51,6 +55,7 @@ public class FranchiseRegistrationController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') and @adminScope.has('crm')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         registrationService.delete(id);
         return ResponseEntity.noContent().build();

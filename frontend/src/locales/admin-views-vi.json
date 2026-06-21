@@ -1,0 +1,822 @@
+{
+  "products": {
+    "title": "Sản phẩm & hiển thị",
+    "description": "Quản lý sản phẩm, banner trang sản phẩm và menu poster theo chi nhánh.",
+    "tabs": {
+      "products": "Sản phẩm",
+      "hero": "Banner trang SP",
+      "menu": "Menu poster"
+    },
+    "addProduct": "Thêm sản phẩm",
+    "addHero": "Thêm banner",
+    "addPoster": "Thêm menu",
+    "previewPublic": "Xem sản phẩm",
+    "editProduct": "Sửa sản phẩm",
+    "createProduct": "Thêm sản phẩm",
+    "empty": "Chưa có sản phẩm phù hợp",
+    "emptyMenu": "Không có menu hiển thị phù hợp",
+    "emptyHero": "Không có banner trang sản phẩm phù hợp",
+    "status": {
+      "ACTIVE": "Đang bán",
+      "INACTIVE": "Tạm ẩn",
+      "visible": "Đang hiển thị"
+    },
+    "toasts": {
+      "imageUploaded": "Đã tải ảnh sản phẩm lên backend",
+      "imageUploadError": "Không tải được ảnh sản phẩm",
+      "galleryUploaded": "Đã tải {count} ảnh vào gallery",
+      "galleryRemoved": "Đã xóa ảnh khỏi gallery",
+      "menuImageUploaded": "Đã tải ảnh menu lên backend",
+      "menuImageError": "Không tải được ảnh menu",
+      "cropError": "Có lỗi xảy ra khi cắt ảnh",
+      "cropExtractError": "Có lỗi xảy ra khi trích xuất vùng cắt ảnh",
+      "cropSuccess": "Đã cắt và tải ảnh lên thành công!",
+      "cropUploadError": "Không tải được ảnh đã cắt",
+      "bannerUploaded": "Đã tải ảnh banner lên backend",
+      "bannerUploadError": "Không tải được ảnh banner",
+      "nameSlugRequired": "Vui lòng nhập tên và slug sản phẩm",
+      "productCreated": "Đã thêm sản phẩm thành công",
+      "productUpdated": "Đã cập nhật sản phẩm thành công",
+      "productSaveError": "Không lưu được sản phẩm",
+      "productDeleted": "Đã xóa sản phẩm thành công",
+      "productDeleteError": "Không xóa được sản phẩm",
+      "posterFieldsRequired": "Vui lòng nhập mã chi nhánh và tên menu",
+      "posterCreated": "Đã thêm menu hiển thị",
+      "posterUpdated": "Đã cập nhật menu hiển thị",
+      "posterSaveError": "Không lưu được menu hiển thị",
+      "posterDeleted": "Đã xóa menu hiển thị",
+      "posterDeleteError": "Không xóa được menu hiển thị",
+      "heroTitleRequired": "Vui lòng nhập tiêu đề banner",
+      "heroCreated": "Đã thêm banner trang sản phẩm",
+      "heroUpdated": "Đã cập nhật banner trang sản phẩm",
+      "heroSaveError": "Không lưu được banner trang sản phẩm",
+      "heroDeleted": "Đã xóa banner trang sản phẩm",
+      "heroDeleteError": "Không xóa được banner trang sản phẩm",
+      "partialLoadError": "Không tải được một phần dữ liệu sản phẩm",
+      "galleryNoValid": "Không có ảnh hợp lệ để upload"
+    },
+    "actions": {
+      "edit": "Sửa",
+      "delete": "Xóa",
+      "save": "Lưu",
+      "cancel": "Hủy",
+      "saveCreate": "Tạo mới",
+      "saveUpdate": "Lưu cập nhật"
+    },
+    "eyebrow": "Products Catalog",
+    "filters": {
+      "productsSearchLabel": "Tìm sản phẩm",
+      "productsSearchPlaceholder": "Tìm tên, slug, danh mục...",
+      "productsStatusLabel": "Trạng thái bán",
+      "heroSearchLabel": "Tìm banner",
+      "heroSearchPlaceholder": "Tìm tiêu đề, nhãn nhỏ, mô tả...",
+      "heroStatusLabel": "Trạng thái hiển thị",
+      "menuSearchLabel": "Tìm menu",
+      "menuSearchPlaceholder": "Tìm tên menu, chi nhánh, mô tả...",
+      "menuStatusLabel": "Trạng thái hiển thị"
+    },
+    "columns": {
+      "products": {
+        "image": "Ảnh",
+        "name": "Sản phẩm",
+        "slug": "Slug",
+        "category": "Danh mục",
+        "status": "Trạng thái",
+        "actions": "Hành động"
+      },
+      "menu": {
+        "image": "Ảnh",
+        "menu": "Menu",
+        "branch": "Chi nhánh",
+        "description": "Mô tả",
+        "status": "Trạng thái",
+        "actions": "Hành động"
+      },
+      "hero": {
+        "image": "Ảnh",
+        "content": "Nội dung",
+        "background": "Ảnh nền",
+        "tone": "Tông màu",
+        "status": "Trạng thái",
+        "sortOrder": "Thứ tự",
+        "actions": "Hành động"
+      }
+    },
+    "modals": {
+      "createProduct": "Thêm Sản Phẩm Mới",
+      "editProduct": "Cập Nhật Sản Phẩm",
+      "createPoster": "Thêm Menu Hiển Thị",
+      "editPoster": "Cập Nhật Menu Hiển Thị",
+      "createHero": "Thêm banner trang sản phẩm",
+      "editHero": "Cập nhật banner trang sản phẩm",
+      "cropper": "Cắt Chỉnh Ảnh Nền Banner"
+    },
+    "fields": {
+      "name": "Tên sản phẩm *",
+      "slug": "Slug *",
+      "category": "Danh mục",
+      "status": "Trạng thái",
+      "imageUrl": "Đường dẫn ảnh (Image URL)",
+      "uploadImage": "Hoặc tải ảnh mới từ máy tính",
+      "shortDescription": "Mô tả ngắn trên thẻ sản phẩm",
+      "heroDescription": "Mô tả hero chi tiết",
+      "tasteProfile": "Hồ sơ hương vị",
+      "ingredients": "Nguyên liệu chính",
+      "servingSuggestion": "Gợi ý thưởng thức",
+      "detailContent": "Nội dung landing page",
+      "gallery": "Gallery ảnh chi tiết",
+      "faqs": "FAQ sản phẩm",
+      "seoTitle": "SEO title",
+      "seoDescription": "SEO description",
+      "featured": "Đánh dấu sản phẩm nổi bật",
+      "branchKey": "Mã chi nhánh / khu vực *",
+      "menuTitle": "Tên menu *",
+      "menuSubtitle": "Mô tả ngắn",
+      "sortOrder": "Thứ tự",
+      "altText": "Alt text",
+      "menuImageUrl": "Đường dẫn ảnh menu",
+      "uploadMenuImage": "Hoặc tải ảnh menu từ máy tính",
+      "bannerTitle": "Tên banner nội bộ *",
+      "displayOrder": "Thứ tự hiển thị",
+      "backgroundImage": "Ảnh nền"
+    },
+    "placeholders": {
+      "name": "Nhập tên sản phẩm...",
+      "slug": "url-friendly-slug",
+      "category": "Chọn hoặc nhập danh mục",
+      "imageUrl": "https://...",
+      "shortDescription": "Mô tả ngắn dùng ở danh sách sản phẩm...",
+      "heroDescription": "Một đoạn giới thiệu hấp dẫn cho trang chi tiết...",
+      "tasteProfile": "Béo mịn, thơm bơ, ngọt nhẹ, topping giòn...",
+      "ingredients": "Mỗi dòng một nguyên liệu: Bơ sáp; Kem sữa; Dừa khô...",
+      "servingSuggestion": "Dùng ngay khi lạnh, phù hợp buổi chiều, thêm topping...",
+      "detailContent": "Viết câu chuyện sản phẩm, điểm khác biệt, quy trình chuẩn bị...",
+      "gallery": "Mỗi dòng một URL ảnh",
+      "faqs": "Mỗi dòng: Câu hỏi | Câu trả lời",
+      "seoTitle": "Tiêu đề SEO cho sản phẩm",
+      "seoDescription": "Mô tả SEO ngắn",
+      "branchKey": "quy-nhon, nha-trang...",
+      "menuTitle": "ALOO Menu Quy Nhơn",
+      "menuSubtitle": "Menu theo chi nhánh hoặc khu vực",
+      "altText": "Mô tả ảnh menu cho SEO",
+      "bannerTitle": "Banner menu mùa hè",
+      "backgroundImage": "https://... hoặc /uploads/..."
+    },
+    "misc": {
+      "noDescription": "Chưa có mô tả",
+      "sortOrder": "Thứ tự: {order}",
+      "hasBackgroundYes": "Đã có",
+      "hasBackgroundNo": "Chưa có",
+      "toneDark": "Tối",
+      "toneLight": "Sáng",
+      "imagePreview": "Xem trước ảnh",
+      "productImagePreview": "Xem trước sản phẩm",
+      "menuPreview": "Xem trước menu",
+      "heroBgPreview": "Xem trước ảnh nền",
+      "galleryAlt": "Gallery sản phẩm",
+      "cropSourceAlt": "Ảnh gốc để cắt",
+      "uploading": "Đang upload lên máy chủ...",
+      "uploadingGallery": "Đang upload nhiều ảnh gallery...",
+      "uploadingMenu": "Đang upload ảnh menu...",
+      "uploadingHeroBg": "Đang upload ảnh nền...",
+      "galleryMultiHint": "Có thể chọn nhiều ảnh cùng lúc. URL ảnh sẽ tự thêm vào ô gallery.",
+      "removeGalleryImage": "Xóa ảnh khỏi gallery",
+      "cropperDescription": "Kéo các thanh trượt bên dưới để chỉnh khung cắt ảnh. Khung viền nét đứt xanh lá là vùng ảnh sẽ được trích xuất.",
+      "cropRatioLabel": "TỶ LỆ KHUNG:",
+      "ratio21x9": "Rộng 21:9 (Banners)",
+      "ratio16x9": "Chuẩn 16:9",
+      "ratio4x3": "Tỷ lệ 4:3",
+      "ratioFree": "Tùy chỉnh tự do",
+      "cropPosX": "Vị trí ngang (X): {value}%",
+      "cropPosY": "Vị trí dọc (Y): {value}%",
+      "cropWidth": "Chiều rộng khung: {value}%",
+      "cropHeight": "Chiều cao khung: {value}%",
+      "cropAndUpload": "Cắt & Tải lên",
+      "heroBgHint": "Khuyến nghị: desktop 1920x720 hoặc 1920x800. Trên mobile ảnh sẽ crop giữa theo tỉ lệ dọc, không đặt chữ/sản phẩm sát mép.",
+      "slugLocked": "Slug không thể đổi sau khi tạo để tránh gãy URL công khai."
+    },
+    "uploadErrors": {
+      "imageUploadFailed": "Không tải được ảnh",
+      "unsupportedFormat": "Định dạng .{extension} chưa được hỗ trợ",
+      "unknownExtension": "không rõ",
+      "fileTooLarge": "Ảnh vượt quá 5MB",
+      "notAnImage": "File không phải ảnh",
+      "menuLoadFailed": "Không tải được menu hiển thị",
+      "heroLoadFailed": "Không tải được banner trang sản phẩm"
+    },
+    "paginationLabels": {
+      "products": "sản phẩm",
+      "menu": "menu",
+      "banner": "banner"
+    },
+    "confirmDelete": {
+      "heroTitle": "Xóa banner trang sản phẩm?",
+      "heroMessage": "Banner này sẽ bị xóa khỏi slider đầu trang sản phẩm. Hành động này không thể hoàn tác.",
+      "heroConfirm": "Xóa banner"
+    }
+  },
+  "homeSections": {
+    "title": "Quản lý block trang chủ",
+    "description": "Tạo card nổi bật, CTA và liên kết động trên trang chủ.",
+    "add": "Thêm block",
+    "edit": "Sửa block",
+    "create": "Thêm block mới",
+    "empty": "Chưa có block phù hợp",
+    "emptyTitle": "Chưa có block trang chủ",
+    "emptyDescription": "Thêm block đầu tiên để hiển thị ở mục Nổi bật hôm nay.",
+    "loading": "Đang tải nội dung trang chủ...",
+    "paginationLabel": "block",
+    "previewHomepage": "Xem trang chủ",
+    "filters": {
+      "searchLabel": "Tìm block",
+      "searchPlaceholder": "Tìm tiêu đề, mã block, mô tả",
+      "typeLabel": "Loại block",
+      "typeAll": "Tất cả loại"
+    },
+    "columns": {
+      "image": "Ảnh",
+      "content": "Nội dung",
+      "type": "Loại",
+      "link": "Liên kết",
+      "sortOrder": "Thứ tự",
+      "updatedAt": "Cập nhật",
+      "status": "Trạng thái",
+      "actions": "Hành động"
+    },
+    "linkCell": {
+      "noButton": "Không có nút",
+      "noLink": "Chưa gắn link"
+    },
+    "formSections": {
+      "basic": "Thông tin cơ bản",
+      "content": "Nội dung hiển thị",
+      "button": "Nút điều hướng",
+      "image": "Hình ảnh",
+      "preview": "Xem trước card trang chủ"
+    },
+    "fields": {
+      "title": "Tiêu đề",
+      "sectionKey": "Mã block",
+      "sectionKeyLocked": "Mã block không thể đổi sau khi tạo.",
+      "type": "Loại block",
+      "sortOrder": "Thứ tự",
+      "status": "Trạng thái",
+      "subtitle": "Nhãn nhỏ",
+      "badge": "Badge trên ảnh",
+      "description": "Mô tả",
+      "buttonText": "Text nút",
+      "linkType": "Kiểu liên kết",
+      "staticPage": "Chọn trang",
+      "product": "Chọn sản phẩm",
+      "post": "Chọn bài viết",
+      "customLink": "Link tùy chỉnh",
+      "linkPreview": "Link sẽ lưu",
+      "linkPending": "Chưa chọn link",
+      "imageUrl": "URL ảnh",
+      "imageFile": "Chọn file ảnh",
+      "uploading": "Đang upload lên máy chủ..."
+    },
+    "placeholders": {
+      "title": "Kem bơ truyền thống",
+      "sectionKey": "featured-product",
+      "subtitle": "Tuyển chọn",
+      "badge": "Bán chạy nhất",
+      "description": "Mô tả ngắn hiển thị trên card...",
+      "buttonText": "Xem sản phẩm",
+      "customLink": "/products/kem-bo-truyen-thong hoặc https://...",
+      "imageUrl": "https://... hoặc /uploads/...",
+      "selectProduct": "Chọn sản phẩm để gắn link",
+      "selectPost": "Chọn bài viết để gắn link"
+    },
+    "defaults": {
+      "subtitle": "Tuyển chọn",
+      "buttonText": "Xem thêm",
+      "previewBadge": "ALOO",
+      "noImage": "Chưa có ảnh"
+    },
+    "preview": {
+      "alt": "Xem trước block"
+    },
+    "confirmDelete": {
+      "title": "Xóa block trang chủ?",
+      "message": "Block này sẽ bị xóa khỏi CMS trang chủ. Hành động này không thể hoàn tác.",
+      "confirm": "Xóa block"
+    },
+    "status": {
+      "ACTIVE": "Đang hiển thị",
+      "INACTIVE": "Tạm ẩn"
+    },
+    "types": {
+      "FEATURED_CARD": "Card nổi bật",
+      "CTA_CARD": "Card CTA",
+      "PRODUCT_CARD": "Card sản phẩm",
+      "LOCATION_CARD": "Card cửa hàng"
+    },
+    "linkTypes": {
+      "NONE": "Không hiển thị nút",
+      "STATIC": "Trang có sẵn",
+      "PRODUCT": "Sản phẩm cụ thể",
+      "POST": "Bài viết cụ thể",
+      "CUSTOM": "Link tùy chỉnh"
+    },
+    "staticLinks": {
+      "home": "Trang chủ",
+      "products": "Sản phẩm",
+      "locations": "Hệ thống cửa hàng",
+      "franchise": "Nhượng quyền",
+      "about": "Về ALOO",
+      "blog": "Blog",
+      "consultation": "Đăng ký tư vấn",
+      "contact": "Liên hệ"
+    },
+    "actions": {
+      "edit": "Sửa",
+      "delete": "Xóa",
+      "cancel": "Hủy",
+      "saveCreate": "Thêm mới",
+      "saveUpdate": "Lưu thay đổi"
+    },
+    "toasts": {
+      "imageUploaded": "Đã tải ảnh block trang chủ",
+      "imageError": "Không tải được ảnh",
+      "requiredFields": "Vui lòng nhập mã block và tiêu đề",
+      "linkRequired": "Vui lòng chọn hoặc nhập link cho nút",
+      "linkOptionsError": "Không tải được danh sách link gợi ý",
+      "created": "Đã thêm block trang chủ",
+      "updated": "Đã cập nhật block trang chủ",
+      "saveError": "Không lưu được block trang chủ",
+      "deleted": "Đã xóa block trang chủ",
+      "deleteError": "Không xóa được block trang chủ",
+      "loadError": "Không tải được nội dung trang chủ",
+      "duplicateKey": "Mã block đã được sử dụng"
+    }
+  },
+  "locations": {
+    "title": "Hệ thống cửa hàng",
+    "description": "Quản lý địa điểm, tiện ích, trạng thái và nội dung hiển thị trên website.",
+    "add": "Thêm cửa hàng",
+    "edit": "Sửa cửa hàng",
+    "create": "Thêm cửa hàng mới",
+    "preview": "Xem trước",
+    "empty": "Chưa có cửa hàng phù hợp",
+    "status": {
+      "ACTIVE": "Đang hoạt động",
+      "COMING_SOON": "Sắp khai trương",
+      "TEMPORARILY_CLOSED": "Tạm nghỉ",
+      "MAINTENANCE": "Đang sửa chữa",
+      "INACTIVE": "Ẩn"
+    },
+    "amenities": {
+      "wifi": "Wifi",
+      "ac": "Máy lạnh",
+      "parking": "Chỗ đậu xe",
+      "card": "Thanh toán thẻ",
+      "takeaway": "Mang đi"
+    },
+    "toasts": {
+      "imageUploaded": "Đã upload ảnh cửa hàng",
+      "imageError": "Không upload được ảnh cửa hàng",
+      "created": "Đã thêm cửa hàng",
+      "updated": "Đã cập nhật cửa hàng",
+      "saveError": "Không lưu được cửa hàng",
+      "deleted": "Đã xóa cửa hàng",
+      "deleteError": "Không xóa được cửa hàng",
+      "loadError": "Không tải được cửa hàng"
+    },
+    "eyebrow": "Store Locator CMS",
+    "filters": {
+      "searchLabel": "Tìm cửa hàng",
+      "searchPlaceholder": "Tìm cửa hàng, địa chỉ, quận/huyện...",
+      "cityLabel": "Tỉnh/TP",
+      "statusLabel": "Trạng thái mở cửa",
+      "featuredLabel": "Nổi bật",
+      "featuredYes": "Nổi bật",
+      "featuredNo": "Không nổi bật"
+    },
+    "columns": {
+      "image": "Ảnh",
+      "name": "Tên cửa hàng",
+      "address": "Địa chỉ",
+      "hours": "Giờ hoạt động",
+      "phone": "Điện thoại",
+      "status": "Trạng thái",
+      "actions": "Hành động"
+    },
+    "actions": {
+      "view": "Xem",
+      "edit": "Sửa",
+      "delete": "Xóa",
+      "cancel": "Hủy",
+      "saveCreate": "Thêm mới",
+      "saveUpdate": "Lưu thay đổi",
+      "viewMap": "Xem bản đồ",
+      "callNow": "Gọi ngay"
+    },
+    "sections": {
+      "basic": "Thông tin cơ bản",
+      "map": "Bản đồ & khu vực",
+      "promo": "Quảng bá"
+    },
+    "fields": {
+      "storeCode": "Mã cửa hàng",
+      "name": "Tên cửa hàng",
+      "slug": "Slug",
+      "phone": "Số điện thoại",
+      "email": "Email",
+      "addressText": "Địa chỉ hiển thị",
+      "openingHours": "Giờ hoạt động",
+      "storeType": "Loại cửa hàng",
+      "description": "Mô tả",
+      "mapUrl": "Google Maps URL",
+      "city": "Thành phố",
+      "district": "Quận/Huyện",
+      "ward": "Phường/Xã",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "coverImageUrl": "Ảnh cover URL",
+      "uploadImage": "Chọn file ảnh cửa hàng",
+      "amenities": "Tiện ích",
+      "galleryText": "Ảnh gallery",
+      "menuPostersText": "Menu poster",
+      "linkTitle": "Tiêu đề link",
+      "linkUrl": "URL liên kết",
+      "displayOrder": "Thứ tự hiển thị",
+      "featured": "Cửa hàng nổi bật",
+      "status": "Trạng thái"
+    },
+    "placeholders": {
+      "storeCode": "ALOO-QN-001",
+      "slug": "kem-bo-aloo-395-nguyen-hue",
+      "openingHours": "09:00 - 22:00",
+      "galleryText": "Nhập mỗi URL ảnh trên một dòng",
+      "menuPostersText": "Nhập mỗi URL poster/menu trên một dòng",
+      "linkTitle": "Xem bản đồ",
+      "linkUrl": "https://maps.google.com/..."
+    },
+    "preview": {
+      "title": "Preview cửa hàng",
+      "hours": "Giờ hoạt động:",
+      "phone": "Điện thoại:"
+    },
+    "validation": {
+      "storeCode": "Mã cửa hàng không được rỗng",
+      "name": "Tên cửa hàng không được rỗng",
+      "slug": "Slug không được rỗng",
+      "addressText": "Địa chỉ không được rỗng",
+      "city": "Tỉnh/thành không được rỗng",
+      "phone": "Số điện thoại tối đa 80 ký tự",
+      "mapUrl": "Google Maps URL không hợp lệ",
+      "linkUrl": "URL liên kết không hợp lệ",
+      "galleryText": "Mỗi dòng gallery phải là một URL hợp lệ",
+      "menuPostersText": "Mỗi dòng menu poster phải là một URL hợp lệ",
+      "openingHours": "Giờ hoạt động là bắt buộc",
+      "displayOrder": "Thứ tự hiển thị phải là số"
+    },
+    "storeTypes": {
+      "FLAGSHIP": "Flagship",
+      "STANDARD": "Standard",
+      "KIOSK": "Kiosk",
+      "FRANCHISE": "Franchise",
+      "POPUP": "Pop-up"
+    },
+    "paginationLabel": "cửa hàng",
+    "defaults": {
+      "linkTitle": "Xem bản đồ"
+    },
+    "imagePreview": {
+      "uploading": "Đang upload lên máy chủ...",
+      "loadFailed": "Không tải được ảnh",
+      "noImage": "Chưa có ảnh"
+    },
+    "featuredBadge": "Nổi bật",
+    "hints": {
+      "galleryText": "Dùng khi muốn hiển thị nhiều ảnh chi tiết cho cửa hàng.",
+      "menuPostersText": "Nếu cửa hàng có menu poster riêng, nhập link ảnh tại đây."
+    }
+  },
+  "feedbacks": {
+    "title": "Testimonial CMS",
+    "description": "Quản lý cảm nhận khách hàng hiển thị trên website.",
+    "add": "Thêm testimonial",
+    "edit": "Cập nhật testimonial",
+    "create": "Thêm testimonial",
+    "empty": "Chưa có testimonial",
+    "searchPlaceholder": "Tìm theo tên, chi nhánh, nội dung...",
+    "visible": "Bật",
+    "hidden": "Ẩn",
+    "columns": {
+      "customer": "Khách hàng",
+      "content": "Nội dung",
+      "rating": "Sao",
+      "visible": "Hiển thị",
+      "sortOrder": "Thứ tự",
+      "actions": "Thao tác"
+    },
+    "fields": {
+      "customerName": "Tên khách hàng",
+      "storeName": "Tên cửa hàng",
+      "avatarUrl": "Avatar URL",
+      "rating": "Số sao",
+      "content": "Nội dung",
+      "sortOrder": "Thứ tự"
+    },
+    "filters": {
+      "all": "Tất cả",
+      "visible": "Đang hiển thị",
+      "hidden": "Đang ẩn"
+    },
+    "toasts": {
+      "loadError": "Không tải được testimonial",
+      "requiredFields": "Vui lòng nhập tên khách hàng và nội dung",
+      "created": "Đã tạo testimonial",
+      "updated": "Đã cập nhật testimonial",
+      "saveError": "Không lưu được testimonial",
+      "visibilityOn": "Đã bật hiển thị",
+      "visibilityOff": "Đã ẩn testimonial",
+      "visibilityError": "Không cập nhật được hiển thị",
+      "deleted": "Đã xóa testimonial",
+      "deleteError": "Không xóa được testimonial"
+    },
+    "actions": {
+      "toggleVisible": "Ẩn/hiện",
+      "edit": "Sửa",
+      "delete": "Xóa",
+      "save": "Lưu",
+      "cancel": "Hủy"
+    },
+    "fieldsPublicVisible": "Hiển thị public",
+    "paginationLabel": "testimonial"
+  },
+  "leads": {
+    "title": "Đăng ký tư vấn",
+    "description": "Danh sách khách hàng tiềm năng và trạng thái xử lý tư vấn nhượng quyền.",
+    "empty": "Chưa có lead phù hợp",
+    "emptyTable": "Chưa có đăng ký tư vấn nào.",
+    "searchLabel": "Tìm lead",
+    "searchPlaceholder": "Tìm họ tên, điện thoại, email, khu vực",
+    "statusLabel": "Trạng thái tư vấn",
+    "detailTitle": "Chi tiết đăng ký tư vấn",
+    "registrationId": "Mã đăng ký #{id}",
+    "assignedPlaceholder": "Tên admin hoặc sale",
+    "notePlaceholder": "Ghi chú chăm sóc lead",
+    "paginationLabel": "đăng ký",
+    "status": {
+      "NEW": "Mới",
+      "CONTACTED": "Đã liên hệ",
+      "CONSULTING": "Đang tư vấn",
+      "POTENTIAL": "Tiềm năng",
+      "SIGNED": "Đã ký",
+      "REJECTED": "Từ chối"
+    },
+    "columns": {
+      "name": "Họ tên",
+      "phone": "Số điện thoại",
+      "email": "Email",
+      "area": "Khu vực",
+      "capital": "Số vốn",
+      "status": "Trạng thái",
+      "actions": "Hành động"
+    },
+    "fields": {
+      "name": "Họ tên",
+      "phone": "Số điện thoại",
+      "email": "Email",
+      "areaOpen": "Khu vực muốn mở cửa hàng",
+      "capital": "Số vốn dự kiến",
+      "registeredAt": "Ngày đăng ký",
+      "status": "Trạng thái",
+      "leadCare": "Chăm sóc lead",
+      "lastContact": "Lần liên hệ cuối",
+      "assignedTo": "Người phụ trách",
+      "note": "Ghi chú"
+    },
+    "actions": {
+      "detail": "Chi tiết",
+      "viewDetail": "Xem chi tiết",
+      "delete": "Xóa",
+      "saveLeadCare": "Lưu chăm sóc lead"
+    },
+    "toasts": {
+      "statusUpdated": "Đã cập nhật trạng thái đăng ký",
+      "statusError": "Không cập nhật được trạng thái",
+      "deleted": "Đã xóa đăng ký tư vấn thành công",
+      "deleteError": "Không xóa được đăng ký tư vấn",
+      "loadError": "Không tải được danh sách đăng ký tư vấn"
+    }
+  },
+  "articleEditor": {
+    "createTitle": "Tạo bài viết mới",
+    "editTitle": "Chỉnh sửa bài viết",
+    "backToList": "← Thoát về danh sách",
+    "exit": "Thoát",
+    "saveDraft": "Lưu nháp",
+    "saveAndPublish": "Lưu & Xuất bản",
+    "publish": "Xuất bản",
+    "publishing": "Đang xuất bản...",
+    "upload": {
+      "title": "Upload ảnh",
+      "uploading": "Đang upload...",
+      "cover": "Upload ảnh đại diện",
+      "gallery": "Upload gallery",
+      "removeImage": "Xóa ảnh"
+    },
+    "statuses": {
+      "DRAFT": "Nháp",
+      "PENDING": "Chờ duyệt",
+      "REVIEWING": "Đang rà soát",
+      "APPROVED": "Đã duyệt",
+      "PUBLISHED": "Đã xuất bản",
+      "ARCHIVED": "Lưu trữ"
+    },
+    "fields": {
+      "title": "Tiêu đề bài viết",
+      "slug": "Slug SEO",
+      "category": "Danh mục",
+      "author": "Tác giả",
+      "source": "Nguồn",
+      "sourceLink": "Link nguồn",
+      "excerpt": "Mô tả ngắn",
+      "content": "Nội dung chi tiết",
+      "coverImage": "Ảnh đại diện",
+      "gallery": "Gallery ảnh",
+      "status": "Trạng thái",
+      "publishedAt": "Ngày xuất bản",
+      "featured": "Nổi bật trang blog",
+      "metaTitle": "Meta title",
+      "metaDescription": "Meta description",
+      "metaKeywords": "Meta keywords"
+    },
+    "placeholders": {
+      "title": "Ví dụ: Review ALOO Kem Bơ Quy Nhơn",
+      "slug": "review-aloo-kem-bo-quy-nhon",
+      "source": "ALOO / Báo chí / Cộng tác viên",
+      "sourceLink": "https://...",
+      "excerpt": "Tóm tắt ngắn dùng cho trang blog và SEO.",
+      "image": "https://...",
+      "metaKeywords": "kem bơ, Quy Nhơn, ALOO"
+    },
+    "toasts": {
+      "coverUploaded": "Đã upload ảnh đại diện",
+      "coverError": "Không upload được ảnh đại diện",
+      "galleryUploaded": "Đã upload gallery",
+      "galleryError": "Không upload được gallery",
+      "titleRequired": "Vui lòng nhập tiêu đề bài viết",
+      "slugRequired": "Vui lòng nhập slug SEO",
+      "published": "Đã lưu và xuất bản bài viết",
+      "draftSaved": "Đã lưu bản nháp",
+      "saveError": "Không lưu được bài viết"
+    }
+  },
+  "categories": {
+    "description": "Quản lý danh mục dùng cho blog và bộ lọc bài viết.",
+    "add": "Thêm danh mục",
+    "empty": "Không có dữ liệu phù hợp",
+    "noDescription": "Chưa có mô tả",
+    "paginationLabel": "danh mục",
+    "backToArticles": "← {label}",
+    "filters": {
+      "searchLabel": "Tìm danh mục",
+      "searchPlaceholder": "Tìm tên danh mục, slug, mô tả"
+    },
+    "columns": {
+      "name": "Tên danh mục",
+      "slug": "Slug",
+      "description": "Mô tả",
+      "status": "Trạng thái",
+      "actions": "Hành động"
+    },
+    "status": {
+      "ACTIVE": "Đang hoạt động",
+      "INACTIVE": "Tạm ẩn"
+    },
+    "fields": {
+      "name": "Tên danh mục",
+      "slug": "Slug",
+      "status": "Trạng thái",
+      "description": "Mô tả ngắn"
+    },
+    "modals": {
+      "create": "Thêm danh mục",
+      "edit": "Sửa danh mục"
+    },
+    "actions": {
+      "edit": "Sửa",
+      "delete": "Xóa",
+      "cancel": "Hủy",
+      "saveCreate": "Thêm mới",
+      "saveUpdate": "Lưu thay đổi"
+    },
+    "toasts": {
+      "created": "Đã thêm danh mục thành công",
+      "updated": "Đã cập nhật danh mục thành công",
+      "saveError": "Không lưu được danh mục",
+      "deleted": "Đã xóa danh mục thành công",
+      "deleteError": "Không xóa được danh mục",
+      "loadError": "Không tải được danh mục",
+      "requiredFields": "Vui lòng nhập tên và slug danh mục"
+    }
+  },
+  "franchise": {
+    "title": "Nội dung trang nhượng quyền",
+    "description": "Quản lý hero, lợi thế, mô hình, quy trình, FAQ và CTA hiển thị tại `/franchise`.",
+    "add": "Thêm block",
+    "previewPublic": "Xem trang nhượng quyền",
+    "empty": "Không có block nhượng quyền phù hợp",
+    "paginationLabel": "block",
+    "filters": {
+      "searchLabel": "Tìm nội dung",
+      "searchPlaceholder": "Tìm tiêu đề, section, JSON...",
+      "sectionLabel": "Section",
+      "sectionAll": "Tất cả section"
+    },
+    "columns": {
+      "section": "Section",
+      "title": "Tiêu đề",
+      "amount": "Giá trị",
+      "sortOrder": "Thứ tự",
+      "note": "Ghi chú",
+      "status": "Trạng thái",
+      "actions": "Hành động"
+    },
+    "sections": {
+      "hero": "Hero",
+      "advantages": "Lợi thế",
+      "models": "Mô hình",
+      "investment": "Đầu tư",
+      "profit": "Lợi nhuận tham khảo",
+      "process": "Quy trình",
+      "founder_story": "Câu chuyện",
+      "faq": "FAQ",
+      "cta": "CTA",
+      "costs": "Chi phí",
+      "benefits": "Lợi ích"
+    },
+    "status": {
+      "ACTIVE": "Đang hiển thị",
+      "INACTIVE": "Tạm ẩn",
+      "HIDDEN": "Ẩn"
+    },
+    "fields": {
+      "section": "Section",
+      "title": "Tiêu đề",
+      "amount": "Giá trị / amount",
+      "sortOrder": "Thứ tự",
+      "status": "Trạng thái",
+      "note": "Ghi chú nội bộ",
+      "content": "Nội dung chi tiết"
+    },
+    "contentFields": {
+      "title": "Tiêu đề",
+      "subtitle": "Phụ đề",
+      "description": "Mô tả",
+      "image": "Ảnh (URL)",
+      "buttonText": "Nút chính",
+      "buttonLink": "Link nút chính",
+      "secondaryButtonText": "Nút phụ",
+      "secondaryButtonLink": "Link nút phụ",
+      "icon": "Icon",
+      "modelName": "Tên mô hình",
+      "area": "Diện tích",
+      "investment": "Đầu tư",
+      "featured": "Nổi bật",
+      "itemName": "Hạng mục",
+      "kioskValue": "Giá trị kiosk",
+      "standardValue": "Giá trị standard",
+      "flagshipValue": "Giá trị flagship",
+      "note": "Ghi chú",
+      "metric": "Chỉ số",
+      "value": "Giá trị",
+      "stepNumber": "Bước số",
+      "founderName": "Tên founder",
+      "storyContent": "Nội dung câu chuyện",
+      "question": "Câu hỏi",
+      "answer": "Câu trả lời",
+      "amount": "Số tiền",
+      "body": "Nội dung"
+    },
+    "placeholders": {
+      "content": "{\"description\":\"...\"}"
+    },
+    "modals": {
+      "create": "Thêm block nhượng quyền",
+      "edit": "Sửa block nhượng quyền"
+    },
+    "actions": {
+      "edit": "Sửa",
+      "delete": "Xóa",
+      "cancel": "Hủy",
+      "saveCreate": "Thêm mới",
+      "saveUpdate": "Lưu thay đổi"
+    },
+    "toasts": {
+      "created": "Đã thêm nội dung nhượng quyền",
+      "updated": "Đã cập nhật nội dung nhượng quyền",
+      "saveError": "Không lưu được nội dung nhượng quyền",
+      "invalidJson": "Nội dung JSON không hợp lệ",
+      "requiredFields": "Vui lòng điền các trường bắt buộc",
+      "deleted": "Đã xóa nội dung nhượng quyền",
+      "deleteError": "Không xóa được nội dung nhượng quyền",
+      "loadError": "Không tải được nội dung nhượng quyền"
+    }
+  }
+}

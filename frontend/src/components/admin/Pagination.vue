@@ -1,5 +1,8 @@
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const props = defineProps({
   page: {
     type: Number,
     required: true,
@@ -18,20 +21,23 @@ defineProps({
   },
   label: {
     type: String,
-    default: 'dòng',
+    default: '',
   },
 })
 
 defineEmits(['prev', 'next'])
+
+const { t } = useI18n()
+const resolvedLabel = computed(() => props.label || t('admin.shared.rows'))
 </script>
 
 <template>
   <div v-if="totalCount > 0" class="mt-4 flex flex-col justify-between gap-3 text-sm text-slate-600 sm:flex-row sm:items-center">
-    <p>Hiển thị {{ visibleCount }} / {{ totalCount }} {{ label }}</p>
+    <p>{{ t('admin.shared.paginationShowing', { visible: visibleCount, total: totalCount, label: resolvedLabel }) }}</p>
     <div class="flex items-center gap-2">
-      <button class="rounded-lg border border-slate-200 px-3 py-2 font-bold disabled:opacity-50" :disabled="page === 1" @click="$emit('prev')">Trước</button>
-      <span class="font-bold text-avocado-800">Trang {{ page }} / {{ totalPages }}</span>
-      <button class="rounded-lg border border-slate-200 px-3 py-2 font-bold disabled:opacity-50" :disabled="page === totalPages" @click="$emit('next')">Sau</button>
+      <button class="rounded-lg border border-slate-200 px-3 py-2 font-bold disabled:opacity-50" :disabled="page === 1" @click="$emit('prev')">{{ t('admin.shared.paginationPrev') }}</button>
+      <span class="font-bold text-avocado-800">{{ t('admin.shared.paginationPage', { page, totalPages }) }}</span>
+      <button class="rounded-lg border border-slate-200 px-3 py-2 font-bold disabled:opacity-50" :disabled="page === totalPages" @click="$emit('next')">{{ t('admin.shared.paginationNext') }}</button>
     </div>
   </div>
 </template>

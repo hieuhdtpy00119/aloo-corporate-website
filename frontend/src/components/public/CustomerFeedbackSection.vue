@@ -25,7 +25,7 @@ onMounted(loadFeedbacks)
 
 <template>
   <section class="bg-white px-4 py-16 sm:px-6 lg:px-8">
-    <div class="mx-auto max-w-[1280px]">
+    <div class="mx-auto max-w-[1240px]">
       <div class="mb-10 border-b border-brand-forest/5 pb-4">
         <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">Cảm nhận khách hàng</span>
         <h2 class="mt-2 text-3xl font-black text-brand-dark lg:text-4xl">Khách hàng nói gì về ALOO</h2>
@@ -40,7 +40,7 @@ onMounted(loadFeedbacks)
       </p>
 
       <div v-else class="grid gap-6 md:grid-cols-3">
-        <article v-for="feedback in feedbacks.slice(0, 6)" :key="feedback.id" class="overflow-hidden rounded-3xl border border-brand-forest/5 bg-[#F8FAF7] shadow-sm">
+        <article v-for="feedback in feedbacks.slice(0, 6)" :key="feedback.id" class="overflow-hidden rounded-3xl border border-brand-forest/5 bg-cream-50 shadow-sm">
           <img v-if="feedback.avatarUrl" :src="resolveBackendAssetUrl(feedback.avatarUrl)" :alt="feedback.customerName" class="aspect-[5/3] w-full object-cover" />
           <div class="p-6">
             <div class="flex items-center gap-1 text-brand-sand">

@@ -1,6 +1,5 @@
 package com.aloo.cms.security;
 
-import com.aloo.cms.entity.UserRole;
 import com.aloo.cms.repository.AdminUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,9 +15,7 @@ public class AdminUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return adminUserRepository.findByEmailIgnoreCaseAndRole(username, UserRole.ADMIN)
-                .map(CustomUserDetails::new)
-                .orElseThrow(() -> new UsernameNotFoundException("Admin user not found"));
+        return loadAnyUserByUsername(username);
     }
 
     public UserDetails loadAnyUserByUsername(String username) throws UsernameNotFoundException {

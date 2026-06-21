@@ -34,7 +34,7 @@ const hero = computed(() => {
         loading="eager"
         fetchpriority="high"
       />
-      <div v-else class="h-full w-full bg-[linear-gradient(135deg,#f6eddc,#dfeec8_45%,#173f25)]"></div>
+      <div v-else class="h-full w-full bg-[linear-gradient(135deg,#FFF7E6,#CDECA6_45%,#0D2F1B)]"></div>
 
       <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,28,14,0.04),rgba(5,28,14,0.24))]"></div>
     </div>

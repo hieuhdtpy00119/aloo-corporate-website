@@ -59,10 +59,20 @@ public class GoogleOAuthLoginService {
         if (fullName != null && !fullName.isBlank()) {
             user.setFullName(fullName);
         }
-        if (avatarUrl != null && !avatarUrl.isBlank()) {
+        if (shouldSyncGoogleAvatar(user.getAvatarUrl(), avatarUrl)) {
             user.setAvatarUrl(avatarUrl);
         }
         return user;
+    }
+
+    private boolean shouldSyncGoogleAvatar(String currentAvatar, String googleAvatar) {
+        if (googleAvatar == null || googleAvatar.isBlank()) {
+            return false;
+        }
+        if (currentAvatar == null || currentAvatar.isBlank()) {
+            return true;
+        }
+        return currentAvatar.contains("googleusercontent.com");
     }
 
     private String required(Object value, String message) {

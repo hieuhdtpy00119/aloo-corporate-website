@@ -54,12 +54,139 @@
     "productsDescription": "The menu focuses on repeatable best-sellers for both retail customers and franchise stores.",
     "franchiseEyebrow": "Franchise",
     "franchiseTitle": "A clear store opening roadmap",
-    "franchiseDescription": "ALOO prioritizes easy rollout, cost control and consistent customer experience across stores."
+    "franchiseDescription": "ALOO prioritizes easy rollout, cost control and consistent customer experience across stores.",
+    "featuredErrorHint": "Could not load featured content. Products and stores are still shown below.",
+    "heroBadge": "Vietnamese avocado ice cream",
+    "heroHeadline": "Naturally rich flavor, refreshingly cool in every cup",
+    "heroDescription": "Explore our signature menu or learn about the ALOO franchise model near you.",
+    "heroCtaProducts": "View products",
+    "heroCtaFranchise": "Franchise",
+    "heroVideoLabel": "ALOO Vietnamese Avocado Ice Cream",
+    "featuredEyebrow": "Curated picks",
+    "featuredTitle": "Featured today",
+    "featuredSubtitle": "Natural goodness from clean garden ingredients",
+    "featuredScrollLeft": "Scroll featured left",
+    "featuredScrollRight": "Scroll featured right",
+    "featuredEmpty": "No featured content yet. Add home page blocks in admin.",
+    "featuredLoadError": "Could not load home featured content",
+    "featuredDefaultCta": "View more",
+    "featuredDefaultBadge": "Featured",
+    "popularEyebrow": "Crowd favorites",
+    "popularTitle": "Most loved products",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right",
+    "viewDetail": "View details",
+    "productsEmpty": "No products on sale yet. Add products or activate them in admin.",
+    "productMetaFallback": "ALOO Signature",
+    "brandStoryEyebrow": "Brand story",
+    "brandStoryTitle": "From ripe avocado essence to a refreshing cup of ice cream",
+    "brandStoryP1": "ALOO's journey began with a passion for Vietnam's fresh agricultural bounty. We carefully select the richest, smoothest ripe Dak Lak avocados and blend them with a touch of sweet, fragrant milk.",
+    "brandStoryP2": "We proudly built a youthful store model with synchronized operations from the prep counter to guest service — so every cup of avocado ice cream keeps its most delicate natural flavor.",
+    "brandStoryCta": "Read the full story",
+    "brandStoryImageAlt": "Fresh ALOO avocado ingredients",
+    "locationsEyebrow": "Experience in person",
+    "locationsTitle": "Find your nearest ALOO store",
+    "locationsViewAll": "View all store locations",
+    "locationHours": "Opening hours:",
+    "locationHoursUpdating": "Updating",
+    "locationDirections": "Get directions",
+    "locationsEmpty": "No active stores yet. Add locations or activate them in admin.",
+    "bottomCtaEyebrow": "Franchise plan",
+    "bottomCtaTitle": "Grow your business with ALOO",
+    "bottomCtaDescription": "A lean avocado ice cream investment model with minimal cost, professional operations and a young customer base full of potential. Full support from site selection to marketing and barista training.",
+    "bottomCtaConsult": "Register for free consultation",
+    "bottomCtaSurvey": "Explore investment costs"
   },
   "about": {
     "eyebrow": "About us",
     "title": "ALOO is built from a familiar Vietnamese flavor",
     "description": "The brand focuses on avocado ice cream, accessible ingredients and lean operations for local markets.",
+    "heroEyebrow": "Brand story",
+    "heroTitleLine1": "Elevating the journey of",
+    "heroTitleHighlight": "Vietnamese avocado",
+    "heroDescription": "From a small business in 2013, Aloo has built an inspiring journey — bringing the community products that are Tasty, Fresh and Healthy.",
+    "heroTagline": "Green energy, refreshing taste",
+    "metricsProducts": "Products on sale",
+    "metricsLocations": "Active stores",
+    "metricsPosts": "Brand articles",
+    "metricsErrorHint": "Could not load metrics from the system. Please try again later.",
+    "timelineEyebrow": "Growth timeline",
+    "timelineTitle": "From core recipes to a scalable system",
+    "timelineErrorHint": "Could not load timeline from CMS. Showing default milestones.",
+    "ctaConclusionEyebrow": "Conclusion",
+    "ctaVisitStore": "Visit a store",
+    "ctaViewMenu": "View avocado menu",
+    "ctaFootnote": "Stores in Quy Nhon & Nha Trang · From 20,000 VND",
+    "quickMenuEyebrow": "Menu",
+    "quickMenuTitle": "Explore ALOO products",
+    "quickMenuDescription": "Avocado ice cream, mango, durian and more signature flavors.",
+    "quickMenuLink": "View menu",
+    "quickFranchiseEyebrow": "Franchise",
+    "quickFranchiseTitle": "Grow with Aloo",
+    "quickFranchiseDescription": "Join the vision of 50 stores by 2030.",
+    "quickFranchiseLink": "Learn more",
+    "section1Eyebrow": "Born from ambition",
+    "section1Title": "Elevating the value of Vietnamese avocado",
+    "section1P1": "Aloo's story began in 2013 with a desire to create quality, nutritious products from local fruit. The founder saw avocado as a superfood with outstanding value whose potential was still underexplored.",
+    "section1P2": "By 2023, under CEO Nguyen Thi Hoang Phuong — Aloo Quy Nhon Co., Ltd. — the brand broke through with synchronized investment in business model, professional operations and elevated customer experience.",
+    "section1Caption": "Started in 2013 · Breakthrough from 2023",
+    "section1Milestones": [
+      "2013 · Origin of the idea",
+      "2015 · Recipe perfected",
+      "2018 · Household business expanded",
+      "2023 · Brand breakthrough"
+    ],
+    "section2Eyebrow": "Overcoming challenges",
+    "section2Title": "With authenticity and care",
+    "section2Subtitle": "From farm to customer",
+    "section2P1": "The biggest challenge was securing a stable supply of fresh avocado. As a seasonal crop, quality varies with weather and region. Aloo tightened input control, rigorously selected growing areas and standardized processing and storage.",
+    "section2P2": "Serious commitment to \"real fresh avocado\" set Aloo apart. Amid industrial food trends, the natural, green flavor of avocado won customers' trust completely.",
+    "qualityTitle": "🌱 Aloo quality commitment",
+    "qualityPoints": [
+      "Strict growing-area control",
+      "Standardized processing & storage",
+      "Consistent flavor at every store",
+      "No preservatives · 100% fresh avocado"
+    ],
+    "section2ImageCaption": "Real fresh avocado · Green · Clean · Delicious",
+    "section3Eyebrow": "Ecosystem & vision",
+    "section3Title": "Reaching for the open sea",
+    "section3P1": "As of 2026, Aloo operates stores in two bustling coastal tourism cities: Quy Nhon and Nha Trang. We keep expanding the menu with creative flavors and the flexible AlooBike model.",
+    "section3MenuLabel": "Signature menu",
+    "section3AudienceTitle": "Serving diverse audiences",
+    "section3AudienceText": "Students · Families · Tourists\nFrom just 20,000 VND — fresh avocado ice cream for everyone.",
+    "section3VisionLabel": "Vision 2030",
+    "section3VisionTitle": "~50 stores nationwide",
+    "section3VisionDesc": "Pioneering avocado ice cream chain · Spreading green energy",
+    "section3ImageCaptionLeft": "Quy Nhon & Nha Trang",
+    "section3ImageCaptionRight": "Target 50 stores · 2030",
+    "valuesEyebrow": "5 core values",
+    "valuesTitle": "The solid foundation of Aloo",
+    "valuesDesc": "Every cup of Aloo avocado ice cream carries the five values that define the brand and its people.",
+    "coreValues": [
+      { "label": "Respect", "desc": "Honoring every member of the Aloo ecosystem." },
+      { "label": "Care", "desc": "Connecting community through products made with love." },
+      { "label": "Creativity", "desc": "Constantly innovating to bring new flavors." },
+      { "label": "Discipline", "desc": "Consistent quality at every point of sale." },
+      { "label": "Fairness", "desc": "Sharing value with partners, staff and customers." }
+    ],
+    "defaultTimeline": [
+      { "year": "2013", "title": "Origin of the idea", "desc": "A desire to create products from fresh Vietnamese avocado for the community." },
+      { "year": "2015", "title": "Recipe perfected", "desc": "Refined flavor, ingredient control and preparation process." },
+      { "year": "2018", "title": "Household business expanded", "desc": "New flavors and increased service scale." },
+      { "year": "2023", "title": "Brand breakthrough", "desc": "CEO Nguyen Thi Hoang Phuong led full professional systemization." }
+    ],
+    "menuItems": [
+      { "name": "Traditional Avocado Ice Cream", "tag": "Signature", "color": "#007A35" },
+      { "name": "Mango Avocado", "tag": "Tropical", "color": "#C9933F" },
+      { "name": "Durian Avocado", "tag": "Special", "color": "#A8742D" },
+      { "name": "Soursop Avocado", "tag": "Seasonal", "color": "#7EC75A" },
+      { "name": "Special Aloo Avocado", "tag": "Premium", "color": "#006227" }
+    ],
+    "ctaConclusionTitle": "More than a decade built on",
+    "ctaConclusionHighlight": "real quality & real value",
+    "ctaConclusionBody": "More than a tasty refreshment — every cup carries Aloo's mission to make life brighter and our health commitment to the community.",
+    "timelineLoadError": "Could not load brand timeline",
     "cards": [
       {
         "title": "Focused products",
@@ -78,12 +205,43 @@
   "products": {
     "eyebrow": "ALOO Menu",
     "title": "Sample product catalog",
-    "description": "Products are designed to clearly present benefits, pricing and menu groups."
+    "description": "Products are designed to clearly present benefits, pricing and menu groups.",
+    "categories": "Product categories",
+    "listEyebrow": "Product list",
+    "allProducts": "All products",
+    "servingCount": "{count} products available",
+    "searchPlaceholder": "Search products...",
+    "explore": "Explore",
+    "emptyNoMatch": "No products match your filters.",
+    "emptyNoData": "No products yet. Add items in the admin panel.",
+    "pageContentErrorHint": "Could not load banner/menu from CMS. Product list is still available.",
+    "prev": "Previous",
+    "next": "Next",
+    "ctaEyebrow": "Partner with ALOO",
+    "ctaTitle": "A focused, appealing menu is the key to the business",
+    "ctaDescription": "A streamlined menu, clean ingredients and standardized preparation help franchise stores run smoothly and grow revenue.",
+    "ctaButton": "Register for franchise consultation",
+    "updatingImage": "Image coming soon",
+    "defaultCategory": "Other products",
+    "productLabel": "Product",
+    "carouselPrev": "Previous slide",
+    "carouselNext": "Next slide",
+    "carouselDot": "Go to slide {index}",
+    "defaultSlideTitle": "ALOO Avocado Ice Cream - Pure Natural Taste",
+    "defaultSlideSubtitle": "Green energy, refreshing taste",
+    "defaultSlideDescription": "Discover fresh avocado ice cream and nutritious Vietnamese farm drinks.",
+    "heroLoading": "Loading product banner..."
   },
   "franchise": {
     "eyebrow": "Partnership opportunity",
     "title": "ALOO franchise for local investors",
     "description": "An overview of the brand model, investment packages and why ALOO fits the Vietnamese avocado ice cream market.",
+    "loading": "Loading franchise content...",
+    "loadErrorHint": "CMS is unavailable. Showing default page content.",
+    "viewAllStores": "View all stores",
+    "readBrandStory": "Read the full brand story",
+    "consultationTitle": "Register for free consultation",
+    "featuredModelBadge": "Most popular",
     "benefitsTitle": "What partners receive",
     "benefits": [
       "Core recipes and product portioning.",
@@ -92,7 +250,69 @@
       "Grand opening support and post-launch follow-up."
     ],
     "partnerTitle": "Ideal partners",
-    "partnerDescription": "ALOO fits small-location owners, first-time F&B investors or operators who want a repeat-purchase product."
+    "partnerDescription": "ALOO fits small-location owners, first-time F&B investors or operators who want a repeat-purchase product.",
+    "heroDefaultSubtitle": "Aloo Avocado Ice Cream Franchise",
+    "heroDefaultTitle": "Grow with Aloo avocado ice cream — Easy to operate, high potential",
+    "heroDefaultDescription": "With 10+ years building a brand from Vietnamese avocado, Aloo partners with you from site survey and store setup to grand opening. Vision 2030: ~50 stores.",
+    "heroDefaultPrimaryCta": "Get free consultation",
+    "heroDefaultSecondaryCta": "View investment costs",
+    "heroAlt": "Aloo Avocado Ice Cream Franchise",
+    "heroStats": [
+      { "num": "10+", "label": "Years of experience" },
+      { "num": "2", "label": "Coastal cities" },
+      { "num": "4", "label": "Franchise models" },
+      { "num": "~50", "label": "2030 target" }
+    ],
+    "advantagesEyebrow": "Why choose Aloo?",
+    "advantagesTitle": "Brand advantages for franchise partners",
+    "advantagesDesc": "Aloo is more than ice cream — a full brand ecosystem built on five core values: Respect · Care · Creativity · Discipline · Fairness.",
+    "modelsEyebrow": "4 franchise models",
+    "modelsTitle": "Choose a model that fits your budget & location",
+    "modelsDesc": "From mobile AlooBike to impressive Flagship — Aloo has a solution for every investment scale.",
+    "modelAreaLabel": "Area",
+    "investmentEyebrow": "Investment cost",
+    "investmentTitle": "Detailed reference cost table",
+    "investmentDesc": "Costs are indicative and will be tailored to your location and area during consultation.",
+    "investmentFootnote": "* Reference costs only; excludes rent and monthly operating expenses.",
+    "investmentTableItem": "Cost item",
+    "investmentTableNote": "Notes",
+    "investmentTypeKiosk": "Kiosk",
+    "investmentTypeStandard": "Standard ★",
+    "investmentTypeFlagship": "Flagship",
+    "revenueEyebrow": "Reference revenue",
+    "revenueTitle": "Business potential for avocado ice cream in tourism cities",
+    "revenueDesc": "Reference figures from Aloo stores in Quy Nhon and Nha Trang. Actual revenue depends on location, operations and tourism season.",
+    "revenuePoints": [
+      "Year-round coastal tourism cities",
+      "Prices from 20,000 VND — accessible to all",
+      "Trending healthy superfood product"
+    ],
+    "processEyebrow": "Franchise process",
+    "processTitle": "6 steps to launch an Aloo store",
+    "processDesc": "From consultation to grand opening in 30–60 days, with Aloo team support at every step.",
+    "storesEyebrow": "Store network",
+    "storesTitle": "Aloo locations in operation",
+    "storesDesc": "Visit in person to experience operations and products before investing.",
+    "viewStoreDetail": "View store details",
+    "partnersEyebrow": "Ideal partners",
+    "partnersTitle": "Who is Aloo right for?",
+    "partnersDesc": "You don't need much experience — just passion and readiness to spread green energy with Aloo.",
+    "partnerProfiles": [
+      { "title": "First-time investors", "desc": "Want to start in F&B with a clear model, lower risk and full support." },
+      { "title": "Existing space owners", "desc": "Have vacant premises and want to maximize them with an established brand." },
+      { "title": "Multi-store investors", "desc": "Want multiple locations in coastal tourism cities for passive income." },
+      { "title": "Mobile entrepreneurs", "desc": "Want to start small with AlooBike before investing in a fixed location." }
+    ],
+    "faqEyebrow": "FAQ",
+    "faqTitle": "Frequently asked questions",
+    "faqDesc": "Can't find an answer? Contact the Aloo consulting team directly.",
+    "ctaDefaultTitle": "Ready to open an Aloo store?",
+    "ctaDefaultDesc": "Register for consultation so the Aloo team can analyze your area, suggest a suitable model and provide a detailed investment estimate.",
+    "ctaPoints": [
+      "✅ Free consultation, no obligation",
+      "✅ Response within 24 hours",
+      "✅ Full A–Z support"
+    ]
   },
   "locations": {
     "eyebrow": "Locations",
@@ -100,12 +320,40 @@
     "description": "Find a nearby ALOO branch by province, store name or address.",
     "searchPlaceholder": "Search by branch name or address",
     "active": "Open",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "maintenance": "Under maintenance",
+    "statsTotal": "Total branches",
+    "statsActive": "Open now",
+    "statsFeatured": "Featured",
+    "featured": "Featured",
+    "loading": "Loading store locations...",
+    "emptyNoData": "No stores yet. Add locations in admin or activate existing ones.",
+    "emptyNoMatch": "No stores match your search.",
+    "detail": "Details",
+    "order": "Order",
+    "callNow": "Call now"
   },
   "blog": {
     "eyebrow": "Blog",
     "title": "ALOO news and stories",
-    "description": "Updates about products, store operations and the growth journey of a Vietnamese avocado ice cream brand."
+    "description": "Updates about products, store operations and the growth journey of a Vietnamese avocado ice cream brand.",
+    "loading": "Loading articles...",
+    "latestSection": "Latest updates",
+    "loadMore": "Load more articles",
+    "excerptFallback": "Article content is being updated.",
+    "dateUnset": "Date not set",
+    "emptyNoData": "No published articles yet",
+    "emptyNoDataDesc": "Blog content will be updated soon.",
+    "emptyNoMatch": "No matching articles",
+    "emptyNoMatchDesc": "This category has no published articles yet.",
+    "sidebarSuggested": "Suggested reading",
+    "sidebarLatest": "Latest posts",
+    "franchiseCtaEyebrow": "Franchise",
+    "franchiseCtaTitle": "Want to open an ALOO store?",
+    "franchiseCtaDesc": "Register so our team can advise on model, location and budget.",
+    "franchiseCtaButton": "Franchise consultation",
+    "loadErrorHint": "Could not load articles. Please try again later.",
+    "clearFilter": "View all articles"
   },
   "consultation": {
     "eyebrow": "Franchise consultation",
@@ -136,5 +384,383 @@
     "eyebrow": "Estimated cost",
     "title": "Reference investment cost",
     "description": "Sample cost ranges help visitors understand the initial investment scale."
+  },
+  "seo": {
+    "defaultTitle": "ALOO - Vietnamese Avocado Ice Cream",
+    "defaultDescription": "ALOO brand website for franchise development and store network.",
+    "routes": {
+      "home": {
+        "title": "ALOO - Vietnamese Avocado Ice Cream",
+        "description": "A Vietnamese avocado ice cream brand with franchise growth and a modern store network."
+      },
+      "products": {
+        "title": "ALOO Menu - Avocado ice cream products",
+        "description": "Explore the ALOO product menu and signature flavors served in stores."
+      },
+      "blog": {
+        "title": "ALOO Blog - Brand news and franchise stories",
+        "description": "Updates on the ALOO brand, store operations and franchise experience."
+      },
+      "franchise": {
+        "title": "ALOO Franchise",
+        "description": "Franchise model information for local investors."
+      },
+      "locations": {
+        "title": "ALOO Store Locator",
+        "description": "Find ALOO stores, addresses, hotlines, opening hours and Google Maps links."
+      },
+      "contact": {
+        "title": "Contact ALOO",
+        "description": "Reach ALOO for brand, store and franchise consultation."
+      },
+      "about": {
+        "title": "About ALOO - Avocado ice cream brand story",
+        "description": "ALOO journey since 2013, core values, milestones and the Vietnamese avocado ecosystem."
+      }
+    }
+  },
+  "admin": {
+    "common": {
+      "loading": "Loading data...",
+      "emptyDefault": "No matching records",
+      "loadPartialError": "Some data could not be loaded."
+    },
+    "shell": {
+      "systemLabel": "Administration",
+      "panelTitle": "ALOO CMS Panel",
+      "openMenu": "Open admin menu",
+      "brandTitle": "ALOO Admin",
+      "brandSubtitle": "System administration",
+      "viewWebsite": "View website",
+      "logout": "Sign out",
+      "profile": "Account profile",
+      "security": "Security",
+      "adminFallbackName": "ALOO Admin",
+      "adminFallbackEmail": "admin{'@'}aloo.vn",
+      "languageLabel": "Admin interface language"
+    },
+    "nav": {
+      "groups": {
+        "content": "Website content",
+        "stores": "Stores & customers",
+        "business": "Business",
+        "system": "System"
+      },
+      "dashboard": "Overview",
+      "products": "Products & display",
+      "franchise": "Franchise",
+      "feedbacks": "Testimonials",
+      "homeSections": "Homepage",
+      "articles": "News",
+      "categories": "Article categories",
+      "locations": "Store locator",
+      "registrations": "Consultation leads",
+      "accounts": "Accounts & access",
+      "auditLogs": "Audit log"
+    },
+    "breadcrumb": {
+      "articleNew": "New article",
+      "articleEdit": "Edit article"
+    },
+    "shared": {
+      "search": "Search",
+      "searchPlaceholder": "Search",
+      "status": "Status",
+      "filter": "Filter",
+      "all": "All",
+      "cancel": "Cancel",
+      "confirmDeleteTitle": "Confirm delete",
+      "confirmDeleteMessage": "This action cannot be undone. Are you sure you want to permanently delete this record from the system?",
+      "confirmDelete": "Delete",
+      "paginationShowing": "Showing {visible} / {total} {label}",
+      "paginationPrev": "Previous",
+      "paginationNext": "Next",
+      "paginationPage": "Page {page} / {totalPages}",
+      "rows": "rows"
+    },
+    "roles": {
+      "FULL": "Full administrator",
+      "CONTENT": "Content editor",
+      "STORES": "Store manager",
+      "CRM": "CRM manager",
+      "SYSTEM": "System administrator"
+    },
+    "login": {
+      "brandTitle": "ALOO Account",
+      "brandSubtitle": "Sign in",
+      "title": "Sign in",
+      "description": "Use one ALOO account for your profile, services and CMS access when your account has admin rights.",
+      "google": "Sign in with Google",
+      "divider": "or",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Verify account",
+      "submitting": "Verifying...",
+      "invalidCredentials": "Invalid email or password"
+    },
+    "dashboard": {
+      "badge": "ALOO Franchise CMS",
+      "title": "Overview dashboard",
+      "scopeTime": "Leads and articles are filtered by {range}. Products and stores show current totals.",
+      "lastUpdated": "Updated at {time}",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing...",
+      "loading": "Loading dashboard data...",
+      "loadErrorTitle": "Some dashboard data could not be loaded.",
+      "emptyLeads": "No leads in the selected time range",
+      "emptyPosts": "No articles in the selected time range",
+      "ranges": {
+        "today": "Today",
+        "week": "Last 7 days",
+        "month30": "Last 30 days",
+        "thisMonth": "This month"
+      },
+      "kpi": {
+        "sectionTitle": "Key operating metrics",
+        "sectionSubtitle": "Metrics for {range}.",
+        "leadsLabel": "Leads to handle",
+        "leadsDescription": "New or in-consultation leads",
+        "leadsNote": "{scoped}/{total} leads",
+        "postsLabel": "Articles pending",
+        "postsDescription": "Unpublished content",
+        "postsNote": "{scoped}/{total} articles",
+        "productsLabel": "Products on sale",
+        "productsDescription": "Active public products",
+        "productsNote": "{total} products",
+        "locationsLabel": "Active locations",
+        "locationsDescription": "Operating stores",
+        "locationsNote": "{total} locations",
+        "snapshotHint": "Current"
+      },
+      "actions": {
+        "sectionTitle": "Priority tasks",
+        "sectionSubtitle": "Items to handle quickly during your shift.",
+        "leadsTitle": "{count} leads awaiting response",
+        "leadsDescription": "Prioritize new customers and leads in consultation.",
+        "leadsAction": "View lead list",
+        "postsTitle": "{count} unpublished articles",
+        "postsDescription": "Review drafts, scheduled posts and pending approvals.",
+        "postsAction": "View article list"
+      },
+      "analysis": {
+        "sectionTitle": "Data breakdown",
+        "sectionSubtitle": "Share of groups in {range}.",
+        "leadsTitle": "Leads by status",
+        "leadsSubtitle": "Consultation pipeline mix",
+        "postsTitle": "Articles by status",
+        "postsSubtitle": "CMS content status",
+        "productsTitle": "Products by category",
+        "productsSubtitle": "Product category mix"
+      },
+      "recent": {
+        "sectionTitle": "Latest updates",
+        "sectionSubtitle": "Leads and articles in {range}.",
+        "leadsTitle": "Consultation leads",
+        "leadsSubtitle": "Recently received franchise requests.",
+        "leadsViewAll": "View all",
+        "leadsDetailAria": "View lead details",
+        "postsTitle": "Articles & news",
+        "postsSubtitle": "Writing progress updates.",
+        "postsManage": "Manage articles",
+        "postsManageAria": "Manage articles"
+      },
+      "misc": {
+        "other": "Other",
+        "notScheduled": "Not scheduled"
+      }
+    },
+    "articles": {
+      "eyebrow": "Article Management System",
+      "title": "News management",
+      "description": "Manage SEO articles, food reviews, brand news and franchise content for ALOO.",
+      "add": "Add article",
+      "empty": "No matching records",
+      "searchLabel": "Search articles",
+      "searchPlaceholder": "Search title, author, tags...",
+      "statusLabel": "Article status",
+      "categoryLabel": "Category",
+      "categoryAll": "All categories",
+      "notScheduled": "Not scheduled",
+      "paginationLabel": "articles",
+      "columns": {
+        "title": "Title",
+        "category": "Category",
+        "author": "Author",
+        "publishedAt": "Published",
+        "status": "Status",
+        "seo": "SEO",
+        "actions": "Actions"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "toasts": {
+        "deleted": "Article deleted",
+        "deleteError": "Could not delete article"
+      }
+    },
+    "profile": {
+      "loading": "Loading account information...",
+      "loadError": "Could not load account information",
+      "uploadingAvatar": "Uploading avatar...",
+      "adminEyebrow": "Admin account",
+      "adminTitle": "Admin profile",
+      "adminDescription": "Manage admin profile and security on one page, separate from CMS modules.",
+      "accountEyebrow": "ALOO account",
+      "accountTitle": "Personal information",
+      "accountDescription": "Update your ALOO account profile.",
+      "tabs": {
+        "account": "Account",
+        "security": "Security"
+      },
+      "fields": {
+        "fullName": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "role": "Role",
+        "currentPassword": "Current password",
+        "newPassword": "New password",
+        "confirmPassword": "Confirm new password"
+      },
+      "avatar": {
+        "chooseLabel": "Choose avatar image",
+        "googleCurrent": "Current image from Google. You can upload a different one.",
+        "googleCustom": "Your custom image. Google sign-in will keep using this avatar."
+      },
+      "security": {
+        "accountTitle": "Account security",
+        "adminTitle": "Admin security",
+        "accountDescription": "Set or change your email password when needed. Skip this if you only use Google sign-in.",
+        "adminDescription": "Change admin passwords regularly and do not reuse personal account passwords."
+      },
+      "actions": {
+        "saveProfile": "Save profile",
+        "savingProfile": "Saving...",
+        "changePassword": "Change password",
+        "changingPassword": "Updating..."
+      },
+      "toasts": {
+        "invalidImageType": "Choose an image file (JPG, PNG, WEBP...)",
+        "imageTooLarge": "Image must be 5MB or smaller",
+        "imageReadError": "Could not read image file",
+        "avatarUpdated": "Avatar updated",
+        "avatarUploadError": "Could not upload avatar",
+        "profileUpdated": "Profile updated",
+        "profileUpdateError": "Could not update profile",
+        "checkForm": "Please check the form",
+        "passwordUpdated": "Password changed",
+        "passwordUpdateError": "Could not change password"
+      }
+    },
+    "password": {
+      "minLengthHint": "Password must be at least {min} characters",
+      "errors": {
+        "currentRequired": "Enter your current password",
+        "newRequired": "Enter a new password",
+        "confirmRequired": "Confirm your new password",
+        "minLength": "New password must be at least 8 characters",
+        "mismatch": "Passwords do not match",
+        "tooShort": "Password must be at least 8 characters"
+      }
+    },
+    "accounts": {
+      "emptyTitle": "No records yet",
+      "emptyDescription": "Add an account from the admin panel.",
+      "title": "Account management",
+      "description": "Manage CMS admin accounts and public users. Passwords are never shown again.",
+      "addAccount": "Add {type}",
+      "adminType": "admin account",
+      "customerType": "user account",
+      "tabAdmins": "CMS admins",
+      "tabCustomers": "Users",
+      "searchPlaceholder": "Search by name, email, phone...",
+      "allStatuses": "All statuses",
+      "profileLabel": "CMS access profile",
+      "loadError": "Could not load account list",
+      "saveSuccessCreate": "Account created",
+      "saveSuccessUpdate": "Account updated",
+      "saveError": "Could not save account",
+      "statusUpdated": "Status updated",
+      "statusError": "Could not update status",
+      "passwordUpdated": "Password changed",
+      "passwordError": "Could not change password",
+      "deleteSuccess": "Account deleted",
+      "deleteError": "Could not delete account",
+      "systemEyebrow": "System administration",
+      "status": {
+        "ACTIVE": "Active",
+        "INACTIVE": "Hidden",
+        "LOCKED": "Locked"
+      },
+      "columns": {
+        "account": "Account",
+        "phone": "Phone",
+        "role": "Role",
+        "status": "Status",
+        "createdAt": "Created",
+        "actions": "Actions"
+      },
+      "actions": {
+        "password": "Password",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "save": "Save",
+        "changePassword": "Change password"
+      },
+      "modals": {
+        "createUser": "Add account",
+        "editUser": "Edit account",
+        "changePassword": "Change password",
+        "changePasswordHint": "Set a new password for {email}.",
+        "fullName": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "avatarUrl": "Avatar URL",
+        "status": "Status",
+        "password": "Password",
+        "newPassword": "New password"
+      },
+      "confirmStatus": {
+        "title": "Change account status?",
+        "message": "{name} will be set to {status}.",
+        "confirm": "Confirm"
+      },
+      "confirmDelete": {
+        "title": "Delete account?",
+        "message": "The account will be removed from the system. Prefer locking if you only need temporary access control.",
+        "confirm": "Delete"
+      }
+    },
+    "accessDenied": "You do not have permission to access this page.",
+    "auditLogs": {
+      "title": "Audit log",
+      "description": "Track account changes and important admin actions.",
+      "loadError": "Could not load audit log",
+      "emptyTitle": "No log entries yet",
+      "emptyDescription": "Admin actions will appear here as they occur.",
+      "exportCsv": "Export CSV",
+      "filters": {
+        "actor": "Actor",
+        "actorPlaceholder": "Admin email...",
+        "action": "Action",
+        "actionPlaceholder": "CREATE, UPDATE...",
+        "entityType": "Entity type",
+        "entityPlaceholder": "ACCOUNT, PRODUCT...",
+        "from": "From",
+        "to": "To",
+        "apply": "Apply filters",
+        "reset": "Clear filters"
+      },
+      "paginationLabel": "entries",
+      "columns": {
+        "time": "Time",
+        "actor": "Actor",
+        "action": "Action",
+        "entity": "Entity",
+        "details": "Details"
+      }
+    }
   }
 }

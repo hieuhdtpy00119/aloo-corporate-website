@@ -4,10 +4,12 @@ import com.aloo.cms.dto.AccountPasswordRequest;
 import com.aloo.cms.dto.AccountStatusRequest;
 import com.aloo.cms.dto.AccountUserRequest;
 import com.aloo.cms.dto.AccountUserResponse;
+import com.aloo.cms.entity.AdminProfile;
 import com.aloo.cms.entity.AdminUser;
 import com.aloo.cms.entity.UserRole;
 import com.aloo.cms.exception.BadRequestException;
 import com.aloo.cms.exception.ResourceNotFoundException;
+import com.aloo.cms.mapper.UserMapper;
 import com.aloo.cms.repository.AdminUserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,8 @@ public class AccountManagementService {
 
     private final AdminUserRepository adminUserRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<AccountUserResponse> findAdminUsers() {
@@ -37,7 +41,14 @@ public class AccountManagementService {
 
     @Transactional
     public AccountUserResponse createAdminUser(AccountUserRequest request) {
-        return createUser(request, UserRole.ADMIN);
+        AccountUserResponse response = createUser(request, UserRole.ADMIN);
+        auditLogService.log(
+                "CREATE_ADMIN",
+                "ADMIN_USER",
+                String.valueOf(response.id()),
+                "Created admin account " + response.email() + " with profile " + response.adminProfile()
+        );
+        return response;
     }
 
     @Transactional
@@ -47,7 +58,14 @@ public class AccountManagementService {
         String status = normalizeStatus(request.status());
         ensureCanDeactivateLastAdmin(user, status);
         user.setStatus(status);
-        return toResponse(adminUserRepository.save(user));
+        AccountUserResponse response = userMapper.toAccountResponse(adminUserRepository.save(user));
+        auditLogService.log(
+                "UPDATE_ADMIN",
+                "ADMIN_USER",
+                String.valueOf(response.id()),
+                "Updated admin account " + response.email()
+        );
+        return response;
     }
 
     @Transactional
@@ -56,24 +74,51 @@ public class AccountManagementService {
         String status = normalizeStatus(request.status());
         ensureCanDeactivateLastAdmin(user, status);
         user.setStatus(status);
-        return toResponse(adminUserRepository.save(user));
+        AccountUserResponse response = userMapper.toAccountResponse(adminUserRepository.save(user));
+        auditLogService.log(
+                "UPDATE_ADMIN_STATUS",
+                "ADMIN_USER",
+                String.valueOf(response.id()),
+                "Changed status to " + response.status()
+        );
+        return response;
     }
 
     @Transactional
     public void changeAdminPassword(Long id, AccountPasswordRequest request) {
-        changePassword(getUser(id, UserRole.ADMIN, "Admin account not found"), request);
+        AdminUser user = getUser(id, UserRole.ADMIN, "Admin account not found");
+        changePassword(user, request);
+        auditLogService.log(
+                "CHANGE_ADMIN_PASSWORD",
+                "ADMIN_USER",
+                String.valueOf(user.getId()),
+                "Password reset for " + user.getEmail()
+        );
     }
 
     @Transactional
     public void deleteAdminUser(Long id) {
         AdminUser user = getUser(id, UserRole.ADMIN, "Admin account not found");
         ensureCanDeactivateLastAdmin(user, "DELETED");
+        auditLogService.log(
+                "DELETE_ADMIN",
+                "ADMIN_USER",
+                String.valueOf(user.getId()),
+                "Deleted admin account " + user.getEmail()
+        );
         adminUserRepository.delete(user);
     }
 
     @Transactional
     public AccountUserResponse createCustomerUser(AccountUserRequest request) {
-        return createUser(request, UserRole.USER);
+        AccountUserResponse response = createUser(request, UserRole.USER);
+        auditLogService.log(
+                "CREATE_CUSTOMER",
+                "CUSTOMER_USER",
+                String.valueOf(response.id()),
+                "Created customer account " + response.email()
+        );
+        return response;
     }
 
     @Transactional
@@ -81,14 +126,28 @@ public class AccountManagementService {
         AdminUser user = getUser(id, UserRole.USER, "Customer account not found");
         updateCommonFields(user, request);
         user.setStatus(normalizeStatus(request.status()));
-        return toResponse(adminUserRepository.save(user));
+        AccountUserResponse response = userMapper.toAccountResponse(adminUserRepository.save(user));
+        auditLogService.log(
+                "UPDATE_CUSTOMER",
+                "CUSTOMER_USER",
+                String.valueOf(response.id()),
+                "Updated customer account " + response.email()
+        );
+        return response;
     }
 
     @Transactional
     public AccountUserResponse updateCustomerStatus(Long id, AccountStatusRequest request) {
         AdminUser user = getUser(id, UserRole.USER, "Customer account not found");
         user.setStatus(normalizeStatus(request.status()));
-        return toResponse(adminUserRepository.save(user));
+        AccountUserResponse response = userMapper.toAccountResponse(adminUserRepository.save(user));
+        auditLogService.log(
+                "UPDATE_CUSTOMER_STATUS",
+                "CUSTOMER_USER",
+                String.valueOf(response.id()),
+                "Changed status to " + response.status()
+        );
+        return response;
     }
 
     @Transactional
@@ -98,12 +157,19 @@ public class AccountManagementService {
 
     @Transactional
     public void deleteCustomerUser(Long id) {
-        adminUserRepository.delete(getUser(id, UserRole.USER, "Customer account not found"));
+        AdminUser user = getUser(id, UserRole.USER, "Customer account not found");
+        auditLogService.log(
+                "DELETE_CUSTOMER",
+                "CUSTOMER_USER",
+                String.valueOf(user.getId()),
+                "Deleted customer account " + user.getEmail()
+        );
+        adminUserRepository.delete(user);
     }
 
     private List<AccountUserResponse> findByRole(UserRole role) {
         return adminUserRepository.findAllByRole(role, defaultSort()).stream()
-                .map(this::toResponse)
+                .map(userMapper::toAccountResponse)
                 .toList();
     }
 
@@ -117,14 +183,20 @@ public class AccountManagementService {
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setStatus(normalizeStatus(request.status()));
+        if (role == UserRole.ADMIN) {
+            user.setAdminProfile(normalizeAdminProfile(request.adminProfile()));
+        }
         setProfileFields(user, request);
-        return toResponse(adminUserRepository.save(user));
+        return userMapper.toAccountResponse(adminUserRepository.save(user));
     }
 
     private void updateCommonFields(AdminUser user, AccountUserRequest request) {
         String email = normalizeEmail(request.email());
         ensureEmailAvailable(email, user.getId());
         user.setEmail(email);
+        if (user.getRole() == UserRole.ADMIN && request.adminProfile() != null && !request.adminProfile().isBlank()) {
+            user.setAdminProfile(normalizeAdminProfile(request.adminProfile()));
+        }
         setProfileFields(user, request);
     }
 
@@ -171,6 +243,17 @@ public class AccountManagementService {
         }
     }
 
+    private AdminProfile normalizeAdminProfile(String profile) {
+        if (profile == null || profile.isBlank()) {
+            return AdminProfile.FULL;
+        }
+        try {
+            return AdminProfile.valueOf(profile.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Admin profile is invalid");
+        }
+    }
+
     private String normalizeEmail(String email) {
         return email.trim().toLowerCase();
     }
@@ -192,20 +275,5 @@ public class AccountManagementService {
 
     private String normalizeBlank(String value) {
         return value == null || value.isBlank() ? null : value.trim();
-    }
-
-    private AccountUserResponse toResponse(AdminUser user) {
-        return new AccountUserResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getFullName(),
-                user.getPhone(),
-                user.getAvatarUrl(),
-                user.getRole().name(),
-                user.getStatus(),
-                user.getLastLoginAt(),
-                user.getCreatedAt(),
-                user.getUpdatedAt()
-        );
     }
 }

@@ -1,24 +1,37 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import ConfirmModal from '../../components/admin/ConfirmModal.vue'
+import AdminPageHeader from '../../components/admin/AdminPageHeader.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
 import Pagination from '../../components/admin/Pagination.vue'
 import SearchFilterBar from '../../components/admin/SearchFilterBar.vue'
 import { useAppStore } from '../../stores/appStore'
 import { useToastStore } from '../../stores/toastStore'
+import {
+  ARTICLE_STATUS_CODES,
+  articleStatusFilterOptions,
+  articleStatusFilterValue,
+  articleStatusLabel,
+  getArticleStatusBadgeClass,
+  normalizeArticleStatus,
+} from '../../utils/articleStatus'
+import { adminPaths } from '../../constants/adminPaths'
 
 const router = useRouter()
 const store = useAppStore()
 const toast = useToastStore()
+const { t } = useI18n()
 
 const search = ref('')
-const statusFilter = ref('Tất cả')
+const statusFilter = ref(t('admin.shared.all'))
 const categoryFilter = ref('')
 const page = ref(1)
 const perPage = 5
 const pendingDelete = ref(null)
 const isLoading = computed(() => store.loading.posts)
+const postsError = computed(() => store.errors.posts)
 
 const categoryOptions = computed(() => [
   '',
@@ -28,55 +41,7 @@ const categoryOptions = computed(() => [
     .map((category) => category.name),
 ])
 
-const statusLabels = {
-  DRAFT: 'Nháp',
-  PENDING: 'Chờ duyệt',
-  REVIEWING: 'Đang rà soát',
-  APPROVED: 'Đã duyệt',
-  PUBLISHED: 'Đã xuất bản',
-  ARCHIVED: 'Lưu trữ',
-  'Bản nháp': 'Nháp',
-  'Lên lịch': 'Chờ duyệt',
-  'Đã đăng': 'Đã xuất bản',
-  Ẩn: 'Lưu trữ',
-}
-
-const statusValues = {
-  Nháp: 'DRAFT',
-  'Chờ duyệt': 'PENDING',
-  'Đang rà soát': 'REVIEWING',
-  'Đang review': 'REVIEWING',
-  'Đã duyệt': 'APPROVED',
-  'Đã xuất bản': 'PUBLISHED',
-  'Lưu trữ': 'ARCHIVED',
-}
-
-const articleStatuses = ['Tất cả', 'Nháp', 'Chờ duyệt', 'Đang rà soát', 'Đã duyệt', 'Đã xuất bản', 'Lưu trữ']
-
-const normalizeStatus = (status) => {
-  if (status === 'Đã đăng') return 'PUBLISHED'
-  if (status === 'Bản nháp') return 'DRAFT'
-  if (status === 'Lên lịch') return 'PENDING'
-  if (status === 'Ẩn') return 'ARCHIVED'
-  return status || 'DRAFT'
-}
-
-const getStatusClass = (status) => {
-  switch (normalizeStatus(status)) {
-    case 'PUBLISHED':
-      return 'bg-green-50 text-green-700 border-green-200'
-    case 'APPROVED':
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200'
-    case 'REVIEWING':
-      return 'bg-orange-50 text-orange-700 border-orange-200'
-    case 'PENDING':
-      return 'bg-blue-50 text-blue-700 border-blue-200'
-    case 'ARCHIVED':
-      return 'bg-slate-100 text-slate-600 border-slate-200'
-    default:
-      return 'bg-yellow-50 text-yellow-700 border-yellow-200'
-  }
-}
+const articleStatuses = computed(() => articleStatusFilterOptions(t))
 
 const getSeoScore = (post) => {
   let score = 0
@@ -91,15 +56,15 @@ const getSeoScore = (post) => {
 
 const filteredArticles = computed(() => {
   const keyword = search.value.trim().toLowerCase()
+  const selectedStatus = articleStatusFilterValue(statusFilter.value, t)
   return store.posts.filter((post) => {
     const haystack = [post.title, post.category, post.author, post.excerpt, ...(post.tags || [])]
       .filter(Boolean)
       .join(' ')
       .toLowerCase()
-    const status = normalizeStatus(post.status)
+    const status = normalizeArticleStatus(post.status)
     const matchesSearch = !keyword || haystack.includes(keyword)
-    const selectedStatus = statusValues[statusFilter.value] || statusFilter.value
-    const matchesStatus = statusFilter.value === 'Tất cả' || status === selectedStatus
+    const matchesStatus = selectedStatus === 'ALL' || status === selectedStatus
     const matchesCategory = !categoryFilter.value || post.category === categoryFilter.value
     return matchesSearch && matchesStatus && matchesCategory
   })
@@ -119,45 +84,59 @@ const openDelete = (post) => {
   pendingDelete.value = post
 }
 
-const deleteArticle = () => {
+const deleteArticle = async () => {
   if (!pendingDelete.value) return
-  store.posts = store.posts.filter((post) => post.id !== pendingDelete.value.id)
-  pendingDelete.value = null
-  toast.success('Đã xóa bài viết')
+  try {
+    await store.deletePost(pendingDelete.value.id)
+    toast.success(t('admin.articles.toasts.deleted'))
+  } catch (error) {
+    toast.error(error.response?.data?.message || error.message || t('admin.articles.toasts.deleteError'))
+  } finally {
+    pendingDelete.value = null
+  }
 }
 </script>
 
 <template>
-  <section class="space-y-6">
-    <div class="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:flex-row lg:items-center">
-      <div>
-        <p class="text-sm font-bold uppercase tracking-[0.18em] text-avocado-600">Article Management System</p>
-        <h1 class="mt-2 text-3xl font-black text-avocado-950">Quản lý tin tức</h1>
-        <p class="mt-2 max-w-2xl text-slate-600">
-          Quản lý bài SEO, review địa điểm ăn uống, tin thương hiệu và nội dung nhượng quyền của ALOO.
-        </p>
-      </div>
-      <button
-        type="button"
-        class="rounded-xl bg-[#2D5A27] px-5 py-3 text-center font-black text-white shadow-sm transition hover:bg-[#24491f]"
-        @click="router.push('/admin/articles/new')"
-      >
-        Thêm bài viết
-      </button>
-    </div>
+  <section>
+    <AdminPageHeader
+      :eyebrow="t('admin.articles.eyebrow')"
+      :title="t('admin.articles.title')"
+      :description="t('admin.articles.description')"
+    >
+      <template #actions>
+        <RouterLink
+          :to="adminPaths.content.articleCategories"
+          class="aloo-btn aloo-btn--secondary"
+        >
+          {{ t('admin.nav.categories') }}
+        </RouterLink>
+        <button
+          type="button"
+          class="aloo-btn aloo-btn--primary"
+          @click="router.push(adminPaths.content.articleNew)"
+        >
+          {{ t('admin.articles.add') }}
+        </button>
+      </template>
+    </AdminPageHeader>
 
     <SearchFilterBar
       v-model:search="search"
       v-model:status="statusFilter"
       v-model:extra-filter="categoryFilter"
-      search-label="Tìm bài viết"
-      search-placeholder="Tìm theo tiêu đề, tác giả, tag..."
-      status-label="Trạng thái bài"
+      :search-label="t('admin.articles.searchLabel')"
+      :search-placeholder="t('admin.articles.searchPlaceholder')"
+      :status-label="t('admin.articles.statusLabel')"
       :status-options="articleStatuses"
       :extra-options="categoryOptions"
-      extra-label="Danh mục"
-      extra-placeholder="Tất cả danh mục"
+      :extra-label="t('admin.articles.categoryLabel')"
+      :extra-placeholder="t('admin.articles.categoryAll')"
     />
+
+    <p v-if="postsError" class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-bold text-red-700" role="alert">
+      {{ postsError }}
+    </p>
 
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div class="overflow-x-auto">
@@ -173,13 +152,13 @@ const deleteArticle = () => {
           </colgroup>
           <thead class="bg-slate-50 text-left text-sm font-black text-slate-600">
             <tr>
-              <th class="px-5 py-4">Tiêu đề</th>
-              <th class="px-5 py-4">Danh mục</th>
-              <th class="px-5 py-4">Tác giả</th>
-              <th class="px-5 py-4">Ngày đăng</th>
-              <th class="px-5 py-4">Trạng thái</th>
-              <th class="px-4 py-4 text-center">SEO</th>
-              <th class="px-4 py-4 text-center">Hành động</th>
+              <th class="px-5 py-4">{{ t('admin.articles.columns.title') }}</th>
+              <th class="px-5 py-4">{{ t('admin.articles.columns.category') }}</th>
+              <th class="px-5 py-4">{{ t('admin.articles.columns.author') }}</th>
+              <th class="px-5 py-4">{{ t('admin.articles.columns.publishedAt') }}</th>
+              <th class="px-5 py-4">{{ t('admin.articles.columns.status') }}</th>
+              <th class="px-4 py-4 text-center">{{ t('admin.articles.columns.seo') }}</th>
+              <th class="px-4 py-4 text-center">{{ t('admin.articles.columns.actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 text-sm">
@@ -190,10 +169,10 @@ const deleteArticle = () => {
               </td>
               <td class="truncate px-5 py-4 font-semibold text-slate-700">{{ post.category }}</td>
               <td class="truncate px-5 py-4 text-slate-600">{{ post.author || 'ALOO Editorial' }}</td>
-              <td class="truncate px-5 py-4 text-slate-600">{{ post.publishedAt || post.date || 'Chưa đặt' }}</td>
+              <td class="truncate px-5 py-4 text-slate-600">{{ post.publishedAt || post.date || t('admin.articles.notScheduled') }}</td>
               <td class="px-5 py-4">
-                <span class="inline-flex rounded-full border px-3 py-1 text-xs font-black" :class="getStatusClass(post.status)">
-                  {{ statusLabels[post.status] || statusLabels[normalizeStatus(post.status)] || post.status }}
+                <span class="inline-flex rounded-full border px-3 py-1 text-xs font-black" :class="getArticleStatusBadgeClass(post.status)">
+                  {{ articleStatusLabel(post.status, t) }}
                 </span>
               </td>
               <td class="px-4 py-4 text-center">
@@ -206,16 +185,16 @@ const deleteArticle = () => {
                   <button
                     type="button"
                     class="rounded-lg border border-avocado-200 px-3 py-2 font-bold text-avocado-700 hover:bg-avocado-50"
-                    @click="router.push(`/admin/articles/${post.id}/edit`)"
+                    @click="router.push(adminPaths.content.articleEdit(post.id))"
                   >
-                    Sửa
+                    {{ t('admin.articles.actions.edit') }}
                   </button>
                   <button
                     type="button"
                     class="rounded-lg border border-red-200 px-3 py-2 font-bold text-red-600 hover:bg-red-50"
                     @click="openDelete(post)"
                   >
-                    Xóa
+                    {{ t('admin.articles.actions.delete') }}
                   </button>
                 </div>
               </td>
@@ -224,14 +203,14 @@ const deleteArticle = () => {
         </table>
       </div>
 
-      <EmptyState v-if="!filteredArticles.length" message="Không có dữ liệu phù hợp" />
+      <EmptyState v-if="isLoading || !filteredArticles.length" :loading="isLoading" :message="t('admin.articles.empty')" />
       <div class="px-5 pb-5">
         <Pagination
           :page="page"
           :total-pages="totalPages"
           :visible-count="paginatedArticles.length"
           :total-count="filteredArticles.length"
-          label="bài viết"
+          :label="t('admin.articles.paginationLabel')"
           @prev="page = Math.max(1, page - 1)"
           @next="page = Math.min(totalPages, page + 1)"
         />

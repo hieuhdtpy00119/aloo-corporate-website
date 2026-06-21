@@ -1,8 +1,8 @@
 # ALOO Corporate Website
 
-Frontend website and admin CMS demo for **ALOO - Kem Bơ Thuần Việt**.
+Website frontend và bản demo admin CMS cho **ALOO - Kem Bơ Thuần Việt**.
 
-## Tech Stack
+## Công nghệ sử dụng
 
 - Vue 3
 - Vite
@@ -11,15 +11,15 @@ Frontend website and admin CMS demo for **ALOO - Kem Bơ Thuần Việt**.
 - Tailwind CSS
 - Axios
 
-## Requirements
+## Yêu cầu
 
-- Node.js 22.11.0 or newer
+- Node.js 22.11.0 trở lên
 - npm
 - Git
 
 ## Node Version Manager
 
-Use Node Version Manager to switch to the Node.js version required by this project.
+Sử dụng Node Version Manager để chuyển sang đúng phiên bản Node.js mà project yêu cầu.
 
 ```bash
 nvm install 22.11.0
@@ -27,9 +27,9 @@ nvm use 22.11.0
 node -v
 ```
 
-This project also includes `.nvmrc`, so Node Version Manager can read the expected version from the repository.
+Project cũng có file `.nvmrc`, nên Node Version Manager có thể đọc phiên bản Node.js cần dùng trực tiếp từ repository.
 
-## Download Project
+## Tải project
 
 Clone repository:
 
@@ -38,15 +38,15 @@ git clone https://github.com/hieuhdtpy00119/aloo-corporate-website.git
 cd aloo-corporate-website
 ```
 
-## Install Dependencies
+## Cài đặt dependencies
 
 ```bash
 npm install
 ```
 
-## Environment Setup
+## Cấu hình môi trường
 
-Create `.env` from the example file if needed:
+Tạo file `.env` từ file mẫu nếu cần:
 
 ```bash
 cp .env.example .env
@@ -58,48 +58,48 @@ Default example:
 VITE_API_URL=http://localhost:3000/api
 ```
 
-This project currently uses mock data, so backend setup is not required.
+Project hiện đang dùng dữ liệu mock, nên chưa bắt buộc cấu hình backend.
 
-## Run Development Server
+## Chạy development server
 
 ```bash
 npm run dev
 ```
 
-Open:
+Mở:
 
 ```text
 http://localhost:5173/
 ```
 
-## Build Production
+## Build production
 
 ```bash
 npm run build
 ```
 
-## Preview Production Build
+## Xem trước bản production build
 
 ```bash
 npm run preview
 ```
 
-## Admin Demo
+## Demo admin
 
-Admin login route:
+Đường dẫn đăng nhập admin:
 
 ```text
 http://localhost:5173/admin/login
 ```
 
-Demo account:
+Tài khoản demo:
 
 ```text
 Email: admin@aloo.vn
 Password: 123456
 ```
 
-## Main Routes
+## Các route chính
 
 Public:
 
@@ -121,8 +121,8 @@ Admin:
 - `/admin/locations`
 - `/admin/franchise-content`
 
-## Notes
+## Ghi chú
 
-- `node_modules/`, `dist/`, and `.env` are ignored by Git.
-- Do not commit real API keys or secrets.
-- Vite variables starting with `VITE_` are exposed to browser code, so secret keys should be stored in a backend service.
+- `node_modules/`, `dist/` và `.env` được Git bỏ qua.
+- Không commit API key thật hoặc secret thật lên Git.
+- Các biến Vite bắt đầu bằng `VITE_` sẽ bị expose ra browser, nên secret key phải được lưu ở backend service.

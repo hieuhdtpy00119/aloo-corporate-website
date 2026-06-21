@@ -5,6 +5,44 @@ import ProductsView from './ProductsView.vue'
 import { useAppStore } from '../../stores/appStore'
 import { useProductPageStore } from '../../stores/productPageStore'
 
+const translations = {
+  'common.all': 'Tất cả',
+  'products.categories': 'Danh mục sản phẩm',
+  'products.listEyebrow': 'Danh sách sản phẩm',
+  'products.allProducts': 'Tất cả sản phẩm',
+  'products.servingCount': '{count} sản phẩm đang phục vụ',
+  'products.searchPlaceholder': 'Tìm sản phẩm...',
+  'products.explore': 'Khám phá',
+  'products.emptyNoMatch': 'Không tìm thấy sản phẩm phù hợp.',
+  'products.emptyNoData': 'Chưa có dữ liệu. Vui lòng thêm sản phẩm trong trang quản trị.',
+  'products.pageContentErrorHint': 'Không tải được banner/menu từ CMS. Trang vẫn hiển thị danh sách sản phẩm.',
+  'products.prev': 'Trước',
+  'products.next': 'Sau',
+  'products.ctaEyebrow': 'Hợp tác cùng ALOO',
+  'products.ctaTitle': 'Một menu tinh gọn, hấp dẫn chính là chìa khóa kinh doanh',
+  'products.ctaDescription': 'Menu tập trung',
+  'products.ctaButton': 'Đăng ký tư vấn nhượng quyền',
+  'products.updatingImage': 'Đang cập nhật ảnh',
+  'products.defaultCategory': 'Sản phẩm khác',
+  'products.productLabel': 'Sản phẩm',
+  'products.carouselPrev': 'Slide trước',
+  'products.carouselNext': 'Slide sau',
+  'products.carouselDot': 'Chuyển tới slide {index}',
+  'products.defaultSlideTitle': 'Kem Bơ ALOO',
+  'products.defaultSlideSubtitle': 'Năng lượng xanh',
+  'products.defaultSlideDescription': 'Khám phá menu kem bơ.',
+  'products.heroLoading': 'Đang tải banner sản phẩm...',
+}
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key, params = {}) => {
+      const value = translations[key] || key
+      return String(value).replace('{count}', params.count ?? '').replace('{index}', params.index ?? '')
+    },
+  }),
+}))
+
 describe('ProductsView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -20,8 +58,6 @@ describe('ProductsView', () => {
       global: {
         stubs: {
           RouterLink: { props: ['to'], template: '<a :href="to"><slot /></a>' },
-          ProductHeroSlider: { template: '<section data-test="product-hero" />' },
-          AlooMenuPoster: { template: '<section />' },
         },
       },
     })
@@ -68,5 +104,15 @@ describe('ProductsView', () => {
     store.products = []
     wrapper = mountView()
     expect(wrapper.text()).toContain('Chưa có dữ liệu')
+  })
+
+  it('shows hero skeleton while CMS banners are loading', () => {
+    const productPageStore = useProductPageStore()
+    productPageStore.loading = true
+    productPageStore.heroSlides = []
+
+    const wrapper = mountView()
+
+    expect(wrapper.find('section[aria-busy="true"]').exists()).toBe(true)
   })
 })

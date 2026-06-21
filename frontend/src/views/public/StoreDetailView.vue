@@ -54,8 +54,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="min-h-screen bg-[#faf8f2] px-4 py-14 text-avocado-950 sm:px-6 lg:px-8">
-    <div class="mx-auto max-w-5xl">
+  <div class="min-h-screen bg-brand-cream px-4 py-14 text-avocado-950 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-[1240px]">
       <RouterLink to="/locations" class="text-sm font-black text-avocado-700 hover:text-avocado-950">
         ← Quay lại hệ thống cửa hàng
       </RouterLink>
@@ -115,5 +115,5 @@ onMounted(async () => {
         </div>
       </article>
     </div>
-  </main>
+  </div>
 </template>

@@ -1,35 +1,65 @@
+import {
+  decodeJwtPayload,
+  getTokenRole,
+  isAdminToken,
+  isAuthenticatedToken,
+} from '../utils/authToken'
+
+export { decodeJwtPayload, getTokenRole, isAdminToken, isAuthenticatedToken }
+
+const buildLoginRedirect = (to) => {
+  const targetPath = to.fullPath || to.path
+  if (to.path.startsWith('/admin') && to.path !== '/admin/login') {
+    return `/login?redirect=${encodeURIComponent(targetPath)}`
+  }
+  return '/login'
+}
+
+const resolveAdminLoginTarget = (to) => {
+  const redirect = to.query?.redirect
+  if (typeof redirect === 'string' && redirect.startsWith('/admin')) {
+    return redirect
+  }
+  return '/admin'
+}
+
+/** @deprecated Use isAdminToken instead */
+export const isValidAdminToken = isAdminToken
+
 export const resolveAuthRedirect = (to, storage = localStorage) => {
   const adminToken = storage.getItem('admin_token')
-  const isAdminLogin = to.path === '/admin/login'
-  const isAdminRoute = to.path.startsWith('/admin') && !isAdminLogin
+  const isLogin = to.path === '/login' || to.path === '/admin/login'
+  const isOAuthCallback = to.path === '/oauth/callback'
+  const isAccountRoute = to.path === '/account'
+  const isAdminRoute = to.path.startsWith('/admin') && !isLogin
 
-  if (isAdminLogin) {
+  if (isOAuthCallback) {
     return true
   }
 
-  if (isAdminRoute && !isValidAdminToken(adminToken)) {
-    return '/admin/login'
+  if (isLogin) {
+    if (isAdminToken(adminToken)) {
+      return resolveAdminLoginTarget(to)
+    }
+    return true
+  }
+
+  if (isAccountRoute) {
+    if (!isAuthenticatedToken(adminToken)) {
+      return '/login'
+    }
+    if (isAdminToken(adminToken)) {
+      return '/admin/profile'
+    }
+    return true
+  }
+
+  if (isAdminRoute && !isAdminToken(adminToken)) {
+    if (isAuthenticatedToken(adminToken) && to.path === '/admin/profile') {
+      return '/account'
+    }
+    return buildLoginRedirect(to)
   }
 
   return true
-}
-
-const decodeJwtPayload = (token) => {
-  try {
-    const payload = String(token || '').split('.')[1]
-    if (!payload) return null
-    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
-    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
-    return JSON.parse(atob(padded))
-  } catch {
-    return null
-  }
-}
-
-export const isValidAdminToken = (token) => {
-  const payload = decodeJwtPayload(token)
-  if (!payload) return false
-  if (payload.exp && payload.exp * 1000 <= Date.now()) return false
-  const role = String(payload.role || payload.authorities || payload.scope || '').toUpperCase()
-  return !role || role.includes('ADMIN')
 }

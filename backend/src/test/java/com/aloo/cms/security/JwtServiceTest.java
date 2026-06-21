@@ -2,8 +2,10 @@ package com.aloo.cms.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.aloo.cms.entity.AdminProfile;
 import com.aloo.cms.entity.AdminUser;
 import com.aloo.cms.entity.UserRole;
+import com.aloo.cms.service.AdminPermissionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -33,7 +35,7 @@ class JwtServiceTest {
     }
 
     private JwtService jwtService(long expirationMs) {
-        JwtService service = new JwtService();
+        JwtService service = new JwtService(new AdminPermissionService());
         ReflectionTestUtils.setField(
                 service,
                 "jwtSecret",
@@ -49,6 +51,7 @@ class JwtServiceTest {
         user.setPasswordHash("$2a$10$7EqJtq98hPqEX7fNZaFWoOFBKDBQawXp0N17DkT5dOblGm5UQzN9e");
         user.setFullName("ALOO Admin");
         user.setRole(UserRole.ADMIN);
+        user.setAdminProfile(AdminProfile.FULL);
         user.setStatus("ACTIVE");
         return user;
     }

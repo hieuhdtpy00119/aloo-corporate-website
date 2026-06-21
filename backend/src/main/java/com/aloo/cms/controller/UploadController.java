@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +24,7 @@ public class UploadController {
     private final RateLimitService rateLimitService;
 
     @PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN') and @adminScope.hasAny('content', 'stores', 'crm', 'system')")
     public UploadResponse uploadImage(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
         rateLimitService.check("admin-upload", RequestClient.ip(request), 40, Duration.ofMinutes(10));
         return uploadService.uploadImage(file);

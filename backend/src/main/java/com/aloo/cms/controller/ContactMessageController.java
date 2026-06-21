@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,21 +32,25 @@ public class ContactMessageController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') and @adminScope.has('crm')")
     public List<ContactMessageResponse> findAll() {
         return contactMessageService.findAll();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') and @adminScope.has('crm')")
     public ContactMessageResponse findById(@PathVariable Long id) {
         return contactMessageService.findById(id);
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN') and @adminScope.has('crm')")
     public ContactMessageResponse updateStatus(@PathVariable Long id, @Valid @RequestBody RegistrationStatusUpdateRequest request) {
         return contactMessageService.updateStatus(id, request);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') and @adminScope.has('crm')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         contactMessageService.delete(id);
         return ResponseEntity.noContent().build();

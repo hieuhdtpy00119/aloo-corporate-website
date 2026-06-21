@@ -95,7 +95,7 @@ async function submitContact() {
 </script>
 
 <template>
-  <main class="bg-[#faf8f2] text-avocado-950 pb-20 min-h-screen">
+  <div class="bg-brand-cream text-avocado-950 pb-20 min-h-screen">
     <!-- Header Hero block -->
     <div class="relative bg-avocado-950 text-white overflow-hidden py-20 px-4 sm:px-6 lg:px-8 text-center">
       <div class="absolute inset-0 opacity-15">
@@ -118,7 +118,7 @@ async function submitContact() {
     </div>
 
     <!-- Main Section -->
-    <section class="max-w-6xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+    <section class="max-w-[1240px] mx-auto px-4 py-16 sm:px-6 lg:px-8">
       <SectionTitle
         :eyebrow="t('contact.eyebrow')"
         :title="t('contact.title')"
@@ -258,7 +258,7 @@ async function submitContact() {
       </div>
 
       <!-- Quick Franchise CTA -->
-      <div class="mt-20 overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-avocado-950 via-avocado-900 to-[#122310] p-8 sm:p-12 text-white relative shadow-xl">
+      <div class="mt-20 overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-avocado-950 via-avocado-900 to-brand-dark p-8 sm:p-12 text-white relative shadow-xl">
         <div class="absolute -right-20 -top-20 w-80 h-80 bg-cream-400/5 rounded-full blur-3xl pointer-events-none"></div>
         <div class="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center relative z-10">
           <div class="space-y-3">
@@ -280,7 +280,7 @@ async function submitContact() {
         </div>
       </div>
     </section>
-  </main>
+  </div>
 </template>
 
 

@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import BaseModal from './BaseModal.vue'
 
 const props = defineProps({
@@ -13,11 +14,11 @@ const props = defineProps({
   },
   title: {
     type: String,
-    default: 'Xác nhận xóa',
+    default: '',
   },
   message: {
     type: String,
-    default: 'Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa vĩnh viễn mục dữ liệu này khỏi cơ sở dữ liệu hệ thống?',
+    default: '',
   },
   confirmText: {
     type: String,
@@ -30,9 +31,12 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['cancel', 'close', 'confirm'])
+const { t } = useI18n()
 
 const isVisible = computed(() => props.show || props.open)
-const resolvedConfirmLabel = computed(() => props.confirmText || props.confirmLabel || 'Xác nhận xóa')
+const resolvedTitle = computed(() => props.title || t('admin.shared.confirmDeleteTitle'))
+const resolvedMessage = computed(() => props.message || t('admin.shared.confirmDeleteMessage'))
+const resolvedConfirmLabel = computed(() => props.confirmText || props.confirmLabel || t('admin.shared.confirmDelete'))
 
 const cancel = () => {
   emit('cancel')
@@ -41,13 +45,13 @@ const cancel = () => {
 </script>
 
 <template>
-  <BaseModal :show="isVisible" :title="title" max-width="max-w-md" @close="cancel">
+  <BaseModal :show="isVisible" :title="resolvedTitle" max-width="max-w-md" @close="cancel">
     <p class="leading-relaxed text-sm text-slate-500">
-      {{ message }}
+      {{ resolvedMessage }}
     </p>
     <template #footer>
       <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-        <button class="rounded-full border border-slate-200 px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 transition hover:bg-slate-50" @click="cancel">Hủy bỏ</button>
+        <button class="rounded-full border border-slate-200 px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 transition hover:bg-slate-50" @click="cancel">{{ t('admin.shared.cancel') }}</button>
         <button class="rounded-full bg-red-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-red-600/10 transition hover:bg-red-500" @click="$emit('confirm')">
           {{ resolvedConfirmLabel }}
         </button>

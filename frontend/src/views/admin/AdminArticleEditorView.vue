@@ -2,26 +2,28 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import RichTextEditor from '../../components/admin/RichTextEditor.vue'
+import { useAdminModuleI18n } from '../../composables/useAdminModuleI18n'
 import { uploadService } from '../../services/cmsService'
 import { useAppStore } from '../../stores/appStore'
 import { useToastStore } from '../../stores/toastStore'
+import { adminPaths } from '../../constants/adminPaths'
 
 const route = useRoute()
 const router = useRouter()
 const store = useAppStore()
 const toast = useToastStore()
+const { m } = useAdminModuleI18n('articleEditor')
 
 const articleId = computed(() => Number(route.params.id))
 const isEdit = computed(() => Number.isFinite(articleId.value) && articleId.value > 0)
 
-const statuses = [
-  { value: 'DRAFT', label: 'Nháp' },
-  { value: 'PENDING', label: 'Chờ duyệt' },
-  { value: 'REVIEWING', label: 'Đang rà soát' },
-  { value: 'APPROVED', label: 'Đã duyệt' },
-  { value: 'PUBLISHED', label: 'Đã xuất bản' },
-  { value: 'ARCHIVED', label: 'Lưu trữ' },
-]
+const statusValues = ['DRAFT', 'PENDING', 'REVIEWING', 'APPROVED', 'PUBLISHED', 'ARCHIVED']
+const statuses = computed(() =>
+  statusValues.map((value) => ({
+    value,
+    label: m(`statuses.${value}`),
+  })),
+)
 const articleCategories = computed(() =>
   store.categories
     .filter((category) => category.type === 'ARTICLE' && category.status === 'ACTIVE')
@@ -177,9 +179,9 @@ const handleThumbnailUpload = async (event) => {
   try {
     const { data } = await uploadService.image(file)
     form.image = data.url
-    toast.success('Đã upload ảnh đại diện')
+    toast.success(m('toasts.coverUploaded'))
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Không upload được ảnh đại diện')
+    toast.error(error.response?.data?.message || m('toasts.coverError'))
   } finally {
     isUploadingImages.value = false
     event.target.value = ''
@@ -194,9 +196,9 @@ const handleGalleryUpload = async (event) => {
   try {
     const uploaded = await Promise.all(files.map((file) => uploadService.image(file)))
     form.gallery.push(...uploaded.map((result) => result.data.url))
-    toast.success('Đã upload gallery')
+    toast.success(m('toasts.galleryUploaded'))
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Không upload được gallery')
+    toast.error(error.response?.data?.message || m('toasts.galleryError'))
   } finally {
     isUploadingImages.value = false
     event.target.value = ''
@@ -213,11 +215,11 @@ const removeThumbnailImage = () => {
 
 const validateForm = () => {
   if (!form.title.trim()) {
-    toast.error('Vui lòng nhập tiêu đề bài viết')
+    toast.error(m('toasts.titleRequired'))
     return false
   }
   if (!form.slug.trim()) {
-    toast.error('Vui lòng nhập slug SEO')
+    toast.error(m('toasts.slugRequired'))
     return false
   }
   return true
@@ -254,11 +256,11 @@ const saveArticle = async (status) => {
 
   try {
     await store.savePost(payload)
-    toast.success(status === 'PUBLISHED' ? 'Đã lưu và xuất bản bài viết' : 'Đã lưu bản nháp')
+    toast.success(status === 'PUBLISHED' ? m('toasts.published') : m('toasts.draftSaved'))
     localStorage.removeItem(draftKey.value)
-    router.push('/admin/articles')
+    router.push(adminPaths.content.articles)
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Không lưu được bài viết')
+    toast.error(error.response?.data?.message || m('toasts.saveError'))
   }
 }
 
@@ -270,25 +272,25 @@ onMounted(async () => {
 
 <template>
   <section class="space-y-6">
-    <div class="sticky top-0 z-20 -mx-4 border-b border-slate-200 bg-slate-50/95 px-4 py-4 backdrop-blur md:-mx-8 md:px-8">
+    <div class="sticky top-16 z-20 -mx-4 border-b border-slate-200 bg-slate-50/95 px-4 py-4 backdrop-blur md:-mx-8 md:px-8">
       <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div>
-          <RouterLink to="/admin/articles" class="text-sm font-black text-avocado-700 hover:text-avocado-900">
-            ← Thoát về danh sách
+          <RouterLink :to="adminPaths.content.articles" class="text-sm font-black text-avocado-700 hover:text-avocado-900">
+            {{ m('backToList') }}
           </RouterLink>
           <h1 class="mt-2 text-3xl font-black text-avocado-950">
-            {{ isEdit ? 'Chỉnh sửa bài viết' : 'Tạo bài viết mới' }}
+            {{ isEdit ? m('editTitle') : m('createTitle') }}
           </h1>
         </div>
         <div class="flex flex-wrap gap-3">
-          <button type="button" class="rounded-xl border border-slate-200 bg-white px-5 py-3 font-black text-slate-700 hover:bg-slate-50" @click="router.push('/admin/articles')">
-            Thoát
+          <button type="button" class="rounded-xl border border-slate-200 bg-white px-5 py-3 font-black text-slate-700 hover:bg-slate-50" @click="router.push(adminPaths.content.articles)">
+            {{ m('exit') }}
           </button>
           <button type="button" class="rounded-xl border border-avocado-200 bg-white px-5 py-3 font-black text-avocado-700 hover:bg-avocado-50 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isUploadingImages" @click="saveArticle('DRAFT')">
-            Lưu nháp
+            {{ m('saveDraft') }}
           </button>
-          <button type="button" class="rounded-xl bg-[#2D5A27] px-5 py-3 font-black text-white shadow-sm hover:bg-[#24491f] disabled:cursor-not-allowed disabled:opacity-60" :disabled="isUploadingImages" @click="saveArticle('PUBLISHED')">
-            Lưu & Xuất bản
+          <button type="button" class="rounded-xl bg-brand-forest px-5 py-3 font-black text-white shadow-sm hover:bg-avocado-800 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isUploadingImages" @click="saveArticle('PUBLISHED')">
+            {{ m('saveAndPublish') }}
           </button>
         </div>
       </div>
@@ -300,34 +302,34 @@ onMounted(async () => {
           <h2 class="text-xl font-black text-avocado-950">Thông tin bài viết</h2>
           <div class="mt-5 grid gap-4 md:grid-cols-2">
             <label class="space-y-2 md:col-span-2">
-              <span class="text-sm font-black text-slate-700">Tiêu đề bài viết</span>
-              <input v-model="form.title" class="admin-input" placeholder="Ví dụ: Review ALOO Kem Bơ Quy Nhơn" />
+              <span class="text-sm font-black text-slate-700">{{ m('fields.title') }}</span>
+              <input v-model="form.title" class="admin-input" :placeholder="m('placeholders.title')" />
             </label>
             <label class="space-y-2">
-              <span class="text-sm font-black text-slate-700">Slug URL</span>
-              <input v-model="form.slug" class="admin-input" placeholder="review-aloo-kem-bo-quy-nhon" />
+              <span class="text-sm font-black text-slate-700">{{ m('fields.slug') }}</span>
+              <input v-model="form.slug" class="admin-input" :placeholder="m('placeholders.slug')" />
             </label>
             <label class="space-y-2">
-              <span class="text-sm font-black text-slate-700">Danh mục</span>
+              <span class="text-sm font-black text-slate-700">{{ m('fields.category') }}</span>
               <select v-model="form.category" class="admin-input">
                 <option v-for="category in articleCategories" :key="category.id" :value="category.name">{{ category.name }}</option>
               </select>
             </label>
             <label class="space-y-2">
-              <span class="text-sm font-black text-slate-700">Tác giả</span>
+              <span class="text-sm font-black text-slate-700">{{ m('fields.author') }}</span>
               <input v-model="form.author" class="admin-input" />
             </label>
             <label class="space-y-2">
-              <span class="text-sm font-black text-slate-700">Nguồn</span>
-              <input v-model="form.source" class="admin-input" placeholder="ALOO / Báo chí / Cộng tác viên" />
+              <span class="text-sm font-black text-slate-700">{{ m('fields.source') }}</span>
+              <input v-model="form.source" class="admin-input" :placeholder="m('placeholders.source')" />
             </label>
             <label class="space-y-2">
-              <span class="text-sm font-black text-slate-700">Link nguồn</span>
-              <input v-model="form.sourceLink" class="admin-input" placeholder="https://..." />
+              <span class="text-sm font-black text-slate-700">{{ m('fields.sourceLink') }}</span>
+              <input v-model="form.sourceLink" class="admin-input" :placeholder="m('placeholders.sourceLink')" />
             </label>
             <label class="space-y-2 md:col-span-2">
-              <span class="text-sm font-black text-slate-700">Mô tả ngắn</span>
-              <textarea v-model="form.excerpt" rows="3" class="admin-input resize-none" placeholder="Tóm tắt ngắn dùng cho trang blog và SEO." />
+              <span class="text-sm font-black text-slate-700">{{ m('fields.excerpt') }}</span>
+              <textarea v-model="form.excerpt" rows="3" class="admin-input resize-none" :placeholder="m('placeholders.excerpt')" />
             </label>
           </div>
         </div>
@@ -335,16 +337,16 @@ onMounted(async () => {
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px] md:items-start">
             <div class="max-w-xl">
-              <h2 class="text-xl font-black text-avocado-950">Upload ảnh</h2>
+              <h2 class="text-xl font-black text-avocado-950">{{ m('upload.title') }}</h2>
               <p class="mt-1 text-sm text-slate-500">Ảnh upload được lưu vào backend và dùng lại ở public blog.</p>
             </div>
             <div class="grid gap-2 sm:grid-cols-2 md:grid-cols-1">
               <label class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl border border-avocado-200 px-4 py-3 text-center text-sm font-black text-avocado-700 transition hover:bg-avocado-50">
-                {{ isUploadingImages ? 'Đang upload...' : 'Upload ảnh đại diện' }}
+                {{ isUploadingImages ? m('upload.uploading') : m('upload.cover') }}
                 <input type="file" accept="image/*" class="hidden" :disabled="isUploadingImages" @change="handleThumbnailUpload" />
               </label>
               <label class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-center text-sm font-black text-slate-700 transition hover:bg-slate-50">
-                {{ isUploadingImages ? 'Đang upload...' : 'Upload gallery' }}
+                {{ isUploadingImages ? m('upload.uploading') : m('upload.gallery') }}
                 <input ref="galleryInput" type="file" accept="image/*" multiple class="hidden" :disabled="isUploadingImages" @change="handleGalleryUpload" />
               </label>
             </div>
@@ -360,18 +362,18 @@ onMounted(async () => {
                 class="absolute right-3 top-3 rounded-xl bg-white/95 px-3 py-2 text-xs font-black text-red-600 shadow-sm ring-1 ring-red-100 transition hover:bg-red-50"
                 @click="removeThumbnailImage"
               >
-                Xóa ảnh
+                {{ m('upload.removeImage') }}
               </button>
             </div>
             <div>
               <label class="space-y-2">
-                <span class="text-sm font-black text-slate-700">URL ảnh đại diện</span>
-                <input v-model="form.image" class="admin-input" placeholder="https://..." />
+                <span class="text-sm font-black text-slate-700">{{ m('fields.coverImage') }}</span>
+                <input v-model="form.image" class="admin-input" :placeholder="m('placeholders.image')" />
               </label>
               <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
                 <div v-for="image in form.gallery" :key="image" class="group relative overflow-hidden rounded-xl border border-slate-200">
                   <img :src="image" alt="Gallery" class="h-24 w-full object-cover" />
-                  <button type="button" class="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-1 text-xs font-black text-red-600 opacity-0 shadow group-hover:opacity-100" @click="removeGalleryImage(image)">
+                  <button type="button" class="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-1 text-xs font-black text-red-600 shadow sm:opacity-0 sm:group-hover:opacity-100" @click="removeGalleryImage(image)">
                     Xóa
                   </button>
                 </div>
@@ -396,13 +398,13 @@ onMounted(async () => {
           <h2 class="text-xl font-black text-avocado-950">Bảng xuất bản</h2>
           <div class="mt-5 space-y-4">
             <label class="space-y-2">
-              <span class="text-sm font-black text-slate-700">Trạng thái</span>
+              <span class="text-sm font-black text-slate-700">{{ m('fields.status') }}</span>
               <select v-model="form.status" class="admin-input">
                 <option v-for="status in statuses" :key="status.value" :value="status.value">{{ status.label }}</option>
               </select>
             </label>
             <label class="space-y-2">
-              <span class="text-sm font-black text-slate-700">Ngày đăng</span>
+              <span class="text-sm font-black text-slate-700">{{ m('fields.publishedAt') }}</span>
               <input v-model="form.publishedAt" type="date" class="admin-input" />
               <p class="rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600">
                 {{ publishedAtDisplay }}
@@ -448,18 +450,18 @@ onMounted(async () => {
           <div class="mt-5 space-y-4">
             <label class="space-y-2">
               <span class="flex justify-between text-sm font-black text-slate-700">
-                SEO title
+                {{ m('fields.metaTitle') }}
                 <small class="text-slate-500">{{ form.seoTitle.length }}/70</small>
               </span>
               <input v-model="form.seoTitle" class="admin-input" />
             </label>
             <label class="space-y-2">
-              <span class="text-sm font-black text-slate-700">Meta keyword</span>
-              <input v-model="form.metaKeywords" class="admin-input" placeholder="kem bơ, Quy Nhơn, ALOO" />
+              <span class="text-sm font-black text-slate-700">{{ m('fields.metaKeywords') }}</span>
+              <input v-model="form.metaKeywords" class="admin-input" :placeholder="m('placeholders.metaKeywords')" />
             </label>
             <label class="space-y-2">
               <span class="flex justify-between text-sm font-black text-slate-700">
-                Meta description
+                {{ m('fields.metaDescription') }}
                 <small class="text-slate-500">{{ form.metaDescription.length }}/160</small>
               </span>
               <textarea v-model="form.metaDescription" rows="4" class="admin-input resize-none" />

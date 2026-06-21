@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { refreshAuthProfile, setAuthProvider } from '../../services/authService'
+import { decodeBase64JsonUtf8 } from '../../utils/textEncoding'
 
 const route = useRoute()
 const router = useRouter()
@@ -8,7 +10,19 @@ const errorMessage = ref('')
 
 const nextLabel = computed(() => (errorMessage.value ? 'Quay lại đăng nhập' : 'Đang hoàn tất đăng nhập...'))
 
-onMounted(() => {
+const decodeUserPayload = (payload) => {
+  if (!payload) return null
+
+  try {
+    return JSON.parse(payload)
+  } catch {
+    // Backward compatible with older redirects that sent raw JSON.
+  }
+
+  return decodeBase64JsonUtf8(payload)
+}
+
+onMounted(async () => {
   const error = route.query.error
   if (error) {
     errorMessage.value = Array.isArray(error) ? error[0] : error
@@ -16,31 +30,32 @@ onMounted(() => {
   }
 
   const token = Array.isArray(route.query.token) ? route.query.token[0] : route.query.token
-  const role = Array.isArray(route.query.role) ? route.query.role[0] : route.query.role
-  const userPayload = Array.isArray(route.query.user) ? route.query.user[0] : route.query.user
 
-  if (!token || !role || !userPayload) {
+  if (!token) {
     errorMessage.value = 'Không nhận được thông tin đăng nhập từ Google'
     return
   }
 
-  let user
-  try {
-    user = JSON.parse(userPayload)
-  } catch {
-    errorMessage.value = 'Thông tin tài khoản Google không hợp lệ'
-    return
-  }
-
-  if (role !== 'ADMIN') {
-    errorMessage.value = 'Tài khoản Google này không có quyền quản trị'
-    return
-  }
-
   localStorage.setItem('admin_token', token)
-  localStorage.setItem('admin_user', JSON.stringify(user))
-  window.dispatchEvent(new Event('aloo-auth-change'))
-  router.replace('/admin')
+  setAuthProvider('google')
+
+  try {
+    const profile = await refreshAuthProfile()
+    router.replace(profile.role === 'ADMIN' ? '/admin' : '/')
+    return
+  } catch {
+    const userPayload = Array.isArray(route.query.user) ? route.query.user[0] : route.query.user
+    const user = decodeUserPayload(userPayload)
+
+    if (!user) {
+      errorMessage.value = 'Không tải được hồ sơ tài khoản sau đăng nhập Google'
+      return
+    }
+
+    localStorage.setItem('admin_user', JSON.stringify(user))
+    window.dispatchEvent(new Event('aloo-auth-change'))
+    router.replace(user.role === 'ADMIN' ? '/admin' : '/')
+  }
 })
 </script>
 
@@ -54,7 +69,7 @@ onMounted(() => {
       </p>
       <RouterLink
         v-if="errorMessage"
-        to="/admin/login"
+        to="/login"
         class="mt-6 inline-flex rounded-full bg-avocado-700 px-6 py-3 text-sm font-black text-white transition hover:bg-avocado-800"
       >
         Đăng nhập lại

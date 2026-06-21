@@ -45,6 +45,10 @@ public class AdminUser {
     @Column(nullable = false, length = 30)
     private UserRole role = UserRole.ADMIN;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private AdminProfile adminProfile = AdminProfile.FULL;
+
     @Column(nullable = false, length = 30)
     private String status = "ACTIVE";
 

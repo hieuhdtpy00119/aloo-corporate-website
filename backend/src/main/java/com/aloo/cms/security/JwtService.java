@@ -1,6 +1,7 @@
 package com.aloo.cms.security;
 
 import com.aloo.cms.entity.AdminUser;
+import com.aloo.cms.service.AdminPermissionService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -15,6 +16,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtService {
 
+    private final AdminPermissionService adminPermissionService;
+
+    public JwtService(AdminPermissionService adminPermissionService) {
+        this.adminPermissionService = adminPermissionService;
+    }
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 
@@ -22,16 +29,21 @@ public class JwtService {
     private long jwtExpirationMs;
 
     public String generateToken(AdminUser user) {
-        return generateToken(user.getEmail(), user.getRole().name());
+        return generateToken(user.getEmail(), user.getRole().name(), adminPermissionService.resolveScopes(user));
     }
 
     public String generateToken(String email, String role) {
+        return generateToken(email, role, java.util.List.of());
+    }
+
+    public String generateToken(String email, String role, java.util.List<String> scopes) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + jwtExpirationMs);
 
         return Jwts.builder()
                 .subject(email)
                 .claim("role", role)
+                .claim("scopes", scopes)
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(signingKey())

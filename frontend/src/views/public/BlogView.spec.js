@@ -4,6 +4,47 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import BlogView from './BlogView.vue'
 import { useAppStore } from '../../stores/appStore'
 
+const translations = {
+  'common.all': 'Tất cả',
+  'blog.eyebrow': 'Blog',
+  'blog.title': 'Tin tức và câu chuyện ALOO',
+  'blog.description': 'Mô tả blog',
+  'blog.latestSection': 'Tin mới cập nhật',
+  'blog.loadMore': 'Xem thêm bài viết',
+  'blog.excerptFallback': 'Nội dung bài viết đang được cập nhật.',
+  'blog.dateUnset': 'Chưa đặt ngày',
+  'blog.emptyNoData': 'Chưa có bài viết công khai',
+  'blog.emptyNoDataDesc': 'Nội dung blog sẽ được cập nhật sớm.',
+  'blog.emptyNoMatch': 'Chưa có bài viết phù hợp',
+  'blog.emptyNoMatchDesc': 'Danh mục này chưa có bài viết công khai.',
+  'blog.sidebarSuggested': 'Gợi ý đọc',
+  'blog.sidebarLatest': 'Bài mới',
+  'blog.franchiseCtaEyebrow': 'Nhượng quyền',
+  'blog.franchiseCtaTitle': 'Muốn mở cửa hàng ALOO?',
+  'blog.franchiseCtaDesc': 'Đăng ký tư vấn',
+  'blog.franchiseCtaButton': 'Tư vấn nhượng quyền',
+  'blog.loadErrorHint': 'Không tải được danh sách bài viết.',
+  'blog.clearFilter': 'Xem tất cả bài viết',
+  'blog.loading': 'Đang tải bài viết...',
+}
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key) => translations[key] || key,
+    locale: { value: 'vi' },
+  }),
+}))
+
+vi.mock('../../services/seoService', () => ({
+  routeSeo: {
+    '/blog': {
+      title: 'Blog ALOO',
+      description: 'Blog description',
+    },
+  },
+  setSeoMeta: vi.fn(),
+}))
+
 describe('BlogView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -57,7 +98,7 @@ describe('BlogView', () => {
     const productFilter = wrapper.findAll('button').find((button) => button.text() === 'Sản phẩm')
     await productFilter.trigger('click')
 
-    expect(productFilter.classes()).toContain('bg-avocado-900')
+    expect(productFilter.classes()).toContain('bg-avocado-700')
     expect(wrapper.text()).toContain('Bài viết sản phẩm')
   })
 })

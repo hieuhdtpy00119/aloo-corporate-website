@@ -1,13 +1,18 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import BaseModal from '../../components/admin/BaseModal.vue'
+import AdminPageHeader from '../../components/admin/AdminPageHeader.vue'
 import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
 import Pagination from '../../components/admin/Pagination.vue'
 import SearchFilterBar from '../../components/admin/SearchFilterBar.vue'
+import { useAdminModuleI18n } from '../../composables/useAdminModuleI18n'
 import { useAppStore } from '../../stores/appStore'
 import { useToastStore } from '../../stores/toastStore'
+import { adminPaths } from '../../constants/adminPaths'
 
+const { m, t } = useAdminModuleI18n('categories')
 const store = useAppStore()
 const toast = useToastStore()
 
@@ -16,18 +21,18 @@ const mode = ref('create')
 const editingId = ref(null)
 const pendingDeleteId = ref(null)
 const searchQuery = ref('')
-const statusFilter = ref('Tất cả')
+const statusFilter = ref(t('admin.shared.all'))
 const currentPage = ref(1)
 const pageSize = 5
 const isLoading = computed(() => store.loading.categories)
 const errorMessage = computed(() => store.errors.categories)
 
 const categoryStatuses = ['ACTIVE', 'INACTIVE']
-const statusLabels = {
-  ACTIVE: 'Đang hoạt động',
-  INACTIVE: 'Tạm ẩn',
-}
-const statusFilters = ['Tất cả', ...categoryStatuses.map((status) => statusLabels[status])]
+const statusLabels = computed(() => ({
+  ACTIVE: m('status.ACTIVE'),
+  INACTIVE: m('status.INACTIVE'),
+}))
+const statusFilters = computed(() => [t('admin.shared.all'), ...categoryStatuses.map((status) => statusLabels.value[status])])
 
 const form = reactive({
   name: '',
@@ -60,7 +65,7 @@ const statusClass = (status) =>
     : 'bg-gray-50 text-gray-700 border-gray-200'
 
 const getStatusValue = (label) =>
-  Object.entries(statusLabels).find(([, value]) => value === label)?.[0] || label
+  Object.entries(statusLabels.value).find(([, value]) => value === label)?.[0] || label
 
 const openCreateModal = () => {
   mode.value = 'create'
@@ -86,6 +91,11 @@ const closeModal = () => {
 }
 
 const saveCategory = async () => {
+  if (!form.name.trim() || !form.slug.trim()) {
+    toast.error(m('toasts.requiredFields'))
+    return
+  }
+
   const payload = {
     id: editingId.value,
     name: form.name.trim(),
@@ -96,19 +106,19 @@ const saveCategory = async () => {
 
   try {
     await store.saveCategory(payload)
-    toast.success(mode.value === 'create' ? 'Đã thêm danh mục thành công' : 'Đã cập nhật danh mục thành công')
+    toast.success(mode.value === 'create' ? m('toasts.created') : m('toasts.updated'))
     closeModal()
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Không lưu được danh mục')
+    toast.error(error.response?.data?.message || m('toasts.saveError'))
   }
 }
 
 const confirmDeleteCategory = async () => {
   try {
     await store.deleteCategory(pendingDeleteId.value)
-    toast.success('Đã xóa danh mục thành công')
+    toast.success(m('toasts.deleted'))
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Không xóa được danh mục')
+    toast.error(error.response?.data?.message || m('toasts.deleteError'))
   } finally {
     pendingDeleteId.value = null
   }
@@ -117,6 +127,7 @@ const confirmDeleteCategory = async () => {
 const filteredCategories = computed(() => {
   const keyword = searchQuery.value.trim().toLowerCase()
   return store.categories
+    .filter((category) => category.type === 'ARTICLE')
     .filter((category) => {
       const matchesSearch =
         !keyword ||
@@ -124,7 +135,7 @@ const filteredCategories = computed(() => {
         category.slug.toLowerCase().includes(keyword) ||
         category.description?.toLowerCase().includes(keyword)
       const matchesStatus =
-        statusFilter.value === 'Tất cả' || category.status === getStatusValue(statusFilter.value)
+        statusFilter.value === t('admin.shared.all') || category.status === getStatusValue(statusFilter.value)
       return matchesSearch && matchesStatus
     })
     .sort((a, b) => a.name.localeCompare(b.name, 'vi'))
@@ -148,29 +159,30 @@ watch([searchQuery, statusFilter], () => {
 
 onMounted(() => {
   store.fetchCategories().catch(() => {
-    toast.error('Không tải được danh mục')
+    toast.error(m('toasts.loadError'))
   })
 })
 </script>
 
 <template>
   <section>
-    <div class="mb-6 flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:flex-row lg:items-center">
-      <div>
-        <h1 class="text-3xl font-black text-avocado-950">Quản lý danh mục</h1>
-        <p class="mt-2 text-slate-600">Quản lý danh mục bài viết và sản phẩm.</p>
-      </div>
-      <button class="rounded-xl bg-[#2D5A27] px-5 py-3 font-black text-white hover:bg-[#24491f]" @click="openCreateModal">
-        Thêm danh mục
-      </button>
-    </div>
+    <RouterLink :to="adminPaths.content.articles" class="mb-4 inline-block text-sm font-black text-avocado-700 hover:text-avocado-900">
+      {{ m('backToArticles', { label: t('admin.nav.articles') }) }}
+    </RouterLink>
+    <AdminPageHeader :title="t('admin.nav.categories')" :description="m('description')">
+      <template #actions>
+        <button class="aloo-btn aloo-btn--primary" @click="openCreateModal">
+          {{ m('add') }}
+        </button>
+      </template>
+    </AdminPageHeader>
 
     <SearchFilterBar
       v-model:search="searchQuery"
       v-model:status="statusFilter"
-      search-label="Tìm danh mục"
-      search-placeholder="Tìm tên danh mục, slug, mô tả"
-      status-label="Trạng thái"
+      :search-label="m('filters.searchLabel')"
+      :search-placeholder="m('filters.searchPlaceholder')"
+      :status-label="t('admin.shared.status')"
       :status-options="statusFilters"
     />
     <p v-if="errorMessage" class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
@@ -189,11 +201,11 @@ onMounted(() => {
           </colgroup>
           <thead class="bg-slate-50 text-sm font-black text-slate-600">
             <tr>
-              <th class="px-5 py-4">Tên danh mục</th>
-              <th class="px-5 py-4">Slug</th>
-              <th class="px-5 py-4">Mô tả</th>
-              <th class="px-5 py-4">Trạng thái</th>
-              <th class="px-5 py-4 text-right">Hành động</th>
+              <th class="px-5 py-4">{{ m('columns.name') }}</th>
+              <th class="px-5 py-4">{{ m('columns.slug') }}</th>
+              <th class="px-5 py-4">{{ m('columns.description') }}</th>
+              <th class="px-5 py-4">{{ m('columns.status') }}</th>
+              <th class="px-5 py-4 text-right">{{ m('columns.actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 text-sm">
@@ -205,7 +217,7 @@ onMounted(() => {
                 <span class="block truncate">/{{ category.slug }}</span>
               </td>
               <td class="px-5 py-4 text-slate-600">
-                <p class="truncate">{{ category.description || 'Chưa có mô tả' }}</p>
+                <p class="truncate">{{ category.description || m('noDescription') }}</p>
               </td>
               <td class="px-5 py-4">
                 <span class="inline-flex min-w-[122px] justify-center rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(category.status)">
@@ -214,15 +226,19 @@ onMounted(() => {
               </td>
               <td class="px-5 py-4">
                 <div class="flex justify-end gap-2">
-                  <button class="rounded-lg border border-avocado-200 px-3 py-2 font-bold text-avocado-700 hover:bg-avocado-50" @click="openEditModal(category)">Sửa</button>
-                  <button class="rounded-lg border border-red-200 px-3 py-2 font-bold text-red-600 hover:bg-red-50" @click="pendingDeleteId = category.id">Xóa</button>
+                  <button class="rounded-lg border border-avocado-200 px-3 py-2 font-bold text-avocado-700 hover:bg-avocado-50" @click="openEditModal(category)">
+                    {{ m('actions.edit') }}
+                  </button>
+                  <button class="rounded-lg border border-red-200 px-3 py-2 font-bold text-red-600 hover:bg-red-50" @click="pendingDeleteId = category.id">
+                    {{ m('actions.delete') }}
+                  </button>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <EmptyState v-if="isLoading || filteredCategories.length === 0" :loading="isLoading" message="Không có dữ liệu phù hợp" />
+      <EmptyState v-if="isLoading || filteredCategories.length === 0" :loading="isLoading" :message="m('empty')" />
     </div>
 
     <Pagination
@@ -230,37 +246,39 @@ onMounted(() => {
       :total-pages="totalPages"
       :visible-count="paginatedCategories.length"
       :total-count="filteredCategories.length"
-      label="danh mục"
+      :label="m('paginationLabel')"
       @prev="currentPage = Math.max(1, currentPage - 1)"
       @next="currentPage = Math.min(totalPages, currentPage + 1)"
     />
 
-    <BaseModal :show="showModal" :title="mode === 'create' ? 'Thêm danh mục' : 'Sửa danh mục'" max-width="max-w-2xl" @close="closeModal">
+    <BaseModal :show="showModal" :title="mode === 'create' ? m('modals.create') : m('modals.edit')" max-width="max-w-2xl" @close="closeModal">
       <form id="category-form" class="grid gap-5 md:grid-cols-2" @submit.prevent="saveCategory">
         <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Tên danh mục
+          {{ m('fields.name') }}
           <input v-model="form.name" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
         </label>
         <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Slug
+          {{ m('fields.slug') }}
           <input v-model="form.slug" required class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
         </label>
         <label class="grid gap-2 text-sm font-bold text-slate-700">
-          Trạng thái
+          {{ m('fields.status') }}
           <select v-model="form.status" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500">
             <option v-for="status in categoryStatuses" :key="status" :value="status">{{ statusLabels[status] }}</option>
           </select>
         </label>
         <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
-          Mô tả ngắn
+          {{ m('fields.description') }}
           <textarea v-model="form.description" rows="3" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500"></textarea>
         </label>
       </form>
       <template #footer>
         <div class="flex justify-end gap-3">
-          <button class="rounded-lg border border-slate-200 px-4 py-3 font-bold text-slate-600 hover:bg-slate-50" @click="closeModal">Hủy</button>
-          <button class="rounded-lg bg-[#2D5A27] px-4 py-3 font-black text-white hover:bg-[#24491f]" form="category-form" type="submit">
-            {{ mode === 'create' ? 'Thêm mới' : 'Lưu thay đổi' }}
+          <button class="rounded-lg border border-slate-200 px-4 py-3 font-bold text-slate-600 hover:bg-slate-50" @click="closeModal">
+            {{ m('actions.cancel') }}
+          </button>
+          <button class="rounded-lg bg-brand-forest px-4 py-3 font-black text-white hover:bg-avocado-800" form="category-form" type="submit">
+            {{ mode === 'create' ? m('actions.saveCreate') : m('actions.saveUpdate') }}
           </button>
         </div>
       </template>

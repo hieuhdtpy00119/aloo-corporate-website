@@ -182,8 +182,8 @@ watch(() => route.params.slug, loadProduct)
 </script>
 
 <template>
-  <main class="min-h-screen bg-[#F8FAF7] pb-20 text-brand-dark">
-    <section v-if="isLoading" class="mx-auto max-w-[1280px] px-4 py-20 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-brand-cream pb-20 text-brand-dark">
+    <section v-if="isLoading" class="mx-auto max-w-[1240px] px-4 py-20 sm:px-6 lg:px-8">
       <div class="grid gap-10 lg:grid-cols-2">
         <div class="aspect-[4/3] animate-pulse rounded-[2rem] bg-white border border-brand-forest/5 shadow-sm"></div>
         <div class="space-y-5 py-8">
@@ -208,7 +208,7 @@ watch(() => route.params.slug, loadProduct)
 
     <template v-else-if="product">
       <section class="bg-white px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <div class="mx-auto max-w-[1280px]">
+        <div class="mx-auto max-w-[1240px]">
           <RouterLink to="/products" class="inline-flex w-fit items-center gap-2 rounded-full border border-brand-forest/10 bg-white px-4.5 py-2.5 text-xs font-black uppercase tracking-wider text-brand-forest shadow-sm transition hover:bg-brand-lime/10 active:scale-95">
             <ArrowLeft class="h-3.5 w-3.5" /> Menu ALOO
           </RouterLink>
@@ -260,15 +260,15 @@ watch(() => route.params.slug, loadProduct)
               </p>
 
               <div class="mt-7 grid gap-3 sm:grid-cols-3">
-                <div class="rounded-2xl border border-brand-forest/5 bg-[#F8FAF7] p-4">
+                <div class="rounded-2xl border border-brand-forest/5 bg-cream-50 p-4">
                   <p class="text-[10px] font-black uppercase tracking-[0.18em] text-brand-sand">Danh mục</p>
                   <p class="mt-1 text-sm font-black text-brand-forest">{{ product.category || 'Sản phẩm' }}</p>
                 </div>
-                <div class="rounded-2xl border border-brand-forest/5 bg-[#F8FAF7] p-4">
+                <div class="rounded-2xl border border-brand-forest/5 bg-cream-50 p-4">
                   <p class="text-[10px] font-black uppercase tracking-[0.18em] text-brand-sand">Trạng thái</p>
                   <p class="mt-1 text-sm font-black text-brand-forest">Đang phục vụ</p>
                 </div>
-                <div class="rounded-2xl border border-brand-forest/5 bg-[#F8FAF7] p-4">
+                <div class="rounded-2xl border border-brand-forest/5 bg-cream-50 p-4">
                   <p class="text-[10px] font-black uppercase tracking-[0.18em] text-brand-sand">Cảm nhận</p>
                   <p class="mt-1 text-sm font-black text-brand-forest">{{ feedbackCountLabel }}</p>
                 </div>
@@ -288,7 +288,7 @@ watch(() => route.params.slug, loadProduct)
       </section>
 
       <section class="px-4 py-14 sm:px-6 lg:px-8 lg:py-18">
-        <div class="mx-auto grid max-w-[1280px] gap-8 lg:grid-cols-[0.92fr_1.08fr]">
+        <div class="mx-auto grid max-w-[1240px] gap-8 lg:grid-cols-[0.92fr_1.08fr]">
           <div class="lg:sticky lg:top-28 lg:self-start">
             <span class="text-xs font-black uppercase tracking-[0.25em] text-brand-forest">Câu chuyện sản phẩm</span>
             <h2 class="mt-3 text-3xl font-black text-brand-dark font-display lg:text-4xl">Điểm khác biệt của {{ product.name }}</h2>
@@ -353,7 +353,7 @@ watch(() => route.params.slug, loadProduct)
       </section>
 
       <section class="bg-white px-4 py-16 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-[1280px]">
+        <div class="mx-auto max-w-[1240px]">
           <div class="border-b border-slate-100 pb-8">
             <span class="text-xs font-black uppercase tracking-[0.25em] text-brand-forest">Đánh giá trải nghiệm</span>
             <div class="mt-3 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -364,7 +364,7 @@ watch(() => route.params.slug, loadProduct)
                 </p>
               </div>
 
-              <div class="flex w-full max-w-sm items-center justify-between rounded-2xl border border-slate-100 bg-[#F8FAF7] px-5 py-4 lg:w-auto lg:min-w-[300px]">
+              <div class="flex w-full max-w-sm items-center justify-between rounded-2xl border border-slate-100 bg-cream-50 px-5 py-4 lg:w-auto lg:min-w-[300px]">
                 <div>
                   <p class="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Tổng quan</p>
                   <p class="mt-1 text-sm font-bold text-brand-muted">{{ feedbackCountLabel }}</p>
@@ -456,7 +456,7 @@ watch(() => route.params.slug, loadProduct)
       </section>
 
       <!-- Related products list -->
-      <section v-if="relatedProducts.length" class="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8">
+      <section v-if="relatedProducts.length" class="mx-auto max-w-[1240px] px-4 py-16 sm:px-6 lg:px-8">
         <div class="mb-10 text-center sm:text-left flex flex-col sm:flex-row sm:items-end justify-between border-b border-brand-forest/5 pb-4">
           <div>
             <span class="text-xs font-black uppercase tracking-[0.25em] text-brand-forest">Gợi ý thêm</span>
@@ -470,7 +470,7 @@ watch(() => route.params.slug, loadProduct)
         <div class="grid gap-6 md:grid-cols-3">
           <RouterLink v-for="item in relatedProducts" :key="item.id" :to="`/products/${item.slug}`" class="group rounded-[2.5rem] border border-brand-forest/5 bg-white p-5 shadow-sm hover-lift flex flex-col justify-between">
             <div class="aspect-[4/3] overflow-hidden rounded-[1.8rem] bg-brand-cream/30">
-              <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" class="w-full h-full object-cover transition-all duration-300 group-hover:scale-103" />
+              <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105" />
               <div v-else class="grid h-full place-items-center bg-brand-lime/10 text-lg font-black text-brand-forest">ALOO</div>
             </div>
             <div>
@@ -485,5 +485,5 @@ watch(() => route.params.slug, loadProduct)
         </div>
       </section>
     </template>
-  </main>
+  </div>
 </template>

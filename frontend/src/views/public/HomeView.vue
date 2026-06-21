@@ -1,10 +1,12 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { ChevronLeft, ChevronRight, MapPin, Award, ArrowRight, Heart } from 'lucide-vue-next'
+import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { ChevronLeft, ChevronRight, MapPin, Award, ArrowRight } from 'lucide-vue-next'
 import { useAppStore } from '../../stores/appStore'
 import { homeSectionService, resolveBackendAssetUrl } from '../../services/cmsService'
-import CustomerFeedbackSection from '../../components/public/CustomerFeedbackSection.vue'
 
+const { t } = useI18n()
 const store = useAppStore()
 const productRail = ref(null)
 const featuredRail = ref(null)
@@ -26,12 +28,13 @@ const featuredCards = computed(() =>
     .filter((section) => section.status === 'ACTIVE')
     .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
     .map((section) => ({
+      id: section.id,
       title: section.title,
       description: section.description || section.subtitle || '',
-      cta: section.buttonText || 'Xem thêm',
+      cta: section.buttonText || t('home.featuredDefaultCta'),
       to: section.buttonLink || '/',
       image: resolveBackendAssetUrl(section.imageUrl || ''),
-      badge: section.badge || section.subtitle || 'Nổi bật',
+      badge: section.badge || section.subtitle || t('home.featuredDefaultBadge'),
     }))
 )
 
@@ -59,7 +62,7 @@ const scrollFeatured = (direction) => {
   })
 }
 
-const productMeta = (product) => product.category || 'ALOO Signature'
+const productMeta = (product) => product.category || t('home.productMetaFallback')
 
 const fetchHomeSections = async () => {
   homeSectionsLoading.value = true
@@ -68,7 +71,7 @@ const fetchHomeSections = async () => {
     const { data } = await homeSectionService.list(true)
     homeSections.value = Array.isArray(data) ? data : []
   } catch (error) {
-    homeSectionsError.value = error.response?.data?.message || 'Không tải được nội dung nổi bật trang chủ'
+    homeSectionsError.value = error.response?.data?.message || t('home.featuredLoadError')
   } finally {
     homeSectionsLoading.value = false
   }
@@ -80,44 +83,68 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="bg-brand-cream/10">
-    <!-- Hero Banner with Glassmorphic Content Card Overlay -->
+  <section class="bg-brand-cream">
     <div class="relative h-[64vh] min-h-[460px] w-full overflow-hidden bg-brand-dark">
       <video
-        class="absolute inset-0 h-full w-full object-contain"
+        class="absolute inset-0 h-full w-full object-cover object-center"
         autoplay
         muted
         loop
         playsinline
         preload="metadata"
-        poster="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=2200&q=90"
-        aria-label="ALOO Kem Bơ Thuần Việt"
+        poster="/about/aloo-origin-story.png"
+        :aria-label="t('home.heroVideoLabel')"
       >
         <source src="/videos/aloo-home-hero.mp4" type="video/mp4" />
       </video>
+      <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/85 via-brand-dark/25 to-brand-dark/10"></div>
+      <div class="relative mx-auto flex h-full max-w-[1240px] items-end px-4 pb-10 sm:px-6 sm:pb-12 lg:px-8">
+        <div class="max-w-xl rounded-3xl border border-white/10 bg-white/10 p-6 text-white shadow-2xl backdrop-blur-md sm:p-8">
+          <span class="inline-flex rounded-full border border-brand-lime/30 bg-brand-lime/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-lime">
+            {{ t('home.heroBadge') }}
+          </span>
+          <h1 class="mt-4 text-3xl font-black leading-tight sm:text-4xl">
+            {{ t('home.heroHeadline') }}
+          </h1>
+          <p class="mt-3 text-sm leading-relaxed text-white/80 sm:text-base">
+            {{ t('home.heroDescription') }}
+          </p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <RouterLink to="/products" class="inline-flex items-center gap-2 rounded-full bg-brand-lime px-5 py-3 text-xs font-black uppercase tracking-wider text-brand-dark transition hover:bg-brand-lime/90">
+              {{ t('home.heroCtaProducts') }} <ArrowRight class="h-4 w-4" />
+            </RouterLink>
+            <RouterLink to="/franchise" class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-3 text-xs font-black uppercase tracking-wider text-white transition hover:bg-white/10">
+              {{ t('home.heroCtaFranchise') }}
+            </RouterLink>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Featured Section -->
-    <section class="mx-auto max-w-[1280px] px-4 py-20 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-[1240px] px-4 py-20 sm:px-6 lg:px-8">
       <div class="mb-10 flex flex-col justify-between gap-4 border-b border-brand-forest/5 pb-4 text-center sm:flex-row sm:items-end sm:text-left">
         <div>
-          <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">Tuyển chọn</span>
-          <h2 class="mt-2 text-3xl font-black text-brand-dark lg:text-4xl">Nổi bật hôm nay</h2>
+          <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">{{ t('home.featuredEyebrow') }}</span>
+          <h2 class="mt-2 text-3xl font-black text-brand-dark lg:text-4xl">{{ t('home.featuredTitle') }}</h2>
         </div>
         <div class="flex items-center justify-center gap-3 sm:justify-end">
-          <p class="text-sm font-medium text-brand-muted">Bí quyết tự nhiên từ nguyên liệu vườn sạch</p>
+          <p class="text-sm font-medium text-brand-muted">{{ t('home.featuredSubtitle') }}</p>
           <div v-if="featuredCards.length > 1" class="hidden gap-2.5 sm:flex">
-            <button class="grid h-10 w-10 place-items-center rounded-full border border-brand-forest/10 bg-white text-brand-dark shadow-sm transition hover:border-brand-forest/20 hover:bg-brand-cream active:scale-95" aria-label="Cuộn nổi bật sang trái" @click="scrollFeatured(-1)">
+            <button type="button" class="grid h-10 w-10 place-items-center rounded-full border border-brand-forest/10 bg-white text-brand-dark shadow-sm transition hover:border-brand-forest/20 hover:bg-brand-cream active:scale-95" :aria-label="t('home.featuredScrollLeft')" @click="scrollFeatured(-1)">
               <ChevronLeft class="h-5 w-5" />
             </button>
-            <button class="grid h-10 w-10 place-items-center rounded-full border border-brand-forest/10 bg-white text-brand-dark shadow-sm transition hover:border-brand-forest/20 hover:bg-brand-cream active:scale-95" aria-label="Cuộn nổi bật sang phải" @click="scrollFeatured(1)">
+            <button type="button" class="grid h-10 w-10 place-items-center rounded-full border border-brand-forest/10 bg-white text-brand-dark shadow-sm transition hover:border-brand-forest/20 hover:bg-brand-cream active:scale-95" :aria-label="t('home.featuredScrollRight')" @click="scrollFeatured(1)">
               <ChevronRight class="h-5 w-5" />
             </button>
           </div>
         </div>
       </div>
 
-      <p v-if="homeSectionsError" class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-center text-sm font-bold text-red-700">{{ homeSectionsError }}</p>
+      <p v-if="homeSectionsError" class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-center text-sm font-bold text-amber-800 shadow-sm">
+        {{ homeSectionsError }}
+        <span class="mt-1 block text-xs font-semibold text-amber-700/80">{{ t('home.featuredErrorHint') }}</span>
+      </p>
       <div v-else-if="homeSectionsLoading" class="featured-scrollbar flex snap-x gap-5 overflow-x-auto pb-6">
         <div v-for="i in 3" :key="i" class="min-w-[82vw] snap-start overflow-hidden rounded-3xl border border-brand-forest/5 bg-white shadow-sm sm:min-w-[360px] lg:min-w-[400px]">
           <div class="aspect-[5/3] animate-pulse bg-slate-100"></div>
@@ -128,12 +155,12 @@ onMounted(() => {
         </div>
       </div>
       <p v-else-if="!featuredCards.length" class="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center text-sm font-bold text-slate-400">
-        Chưa có nội dung nổi bật. Vào admin để thêm block trang chủ.
+        {{ t('home.featuredEmpty') }}
       </p>
       <div v-else ref="featuredRail" class="featured-scrollbar flex snap-x gap-5 overflow-x-auto pb-6">
         <RouterLink
           v-for="card in featuredCards"
-          :key="card.title"
+          :key="card.id ?? card.title"
           :to="card.to"
           class="group flex min-w-[82vw] snap-start flex-col overflow-hidden rounded-3xl border border-brand-forest/5 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl sm:min-w-[360px] lg:min-w-[400px]"
         >
@@ -141,7 +168,7 @@ onMounted(() => {
             <div class="absolute top-4 left-4 z-10 rounded-full bg-brand-dark/80 backdrop-blur-md px-3.5 py-1.5 text-xs font-bold text-brand-lime">
               {{ card.badge }}
             </div>
-            <img v-if="card.image" :src="card.image" :alt="card.title" class="h-full w-full object-cover transition duration-500 group-hover:scale-103" />
+            <img v-if="card.image" :src="card.image" :alt="card.title" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
             <div v-else class="grid h-full place-items-center bg-brand-lime/10 text-2xl font-black text-brand-forest">ALOO</div>
           </div>
           <div class="flex flex-1 flex-col justify-between p-5">
@@ -160,17 +187,17 @@ onMounted(() => {
     </section>
 
     <!-- Trending Products Slider Section -->
-    <section class="mx-auto max-w-[1280px] px-4 py-12 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-[1240px] px-4 py-12 sm:px-6 lg:px-8">
       <div class="mb-12 flex items-end justify-between gap-4 border-b border-brand-forest/5 pb-4">
         <div>
-          <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">Món ngon nước tiếng</span>
-          <h2 class="mt-2 text-3xl font-black text-brand-dark lg:text-4xl">Sản phẩm được yêu thích</h2>
+          <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">{{ t('home.popularEyebrow') }}</span>
+          <h2 class="mt-2 text-3xl font-black text-brand-dark lg:text-4xl">{{ t('home.popularTitle') }}</h2>
         </div>
         <div class="hidden gap-2.5 sm:flex">
-          <button class="grid h-10 w-10 place-items-center rounded-full border border-brand-forest/10 bg-white text-brand-dark hover:bg-brand-cream hover:border-brand-forest/20 shadow-sm transition cursor-pointer active:scale-95" aria-label="Cuộn trái" @click="scrollProducts(-1)">
+          <button type="button" class="grid h-10 w-10 place-items-center rounded-full border border-brand-forest/10 bg-white text-brand-dark hover:bg-brand-cream hover:border-brand-forest/20 shadow-sm transition cursor-pointer active:scale-95" :aria-label="t('home.scrollLeft')" @click="scrollProducts(-1)">
             <ChevronLeft class="h-5 w-5" />
           </button>
-          <button class="grid h-10 w-10 place-items-center rounded-full border border-brand-forest/10 bg-white text-brand-dark hover:bg-brand-cream hover:border-brand-forest/20 shadow-sm transition cursor-pointer active:scale-95" aria-label="Cuộn phải" @click="scrollProducts(1)">
+          <button type="button" class="grid h-10 w-10 place-items-center rounded-full border border-brand-forest/10 bg-white text-brand-dark hover:bg-brand-cream hover:border-brand-forest/20 shadow-sm transition cursor-pointer active:scale-95" :aria-label="t('home.scrollRight')" @click="scrollProducts(1)">
             <ChevronRight class="h-5 w-5" />
           </button>
         </div>
@@ -192,9 +219,6 @@ onMounted(() => {
       <div v-else-if="popularProducts.length" ref="productRail" class="product-scrollbar flex snap-x gap-6 overflow-x-auto pb-8">
         <article v-for="product in popularProducts" :key="product.id" class="min-w-[75vw] snap-start sm:min-w-[280px] lg:min-w-[290px] bg-white rounded-3xl p-4 shadow-sm border border-brand-forest/5 hover-lift group">
           <div class="aspect-square overflow-hidden rounded-2xl bg-brand-cream/30 relative">
-            <button class="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm grid place-items-center text-slate-400 hover:text-red-500 transition shadow-sm cursor-pointer" aria-label="Yêu thích">
-              <Heart class="h-4 w-4 fill-transparent" />
-            </button>
             <img v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105" />
             <div v-else class="grid h-full place-items-center text-xl font-black text-brand-forest bg-brand-lime/10">ALOO</div>
           </div>
@@ -205,37 +229,37 @@ onMounted(() => {
           <div class="mt-4 flex items-center justify-between border-t border-slate-50 pt-3">
             <p class="text-sm font-black text-brand-forest font-display">{{ productMeta(product) }}</p>
             <RouterLink :to="product.slug ? `/products/${product.slug}` : '/products'" class="rounded-full bg-brand-lime/15 hover:bg-brand-lime/30 px-3.5 py-1.5 text-xs font-black text-brand-forest transition">
-              Xem chi tiết
+              {{ t('home.viewDetail') }}
             </RouterLink>
           </div>
         </article>
       </div>
       <p v-else class="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center text-sm font-bold text-slate-400">
-        Chưa có sản phẩm đang bán. Vào admin để thêm hoặc bật trạng thái sản phẩm.
+        {{ t('home.productsEmpty') }}
       </p>
     </section>
 
     <!-- Brand Story Section (Asymmetrical Layout with warm beige background details) -->
     <section class="bg-brand-cream/50 py-20">
-      <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
         <div class="grid items-center gap-12 lg:grid-cols-2">
           <div class="space-y-6 max-w-lg">
             <div class="flex items-center gap-2">
               <Award class="h-5 w-5 text-brand-brown" />
-              <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">Câu chuyện thương hiệu</span>
+              <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">{{ t('home.brandStoryEyebrow') }}</span>
             </div>
             <h2 class="text-3xl font-black leading-tight text-brand-dark lg:text-4xl">
-              Từ tinh hoa trái bơ chín sáp đến ly kem mát lành
+              {{ t('home.brandStoryTitle') }}
             </h2>
             <p class="text-base leading-relaxed text-brand-muted font-medium">
-              Hành trình của ALOO bắt đầu từ tình yêu cháy bỏng với nguồn nông sản tươi tốt của dải đất hình chữ S. Chúng tôi lựa chọn kỹ càng từng quả bơ chín sáp Đắk Lắk béo bùi dẻo mịn nhất để xay cùng chút cốt sữa ngọt thơm.
+              {{ t('home.brandStoryP1') }}
             </p>
             <p class="text-sm leading-relaxed text-brand-muted">
-              Chúng tôi tự hào xây dựng một mô hình cửa hàng trẻ trung, quy trình vận hành đồng bộ hóa từ quầy pha chế đến phong cách đón khách. Giúp mỗi ly kem bơ khi đến tay bạn luôn giữ nguyên được hương vị tự nhiên tinh tế nhất.
+              {{ t('home.brandStoryP2') }}
             </p>
             <div class="pt-2">
               <RouterLink to="/about" class="inline-flex items-center gap-2 rounded-full bg-brand-lime text-brand-dark px-6 py-3.5 text-xs font-black uppercase tracking-wider hover:bg-brand-lime/90 transition shadow-md">
-                Đọc tiếp câu chuyện <ArrowRight class="h-4 w-4" />
+                {{ t('home.brandStoryCta') }} <ArrowRight class="h-4 w-4" />
               </RouterLink>
             </div>
           </div>
@@ -244,8 +268,8 @@ onMounted(() => {
             <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-brand-sand/15 rounded-full blur-2xl z-0"></div>
             <div class="overflow-hidden rounded-3xl bg-white p-3 shadow-xl border border-brand-forest/5 relative z-10">
               <img
-                src="https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?auto=format&fit=crop&w=1500&q=85"
-                alt="Nguyên liệu bơ tươi"
+                src="/about/aloo-quality-ingredients.png"
+                :alt="t('home.brandStoryImageAlt')"
                 class="aspect-[4/3] w-full object-cover rounded-2xl"
               />
             </div>
@@ -254,17 +278,16 @@ onMounted(() => {
       </div>
     </section>
 
-    <CustomerFeedbackSection />
 
     <!-- Location Finder Section -->
-    <section class="mx-auto max-w-[1280px] px-4 py-20 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-[1240px] px-4 py-20 sm:px-6 lg:px-8">
       <div class="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end text-center sm:text-left border-b border-brand-forest/5 pb-4">
         <div>
-          <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">Trải nghiệm trực tiếp</span>
-          <h2 class="mt-2 text-3xl font-black text-brand-dark lg:text-4xl">Tìm cửa hàng ALOO gần nhất</h2>
+          <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">{{ t('home.locationsEyebrow') }}</span>
+          <h2 class="mt-2 text-3xl font-black text-brand-dark lg:text-4xl">{{ t('home.locationsTitle') }}</h2>
         </div>
         <RouterLink to="/locations" class="inline-flex items-center justify-center gap-1.5 text-sm font-bold text-brand-forest hover:text-brand-dark transition">
-          Xem tất cả hệ thống cửa hàng <ArrowRight class="h-4 w-4" />
+          {{ t('home.locationsViewAll') }} <ArrowRight class="h-4 w-4" />
         </RouterLink>
       </div>
       <p v-if="store.errors.locations" class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-center text-sm font-bold text-red-700">
@@ -286,38 +309,51 @@ onMounted(() => {
             </div>
             <h3 class="mt-5 text-lg font-bold text-brand-dark">{{ location.name }}</h3>
             <p class="mt-2 text-sm leading-relaxed text-brand-muted font-medium">{{ location.addressText }}</p>
-            <p class="mt-2 text-xs font-bold text-brand-forest bg-brand-lime/10 inline-block px-3 py-1 rounded-full">Giờ hoạt động: {{ location.openingHours || 'Đang cập nhật' }}</p>
+            <p class="mt-2 text-xs font-bold text-brand-forest bg-brand-lime/10 inline-block px-3 py-1 rounded-full">{{ t('home.locationHours') }} {{ location.openingHours || t('home.locationHoursUpdating') }}</p>
           </div>
           <div class="mt-6 border-t border-slate-100 pt-4">
-            <a :href="location.mapUrl || '/locations'" target="_blank" rel="noreferrer" class="inline-flex w-full justify-center rounded-full border border-brand-forest/10 hover:border-brand-forest hover:bg-brand-lime/10 px-4 py-2.5 text-xs font-black text-brand-forest transition">
-              Chỉ đường chi tiết
+            <RouterLink
+              v-if="!location.mapUrl"
+              to="/locations"
+              class="inline-flex w-full justify-center rounded-full border border-brand-forest/10 hover:border-brand-forest hover:bg-brand-lime/10 px-4 py-2.5 text-xs font-black text-brand-forest transition"
+            >
+              {{ t('home.locationDirections') }}
+            </RouterLink>
+            <a
+              v-else
+              :href="location.mapUrl"
+              target="_blank"
+              rel="noreferrer"
+              class="inline-flex w-full justify-center rounded-full border border-brand-forest/10 hover:border-brand-forest hover:bg-brand-lime/10 px-4 py-2.5 text-xs font-black text-brand-forest transition"
+            >
+              {{ t('home.locationDirections') }}
             </a>
           </div>
         </article>
       </div>
       <p v-else class="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center text-sm font-bold text-slate-400">
-        Chưa có cửa hàng đang hoạt động. Vào admin để thêm hoặc bật trạng thái địa điểm.
+        {{ t('home.locationsEmpty') }}
       </p>
     </section>
 
     <!-- Premium Call-to-action Franchise Section -->
-    <section class="mx-auto max-w-[1280px] px-4 py-12 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-[1240px] px-4 py-12 sm:px-6 lg:px-8">
       <div class="overflow-hidden rounded-3xl bg-gradient-to-br from-brand-dark via-brand-dark/95 to-brand-forest px-8 py-16 text-white sm:px-12 lg:px-16 shadow-2xl relative border border-white/5">
         <!-- Floating decorative glowing circle -->
         <div class="absolute -right-10 -top-10 w-44 h-44 bg-brand-lime/10 rounded-full blur-2xl pointer-events-none"></div>
 
         <div class="max-w-2xl relative z-10">
-          <span class="text-xs font-black uppercase tracking-[0.25em] text-brand-lime bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">Kế hoạch nhượng quyền</span>
-          <h2 class="mt-6 text-3xl font-black leading-tight text-white lg:text-4xl">Đồng hành kinh doanh cùng ALOO</h2>
+          <span class="text-xs font-black uppercase tracking-[0.25em] text-brand-lime bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">{{ t('home.bottomCtaEyebrow') }}</span>
+          <h2 class="mt-6 text-3xl font-black leading-tight text-white lg:text-4xl">{{ t('home.bottomCtaTitle') }}</h2>
           <p class="mt-3 text-base leading-relaxed text-white/80">
-            Mô hình đầu tư kem bơ tinh gọn, chi phí tối giản, vận hành bài bản và tệp khách hàng trẻ đầy tiềm năng. Hỗ trợ trọn gói từ định vị mặt bằng đến marketing và đào tạo pha chế.
+            {{ t('home.bottomCtaDescription') }}
           </p>
           <div class="mt-8 flex flex-wrap gap-4">
             <RouterLink to="/consultation" class="rounded-full bg-brand-lime text-brand-dark font-black px-6 py-4 hover:bg-brand-lime/90 transition duration-300 shadow-lg shadow-brand-lime/25 uppercase tracking-wider text-xs">
-              Đăng ký tư vấn miễn phí
+              {{ t('home.bottomCtaConsult') }}
             </RouterLink>
             <RouterLink to="/franchise" class="rounded-full border border-white/20 bg-white/5 text-white font-bold px-6 py-4 hover:bg-white/10 transition duration-300 text-xs uppercase tracking-wider">
-              Khảo sát chi phí đầu tư
+              {{ t('home.bottomCtaSurvey') }}
             </RouterLink>
           </div>
         </div>
@@ -329,7 +365,7 @@ onMounted(() => {
 <style scoped>
 .featured-scrollbar,
 .product-scrollbar {
-  scrollbar-color: #5BBD2F #F7F4EE;
+  scrollbar-color: #8CC63F #FFF7E6;
   scrollbar-width: thin;
 }
 
@@ -341,18 +377,18 @@ onMounted(() => {
 .featured-scrollbar::-webkit-scrollbar-track,
 .product-scrollbar::-webkit-scrollbar-track {
   border-radius: 999px;
-  background: #F7F4EE;
+  background: #FFF7E6;
 }
 
 .featured-scrollbar::-webkit-scrollbar-thumb,
 .product-scrollbar::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: #c1f0ab;
+  background: #CDECA6;
 }
 
 .featured-scrollbar::-webkit-scrollbar-thumb:hover,
 .product-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #5BBD2F;
+  background: #8CC63F;
 }
 </style>
 

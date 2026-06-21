@@ -1,14 +1,27 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { ref } from 'vue'
+import { describe, expect, it, vi } from 'vitest'
 import PublicLayout from './PublicLayout.vue'
+
+vi.mock('vue-router', () => ({
+  useRoute: () => ({ path: '/products', fullPath: '/products' }),
+}))
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    locale: ref('vi'),
+    t: (key) => key,
+  }),
+}))
+
+vi.mock('../services/seoService', () => ({
+  applyRouteSeo: vi.fn(),
+}))
 
 describe('PublicLayout', () => {
   it('renders header, route content and footer consistently', () => {
     const wrapper = mount(PublicLayout, {
       global: {
-        mocks: {
-          $route: { fullPath: '/products' },
-        },
         stubs: {
           Navbar: { template: '<header data-test="public-header">Header</header>' },
           Footer: { template: '<footer data-test="public-footer">Footer</footer>' },

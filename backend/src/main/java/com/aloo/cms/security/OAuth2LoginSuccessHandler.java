@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -31,17 +32,29 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication
     ) throws IOException, ServletException {
-        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
-        AuthResponse auth = googleOAuthLoginService.login(oauthToken.getPrincipal());
+        try {
+            OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+            AuthResponse auth = googleOAuthLoginService.login(oauthToken.getPrincipal());
 
-        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
-                .queryParam("token", auth.token())
-                .queryParam("role", auth.user().role())
-                .queryParam("user", objectMapper.writeValueAsString(auth.user()))
-                .encode(StandardCharsets.UTF_8)
-                .build()
-                .toUriString();
+            String userJson = objectMapper.writeValueAsString(auth.user());
+            String userEncoded = Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(userJson.getBytes(StandardCharsets.UTF_8));
 
-        response.sendRedirect(targetUrl);
+            String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
+                    .queryParam("token", auth.token())
+                    .queryParam("role", auth.user().role())
+                    .queryParam("user", userEncoded)
+                    .build(true)
+                    .toUriString();
+
+            response.sendRedirect(targetUrl);
+        } catch (Exception ex) {
+            String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
+                    .queryParam("error", ex.getMessage() == null ? "Không thể đăng nhập bằng Google" : ex.getMessage())
+                    .build(true)
+                    .toUriString();
+
+            response.sendRedirect(targetUrl);
+        }
     }
 }

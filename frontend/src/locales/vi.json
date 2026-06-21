@@ -54,12 +54,139 @@
     "productsDescription": "Menu tập trung vào các món có khả năng bán lặp lại cao, phù hợp cả khách mua lẻ và điểm bán nhượng quyền.",
     "franchiseEyebrow": "Nhượng quyền",
     "franchiseTitle": "Lộ trình mở cửa hàng rõ ràng",
-    "franchiseDescription": "ALOO ưu tiên quy trình dễ triển khai, quản lý chi phí và tạo trải nghiệm đồng nhất giữa các điểm bán."
+    "franchiseDescription": "ALOO ưu tiên quy trình dễ triển khai, quản lý chi phí và tạo trải nghiệm đồng nhất giữa các điểm bán.",
+    "featuredErrorHint": "Không tải được nội dung nổi bật. Trang vẫn hiển thị sản phẩm và cửa hàng.",
+    "heroBadge": "Kem bơ thuần Việt",
+    "heroHeadline": "Vị béo tự nhiên, mát lành từng ly",
+    "heroDescription": "Khám phá thực đơn signature hoặc tìm hiểu mô hình nhượng quyền ALOO gần bạn.",
+    "heroCtaProducts": "Xem sản phẩm",
+    "heroCtaFranchise": "Nhượng quyền",
+    "heroVideoLabel": "ALOO Kem Bơ Thuần Việt",
+    "featuredEyebrow": "Tuyển chọn",
+    "featuredTitle": "Nổi bật hôm nay",
+    "featuredSubtitle": "Bí quyết tự nhiên từ nguyên liệu vườn sạch",
+    "featuredScrollLeft": "Cuộn nổi bật sang trái",
+    "featuredScrollRight": "Cuộn nổi bật sang phải",
+    "featuredEmpty": "Chưa có nội dung nổi bật. Vào admin để thêm block trang chủ.",
+    "featuredLoadError": "Không tải được nội dung nổi bật trang chủ",
+    "featuredDefaultCta": "Xem thêm",
+    "featuredDefaultBadge": "Nổi bật",
+    "popularEyebrow": "Món ngon nước tiếng",
+    "popularTitle": "Sản phẩm được yêu thích",
+    "scrollLeft": "Cuộn trái",
+    "scrollRight": "Cuộn phải",
+    "viewDetail": "Xem chi tiết",
+    "productsEmpty": "Chưa có sản phẩm đang bán. Vào admin để thêm hoặc bật trạng thái sản phẩm.",
+    "productMetaFallback": "ALOO Signature",
+    "brandStoryEyebrow": "Câu chuyện thương hiệu",
+    "brandStoryTitle": "Từ tinh hoa trái bơ chín sáp đến ly kem mát lành",
+    "brandStoryP1": "Hành trình của ALOO bắt đầu từ tình yêu cháy bỏng với nguồn nông sản tươi tốt của dải đất hình chữ S. Chúng tôi lựa chọn kỹ càng từng quả bơ chín sáp Đắk Lắk béo bùi dẻo mịn nhất để xay cùng chút cốt sữa ngọt thơm.",
+    "brandStoryP2": "Chúng tôi tự hào xây dựng một mô hình cửa hàng trẻ trung, quy trình vận hành đồng bộ hóa từ quầy pha chế đến phong cách đón khách. Giúp mỗi ly kem bơ khi đến tay bạn luôn giữ nguyên được hương vị tự nhiên tinh tế nhất.",
+    "brandStoryCta": "Đọc tiếp câu chuyện",
+    "brandStoryImageAlt": "Nguyên liệu bơ tươi ALOO",
+    "locationsEyebrow": "Trải nghiệm trực tiếp",
+    "locationsTitle": "Tìm cửa hàng ALOO gần nhất",
+    "locationsViewAll": "Xem tất cả hệ thống cửa hàng",
+    "locationHours": "Giờ hoạt động:",
+    "locationHoursUpdating": "Đang cập nhật",
+    "locationDirections": "Chỉ đường chi tiết",
+    "locationsEmpty": "Chưa có cửa hàng đang hoạt động. Vào admin để thêm hoặc bật trạng thái địa điểm.",
+    "bottomCtaEyebrow": "Kế hoạch nhượng quyền",
+    "bottomCtaTitle": "Đồng hành kinh doanh cùng ALOO",
+    "bottomCtaDescription": "Mô hình đầu tư kem bơ tinh gọn, chi phí tối giản, vận hành bài bản và tệp khách hàng trẻ đầy tiềm năng. Hỗ trợ trọn gói từ định vị mặt bằng đến marketing và đào tạo pha chế.",
+    "bottomCtaConsult": "Đăng ký tư vấn miễn phí",
+    "bottomCtaSurvey": "Khảo sát chi phí đầu tư"
   },
   "about": {
     "eyebrow": "Về chúng tôi",
     "title": "ALOO xây dựng từ hương vị quen thuộc của người Việt",
     "description": "Thương hiệu tập trung vào kem bơ, nguyên liệu dễ tiếp cận và quy trình vận hành gọn để phù hợp với thị trường địa phương.",
+    "heroEyebrow": "Câu chuyện thương hiệu",
+    "heroTitleLine1": "Hành trình nâng tầm",
+    "heroTitleHighlight": "trái bơ Việt",
+    "heroDescription": "Từ một hộ kinh doanh nhỏ năm 2013, Aloo Kem Bơ đã viết nên hành trình đầy cảm hứng — mang đến cộng đồng những sản phẩm \"Ngon · Trẻ · Khỏe\".",
+    "heroTagline": "Năng lượng xanh, mát vị lành",
+    "metricsProducts": "Sản phẩm đang bán",
+    "metricsLocations": "Cửa hàng hoạt động",
+    "metricsPosts": "Bài viết thương hiệu",
+    "metricsErrorHint": "Không tải được số liệu từ hệ thống. Vui lòng thử lại sau.",
+    "timelineEyebrow": "Lộ trình phát triển",
+    "timelineTitle": "Từ công thức chủ lực đến mô hình hệ thống",
+    "timelineErrorHint": "Không tải được lộ trình từ CMS. Đang hiển thị mốc mặc định.",
+    "ctaConclusionEyebrow": "Kết luận",
+    "ctaVisitStore": "Ghé cửa hàng ngay",
+    "ctaViewMenu": "Xem menu kem bơ",
+    "ctaFootnote": "Cửa hàng tại Quy Nhơn & Nha Trang · Giá từ 20.000đ",
+    "quickMenuEyebrow": "Menu",
+    "quickMenuTitle": "Khám phá sản phẩm ALOO",
+    "quickMenuDescription": "Kem bơ, bơ xoài, bơ sầu riêng và nhiều vị đặc sắc khác.",
+    "quickMenuLink": "Xem menu",
+    "quickFranchiseEyebrow": "Nhượng quyền",
+    "quickFranchiseTitle": "Cùng Aloo vươn xa",
+    "quickFranchiseDescription": "Cơ hội gia nhập hệ thống 50 cửa hàng tầm nhìn 2030.",
+    "quickFranchiseLink": "Tìm hiểu ngay",
+    "section1Eyebrow": "Khởi nguồn từ khát vọng",
+    "section1Title": "Nâng tầm giá trị trái bơ Việt Nam",
+    "section1P1": "Câu chuyện của Aloo Kem Bơ bắt đầu từ năm 2013, xuất phát từ mong muốn tạo ra những sản phẩm chất lượng, giàu dinh dưỡng từ chính nguồn trái cây nội địa. Người sáng lập nhận thấy bơ là một siêu thực phẩm có giá trị vượt trội nhưng tiềm năng vẫn chưa được khai thác xứng đáng.",
+    "section1P2": "Đến năm 2023, dưới sự dẫn dắt của CEO Nguyễn Thị Hoàng Phương – Công ty TNHH Aloo Quy Nhơn, thương hiệu bắt đầu bứt phá mạnh mẽ với đầu tư đồng bộ từ mô hình kinh doanh, quy trình vận hành chuyên nghiệp đến nâng cao trải nghiệm khách hàng.",
+    "section1Caption": "Khởi nghiệp từ năm 2013 · Bứt phá từ 2023",
+    "section1Milestones": [
+      "2013 · Khởi nguồn ý tưởng",
+      "2015 · Hoàn thiện công thức",
+      "2018 · Mở rộng hộ kinh doanh",
+      "2023 · Bứt phá thương hiệu"
+    ],
+    "section2Eyebrow": "Vượt qua thách thức",
+    "section2Title": "Bằng sự chân thực và tử tế",
+    "section2Subtitle": "Từ vùng trồng đến tay thực khách",
+    "section2P1": "Khó khăn lớn nhất là đảm bảo nguồn bơ tươi ổn định. Do bơ là nông sản mang tính mùa vụ, chất lượng trái dễ biến động theo thời tiết và vùng miền. Aloo luôn thắt chặt quy trình kiểm soát đầu vào, khắt khe trong lựa chọn vùng trồng và chuẩn hóa quy trình sơ chế, bảo quản.",
+    "section2P2": "Chính sự nghiêm túc và kiên định với giá trị \"bơ tươi thật\" đã giúp Aloo tạo nên sự khác biệt hoàn toàn. Giữa làn sóng thực phẩm công nghiệp, hương vị tự nhiên, xanh lành từ quả bơ đã chinh phục hoàn toàn niềm tin của thực khách.",
+    "qualityTitle": "🌱 Cam kết chất lượng Aloo",
+    "qualityPoints": [
+      "Kiểm soát vùng trồng nghiêm ngặt",
+      "Quy trình sơ chế & bảo quản chuẩn hoá",
+      "Hương vị đồng đều tại mọi cửa hàng",
+      "Không chất bảo quản · Bơ tươi 100%"
+    ],
+    "section2ImageCaption": "Bơ tươi thật · Xanh · Lành · Ngon",
+    "section3Eyebrow": "Hệ sinh thái & Tầm nhìn",
+    "section3Title": "Vươn mình ra biển lớn",
+    "section3P1": "Tính đến năm 2026, Aloo Kem Bơ sở hữu hệ thống chuỗi cửa hàng tại hai thành phố du lịch biển sầm uất là Quy Nhơn và Nha Trang. Không ngừng mở rộng menu với các vị sáng tạo và mô hình ALooBike phục vụ linh hoạt.",
+    "section3MenuLabel": "Menu đặc sắc",
+    "section3AudienceTitle": "Phục vụ đa dạng đối tượng",
+    "section3AudienceText": "Học sinh · Sinh viên · Gia đình · Khách du lịch\nGiá chỉ từ 20.000đ — kem bơ tươi dành cho tất cả mọi người.",
+    "section3VisionLabel": "Tầm nhìn 2030",
+    "section3VisionTitle": "~50 cửa hàng trên toàn quốc",
+    "section3VisionDesc": "Chuỗi kem bơ tiên phong · Lan tỏa năng lượng xanh",
+    "section3ImageCaptionLeft": "Quy Nhơn & Nha Trang",
+    "section3ImageCaptionRight": "Mục tiêu 50 CH · 2030",
+    "valuesEyebrow": "5 giá trị cốt lõi",
+    "valuesTitle": "Nền tảng vững chắc của Aloo",
+    "valuesDesc": "Mỗi ly kem bơ Aloo đều mang theo 5 giá trị định hình nên thương hiệu và con người Aloo.",
+    "coreValues": [
+      { "label": "Tôn trọng", "desc": "Trân trọng mọi thành viên trong hệ sinh thái Aloo." },
+      { "label": "Yêu thương", "desc": "Gắn kết cộng đồng bằng sản phẩm làm từ tình yêu." },
+      { "label": "Sáng tạo", "desc": "Không ngừng đổi mới để mang đến hương vị mới lạ." },
+      { "label": "Kỷ luật", "desc": "Cam kết chất lượng đồng đều tại mọi điểm bán." },
+      { "label": "Công bằng", "desc": "Chia sẻ giá trị với đối tác, nhân viên và khách hàng." }
+    ],
+    "defaultTimeline": [
+      { "year": "2013", "title": "Khởi nguồn ý tưởng", "desc": "Mong muốn tạo sản phẩm từ bơ tươi Việt Nam, phục vụ cộng đồng." },
+      { "year": "2015", "title": "Hoàn thiện công thức", "desc": "Tinh chỉnh hương vị, kiểm soát nguyên liệu và quy trình pha chế." },
+      { "year": "2018", "title": "Mở rộng hộ kinh doanh", "desc": "Phát triển thêm vị mới và tăng quy mô phục vụ." },
+      { "year": "2023", "title": "Bứt phá thương hiệu", "desc": "CEO Nguyễn Thị Hoàng Phương dẫn dắt giai đoạn bài bản, hệ thống hóa toàn diện." }
+    ],
+    "menuItems": [
+      { "name": "Kem Bơ Truyền Thống", "tag": "Signature", "color": "#007A35" },
+      { "name": "Bơ Xoài", "tag": "Tropical", "color": "#C9933F" },
+      { "name": "Bơ Sầu Riêng", "tag": "Special", "color": "#A8742D" },
+      { "name": "Bơ Mãng Cầu", "tag": "Seasonal", "color": "#7EC75A" },
+      { "name": "Bơ Aloo Đặc Biệt", "tag": "Premium", "color": "#006227" }
+    ],
+    "ctaConclusionTitle": "Hơn một thập kỷ đi lên từ",
+    "ctaConclusionHighlight": "chất lượng thật & giá trị thật",
+    "ctaConclusionBody": "Không chỉ là món giải nhiệt ngon miệng — mỗi ly kem bơ còn mang sứ mệnh làm cuộc sống tươi đẹp hơn và lời cam kết sức khỏe của Aloo dành cho cộng đồng.",
+    "timelineLoadError": "Không tải được lộ trình thương hiệu",
     "cards": [
       {
         "title": "Sản phẩm tập trung",
@@ -78,12 +205,43 @@
   "products": {
     "eyebrow": "Menu ALOO",
     "title": "Danh mục sản phẩm mẫu",
-    "description": "Các sản phẩm được thiết kế để trình bày rõ lợi ích, giá bán và nhóm món."
+    "description": "Các sản phẩm được thiết kế để trình bày rõ lợi ích, giá bán và nhóm món.",
+    "categories": "Danh mục sản phẩm",
+    "listEyebrow": "Danh sách sản phẩm",
+    "allProducts": "Tất cả sản phẩm",
+    "servingCount": "{count} sản phẩm đang phục vụ",
+    "searchPlaceholder": "Tìm sản phẩm...",
+    "explore": "Khám phá",
+    "emptyNoMatch": "Không tìm thấy sản phẩm phù hợp.",
+    "emptyNoData": "Chưa có dữ liệu. Vui lòng thêm sản phẩm trong trang quản trị.",
+    "pageContentErrorHint": "Không tải được banner/menu từ CMS. Trang vẫn hiển thị danh sách sản phẩm.",
+    "prev": "Trước",
+    "next": "Sau",
+    "ctaEyebrow": "Hợp tác cùng ALOO",
+    "ctaTitle": "Một menu tinh gọn, hấp dẫn chính là chìa khóa kinh doanh",
+    "ctaDescription": "Menu tập trung, nguyên liệu sạch mang câu chuyện thương hiệu và quy trình pha chế chuẩn hóa giúp điểm bán nhượng quyền vận hành nhẹ nhàng, tối ưu chi phí và bứt phá doanh thu.",
+    "ctaButton": "Đăng ký tư vấn nhượng quyền",
+    "updatingImage": "Đang cập nhật ảnh",
+    "defaultCategory": "Sản phẩm khác",
+    "productLabel": "Sản phẩm",
+    "carouselPrev": "Slide trước",
+    "carouselNext": "Slide sau",
+    "carouselDot": "Chuyển tới slide {index}",
+    "defaultSlideTitle": "Kem Bơ ALOO - Trọn Vị Tự Nhiên",
+    "defaultSlideSubtitle": "Năng lượng xanh, mát vị lành",
+    "defaultSlideDescription": "Khám phá thế giới kem bơ tươi mát và các thức uống nông sản Việt giàu dinh dưỡng.",
+    "heroLoading": "Đang tải banner sản phẩm..."
   },
   "franchise": {
     "eyebrow": "Cơ hội hợp tác",
     "title": "Nhượng quyền ALOO cho nhà đầu tư địa phương",
     "description": "Trang giới thiệu mô hình thương hiệu, các gói đầu tư và lý do ALOO phù hợp với thị trường kem bơ Việt Nam.",
+    "loading": "Đang tải nội dung nhượng quyền...",
+    "loadErrorHint": "Không kết nối được CMS. Trang đang hiển thị nội dung mặc định.",
+    "viewAllStores": "Xem tất cả cửa hàng",
+    "readBrandStory": "Đọc đầy đủ câu chuyện thương hiệu",
+    "consultationTitle": "Đăng ký nhận tư vấn miễn phí",
+    "featuredModelBadge": "Được chọn nhiều",
     "benefitsTitle": "Giá trị nhận được",
     "benefits": [
       "Công thức và định lượng món chủ lực.",
@@ -92,7 +250,69 @@
       "Hỗ trợ khai trương và theo dõi sau mở bán."
     ],
     "partnerTitle": "Đối tác phù hợp",
-    "partnerDescription": "ALOO phù hợp với người có mặt bằng nhỏ, nhà đầu tư lần đầu mở cửa hàng F&B, hoặc chủ kinh doanh muốn thêm một sản phẩm có tính mua lặp lại cao."
+    "partnerDescription": "ALOO phù hợp với người có mặt bằng nhỏ, nhà đầu tư lần đầu mở cửa hàng F&B, hoặc chủ kinh doanh muốn thêm một sản phẩm có tính mua lặp lại cao.",
+    "heroDefaultSubtitle": "Nhượng quyền Aloo Kem Bơ",
+    "heroDefaultTitle": "Cùng Aloo kinh doanh kem bơ — Mô hình dễ vận hành, giàu tiềm năng",
+    "heroDefaultDescription": "Hơn 10 năm xây dựng thương hiệu từ trái bơ Việt, Aloo Kem Bơ đồng hành cùng đối tác từ khảo sát mặt bằng, setup cửa hàng đến khai trương thực tế. Tầm nhìn 2030: ~50 cửa hàng.",
+    "heroDefaultPrimaryCta": "Nhận tư vấn miễn phí",
+    "heroDefaultSecondaryCta": "Xem chi phí đầu tư",
+    "heroAlt": "Nhượng quyền Aloo Kem Bơ",
+    "heroStats": [
+      { "num": "10+", "label": "Năm kinh nghiệm" },
+      { "num": "2", "label": "Thành phố biển" },
+      { "num": "4", "label": "Mô hình nhượng quyền" },
+      { "num": "~50", "label": "Mục tiêu 2030" }
+    ],
+    "advantagesEyebrow": "Tại sao chọn Aloo?",
+    "advantagesTitle": "Lợi thế thương hiệu dành cho đối tác nhượng quyền",
+    "advantagesDesc": "Aloo Kem Bơ không chỉ là món kem — đó là cả một hệ sinh thái thương hiệu với 5 giá trị cốt lõi: Tôn trọng · Yêu thương · Sáng tạo · Kỷ luật · Công bằng.",
+    "modelsEyebrow": "4 mô hình nhượng quyền",
+    "modelsTitle": "Chọn mô hình phù hợp với ngân sách & mặt bằng",
+    "modelsDesc": "Từ AlooBike cơ động đến Flagship ấn tượng — Aloo có giải pháp cho mọi quy mô đầu tư.",
+    "modelAreaLabel": "Diện tích",
+    "investmentEyebrow": "Chi phí đầu tư",
+    "investmentTitle": "Bảng chi phí tham khảo chi tiết",
+    "investmentDesc": "Các mức chi phí mang tính tham khảo, sẽ được tư vấn cụ thể theo mặt bằng và khu vực của bạn.",
+    "investmentFootnote": "* Chi phí mang tính tham khảo, chưa bao gồm tiền thuê mặt bằng và chi phí vận hành hàng tháng.",
+    "investmentTableItem": "Hạng mục chi phí",
+    "investmentTableNote": "Ghi chú",
+    "investmentTypeKiosk": "Kiosk",
+    "investmentTypeStandard": "Standard ★",
+    "investmentTypeFlagship": "Flagship",
+    "revenueEyebrow": "Doanh thu tham khảo",
+    "revenueTitle": "Tiềm năng kinh doanh kem bơ tại thành phố du lịch",
+    "revenueDesc": "Số liệu tham khảo từ các cửa hàng Aloo tại Quy Nhơn và Nha Trang. Doanh thu thực tế phụ thuộc vị trí, vận hành và mùa du lịch.",
+    "revenuePoints": [
+      "Thành phố du lịch biển quanh năm",
+      "Giá bán từ 20.000đ — phù hợp mọi đối tượng",
+      "Sản phẩm siêu thực phẩm xu hướng healthy"
+    ],
+    "processEyebrow": "Quy trình nhượng quyền",
+    "processTitle": "6 bước triển khai cửa hàng Aloo",
+    "processDesc": "Từ đăng ký tư vấn đến khai trương chỉ trong 30–60 ngày, mỗi bước đều có đội ngũ Aloo đồng hành.",
+    "storesEyebrow": "Hệ thống cửa hàng",
+    "storesTitle": "Các điểm Aloo đang vận hành",
+    "storesDesc": "Thăm quan thực tế để trải nghiệm mô hình vận hành và sản phẩm trước khi quyết định đầu tư.",
+    "viewStoreDetail": "Xem chi tiết cửa hàng",
+    "partnersEyebrow": "Đối tác lý tưởng",
+    "partnersTitle": "Aloo phù hợp với ai?",
+    "partnersDesc": "Bạn không cần nhiều kinh nghiệm — chỉ cần đam mê và sẵn sàng cùng Aloo lan tỏa Năng lượng xanh.",
+    "partnerProfiles": [
+      { "title": "Nhà đầu tư lần đầu", "desc": "Muốn khởi nghiệp F&B với mô hình rõ ràng, ít rủi ro và được hỗ trợ đầy đủ." },
+      { "title": "Chủ mặt bằng sẵn có", "desc": "Đang có mặt bằng trống và muốn khai thác hiệu quả với thương hiệu được xây dựng sẵn." },
+      { "title": "Nhà đầu tư đa cửa hàng", "desc": "Muốn mở nhiều điểm tại các thành phố du lịch biển, hướng đến thu nhập thụ động." },
+      { "title": "Kinh doanh cơ động", "desc": "Muốn bắt đầu nhỏ với AlooBike — thử nghiệm thị trường trước khi đầu tư mặt bằng cố định." }
+    ],
+    "faqEyebrow": "FAQ",
+    "faqTitle": "Câu hỏi thường gặp",
+    "faqDesc": "Chưa tìm được câu trả lời? Liên hệ trực tiếp đội tư vấn Aloo.",
+    "ctaDefaultTitle": "Sẵn sàng mở cửa hàng Aloo?",
+    "ctaDefaultDesc": "Đăng ký tư vấn để đội ngũ Aloo phân tích khu vực, đề xuất mô hình phù hợp và dự toán chi phí đầu tư chi tiết cho bạn.",
+    "ctaPoints": [
+      "✅ Tư vấn miễn phí, không ràng buộc",
+      "✅ Phản hồi trong vòng 24 giờ",
+      "✅ Hỗ trợ toàn diện từ A–Z"
+    ]
   },
   "locations": {
     "eyebrow": "Địa điểm",
@@ -100,12 +320,40 @@
     "description": "Tìm chi nhánh ALOO gần bạn theo tỉnh thành, tên cửa hàng hoặc địa chỉ.",
     "searchPlaceholder": "Tìm theo tên chi nhánh hoặc địa chỉ",
     "active": "Đang hoạt động",
-    "comingSoon": "Sắp khai trương"
+    "comingSoon": "Sắp khai trương",
+    "maintenance": "Đang sửa chữa",
+    "statsTotal": "Tổng chi nhánh",
+    "statsActive": "Đang hoạt động",
+    "statsFeatured": "Nổi bật",
+    "featured": "Nổi bật",
+    "loading": "Đang tải hệ thống cửa hàng...",
+    "emptyNoData": "Chưa có cửa hàng nào. Vào admin để thêm hoặc bật trạng thái địa điểm.",
+    "emptyNoMatch": "Không tìm thấy cửa hàng nào khớp với tìm kiếm.",
+    "detail": "Chi tiết",
+    "order": "Đặt món",
+    "callNow": "Gọi ngay"
   },
   "blog": {
     "eyebrow": "Blog",
     "title": "Tin tức và câu chuyện ALOO",
-    "description": "Cập nhật nội dung về sản phẩm, vận hành cửa hàng và hành trình phát triển thương hiệu kem bơ thuần Việt."
+    "description": "Cập nhật nội dung về sản phẩm, vận hành cửa hàng và hành trình phát triển thương hiệu kem bơ thuần Việt.",
+    "loading": "Đang tải bài viết...",
+    "latestSection": "Tin mới cập nhật",
+    "loadMore": "Xem thêm bài viết",
+    "excerptFallback": "Nội dung bài viết đang được cập nhật.",
+    "dateUnset": "Chưa đặt ngày",
+    "emptyNoData": "Chưa có bài viết công khai",
+    "emptyNoDataDesc": "Nội dung blog sẽ được cập nhật sớm.",
+    "emptyNoMatch": "Chưa có bài viết phù hợp",
+    "emptyNoMatchDesc": "Danh mục này chưa có bài viết công khai.",
+    "sidebarSuggested": "Gợi ý đọc",
+    "sidebarLatest": "Bài mới",
+    "franchiseCtaEyebrow": "Nhượng quyền",
+    "franchiseCtaTitle": "Muốn mở cửa hàng ALOO?",
+    "franchiseCtaDesc": "Đăng ký để đội ngũ tư vấn mô hình, mặt bằng và chi phí phù hợp.",
+    "franchiseCtaButton": "Tư vấn nhượng quyền",
+    "loadErrorHint": "Không tải được danh sách bài viết. Vui lòng thử lại sau.",
+    "clearFilter": "Xem tất cả bài viết"
   },
   "consultation": {
     "eyebrow": "Đăng ký tư vấn",
@@ -136,5 +384,383 @@
     "eyebrow": "Chi phí dự kiến",
     "title": "Chi phí đầu tư tham khảo",
     "description": "Các mức chi phí là dữ liệu mẫu cho giao diện, giúp người xem hình dung quy mô đầu tư ban đầu."
+  },
+  "seo": {
+    "defaultTitle": "ALOO - Kem Bơ Thuần Việt",
+    "defaultDescription": "Website thương hiệu, nhượng quyền và hệ thống cửa hàng ALOO Kem Bơ Thuần Việt.",
+    "routes": {
+      "home": {
+        "title": "ALOO - Kem Bơ Thuần Việt",
+        "description": "Thương hiệu kem bơ thuần Việt, phát triển nhượng quyền và hệ thống cửa hàng hiện đại."
+      },
+      "products": {
+        "title": "Menu ALOO - Sản phẩm kem bơ",
+        "description": "Khám phá menu sản phẩm ALOO dùng để giới thiệu hương vị tại cửa hàng."
+      },
+      "blog": {
+        "title": "Blog ALOO - Tin tức thương hiệu và nhượng quyền",
+        "description": "Cập nhật câu chuyện thương hiệu, vận hành cửa hàng và kinh nghiệm nhượng quyền ALOO."
+      },
+      "franchise": {
+        "title": "Nhượng quyền ALOO",
+        "description": "Thông tin mô hình nhượng quyền ALOO cho nhà đầu tư địa phương."
+      },
+      "locations": {
+        "title": "Hệ thống cửa hàng ALOO",
+        "description": "Tìm cửa hàng ALOO, địa chỉ, hotline, giờ mở cửa và Google Maps."
+      },
+      "contact": {
+        "title": "Liên hệ ALOO",
+        "description": "Kết nối với ALOO để được tư vấn thương hiệu, cửa hàng và nhượng quyền."
+      },
+      "about": {
+        "title": "Về ALOO - Câu chuyện thương hiệu kem bơ",
+        "description": "Hành trình ALOO từ 2013, giá trị cốt lõi, lộ trình phát triển và hệ sinh thái kem bơ thuần Việt."
+      }
+    }
+  },
+  "admin": {
+    "common": {
+      "loading": "Đang tải dữ liệu...",
+      "emptyDefault": "Không có dữ liệu phù hợp",
+      "loadPartialError": "Không tải được một phần dữ liệu."
+    },
+    "shell": {
+      "systemLabel": "Hệ thống quản trị",
+      "panelTitle": "ALOO CMS Panel",
+      "openMenu": "Mở menu quản trị",
+      "brandTitle": "ALOO Admin",
+      "brandSubtitle": "Quản trị hệ thống",
+      "viewWebsite": "Xem website",
+      "logout": "Đăng xuất",
+      "profile": "Hồ sơ tài khoản",
+      "security": "Bảo mật",
+      "adminFallbackName": "ALOO Admin",
+      "adminFallbackEmail": "admin{'@'}aloo.vn",
+      "languageLabel": "Ngôn ngữ giao diện admin"
+    },
+    "nav": {
+      "groups": {
+        "content": "Nội dung website",
+        "stores": "Cửa hàng & khách hàng",
+        "business": "Kinh doanh",
+        "system": "Hệ thống"
+      },
+      "dashboard": "Tổng quan",
+      "products": "Sản phẩm & hiển thị",
+      "franchise": "Nhượng quyền",
+      "feedbacks": "Cảm nhận khách hàng",
+      "homeSections": "Trang chủ",
+      "articles": "Tin tức",
+      "categories": "Danh mục bài viết",
+      "locations": "Hệ thống cửa hàng",
+      "registrations": "Lead tư vấn",
+      "accounts": "Tài khoản & phân quyền",
+      "auditLogs": "Nhật ký hệ thống"
+    },
+    "breadcrumb": {
+      "articleNew": "Tạo bài viết",
+      "articleEdit": "Chỉnh sửa bài viết"
+    },
+    "shared": {
+      "search": "Tìm kiếm",
+      "searchPlaceholder": "Tìm kiếm",
+      "status": "Trạng thái",
+      "filter": "Bộ lọc",
+      "all": "Tất cả",
+      "cancel": "Hủy bỏ",
+      "confirmDeleteTitle": "Xác nhận xóa",
+      "confirmDeleteMessage": "Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa vĩnh viễn mục dữ liệu này khỏi cơ sở dữ liệu hệ thống?",
+      "confirmDelete": "Xác nhận xóa",
+      "paginationShowing": "Hiển thị {visible} / {total} {label}",
+      "paginationPrev": "Trước",
+      "paginationNext": "Sau",
+      "paginationPage": "Trang {page} / {totalPages}",
+      "rows": "dòng"
+    },
+    "roles": {
+      "FULL": "Quản trị viên toàn quyền",
+      "CONTENT": "Biên tập nội dung",
+      "STORES": "Quản lý cửa hàng",
+      "CRM": "Quản lý CRM",
+      "SYSTEM": "Quản trị hệ thống"
+    },
+    "login": {
+      "brandTitle": "ALOO Account",
+      "brandSubtitle": "Đăng nhập tài khoản",
+      "title": "Đăng nhập",
+      "description": "Dùng một tài khoản ALOO để truy cập hồ sơ, dịch vụ và khu quản trị nếu tài khoản có quyền CMS.",
+      "google": "Đăng nhập bằng Google",
+      "divider": "hoặc",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "submit": "Xác thực tài khoản",
+      "submitting": "Đang xác thực...",
+      "invalidCredentials": "Sai tài khoản hoặc mật khẩu"
+    },
+    "dashboard": {
+      "badge": "ALOO Franchise CMS",
+      "title": "Dashboard tổng quan",
+      "scopeTime": "Theo dõi lead và bài viết trong {range}. Sản phẩm và cửa hàng là số liệu hiện tại.",
+      "lastUpdated": "Cập nhật lúc {time}",
+      "refresh": "Làm mới",
+      "refreshing": "Đang làm mới...",
+      "loading": "Đang tải dữ liệu dashboard...",
+      "loadErrorTitle": "Không tải được một phần dữ liệu dashboard.",
+      "emptyLeads": "Chưa có lead trong phạm vi thời gian đã chọn",
+      "emptyPosts": "Chưa có bài viết trong phạm vi thời gian đã chọn",
+      "ranges": {
+        "today": "Hôm nay",
+        "week": "7 ngày qua",
+        "month30": "30 ngày qua",
+        "thisMonth": "Tháng này"
+      },
+      "kpi": {
+        "sectionTitle": "Chỉ số vận hành chính",
+        "sectionSubtitle": "Các chỉ số thống kê theo phạm vi {range}.",
+        "leadsLabel": "Lead cần xử lý",
+        "leadsDescription": "Lead mới hoặc đang tư vấn",
+        "leadsNote": "{scoped}/{total} lead",
+        "postsLabel": "Bài viết chờ duyệt",
+        "postsDescription": "Nội dung chưa xuất bản",
+        "postsNote": "{scoped}/{total} bài",
+        "productsLabel": "Sản phẩm đang bán",
+        "productsDescription": "Sản phẩm public đang bật",
+        "productsNote": "{total} sản phẩm",
+        "locationsLabel": "Địa điểm hoạt động",
+        "locationsDescription": "Cửa hàng đang hoạt động",
+        "locationsNote": "{total} địa điểm",
+        "snapshotHint": "Hiện tại"
+      },
+      "actions": {
+        "sectionTitle": "Đầu việc cần ưu tiên",
+        "sectionSubtitle": "Các thông báo cần xử lý nhanh chóng trong ca làm việc.",
+        "leadsTitle": "{count} lead đang chờ phản hồi",
+        "leadsDescription": "Ưu tiên liên hệ khách hàng mới và lead đang trong giai đoạn tư vấn.",
+        "leadsAction": "Xem danh sách lead",
+        "postsTitle": "{count} bài viết chưa xuất bản",
+        "postsDescription": "Kiểm tra bản nháp, bài lên lịch và các nội dung đang chờ duyệt.",
+        "postsAction": "Xem danh sách bài viết"
+      },
+      "analysis": {
+        "sectionTitle": "Cơ cấu & Phân bổ dữ liệu",
+        "sectionSubtitle": "Tỷ trọng các nhóm đối tượng trong phạm vi {range}.",
+        "leadsTitle": "Lead theo trạng thái",
+        "leadsSubtitle": "Tỷ trọng lead theo pipeline tư vấn",
+        "postsTitle": "Bài viết theo trạng thái",
+        "postsSubtitle": "Tình trạng nội dung trong CMS",
+        "productsTitle": "Sản phẩm theo danh mục",
+        "productsSubtitle": "Cơ cấu danh mục sản phẩm"
+      },
+      "recent": {
+        "sectionTitle": "Dữ liệu cập nhật mới nhất",
+        "sectionSubtitle": "Danh sách lead và bài viết trong phạm vi {range}.",
+        "leadsTitle": "Lead đăng ký tư vấn",
+        "leadsSubtitle": "Các yêu cầu nhượng quyền vừa nhận.",
+        "leadsViewAll": "Xem tất cả",
+        "leadsDetailAria": "Xem chi tiết lead",
+        "postsTitle": "Bài viết & tin tức",
+        "postsSubtitle": "Cập nhật tiến trình viết bài.",
+        "postsManage": "Quản lý bài viết",
+        "postsManageAria": "Quản lý bài viết"
+      },
+      "misc": {
+        "other": "Khác",
+        "notScheduled": "Chưa đặt lịch"
+      }
+    },
+    "articles": {
+      "eyebrow": "Article Management System",
+      "title": "Quản lý tin tức",
+      "description": "Quản lý bài SEO, review địa điểm ăn uống, tin thương hiệu và nội dung nhượng quyền của ALOO.",
+      "add": "Thêm bài viết",
+      "empty": "Không có dữ liệu phù hợp",
+      "searchLabel": "Tìm bài viết",
+      "searchPlaceholder": "Tìm theo tiêu đề, tác giả, tag...",
+      "statusLabel": "Trạng thái bài",
+      "categoryLabel": "Danh mục",
+      "categoryAll": "Tất cả danh mục",
+      "notScheduled": "Chưa đặt lịch",
+      "paginationLabel": "bài viết",
+      "columns": {
+        "title": "Tiêu đề",
+        "category": "Danh mục",
+        "author": "Tác giả",
+        "publishedAt": "Ngày đăng",
+        "status": "Trạng thái",
+        "seo": "SEO",
+        "actions": "Hành động"
+      },
+      "actions": {
+        "edit": "Sửa",
+        "delete": "Xóa"
+      },
+      "toasts": {
+        "deleted": "Đã xóa bài viết",
+        "deleteError": "Không thể xóa bài viết"
+      }
+    },
+    "profile": {
+      "loading": "Đang tải thông tin tài khoản...",
+      "loadError": "Không tải được thông tin tài khoản",
+      "uploadingAvatar": "Đang tải ảnh lên...",
+      "adminEyebrow": "Tài khoản quản trị",
+      "adminTitle": "Tài khoản admin",
+      "adminDescription": "Quản lý hồ sơ và bảo mật admin trong cùng một trang, tách khỏi các module CMS.",
+      "accountEyebrow": "Tài khoản ALOO",
+      "accountTitle": "Thông tin cá nhân",
+      "accountDescription": "Cập nhật hồ sơ tài khoản ALOO của bạn.",
+      "tabs": {
+        "account": "Tài khoản",
+        "security": "Bảo mật"
+      },
+      "fields": {
+        "fullName": "Họ tên",
+        "email": "Email",
+        "phone": "Số điện thoại",
+        "role": "Vai trò",
+        "currentPassword": "Mật khẩu hiện tại",
+        "newPassword": "Mật khẩu mới",
+        "confirmPassword": "Nhập lại mật khẩu mới"
+      },
+      "avatar": {
+        "chooseLabel": "Chọn ảnh đại diện",
+        "googleCurrent": "Ảnh hiện tại từ Google. Bạn có thể tải ảnh khác để thay thế.",
+        "googleCustom": "Ảnh tùy chỉnh của bạn. Đăng nhập Google sẽ giữ ảnh này."
+      },
+      "security": {
+        "accountTitle": "Bảo mật tài khoản",
+        "adminTitle": "Bảo mật admin",
+        "accountDescription": "Đặt hoặc đổi mật khẩu để đăng nhập bằng email khi cần. Nếu bạn chỉ dùng Google, có thể bỏ qua mục này.",
+        "adminDescription": "Mật khẩu admin nên được đổi định kỳ và không dùng lại với tài khoản cá nhân."
+      },
+      "actions": {
+        "saveProfile": "Cập nhật thông tin",
+        "savingProfile": "Đang lưu...",
+        "changePassword": "Đổi mật khẩu",
+        "changingPassword": "Đang đổi..."
+      },
+      "toasts": {
+        "invalidImageType": "Vui lòng chọn file ảnh (JPG, PNG, WEBP...)",
+        "imageTooLarge": "Ảnh tối đa 5MB",
+        "imageReadError": "Không đọc được file ảnh",
+        "avatarUpdated": "Đã cập nhật ảnh đại diện",
+        "avatarUploadError": "Không upload được ảnh đại diện",
+        "profileUpdated": "Cập nhật thông tin thành công",
+        "profileUpdateError": "Không cập nhật được thông tin",
+        "checkForm": "Vui lòng kiểm tra lại thông tin",
+        "passwordUpdated": "Đổi mật khẩu thành công",
+        "passwordUpdateError": "Không đổi được mật khẩu"
+      }
+    },
+    "password": {
+      "minLengthHint": "Mật khẩu tối thiểu {min} ký tự",
+      "errors": {
+        "currentRequired": "Vui lòng nhập mật khẩu hiện tại",
+        "newRequired": "Vui lòng nhập mật khẩu mới",
+        "confirmRequired": "Vui lòng nhập lại mật khẩu mới",
+        "minLength": "Mật khẩu mới tối thiểu 8 ký tự",
+        "mismatch": "Mật khẩu nhập lại không khớp",
+        "tooShort": "Mật khẩu tối thiểu 8 ký tự"
+      }
+    },
+    "accounts": {
+      "emptyTitle": "Chưa có dữ liệu",
+      "emptyDescription": "Vui lòng thêm tài khoản trong trang quản trị.",
+      "title": "Quản lý tài khoản",
+      "description": "Quản lý tài khoản admin CMS và người dùng public. Mật khẩu không bao giờ hiển thị lại.",
+      "addAccount": "Thêm {type}",
+      "adminType": "tài khoản admin",
+      "customerType": "tài khoản người dùng",
+      "tabAdmins": "Admin CMS",
+      "tabCustomers": "Người dùng",
+      "searchPlaceholder": "Tìm theo tên, email, SĐT...",
+      "allStatuses": "Tất cả trạng thái",
+      "profileLabel": "Phân quyền CMS",
+      "loadError": "Không tải được danh sách tài khoản",
+      "saveSuccessCreate": "Đã tạo tài khoản",
+      "saveSuccessUpdate": "Đã cập nhật tài khoản",
+      "saveError": "Không lưu được tài khoản",
+      "statusUpdated": "Đã cập nhật trạng thái",
+      "statusError": "Không cập nhật được trạng thái",
+      "passwordUpdated": "Đã đổi mật khẩu",
+      "passwordError": "Không đổi được mật khẩu",
+      "deleteSuccess": "Đã xóa tài khoản",
+      "deleteError": "Không xóa được tài khoản",
+      "systemEyebrow": "Hệ thống quản trị",
+      "status": {
+        "ACTIVE": "Đang hoạt động",
+        "INACTIVE": "Tạm ẩn",
+        "LOCKED": "Đã khóa"
+      },
+      "columns": {
+        "account": "Tài khoản",
+        "phone": "SĐT",
+        "role": "Vai trò",
+        "status": "Trạng thái",
+        "createdAt": "Ngày tạo",
+        "actions": "Hành động"
+      },
+      "actions": {
+        "password": "Mật khẩu",
+        "edit": "Sửa",
+        "delete": "Xóa",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "changePassword": "Đổi mật khẩu"
+      },
+      "modals": {
+        "createUser": "Thêm tài khoản",
+        "editUser": "Sửa tài khoản",
+        "changePassword": "Đổi mật khẩu",
+        "changePasswordHint": "Đặt mật khẩu mới cho {email}.",
+        "fullName": "Họ tên",
+        "email": "Email",
+        "phone": "Số điện thoại",
+        "avatarUrl": "Avatar URL",
+        "status": "Trạng thái",
+        "password": "Mật khẩu",
+        "newPassword": "Mật khẩu mới"
+      },
+      "confirmStatus": {
+        "title": "Đổi trạng thái tài khoản?",
+        "message": "Trạng thái của {name} sẽ chuyển sang {status}.",
+        "confirm": "Xác nhận"
+      },
+      "confirmDelete": {
+        "title": "Xóa tài khoản?",
+        "message": "Tài khoản sẽ bị xóa khỏi hệ thống. Hành động này không nên dùng nếu chỉ muốn tạm khóa.",
+        "confirm": "Xóa"
+      }
+    },
+    "accessDenied": "Bạn không có quyền truy cập trang này.",
+    "auditLogs": {
+      "title": "Nhật ký hệ thống",
+      "description": "Theo dõi thay đổi tài khoản và thao tác quản trị quan trọng.",
+      "loadError": "Không tải được nhật ký hệ thống",
+      "emptyTitle": "Chưa có nhật ký",
+      "emptyDescription": "Các thao tác quản trị sẽ được ghi lại tại đây.",
+      "exportCsv": "Xuất CSV",
+      "filters": {
+        "actor": "Người thực hiện",
+        "actorPlaceholder": "Email admin...",
+        "action": "Hành động",
+        "actionPlaceholder": "CREATE, UPDATE...",
+        "entityType": "Loại đối tượng",
+        "entityPlaceholder": "ACCOUNT, PRODUCT...",
+        "from": "Từ ngày",
+        "to": "Đến ngày",
+        "apply": "Lọc",
+        "reset": "Xóa lọc"
+      },
+      "paginationLabel": "bản ghi",
+      "columns": {
+        "time": "Thời gian",
+        "actor": "Người thực hiện",
+        "action": "Hành động",
+        "entity": "Đối tượng",
+        "details": "Chi tiết"
+      }
+    }
   }
 }

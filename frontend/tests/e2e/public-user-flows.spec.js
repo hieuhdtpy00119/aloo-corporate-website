@@ -133,7 +133,8 @@ test.describe('ALOO public UI and user flows', () => {
     await expect(page.getByRole('heading', { name: /nhượng quyền/i })).toBeVisible()
 
     await page.goto('/cost', { waitUntil: 'domcontentloaded' })
-    await expect(page.getByRole('heading', { name: /dự toán chi phí/i })).toBeVisible()
+    await expect(page).toHaveURL(/\/franchise#investment/)
+    await expect(page.getByRole('heading', { name: /bảng chi phí tham khảo chi tiết/i })).toBeVisible()
 
     await page.goto('/consultation', { waitUntil: 'domcontentloaded' })
     const form = page.locator('form').first()

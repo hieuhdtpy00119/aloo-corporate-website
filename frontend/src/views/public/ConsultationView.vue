@@ -7,7 +7,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <main class="bg-[#faf8f2] text-avocado-950 pb-20 min-h-screen">
+  <div class="bg-brand-cream text-avocado-950 pb-20 min-h-screen">
     <!-- Header Hero block -->
     <div class="relative bg-avocado-950 text-white overflow-hidden py-20 px-4 sm:px-6 lg:px-8 text-center">
       <div class="absolute inset-0 opacity-15">
@@ -40,6 +40,5 @@ const { t } = useI18n()
         <ConsultationForm />
       </div>
     </section>
-  </main>
+  </div>
 </template>
-

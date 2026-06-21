@@ -2,6 +2,16 @@ const DEFAULT_TITLE = 'ALOO - Kem Bơ Thuần Việt'
 const DEFAULT_DESCRIPTION = 'Website thương hiệu, nhượng quyền và hệ thống cửa hàng ALOO Kem Bơ Thuần Việt.'
 const DEFAULT_IMAGE = '/logo-aloo.png'
 
+export const ROUTE_SEO_KEYS = {
+  '/': 'home',
+  '/products': 'products',
+  '/blog': 'blog',
+  '/franchise': 'franchise',
+  '/locations': 'locations',
+  '/contact': 'contact',
+  '/about': 'about',
+}
+
 const ensureMeta = (selector, createAttributes) => {
   let element = document.head.querySelector(selector)
   if (!element) {
@@ -28,6 +38,22 @@ export const setSeoMeta = ({
   ensureMeta('meta[property="og:type"]', { property: 'og:type' }).setAttribute('content', type)
 }
 
+export const resolveRouteSeoMeta = (path, t) => {
+  const routeKey = ROUTE_SEO_KEYS[path]
+  if (!routeKey) return null
+
+  return {
+    title: t(`seo.routes.${routeKey}.title`),
+    description: t(`seo.routes.${routeKey}.description`),
+  }
+}
+
+export const applyRouteSeo = (path, t) => {
+  const meta = resolveRouteSeoMeta(path, t)
+  if (meta) setSeoMeta(meta)
+}
+
+/** @deprecated Use locale keys under seo.routes.* with applyRouteSeo instead */
 export const routeSeo = {
   '/': {
     title: 'ALOO - Kem Bơ Thuần Việt',
@@ -52,5 +78,9 @@ export const routeSeo = {
   '/contact': {
     title: 'Liên hệ ALOO',
     description: 'Kết nối với ALOO để được tư vấn thương hiệu, cửa hàng và nhượng quyền.',
+  },
+  '/about': {
+    title: 'Về ALOO - Câu chuyện thương hiệu kem bơ',
+    description: 'Hành trình ALOO từ 2013, giá trị cốt lõi, lộ trình phát triển và hệ sinh thái kem bơ thuần Việt.',
   },
 }

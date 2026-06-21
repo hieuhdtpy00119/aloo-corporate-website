@@ -1,34 +1,16 @@
 import { defineStore } from 'pinia'
+import { canAccessAdminSession, ADMIN_SCOPES } from '../utils/adminAccess'
 import {
   categoryService,
   locationService,
   postService,
   productService,
   registrationService,
+  normalizeStorageAssetUrl,
   resolveBackendAssetUrl,
 } from '../services/cmsService'
 
-const registrationStatusToUi = {
-  NEW: 'Mới',
-  CONTACTED: 'Đã liên hệ',
-  CONSULTING: 'Đang tư vấn',
-  POTENTIAL: 'Tiềm năng',
-  SIGNED: 'Đã ký',
-  REJECTED: 'Từ chối',
-  DONE: 'Đã ký',
-  COMPLETED: 'Đã ký',
-  CANCELED: 'Từ chối',
-  CANCELLED: 'Từ chối',
-}
-
-const registrationStatusToApi = {
-  Mới: 'NEW',
-  'Đã liên hệ': 'CONTACTED',
-  'Đang tư vấn': 'CONSULTING',
-  'Tiềm năng': 'POTENTIAL',
-  'Đã ký': 'SIGNED',
-  'Từ chối': 'REJECTED',
-}
+import { normalizeLeadStatusCode } from '../utils/leadStatus'
 
 const normalizeDate = (value) => {
   if (!value) return ''
@@ -48,6 +30,11 @@ const toDateTime = (value) => {
   const normalized = String(value).trim().replace(' ', 'T')
   return normalized.includes('T') ? normalized : `${normalized}T00:00:00`
 }
+
+const isRequestCanceled = (error) =>
+  error?.code === 'ERR_CANCELED' ||
+  error?.name === 'CanceledError' ||
+  ['canceled', 'cancelled', 'request aborted'].includes(String(error?.message || '').toLowerCase())
 
 export const useAppStore = defineStore('app', {
   state: () => ({
@@ -74,9 +61,9 @@ export const useAppStore = defineStore('app', {
   getters: {
     totalProducts: (state) => state.products.length,
     totalRegistrations: (state) => state.registrations.length,
-    newRegistrations: (state) => state.registrations.filter((item) => item.status === 'Mới').length,
+    newRegistrations: (state) => state.registrations.filter((item) => normalizeLeadStatusCode(item.status) === 'NEW').length,
     contactedRegistrations: (state) =>
-      state.registrations.filter((item) => item.status === 'Đã liên hệ').length,
+      state.registrations.filter((item) => normalizeLeadStatusCode(item.status) === 'CONTACTED').length,
     categoryNameById: (state) => (id) =>
       state.categories.find((category) => Number(category.id) === Number(id))?.name || '',
     categoryIdByName: (state) => (name) =>
@@ -148,7 +135,7 @@ export const useAppStore = defineStore('app', {
       }
     },
     normalizeRegistration(registration) {
-      const status = registrationStatusToUi[registration.status] || registration.status || 'Mới'
+      const status = normalizeLeadStatusCode(registration.status)
       return {
         ...registration,
         name: registration.fullName || registration.name || '',
@@ -203,6 +190,7 @@ export const useAppStore = defineStore('app', {
         const { data } = await request()
         assign(Array.isArray(data) ? data : [])
       } catch (error) {
+        if (isRequestCanceled(error)) return
         this.errors[key] = error.response?.data?.message || error.message || 'Không tải được dữ liệu'
         throw error
       } finally {
@@ -242,15 +230,29 @@ export const useAppStore = defineStore('app', {
       ])
     },
     async fetchAdminData() {
-      await Promise.allSettled([
-        this.fetchProducts(),
-        this.fetchCategories(),
-        this.fetchPosts(),
-        this.fetchLocations(),
-        this.fetchRegistrations(),
-      ])
+      const permissions = canAccessAdminSession()
+      const tasks = []
+
+      if (permissions[ADMIN_SCOPES.content]) {
+        tasks.push(this.fetchProducts(), this.fetchCategories(), this.fetchPosts())
+      }
+      if (permissions[ADMIN_SCOPES.stores]) {
+        tasks.push(this.fetchLocations())
+      }
+      if (permissions[ADMIN_SCOPES.crm]) {
+        tasks.push(this.fetchRegistrations())
+      }
+
+      await Promise.allSettled(tasks)
     },
     buildProductPayload(product) {
+      const normalizeGalleryStorage = (gallery) =>
+        String(gallery || '')
+          .split(/\r?\n/)
+          .map((line) => normalizeStorageAssetUrl(line.trim()))
+          .filter(Boolean)
+          .join('\n')
+
       return {
         name: product.name?.trim(),
         slug: product.slug?.trim() || slugify(product.name),
@@ -260,10 +262,10 @@ export const useAppStore = defineStore('app', {
         ingredients: product.ingredients || '',
         tasteProfile: product.tasteProfile || '',
         servingSuggestion: product.servingSuggestion || '',
-        gallery: product.gallery || '',
+        gallery: normalizeGalleryStorage(product.gallery || ''),
         faqs: product.faqs || '',
         price: 0,
-        imageUrl: product.imageUrl || product.image || '',
+        imageUrl: normalizeStorageAssetUrl(product.imageUrl || product.image || ''),
         categoryId: product.categoryId || null,
         category: product.category || '',
         sortOrder: Number(product.sortOrder || 0),
@@ -397,7 +399,7 @@ export const useAppStore = defineStore('app', {
       this.locations = this.locations.filter((item) => item.id !== id)
     },
     async updateRegistrationStatus(registration, status, extra = {}) {
-      const apiStatus = registrationStatusToApi[status] || status
+      const apiStatus = normalizeLeadStatusCode(status)
       const { data } = await registrationService.updateStatus(registration.id, apiStatus, extra)
       const normalized = this.normalizeRegistration(data)
       const index = this.registrations.findIndex((item) => item.id === normalized.id)

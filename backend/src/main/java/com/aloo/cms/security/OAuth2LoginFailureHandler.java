@@ -4,7 +4,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -23,10 +22,13 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
             HttpServletResponse response,
             AuthenticationException exception
     ) throws IOException, ServletException {
+        String message = exception.getMessage() == null || exception.getMessage().isBlank()
+                ? "Không thể đăng nhập bằng Google"
+                : exception.getMessage();
+
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
-                .queryParam("error", "Không thể đăng nhập bằng Google")
-                .encode(StandardCharsets.UTF_8)
-                .build()
+                .queryParam("error", message)
+                .build(true)
                 .toUriString();
 
         response.sendRedirect(targetUrl);

@@ -8,38 +8,38 @@
   --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: 'Be Vietnam Pro', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  --color-brand-forest: #006633;
-  --color-brand-lime: #5BBD2F;
-  --color-brand-brown: #A0703E;
-  --color-brand-olive: #8DB560;
-  --color-brand-sand: #C8A85A;
-  --color-brand-cream: #F7F4EE;
-  --color-brand-dark: #0D2B1A;
-  --color-brand-muted: #5F7A6A;
+  --color-brand-forest: #007A35;
+  --color-brand-lime: #8CC63F;
+  --color-brand-brown: #A8742D;
+  --color-brand-olive: #7EC75A;
+  --color-brand-sand: #E5B85D;
+  --color-brand-cream: #FFF7E6;
+  --color-brand-dark: #0D2F1B;
+  --color-brand-muted: #607D62;
 
-  --color-avocado-50: #f2fdf0;
-  --color-avocado-100: #e1f8d5;
-  --color-avocado-200: #c1f0ab;
-  --color-avocado-300: #9ce27c;
-  --color-avocado-400: #7bd353;
-  --color-avocado-500: #5BBD2F;
-  --color-avocado-600: #48a620;
-  --color-avocado-700: #006633;
-  --color-avocado-800: #005229;
-  --color-avocado-900: #003d1f;
-  --color-avocado-950: #0D2B1A;
+  --color-avocado-50: #F5FBEA;
+  --color-avocado-100: #E7F6D2;
+  --color-avocado-200: #CDECA6;
+  --color-avocado-300: #A9DC73;
+  --color-avocado-400: #83C946;
+  --color-avocado-500: #5BBE2F;
+  --color-avocado-600: #2E9E32;
+  --color-avocado-700: #007A35;
+  --color-avocado-800: #006227;
+  --color-avocado-900: #0B4A22;
+  --color-avocado-950: #0D2F1B;
 
-  --color-cream-50: #fbfaf8;
-  --color-cream-100: #F7F4EE;
-  --color-cream-200: #eeeae0;
-  --color-cream-300: #e3ded2;
-  --color-cream-400: #d7cfbd;
-  --color-cream-500: #c8a85a;
-  --color-cream-600: #A0703E;
-  --color-cream-700: #8b6034;
+  --color-cream-50: #FFFCF4;
+  --color-cream-100: #FFF7E6;
+  --color-cream-200: #F4E7C7;
+  --color-cream-300: #E8D09B;
+  --color-cream-400: #E5B85D;
+  --color-cream-500: #C9933F;
+  --color-cream-600: #A8742D;
+  --color-cream-700: #7F5526;
 
-  --color-honey-500: #A0703E;
-  --color-honey-600: #8b6034;
+  --color-honey-500: #A8742D;
+  --color-honey-600: #875820;
 }
 
 @layer base {
@@ -54,8 +54,8 @@
   body {
     margin: 0;
     min-width: 320px;
-    background: #F7F4EE;
-    color: #0D2B1A;
+    background: #FFF7E6;
+    color: #0D2F1B;
     font-family: var(--font-sans);
     font-weight: 400;           /* Body: font-normal */
     line-height: 1.65;
@@ -112,7 +112,7 @@
 }
 
 .glass-panel-dark {
-  background: rgba(18, 35, 16, 0.85);
+  background: rgba(13, 47, 27, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -122,7 +122,7 @@
   background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(43, 90, 39, 0.06);
+  border-bottom: 1px solid rgba(0, 122, 53, 0.08);
 }
 
 /* Custom interactive classes */
@@ -132,7 +132,7 @@
 
 .hover-lift:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px -15px rgba(43, 90, 39, 0.08);
+  box-shadow: 0 20px 40px -15px rgba(0, 122, 53, 0.12);
 }
 
 .hover-scale {
@@ -150,15 +150,15 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #faf8f2;
+  background: #fff7e6;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c9ebb6;
+  background: #cdeca6;
   border-radius: 99px;
-  border: 3px solid #faf8f2;
+  border: 3px solid #fff7e6;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a2dd85;
+  background: #8cc63f;
 }

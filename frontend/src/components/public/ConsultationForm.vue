@@ -44,7 +44,7 @@ const submitForm = async () => {
     const { data } = await createFranchiseRegistration(payload)
     store.addRegistration(data)
     trackEvent('submit_franchise_form', { province: payload.province })
-    toast.success(t('consultation.success'))
+    toast.success('Cảm ơn bạn đã quan tâm tới ALOO. Chúng tôi sẽ liên hệ trong thời gian sớm nhất.')
     resetForm()
   } catch (error) {
     toast.error(error.response?.data?.message || 'Không gửi được đăng ký tư vấn. Vui lòng thử lại sau.')

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { clearAuthSession } from './authService'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
@@ -23,13 +24,12 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const path = window.location.pathname
-      localStorage.removeItem('admin_token')
-      localStorage.removeItem('admin_user')
+      clearAuthSession()
 
       window.dispatchEvent(new Event('aloo-auth-change'))
 
-      if (path.startsWith('/admin') && path !== '/admin/login') {
-        window.location.assign('/admin/login')
+      if (path.startsWith('/admin') && path !== '/login') {
+        window.location.assign('/login')
       }
     }
 

@@ -7,4 +7,8 @@ import org.springframework.data.domain.Sort;
 
 public interface HomeSectionRepository extends JpaRepository<HomeSection, Long> {
     List<HomeSection> findByStatus(String status, Sort sort);
+
+    boolean existsBySectionKey(String sectionKey);
+
+    boolean existsBySectionKeyAndIdNot(String sectionKey, Long id);
 }

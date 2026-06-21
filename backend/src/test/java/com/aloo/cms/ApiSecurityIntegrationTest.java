@@ -1,7 +1,9 @@
 package com.aloo.cms;
 
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -200,6 +203,36 @@ class ApiSecurityIntegrationTest {
     }
 
     @Test
+    void authenticatedUserCanUploadProfileAvatarAndImageUpload() throws Exception {
+        ensureUserExists("user@example.com", UserRole.USER);
+        String userToken = tokenFor("user@example.com", "USER");
+        MockMultipartFile avatar = new MockMultipartFile(
+                "file",
+                "avatar.png",
+                "image/png",
+                new byte[] {(byte) 137, 80, 78, 71, 13, 10, 26, 10}
+        );
+
+        mockMvc.perform(multipart("/api/auth/profile/avatar")
+                        .file(avatar)
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.url").value(startsWith("/uploads/")))
+                .andExpect(jsonPath("$.fileName", notNullValue()));
+
+        mockMvc.perform(multipart("/api/uploads/images")
+                        .file(new MockMultipartFile(
+                                "file",
+                                "avatar-2.png",
+                                "image/png",
+                                new byte[] {(byte) 137, 80, 78, 71, 13, 10, 26, 10}
+                        ))
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.url").value(startsWith("/uploads/")));
+    }
+
+    @Test
     void corsAllowsViteOrigin() throws Exception {
         mockMvc.perform(options("/api/products")
                         .header("Origin", "http://localhost:5173")
@@ -225,6 +258,31 @@ class ApiSecurityIntegrationTest {
 
         JsonNode json = objectMapper.readTree(response);
         return json.get("token").asText();
+    }
+
+    private void ensureUserExists(String email, UserRole role) {
+        if (adminUserRepository.existsByEmailIgnoreCase(email)) {
+            return;
+        }
+
+        AdminUser user = new AdminUser();
+        user.setEmail(email);
+        user.setFullName("Test User");
+        user.setPasswordHash(passwordEncoder.encode("123456"));
+        user.setPhone("0900123456");
+        user.setRole(role);
+        user.setStatus("ACTIVE");
+        adminUserRepository.save(user);
+    }
+
+    private String tokenFor(String email, String role) {
+        return Jwts.builder()
+                .subject(email)
+                .claim("role", role)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 3_600_000))
+                .signWith(Keys.hmacShaKeyFor(TEST_SECRET.getBytes(StandardCharsets.UTF_8)))
+                .compact();
     }
 
     private String expiredToken() {

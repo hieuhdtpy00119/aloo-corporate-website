@@ -1,10 +1,17 @@
 <script setup>
 import { reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { KeyRound, LockKeyhole, ShieldCheck } from 'lucide-vue-next'
 import { changeAdminPassword } from '../../services/authService'
 import { useToastStore } from '../../stores/toastStore'
+import {
+  getConfirmPasswordErrorKey,
+  getCurrentPasswordErrorKey,
+  getNewPasswordErrorKey,
+} from '../../utils/passwordPolicy'
 
 const toast = useToastStore()
+const { t } = useI18n()
 const isSaving = ref(false)
 
 const form = reactive({
@@ -28,21 +35,14 @@ const clearErrors = () => {
 const validate = () => {
   clearErrors()
 
-  if (!form.currentPassword.trim()) {
-    errors.currentPassword = 'Vui lòng nhập mật khẩu hiện tại'
-  }
+  const currentErrorKey = getCurrentPasswordErrorKey(form.currentPassword)
+  if (currentErrorKey) errors.currentPassword = t(currentErrorKey)
 
-  if (!form.newPassword.trim()) {
-    errors.newPassword = 'Vui lòng nhập mật khẩu mới'
-  } else if (form.newPassword.length < 8) {
-    errors.newPassword = 'Mật khẩu mới tối thiểu 8 ký tự'
-  }
+  const newErrorKey = getNewPasswordErrorKey(form.newPassword)
+  if (newErrorKey) errors.newPassword = t(newErrorKey)
 
-  if (!form.confirmPassword.trim()) {
-    errors.confirmPassword = 'Vui lòng nhập lại mật khẩu mới'
-  } else if (form.confirmPassword !== form.newPassword) {
-    errors.confirmPassword = 'Mật khẩu nhập lại không khớp'
-  }
+  const confirmErrorKey = getConfirmPasswordErrorKey(form.newPassword, form.confirmPassword)
+  if (confirmErrorKey) errors.confirmPassword = t(confirmErrorKey)
 
   return !errors.currentPassword && !errors.newPassword && !errors.confirmPassword
 }

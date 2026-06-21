@@ -35,4 +35,17 @@ public class FranchiseContentService {
         franchiseContentMapper.updateEntity(content, request);
         return franchiseContentMapper.toResponse(franchiseContentRepository.save(content));
     }
+
+    public FranchiseContentResponse create(FranchiseContentRequest request) {
+        FranchiseContent content = new FranchiseContent();
+        franchiseContentMapper.updateEntity(content, request);
+        return franchiseContentMapper.toResponse(franchiseContentRepository.save(content));
+    }
+
+    public void delete(Long id) {
+        if (!franchiseContentRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Franchise content not found");
+        }
+        franchiseContentRepository.deleteById(id);
+    }
 }

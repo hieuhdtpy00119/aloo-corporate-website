@@ -1,27 +1,42 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import AdminPageHeader from '../../components/admin/AdminPageHeader.vue'
 import BaseModal from '../../components/admin/BaseModal.vue'
 import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
 import Pagination from '../../components/admin/Pagination.vue'
 import SearchFilterBar from '../../components/admin/SearchFilterBar.vue'
+import { useAdminModuleI18n } from '../../composables/useAdminModuleI18n'
 import { useAppStore } from '../../stores/appStore'
 import { useToastStore } from '../../stores/toastStore'
+import {
+  LEAD_STATUS_CODES,
+  getLeadStatusBadgeClass,
+  leadStatusLabel,
+  normalizeLeadStatusCode,
+} from '../../utils/leadStatus'
 
+const { m, t } = useAdminModuleI18n('leads')
 const store = useAppStore()
 const toast = useToastStore()
+const route = useRoute()
+const router = useRouter()
 const selectedRegistration = ref(null)
 const pendingDeleteId = ref(null)
 const searchQuery = ref('')
-const statusFilter = ref('Tất cả')
+const statusFilter = ref(t('admin.shared.all'))
 const isLoading = computed(() => store.loading.registrations)
 const errorMessage = computed(() => store.errors.registrations)
 const currentPage = ref(1)
 const pageSize = 5
-const registrationStatuses = ['Mới', 'Đã liên hệ', 'Đang tư vấn', 'Tiềm năng', 'Đã ký', 'Từ chối']
-const statusFilters = ['Tất cả', ...registrationStatuses]
+const registrationStatuses = LEAD_STATUS_CODES
+const statusFilters = computed(() => [
+  t('admin.shared.all'),
+  ...registrationStatuses.map((code) => leadStatusLabel(code, t)),
+])
 const leadForm = reactive({
-  status: 'Mới',
+  status: 'NEW',
   note: '',
   lastContactedAt: '',
   assignedTo: '',
@@ -31,36 +46,29 @@ const registrations = computed(() => store.registrations)
 
 const formatCurrency = (value) => `${new Intl.NumberFormat('vi-VN').format(Number(value || 0))} đ`
 
-const statusClass = (status) => ({
-  'bg-blue-50 text-blue-700 ring-1 ring-blue-100': status === 'Mới',
-  'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100': status === 'Đã liên hệ',
-  'bg-amber-50 text-amber-700 ring-1 ring-amber-100': status === 'Đang tư vấn',
-  'bg-orange-50 text-orange-700 ring-1 ring-orange-100': status === 'Tiềm năng',
-  'bg-purple-50 text-purple-700 ring-1 ring-purple-100': status === 'Đã ký',
-  'bg-slate-100 text-slate-600 ring-1 ring-slate-200': status === 'Từ chối',
-})
+const statusClass = getLeadStatusBadgeClass
 
-const getStatusSelectClass = (status) => ({
-  'bg-blue-50 text-blue-700 border-blue-200': status === 'Mới',
-  'bg-emerald-50 text-emerald-700 border-emerald-200': status === 'Đã liên hệ',
-  'bg-amber-50 text-amber-700 border-amber-200': status === 'Đang tư vấn',
-  'bg-orange-50 text-orange-700 border-orange-200': status === 'Tiềm năng',
-  'bg-purple-50 text-purple-700 border-purple-200': status === 'Đã ký',
-  'bg-red-50 text-red-700 border-red-200': status === 'Từ chối',
-})
+const getStatusFilterCode = (label) => {
+  if (label === t('admin.shared.all')) return 'ALL'
+  const match = registrationStatuses.find((code) => leadStatusLabel(code, t) === label)
+  return match || label
+}
 
 const showDetail = (registration) => {
   selectedRegistration.value = registration
   Object.assign(leadForm, {
-    status: registration.status || 'Mới',
+    status: normalizeLeadStatusCode(registration.status),
     note: registration.note || '',
     lastContactedAt: registration.lastContactedAt ? String(registration.lastContactedAt).replace(' ', 'T').slice(0, 16) : '',
     assignedTo: registration.assignedTo || '',
   })
+  if (String(route.query.lead || '') !== String(registration.id)) {
+    router.replace({ query: { ...route.query, lead: registration.id } })
+  }
 }
 
 const notifyStatusChange = () => {
-  toast.success('Đã cập nhật trạng thái đăng ký')
+  toast.success(m('toasts.statusUpdated'))
 }
 
 const updateRegistrationStatus = async (registration, status) => {
@@ -74,7 +82,7 @@ const updateRegistrationStatus = async (registration, status) => {
     showDetail(updated)
     notifyStatusChange()
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Không cập nhật được trạng thái')
+    toast.error(error.response?.data?.message || m('toasts.statusError'))
   }
 }
 
@@ -85,6 +93,18 @@ const saveLeadCare = () => {
 
 const closeDetailModal = () => {
   selectedRegistration.value = null
+  if (route.query.lead) {
+    const nextQuery = { ...route.query }
+    delete nextQuery.lead
+    router.replace({ query: nextQuery })
+  }
+}
+
+const openLeadFromQuery = () => {
+  const leadId = route.query.lead
+  if (!leadId) return
+  const registration = store.registrations.find((item) => String(item.id) === String(leadId))
+  if (registration) showDetail(registration)
 }
 
 const deleteRegistration = (registrationId) => {
@@ -94,12 +114,12 @@ const deleteRegistration = (registrationId) => {
 const confirmDeleteRegistration = async () => {
   try {
     await store.deleteRegistration(pendingDeleteId.value)
-    toast.success('Đã xóa đăng ký tư vấn thành công')
+    toast.success(m('toasts.deleted'))
     if (selectedRegistration.value?.id === pendingDeleteId.value) {
       closeDetailModal()
     }
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Không xóa được đăng ký tư vấn')
+    toast.error(error.response?.data?.message || m('toasts.deleteError'))
   } finally {
     pendingDeleteId.value = null
   }
@@ -114,7 +134,9 @@ const filteredRegistrations = computed(() => {
       registration.phone.toLowerCase().includes(keyword) ||
       registration.email.toLowerCase().includes(keyword) ||
       registration.area.toLowerCase().includes(keyword)
-    const matchesStatus = statusFilter.value === 'Tất cả' || registration.status === statusFilter.value
+    const matchesStatus =
+      statusFilter.value === t('admin.shared.all') ||
+      normalizeLeadStatusCode(registration.status) === getStatusFilterCode(statusFilter.value)
     return matchesSearch && matchesStatus
   })
 })
@@ -128,26 +150,39 @@ watch([searchQuery, statusFilter], () => {
   currentPage.value = 1
 })
 
-onMounted(() => {
-  store.fetchRegistrations().catch(() => {
-    toast.error('Không tải được danh sách đăng ký tư vấn')
-  })
+watch(
+  () => route.query.lead,
+  () => {
+    if (!route.query.lead) {
+      selectedRegistration.value = null
+      return
+    }
+    openLeadFromQuery()
+  },
+)
+
+onMounted(async () => {
+  try {
+    if (!store.registrations.length) {
+      await store.fetchRegistrations()
+    }
+    openLeadFromQuery()
+  } catch {
+    toast.error(m('toasts.loadError'))
+  }
 })
 </script>
 
 <template>
   <section>
-    <div class="mb-6">
-      <h2 class="text-3xl font-black text-avocado-950">Đăng ký tư vấn</h2>
-      <p class="mt-2 text-slate-600">Danh sách khách hàng tiềm năng và trạng thái xử lý tư vấn nhượng quyền.</p>
-    </div>
+    <AdminPageHeader :title="m('title')" :description="m('description')" />
 
     <SearchFilterBar
       v-model:search="searchQuery"
       v-model:status="statusFilter"
-      search-label="Tìm lead"
-      search-placeholder="Tìm họ tên, điện thoại, email, khu vực"
-      status-label="Trạng thái tư vấn"
+      :search-label="m('searchLabel')"
+      :search-placeholder="m('searchPlaceholder')"
+      :status-label="m('statusLabel')"
       :status-options="statusFilters"
     />
     <p v-if="errorMessage" class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
@@ -169,13 +204,13 @@ onMounted(() => {
           </colgroup>
           <thead class="bg-slate-50">
             <tr>
-              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Họ tên</th>
-              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Số điện thoại</th>
-              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Email</th>
-              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Khu vực</th>
-              <th class="px-3 py-3 text-right text-xs font-black uppercase tracking-wide text-slate-500">Số vốn</th>
-              <th class="px-3 py-3 text-center text-xs font-black uppercase tracking-wide text-slate-500">Trạng thái</th>
-              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Hành động</th>
+              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">{{ m('columns.name') }}</th>
+              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">{{ m('columns.phone') }}</th>
+              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">{{ m('columns.email') }}</th>
+              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">{{ m('columns.area') }}</th>
+              <th class="px-3 py-3 text-right text-xs font-black uppercase tracking-wide text-slate-500">{{ m('columns.capital') }}</th>
+              <th class="px-3 py-3 text-center text-xs font-black uppercase tracking-wide text-slate-500">{{ m('columns.status') }}</th>
+              <th class="px-3 py-3 text-xs font-black uppercase tracking-wide text-slate-500">{{ m('columns.actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -189,22 +224,22 @@ onMounted(() => {
               <td class="whitespace-nowrap px-3 py-2.5 text-right text-sm font-bold tabular-nums text-slate-800">{{ formatCurrency(registration.capital) }}</td>
               <td class="px-3 py-2.5 text-center text-sm">
                 <span class="inline-flex min-w-[112px] justify-center rounded-full px-3 py-1.5 text-xs font-black" :class="statusClass(registration.status)">
-                  {{ registration.status }}
+                  {{ leadStatusLabel(registration.status, t) }}
                 </span>
               </td>
               <td class="px-3 py-2.5 align-middle text-sm">
                 <div class="inline-flex min-w-[142px] items-center gap-2 whitespace-nowrap">
                   <button class="rounded-lg border border-blue-200 px-3 py-1.5 text-center font-bold leading-5 text-blue-700 hover:bg-blue-50" @click="showDetail(registration)">
-                    Chi tiết
+                    {{ m('actions.detail') }}
                   </button>
                   <button class="rounded-lg border border-red-200 px-3 py-1.5 text-center font-bold leading-5 text-red-600 hover:bg-red-50" @click="deleteRegistration(registration.id)">
-                    Xóa
+                    {{ m('actions.delete') }}
                   </button>
                 </div>
               </td>
             </tr>
             <tr v-if="registrations.length === 0">
-              <td colspan="7" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">Chưa có đăng ký tư vấn nào.</td>
+              <td colspan="7" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">{{ m('emptyTable') }}</td>
             </tr>
           </tbody>
         </table>
@@ -218,85 +253,93 @@ onMounted(() => {
               <p class="mt-1 text-sm text-slate-600">{{ registration.phone }}</p>
             </div>
             <span class="shrink-0 rounded-full px-3 py-1.5 text-xs font-black" :class="statusClass(registration.status)">
-              {{ registration.status }}
+              {{ leadStatusLabel(registration.status, t) }}
             </span>
           </div>
           <div class="mt-4 grid gap-2 text-sm text-slate-700">
-            <p><span class="font-bold text-slate-900">Email:</span> {{ registration.email }}</p>
-            <p><span class="font-bold text-slate-900">Khu vực:</span> {{ registration.area }}</p>
-            <p><span class="font-bold text-slate-900">Số vốn:</span> {{ formatCurrency(registration.capital) }}</p>
+            <p><span class="font-bold text-slate-900">{{ m('columns.email') }}:</span> {{ registration.email }}</p>
+            <p><span class="font-bold text-slate-900">{{ m('columns.area') }}:</span> {{ registration.area }}</p>
+            <p><span class="font-bold text-slate-900">{{ m('columns.capital') }}:</span> {{ formatCurrency(registration.capital) }}</p>
           </div>
           <div class="mt-4 grid gap-2 sm:grid-cols-3">
             <button class="rounded-lg border border-blue-200 px-3 py-2 text-sm font-bold text-blue-700 hover:bg-blue-50" @click="showDetail(registration)">
-              Xem chi tiết
+              {{ m('actions.viewDetail') }}
             </button>
             <button class="rounded-lg border border-red-200 px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50" @click="deleteRegistration(registration.id)">
-              Xóa
+              {{ m('actions.delete') }}
             </button>
           </div>
         </article>
       </div>
     </div>
 
-    <Pagination :page="currentPage" :total-pages="totalPages" :visible-count="paginatedRegistrations.length" :total-count="filteredRegistrations.length" label="đăng ký" @prev="currentPage--" @next="currentPage++" />
+    <Pagination
+      :page="currentPage"
+      :total-pages="totalPages"
+      :visible-count="paginatedRegistrations.length"
+      :total-count="filteredRegistrations.length"
+      :label="m('paginationLabel')"
+      @prev="currentPage = Math.max(1, currentPage - 1)"
+      @next="currentPage = Math.min(totalPages, currentPage + 1)"
+    />
 
-    <BaseModal :show="Boolean(selectedRegistration)" title="Chi tiết đăng ký tư vấn" @close="closeDetailModal">
+    <BaseModal :show="Boolean(selectedRegistration)" :title="m('detailTitle')" @close="closeDetailModal">
       <template v-if="selectedRegistration">
-        <p class="mb-5 text-sm text-slate-500">Mã đăng ký #{{ selectedRegistration.id }}</p>
+        <p class="mb-5 text-sm text-slate-500">{{ m('registrationId', { id: selectedRegistration.id }) }}</p>
         <dl class="grid gap-4 sm:grid-cols-2">
           <div class="rounded-lg bg-slate-50 p-4">
-            <dt class="text-xs font-black uppercase text-slate-500">Họ tên</dt>
+            <dt class="text-xs font-black uppercase text-slate-500">{{ m('fields.name') }}</dt>
             <dd class="mt-1 font-bold text-avocado-950">{{ selectedRegistration.name }}</dd>
           </div>
           <div class="rounded-lg bg-slate-50 p-4">
-            <dt class="text-xs font-black uppercase text-slate-500">Số điện thoại</dt>
+            <dt class="text-xs font-black uppercase text-slate-500">{{ m('fields.phone') }}</dt>
             <dd class="mt-1 font-bold text-avocado-950">{{ selectedRegistration.phone }}</dd>
           </div>
           <div class="rounded-lg bg-slate-50 p-4">
-            <dt class="text-xs font-black uppercase text-slate-500">Email</dt>
+            <dt class="text-xs font-black uppercase text-slate-500">{{ m('fields.email') }}</dt>
             <dd class="mt-1 break-words font-bold text-avocado-950">{{ selectedRegistration.email }}</dd>
           </div>
           <div class="rounded-lg bg-slate-50 p-4">
-            <dt class="text-xs font-black uppercase text-slate-500">Khu vực muốn mở cửa hàng</dt>
+            <dt class="text-xs font-black uppercase text-slate-500">{{ m('fields.areaOpen') }}</dt>
             <dd class="mt-1 font-bold text-avocado-950">{{ selectedRegistration.area }}</dd>
           </div>
           <div class="rounded-lg bg-slate-50 p-4">
-            <dt class="text-xs font-black uppercase text-slate-500">Số vốn dự kiến</dt>
+            <dt class="text-xs font-black uppercase text-slate-500">{{ m('fields.capital') }}</dt>
             <dd class="mt-1 font-bold text-avocado-950">{{ formatCurrency(selectedRegistration.capital) }}</dd>
           </div>
           <div class="rounded-lg bg-slate-50 p-4">
-            <dt class="text-xs font-black uppercase text-slate-500">Ngày đăng ký</dt>
+            <dt class="text-xs font-black uppercase text-slate-500">{{ m('fields.registeredAt') }}</dt>
             <dd class="mt-1 font-bold text-avocado-950">{{ selectedRegistration.createdAt }}</dd>
           </div>
           <div class="rounded-lg bg-slate-50 p-4 sm:col-span-2">
-            <dt class="text-xs font-black uppercase text-slate-500">Trạng thái</dt>
+            <dt class="text-xs font-black uppercase text-slate-500">{{ m('fields.status') }}</dt>
             <dd class="mt-2">
               <select v-model="leadForm.status" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-avocado-500">
-                <option v-for="status in registrationStatuses" :key="status" :value="status">{{ status }}</option>
+                <option v-for="status in registrationStatuses" :key="status" :value="status">{{ leadStatusLabel(status, t) }}</option>
               </select>
             </dd>
           </div>
           <div class="rounded-lg bg-slate-50 p-4 sm:col-span-2">
-            <dt class="text-xs font-black uppercase text-slate-500">Chăm sóc lead</dt>
+            <dt class="text-xs font-black uppercase text-slate-500">{{ m('fields.leadCare') }}</dt>
             <dd class="mt-3 grid gap-3">
               <div class="grid gap-3 sm:grid-cols-2">
                 <label class="grid gap-1">
-                  <span class="text-xs font-bold text-slate-500">Lần liên hệ cuối</span>
+                  <span class="text-xs font-bold text-slate-500">{{ m('fields.lastContact') }}</span>
                   <input v-model="leadForm.lastContactedAt" type="datetime-local" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-avocado-500" />
                 </label>
                 <label class="grid gap-1">
-                  <span class="text-xs font-bold text-slate-500">Người phụ trách</span>
-                  <input v-model="leadForm.assignedTo" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-avocado-500" placeholder="Tên admin hoặc sale" />
+                  <span class="text-xs font-bold text-slate-500">{{ m('fields.assignedTo') }}</span>
+                  <input v-model="leadForm.assignedTo" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-avocado-500" :placeholder="m('assignedPlaceholder')" />
                 </label>
               </div>
-              <textarea v-model="leadForm.note" rows="4" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-avocado-500" placeholder="Ghi chú chăm sóc lead"></textarea>
+              <textarea v-model="leadForm.note" rows="4" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-avocado-500" :placeholder="m('notePlaceholder')"></textarea>
               <button type="button" class="w-fit rounded-xl bg-avocado-800 px-5 py-3 text-sm font-black text-white hover:bg-avocado-950" @click="saveLeadCare">
-                Lưu chăm sóc lead
+                {{ m('actions.saveLeadCare') }}
               </button>
             </dd>
           </div>
           <div class="rounded-lg bg-slate-50 p-4 sm:col-span-2">
-            <dt class="text-xs font-black uppercase text-slate-500">Ghi chú</dt>
+            <dt class="text-xs font-black uppercase text-slate-500">{{ m('fields.note') }}</dt>
             <dd class="mt-1 leading-7 text-slate-700">{{ selectedRegistration.note }}</dd>
           </div>
         </dl>

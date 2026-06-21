@@ -1,21 +1,21 @@
 :root {
-  --aloo-brand-950: #0D2B1A;
-  --aloo-brand-900: #003d1f;
-  --aloo-brand-800: #005229;
-  --aloo-brand-700: #006633;
-  --aloo-brand-600: #5BBD2F;
-  --aloo-brand-100: #e1f8d5;
-  --aloo-brand-50: #f2fdf0;
-  --aloo-accent-yellow: #C8A85A;
-  --aloo-accent-orange: #A0703E;
-  --aloo-bg: #F7F4EE;
+  --aloo-brand-950: #0D2F1B;
+  --aloo-brand-900: #0B4A22;
+  --aloo-brand-800: #006227;
+  --aloo-brand-700: #007A35;
+  --aloo-brand-600: #2E9E32;
+  --aloo-brand-100: #E7F6D2;
+  --aloo-brand-50: #F5FBEA;
+  --aloo-accent-yellow: #E5B85D;
+  --aloo-accent-orange: #A8742D;
+  --aloo-bg: #FFF7E6;
   --aloo-surface: #ffffff;
-  --aloo-surface-soft: #fbfaf8;
-  --aloo-text: #0D2B1A;
-  --aloo-text-soft: #5F7A6A;
-  --aloo-text-muted: #8fa597;
-  --aloo-border: #e3ded5;
-  --aloo-border-soft: #f0ede6;
+  --aloo-surface-soft: #FFFCF4;
+  --aloo-text: #0D2F1B;
+  --aloo-text-soft: #607D62;
+  --aloo-text-muted: #8EA28F;
+  --aloo-border: #E9DFC8;
+  --aloo-border-soft: #F4E7C7;
   --aloo-danger: #dc2626;
   --aloo-success: #059669;
   --aloo-warning: #d97706;
@@ -24,9 +24,9 @@
   --aloo-radius-md: 14px;
   --aloo-radius-lg: 18px;
   --aloo-radius-xl: 24px;
-  --aloo-shadow-sm: 0 8px 32px rgba(0, 102, 51, 0.08);
-  --aloo-shadow-md: 0 16px 42px rgba(0, 102, 51, 0.12);
-  --aloo-focus-ring: 0 0 0 4px rgba(0, 102, 51, 0.12);
+  --aloo-shadow-sm: 0 8px 32px rgba(0, 122, 53, 0.08);
+  --aloo-shadow-md: 0 16px 42px rgba(0, 122, 53, 0.12);
+  --aloo-focus-ring: 0 0 0 4px rgba(0, 122, 53, 0.14);
 }
 
 .aloo-page-shell {
@@ -109,7 +109,7 @@
 
 .aloo-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 102, 51, 0.12);
+  box-shadow: 0 8px 20px rgba(0, 122, 53, 0.12);
 }
 
 .aloo-btn:focus-visible {
@@ -120,16 +120,16 @@
 .aloo-btn--primary {
   background: var(--aloo-brand-700);
   color: #ffffff;
-  box-shadow: 0 10px 22px rgba(0, 102, 51, 0.2);
+  box-shadow: 0 10px 22px rgba(0, 122, 53, 0.22);
 }
 
 .aloo-btn--primary:hover {
   background: var(--aloo-brand-800);
-  box-shadow: 0 12px 26px rgba(0, 102, 51, 0.3);
+  box-shadow: 0 12px 26px rgba(0, 122, 53, 0.3);
 }
 
 .aloo-btn--secondary {
-  border-color: rgba(0, 102, 51, 0.24);
+  border-color: rgba(0, 122, 53, 0.24);
   background: #ffffff;
   color: var(--aloo-brand-700);
 }
@@ -160,7 +160,7 @@
 
 .aloo-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(0, 102, 51, 0.14);
+  box-shadow: 0 16px 48px rgba(0, 122, 53, 0.14);
 }
 
 .aloo-admin-page {
