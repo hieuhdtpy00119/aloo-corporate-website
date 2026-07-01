@@ -23,6 +23,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<ProductResponse> findAll() {
@@ -49,7 +50,9 @@ public class ProductService {
         ensureSlugAvailable(request.slug(), null);
         Product product = productMapper.toEntity(request);
         product.setCategory(resolveCategory(request));
-        return productMapper.toResponse(productRepository.save(product));
+        ProductResponse response = productMapper.toResponse(productRepository.save(product));
+        auditLogService.logCreated("PRODUCT", String.valueOf(response.id()), response.name(), response.slug());
+        return response;
     }
 
     @Transactional
@@ -58,12 +61,15 @@ public class ProductService {
         ensureSlugAvailable(request.slug(), id);
         productMapper.updateEntity(product, request);
         product.setCategory(resolveCategory(request));
-        return productMapper.toResponse(productRepository.save(product));
+        ProductResponse response = productMapper.toResponse(productRepository.save(product));
+        auditLogService.logUpdated("PRODUCT", String.valueOf(response.id()), response.name(), response.slug());
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
         Product product = getProduct(id);
+        auditLogService.logDeleted("PRODUCT", String.valueOf(product.getId()), product.getName(), product.getSlug());
         productRepository.delete(product);
     }
 

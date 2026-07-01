@@ -1,5 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import AdminShellFrame from '../shell/AdminShellFrame.vue'
+import AdminShellTablePanel from '../shell/AdminShellTablePanel.vue'
 import BaseModal from '../BaseModal.vue'
 import ConfirmModal from '../ConfirmModal.vue'
 import EmptyState from '../EmptyState.vue'
@@ -121,6 +123,74 @@ const adjustCropBox = (field, val) => {
   } else if (field === 'y') {
     cropBox.y = Math.min(100 - cropBox.h, num)
   }
+}
+
+const cropWrapperRef = ref(null)
+let dragState = null
+
+const getWrapperSize = () => {
+  const el = cropWrapperRef.value
+  if (!el) return { width: 1, height: 1 }
+  const rect = el.getBoundingClientRect()
+  return { width: rect.width || 1, height: rect.height || 1 }
+}
+
+const onCropDrag = (event) => {
+  if (!dragState) return
+  const { width, height } = getWrapperSize()
+  const dxPct = ((event.clientX - dragState.startX) / width) * 100
+  const dyPct = ((event.clientY - dragState.startY) / height) * 100
+  const box = dragState.startBox
+  const minSize = 10
+
+  if (dragState.mode === 'move') {
+    cropBox.x = Math.min(100 - box.w, Math.max(0, box.x + dxPct))
+    cropBox.y = Math.min(100 - box.h, Math.max(0, box.y + dyPct))
+    return
+  }
+
+  let { x, y, w, h } = box
+  const handle = dragState.handle
+  if (handle.includes('e')) {
+    w = Math.min(100 - box.x, Math.max(minSize, box.w + dxPct))
+  }
+  if (handle.includes('s')) {
+    h = Math.min(100 - box.y, Math.max(minSize, box.h + dyPct))
+  }
+  if (handle.includes('w')) {
+    const newX = Math.min(box.x + box.w - minSize, Math.max(0, box.x + dxPct))
+    w = box.w + (box.x - newX)
+    x = newX
+  }
+  if (handle.includes('n')) {
+    const newY = Math.min(box.y + box.h - minSize, Math.max(0, box.y + dyPct))
+    h = box.h + (box.y - newY)
+    y = newY
+  }
+  cropBox.x = x
+  cropBox.y = y
+  cropBox.w = w
+  cropBox.h = h
+}
+
+const endCropDrag = () => {
+  dragState = null
+  window.removeEventListener('pointermove', onCropDrag)
+  window.removeEventListener('pointerup', endCropDrag)
+}
+
+const startCropDrag = (event, mode, handle = null) => {
+  event.preventDefault()
+  event.stopPropagation()
+  dragState = {
+    mode,
+    handle,
+    startX: event.clientX,
+    startY: event.clientY,
+    startBox: { x: cropBox.x, y: cropBox.y, w: cropBox.w, h: cropBox.h },
+  }
+  window.addEventListener('pointermove', onCropDrag)
+  window.addEventListener('pointerup', endCropDrag)
 }
 
 const setCropRatioPreset = (ratio) => {
@@ -252,6 +322,7 @@ const totalHeroPages = computed(() => Math.max(1, Math.ceil(filteredHeroBanners.
 const paginatedHeroBanners = computed(() =>
   filteredHeroBanners.value.slice((heroCurrentPage.value - 1) * pageSize, heroCurrentPage.value * pageSize),
 )
+const listCountText = computed(() => t('admin.shared.totalCount', { count: filteredHeroBanners.value.length }))
 
 const fetchHeroBanners = async () => {
   isLoadingHeroBanners.value = true
@@ -324,7 +395,7 @@ defineExpose({ openCreate: openCreateHeroModal })
 </script>
 
 <template>
-  <div class="space-y-6">
+  <AdminShellFrame variant="toolbar" inner="toolbar">
     <SearchFilterBar
       v-model:search="heroSearchQuery"
       v-model:status="heroStatusFilter"
@@ -333,73 +404,118 @@ defineExpose({ openCreate: openCreateHeroModal })
       :status-label="m('filters.heroStatusLabel')"
       :status-options="heroStatusFilters"
     />
+  </AdminShellFrame>
 
-    <p v-if="heroBannerError" class="rounded-2xl bg-red-50 border border-red-200/50 px-4 py-3 text-xs font-bold text-red-700">
-      {{ heroBannerError }}
-    </p>
+  <AdminShellFrame v-if="heroBannerError" as="p" variant="alert" class="admin-list-alert">
+    {{ heroBannerError }}
+  </AdminShellFrame>
 
-    <div class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-      <div class="overflow-x-auto">
-        <table v-if="!isLoadingHeroBanners && filteredHeroBanners.length" class="w-full min-w-[920px] table-fixed whitespace-nowrap text-left">
-          <colgroup>
-            <col class="w-[10%]" />
-            <col class="w-[30%]" />
-            <col class="w-[14%]" />
-            <col class="w-[12%]" />
-            <col class="w-[14%]" />
-            <col class="w-[10%]" />
-            <col class="w-[10%]" />
-          </colgroup>
-          <thead class="bg-slate-50/50 border-b border-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            <tr>
-              <th class="px-6 py-4">{{ m('columns.hero.image') }}</th>
-              <th class="px-6 py-4">{{ m('columns.hero.content') }}</th>
-              <th class="px-6 py-4">{{ m('columns.hero.background') }}</th>
-              <th class="px-6 py-4">{{ m('columns.hero.tone') }}</th>
-              <th class="px-6 py-4">{{ m('columns.hero.status') }}</th>
-              <th class="px-6 py-4">{{ m('columns.hero.sortOrder') }}</th>
-              <th class="px-6 py-4 text-right">{{ m('columns.hero.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-50 text-xs">
-            <tr v-for="banner in paginatedHeroBanners" :key="banner.id" class="hover:bg-slate-50/30 transition">
-              <td class="px-6 py-4">
-                <img v-if="banner.backgroundImageUrl" :src="resolveBackendAssetUrl(banner.backgroundImageUrl)" :alt="banner.title" class="h-12 w-14 rounded-xl object-cover border border-slate-100 shadow-sm" />
-                <div v-else class="grid h-12 w-14 place-items-center rounded-xl bg-slate-50 border border-slate-100 text-[9px] font-bold text-slate-400">
-                  <ImageIcon class="h-4 w-4" />
-                </div>
-              </td>
-              <td class="px-6 py-4">
-                <p class="truncate font-bold text-xs text-avocado-950">{{ banner.title }}</p>
-                <p class="mt-1 truncate text-[10px] text-slate-400">{{ banner.subtitle || banner.description || m('misc.noDescription') }}</p>
-              </td>
-              <td class="px-6 py-4">
-                <span class="font-semibold text-slate-500">{{ banner.backgroundImageUrl ? m('misc.hasBackgroundYes') : m('misc.hasBackgroundNo') }}</span>
-              </td>
-              <td class="px-6 py-4 font-semibold text-slate-500">{{ banner.tone === 'dark' ? m('misc.toneDark') : m('misc.toneLight') }}</td>
-              <td class="px-6 py-4">
-                <span class="inline-flex min-w-[92px] justify-center rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(banner.status)">
-                  {{ heroStatusLabels[banner.status] || banner.status }}
-                </span>
-              </td>
-              <td class="px-6 py-4 font-semibold text-slate-500">{{ banner.sortOrder }}</td>
-              <td class="px-6 py-4">
-                <div class="flex justify-end gap-1.5">
-                  <button class="rounded-xl border border-avocado-100/50 p-2 font-bold text-avocado-700 hover:bg-avocado-50/50 transition" :title="m('actions.edit')" @click="openEditHeroModal(banner)">
-                    <Edit2 class="h-3.5 w-3.5" />
-                  </button>
-                  <button class="rounded-xl border border-red-100 p-2 font-bold text-red-600 hover:bg-red-50 transition" :title="m('actions.delete')" @click="pendingDeleteHeroId = banner.id">
-                    <Trash2 class="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <EmptyState v-if="isLoadingHeroBanners || filteredHeroBanners.length === 0" :loading="isLoadingHeroBanners" :message="m('emptyHero')" />
-    </div>
+  <AdminShellFrame v-if="isLoadingHeroBanners" variant="body" inner="pad">
+    <div v-for="i in 5" :key="i" class="admin-shell-skeleton" />
+  </AdminShellFrame>
 
+  <AdminShellFrame v-else-if="!filteredHeroBanners.length" variant="body" inner="pad">
+    <EmptyState :message="m('emptyHero')" />
+  </AdminShellFrame>
+
+  <AdminShellFrame v-else variant="body" visibility="desktop">
+    <AdminShellTablePanel :title="m('tabs.hero')" :count-text="listCountText">
+      <table class="admin-shell-table">
+        <colgroup>
+          <col style="width: 10%" />
+          <col style="width: 30%" />
+          <col style="width: 14%" />
+          <col style="width: 12%" />
+          <col style="width: 14%" />
+          <col style="width: 10%" />
+          <col style="width: 10%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>{{ m('columns.hero.image') }}</th>
+            <th>{{ m('columns.hero.content') }}</th>
+            <th>{{ m('columns.hero.background') }}</th>
+            <th>{{ m('columns.hero.tone') }}</th>
+            <th class="text-center">{{ m('columns.hero.status') }}</th>
+            <th>{{ m('columns.hero.sortOrder') }}</th>
+            <th class="text-right">{{ m('columns.hero.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="banner in paginatedHeroBanners" :key="banner.id">
+            <td>
+              <img v-if="banner.backgroundImageUrl" :src="resolveBackendAssetUrl(banner.backgroundImageUrl)" :alt="banner.title" class="h-12 w-14 rounded-xl border border-slate-100 object-cover shadow-sm" />
+              <div v-else class="grid h-12 w-14 place-items-center rounded-xl border border-slate-100 bg-slate-50 text-slate-400">
+                <ImageIcon class="h-4 w-4" />
+              </div>
+            </td>
+            <td>
+              <p class="truncate font-bold text-avocado-950">{{ banner.title }}</p>
+            </td>
+            <td class="admin-shell-cell-muted font-semibold">
+              {{ banner.backgroundImageUrl ? m('misc.hasBackgroundYes') : m('misc.hasBackgroundNo') }}
+            </td>
+            <td class="admin-shell-cell-muted font-semibold">{{ banner.tone === 'dark' ? m('misc.toneDark') : m('misc.toneLight') }}</td>
+            <td class="text-center">
+              <span class="inline-flex min-w-[92px] justify-center rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(banner.status)">
+                {{ heroStatusLabels[banner.status] || banner.status }}
+              </span>
+            </td>
+            <td class="admin-shell-cell-muted font-semibold">{{ banner.sortOrder }}</td>
+            <td>
+              <div class="flex justify-end gap-1.5">
+                <button class="rounded-xl border border-avocado-100/50 p-2 font-bold text-avocado-700 transition hover:bg-avocado-50/50" :title="m('actions.edit')" @click="openEditHeroModal(banner)">
+                  <Edit2 class="h-3.5 w-3.5" />
+                </button>
+                <button class="rounded-xl border border-red-100 p-2 font-bold text-red-600 transition hover:bg-red-50" :title="m('actions.delete')" @click="pendingDeleteHeroId = banner.id">
+                  <Trash2 class="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </AdminShellTablePanel>
+  </AdminShellFrame>
+
+  <AdminShellFrame v-if="!isLoadingHeroBanners && filteredHeroBanners.length" variant="body" visibility="mobile">
+    <AdminShellTablePanel :title="m('tabs.hero')" :count-text="listCountText">
+      <template #below>
+        <div class="admin-shell-frame__inner--pad admin-shell-frame__inner--stack">
+          <article v-for="banner in paginatedHeroBanners" :key="banner.id" class="admin-shell-mobile-card">
+            <div class="flex items-start gap-3">
+              <img
+                v-if="banner.backgroundImageUrl"
+                :src="resolveBackendAssetUrl(banner.backgroundImageUrl)"
+                :alt="banner.title"
+                class="h-14 w-20 rounded-xl border border-slate-100 object-cover"
+              />
+              <div v-else class="grid h-14 w-20 shrink-0 place-items-center rounded-xl border border-slate-100 bg-slate-50 text-slate-400">
+                <ImageIcon class="h-5 w-5" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="truncate font-black text-avocado-950">{{ banner.title }}</h3>
+                <p class="mt-1 text-xs text-slate-500">{{ m('columns.hero.sortOrder') }}: {{ banner.sortOrder }}</p>
+              </div>
+              <span class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(banner.status)">
+                {{ heroStatusLabels[banner.status] || banner.status }}
+              </span>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button class="rounded-lg border border-avocado-200 px-3 py-2 text-xs font-bold text-avocado-700" @click="openEditHeroModal(banner)">
+                {{ m('actions.edit') }}
+              </button>
+              <button class="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600" @click="pendingDeleteHeroId = banner.id">
+                {{ m('actions.delete') }}
+              </button>
+            </div>
+          </article>
+        </div>
+      </template>
+    </AdminShellTablePanel>
+  </AdminShellFrame>
+
+  <AdminShellFrame v-if="filteredHeroBanners.length" variant="footer">
     <Pagination
       :page="heroCurrentPage"
       :total-pages="totalHeroPages"
@@ -409,13 +525,14 @@ defineExpose({ openCreate: openCreateHeroModal })
       @prev="heroCurrentPage = Math.max(1, heroCurrentPage - 1)"
       @next="heroCurrentPage = Math.min(totalHeroPages, heroCurrentPage + 1)"
     />
+  </AdminShellFrame>
 
-    <BaseModal :show="showHeroModal" :title="heroMode === 'create' ? m('modals.createHero') : m('modals.editHero')" max-width="max-w-5xl" @close="closeHeroModal">
+  <BaseModal :show="showHeroModal" :title="heroMode === 'create' ? m('modals.createHero') : m('modals.editHero')" max-width="max-w-5xl" @close="closeHeroModal">
       <form id="hero-form" class="grid gap-5" @submit.prevent="saveHeroBanner">
         <div class="grid gap-5 md:grid-cols-2">
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.bannerTitle') }}
-            <input v-model="heroForm.title" required class="admin-input-premium" :placeholder="m('placeholders.bannerTitle')" />
+            <input v-model="heroForm.title" required class="admin-input-premium" />
           </label>
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.displayOrder') }}
@@ -435,13 +552,10 @@ defineExpose({ openCreate: openCreateHeroModal })
         <div>
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.backgroundImage') }}
-            <input v-model="heroForm.backgroundImageUrl" class="admin-input-premium" :placeholder="m('placeholders.backgroundImage')" />
-            <span class="text-[11px] font-semibold normal-case tracking-normal text-slate-400">
-              {{ m('misc.heroBgHint') }}
-            </span>
+            <input v-model="heroForm.backgroundImageUrl" class="admin-input-premium" />
             <input type="file" accept=".jpg,.jpeg,.jfif,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" class="w-full text-xs font-bold text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white" :disabled="Boolean(isUploadingHeroImage)" @change="handleHeroImageFileChange($event, 'backgroundImageUrl')" />
             <span v-if="isUploadingHeroImage === 'backgroundImageUrl'" class="text-xs font-bold text-avocado-700 animate-pulse">{{ m('misc.uploadingHeroBg') }}</span>
-            <img v-if="heroBackgroundPreviewUrl" :src="heroBackgroundPreviewUrl" :alt="m('misc.heroBgPreview')" class="h-28 w-full rounded-xl border border-slate-100 object-cover" />
+            <img v-if="heroBackgroundPreviewUrl" :src="heroBackgroundPreviewUrl" :alt="heroForm.title || ''" class="h-28 w-full rounded-xl border border-slate-100 object-cover" />
           </label>
         </div>
       </form>
@@ -457,15 +571,12 @@ defineExpose({ openCreate: openCreateHeroModal })
 
     <BaseModal :show="showCropper" :title="m('modals.cropper')" max-width="max-w-3xl" @close="showCropper = false">
       <div class="space-y-5">
-        <p class="text-xs font-semibold text-slate-500">
-          {{ m('misc.cropperDescription') }}
-        </p>
-
+        <p class="text-center text-[11px] font-semibold text-slate-400">{{ m('misc.cropDragHint') }}</p>
         <div class="relative mx-auto border border-slate-200 rounded-xl overflow-hidden bg-slate-900 flex items-center justify-center p-2 max-h-[380px]">
-          <div class="relative inline-block overflow-hidden max-w-full">
-            <img :src="cropperSrc" :alt="m('misc.cropSourceAlt')" class="max-h-[340px] block select-none pointer-events-none" />
+          <div ref="cropWrapperRef" class="relative inline-block overflow-hidden max-w-full touch-none">
+            <img :src="cropperSrc" :alt="m('misc.cropSourceAlt')" class="max-h-[340px] block select-none pointer-events-none" draggable="false" />
             <div
-              class="absolute border-[2px] border-dashed border-lime-500 pointer-events-none transition-all"
+              class="absolute border-[2px] border-dashed border-lime-500 cursor-move"
               :style="{
                 left: cropBox.x + '%',
                 top: cropBox.y + '%',
@@ -473,7 +584,13 @@ defineExpose({ openCreate: openCreateHeroModal })
                 height: cropBox.h + '%',
                 boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.65)'
               }"
-            ></div>
+              @pointerdown="startCropDrag($event, 'move')"
+            >
+              <span class="crop-handle crop-handle--nw" @pointerdown="startCropDrag($event, 'resize', 'nw')"></span>
+              <span class="crop-handle crop-handle--ne" @pointerdown="startCropDrag($event, 'resize', 'ne')"></span>
+              <span class="crop-handle crop-handle--sw" @pointerdown="startCropDrag($event, 'resize', 'sw')"></span>
+              <span class="crop-handle crop-handle--se" @pointerdown="startCropDrag($event, 'resize', 'se')"></span>
+            </div>
           </div>
         </div>
 
@@ -590,26 +707,41 @@ defineExpose({ openCreate: openCreateHeroModal })
       @cancel="pendingDeleteHeroId = null"
       @confirm="confirmDeleteHeroBanner"
     />
-  </div>
 </template>
 
 <style scoped>
-.admin-input-premium {
-  width: 100%;
-  border-radius: 1rem;
-  border: 1px solid rgb(241, 245, 249);
-  background: rgb(248, 250, 252, 0.5);
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: rgb(30, 41, 59);
-  outline: none;
-  transition: all 0.2s;
+.crop-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 2px solid #65a30d;
+  border-radius: 9999px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  z-index: 2;
 }
 
-.admin-input-premium:focus {
-  background: white;
-  border-color: rgb(126, 199, 90);
-  box-shadow: 0 0 0 3px rgba(112, 149, 107, 0.1);
+.crop-handle--nw {
+  top: -7px;
+  left: -7px;
+  cursor: nwse-resize;
+}
+
+.crop-handle--ne {
+  top: -7px;
+  right: -7px;
+  cursor: nesw-resize;
+}
+
+.crop-handle--sw {
+  bottom: -7px;
+  left: -7px;
+  cursor: nesw-resize;
+}
+
+.crop-handle--se {
+  bottom: -7px;
+  right: -7px;
+  cursor: nwse-resize;
 }
 </style>

@@ -1,0 +1,242 @@
+/* ── Admin shell: compact typography ── */
+.aloo-admin-shell {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.aloo-admin-shell .aloo-title--admin {
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.aloo-admin-shell .aloo-copy {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.aloo-admin-shell .aloo-eyebrow {
+  font-size: 10px;
+}
+
+.aloo-admin-shell .aloo-admin-header {
+  padding: 14px 16px;
+  gap: 12px;
+}
+
+.aloo-admin-shell .aloo-admin-toolbar {
+  padding: 10px 14px;
+  gap: 12px;
+}
+
+.aloo-admin-shell .aloo-admin-toolbar .aloo-label {
+  font-size: 10px;
+}
+
+.aloo-admin-shell .aloo-admin-toolbar .aloo-input,
+.aloo-admin-shell .aloo-admin-toolbar .aloo-select {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.aloo-admin-shell .aloo-btn {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.aloo-admin-shell table th {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 8px 12px;
+  vertical-align: middle;
+}
+
+.aloo-admin-shell table td {
+  font-size: 12px;
+  padding: 8px 12px;
+  vertical-align: middle;
+}
+
+.aloo-admin-shell table .font-black,
+.aloo-admin-shell table .font-bold {
+  font-weight: 600;
+}
+
+.aloo-admin-shell .text-sm {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.aloo-admin-shell .text-xs {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* ── List pages: 3-panel layout ── */
+.admin-list-page {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-list-panel :deep(.aloo-admin-header),
+.admin-list-panel :deep(.aloo-admin-toolbar) {
+  margin: 0;
+  padding: 14px 16px;
+  gap: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.admin-list-page :deep(.aloo-title--admin) {
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.admin-list-page :deep(.aloo-copy) {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.admin-list-page :deep(.aloo-label) {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #475569;
+}
+
+.admin-list-page :deep(.aloo-input),
+.admin-list-page :deep(.aloo-select) {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+  border-color: #d1d5db;
+  border-radius: 8px;
+}
+
+.admin-list-page :deep(.aloo-admin-toolbar) {
+  gap: 10px;
+}
+
+.admin-list-panel.admin-list-table-panel {
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.admin-list-table-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 10px 16px;
+}
+
+.admin-list-table-panel__title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.admin-list-table-panel__count {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.admin-list-table-panel__body {
+  padding: 0 0 4px;
+}
+
+.admin-list-table-panel__body > .overflow-x-auto,
+.admin-list-table-panel__body > .overflow-hidden {
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.admin-list-table-panel__body table thead {
+  background: #f8fafc;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.admin-list-table-panel__body table th {
+  padding: 8px 12px;
+  vertical-align: middle;
+}
+
+.admin-list-table-panel__body table td {
+  padding: 8px 12px;
+  vertical-align: middle;
+  font-size: 12px;
+}
+
+.admin-list-alert {
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.admin-list-btn {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-list-btn--primary {
+  border: 1px solid #006227;
+  background: #006227;
+  color: #ffffff;
+}
+
+.admin-list-btn--primary:hover {
+  background: #004d1f;
+}
+
+.admin-list-btn--outline {
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #334155;
+}
+
+.admin-list-btn--outline:hover {
+  background: #f8fafc;
+}
+
+.admin-list-btn--danger {
+  border: 1px solid #fecaca;
+  background: #ffffff;
+  color: #dc2626;
+}
+
+.admin-list-btn--danger:hover {
+  background: #fef2f2;
+}

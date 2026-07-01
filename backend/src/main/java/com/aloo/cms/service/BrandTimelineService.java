@@ -18,6 +18,7 @@ public class BrandTimelineService {
 
     private final BrandTimelineRepository brandTimelineRepository;
     private final BrandTimelineMapper brandTimelineMapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<BrandTimelineResponse> findAll() {
@@ -40,19 +41,25 @@ public class BrandTimelineService {
 
     @Transactional
     public BrandTimelineResponse create(BrandTimelineRequest request) {
-        return brandTimelineMapper.toResponse(brandTimelineRepository.save(brandTimelineMapper.toEntity(request)));
+        BrandTimelineResponse response = brandTimelineMapper.toResponse(brandTimelineRepository.save(brandTimelineMapper.toEntity(request)));
+        auditLogService.logCreated("BRAND_TIMELINE", String.valueOf(response.id()), response.title(), response.year());
+        return response;
     }
 
     @Transactional
     public BrandTimelineResponse update(Long id, BrandTimelineRequest request) {
         BrandTimeline item = getItem(id);
         brandTimelineMapper.updateEntity(item, request);
-        return brandTimelineMapper.toResponse(brandTimelineRepository.save(item));
+        BrandTimelineResponse response = brandTimelineMapper.toResponse(brandTimelineRepository.save(item));
+        auditLogService.logUpdated("BRAND_TIMELINE", String.valueOf(response.id()), response.title(), response.year());
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
-        brandTimelineRepository.delete(getItem(id));
+        BrandTimeline item = getItem(id);
+        auditLogService.logDeleted("BRAND_TIMELINE", String.valueOf(item.getId()), item.getTitle(), item.getYear());
+        brandTimelineRepository.delete(item);
     }
 
     private BrandTimeline getItem(Long id) {

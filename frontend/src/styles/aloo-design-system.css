@@ -75,15 +75,15 @@
 }
 
 .aloo-title--admin {
-  font-size: clamp(28px, 3vw, 42px);
-  line-height: 1.08;
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.2;
 }
 
 .aloo-copy {
   margin: 0;
   color: var(--aloo-text-soft);
-  font-size: 16px;
-  line-height: 1.75;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .aloo-actions {
@@ -171,23 +171,45 @@
 .aloo-admin-header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 24px;
+  gap: 16px;
   align-items: center;
   border: 1px solid var(--aloo-border-soft);
   border-radius: var(--aloo-radius-xl);
   background: var(--aloo-surface);
-  padding: 28px 32px;
+  padding: 20px 24px;
   box-shadow: var(--aloo-shadow-sm);
 }
 
 .aloo-admin-toolbar {
   display: grid;
-  gap: 14px;
+  gap: 16px;
+  column-gap: 20px;
   border: 1px solid var(--aloo-border-soft);
   border-radius: var(--aloo-radius-xl);
   background: var(--aloo-surface);
-  padding: 18px;
+  padding: 12px 16px;
   box-shadow: var(--aloo-shadow-sm);
+}
+
+.aloo-admin-toolbar--embedded {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border-bottom: 1px solid var(--aloo-border-soft);
+}
+
+.aloo-admin-toolbar .aloo-field {
+  gap: 6px;
+}
+
+.aloo-admin-toolbar .aloo-label {
+  font-size: 11px;
+}
+
+.aloo-admin-toolbar .aloo-input,
+.aloo-admin-toolbar .aloo-select {
+  min-height: 40px;
+  padding: 0 14px;
 }
 
 .aloo-field {

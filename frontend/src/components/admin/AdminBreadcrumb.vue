@@ -13,7 +13,7 @@ const items = computed(() => buildAdminBreadcrumbItems(route.path, t))
 
 <template>
   <nav aria-label="Breadcrumb" class="min-w-0">
-    <ol class="flex flex-wrap items-center gap-1 text-sm">
+    <ol class="flex flex-wrap items-center gap-1 text-xs">
       <li v-for="(item, index) in items" :key="`${item.label}-${index}`" class="flex min-w-0 items-center gap-1">
         <ChevronRight v-if="index > 0" class="h-3.5 w-3.5 shrink-0 text-slate-300" />
         <RouterLink

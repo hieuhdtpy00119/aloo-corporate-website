@@ -97,15 +97,15 @@ onMounted(() => {
 
     <!-- ===== HERO ===== -->
     <div class="relative overflow-hidden bg-avocado-950 text-white">
-      <div class="absolute inset-0 opacity-20">
+      <div class="absolute inset-0">
         <img
-          src="/about/aloo-origin-story.png"
+          src="/about/aloo-about-hero.png"
           alt=""
           aria-hidden="true"
           class="h-full w-full object-cover object-center"
         />
       </div>
-      <div class="absolute inset-0 bg-gradient-to-b from-avocado-950/60 via-avocado-950/70 to-avocado-950"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-black/45 via-black/35 to-black/45"></div>
 
       <!-- Decorative circles -->
       <div class="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-green-400/10 blur-3xl"></div>

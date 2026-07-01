@@ -20,6 +20,7 @@ public class ContactMessageService {
 
     private final ContactMessageRepository contactMessageRepository;
     private final ContactMessageMapper contactMessageMapper;
+    private final AuditLogService auditLogService;
 
     @Transactional
     public ContactMessageResponse create(ContactMessageRequest request) {
@@ -43,12 +44,26 @@ public class ContactMessageService {
     public ContactMessageResponse updateStatus(Long id, RegistrationStatusUpdateRequest request) {
         ContactMessage message = getMessage(id);
         message.setStatus(request.status().trim().toUpperCase(Locale.ROOT));
-        return contactMessageMapper.toResponse(contactMessageRepository.save(message));
+        ContactMessageResponse response = contactMessageMapper.toResponse(contactMessageRepository.save(message));
+        auditLogService.logStatusChanged(
+                "CONTACT_MESSAGE",
+                String.valueOf(response.id()),
+                response.fullName(),
+                response.status()
+        );
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
-        contactMessageRepository.delete(getMessage(id));
+        ContactMessage message = getMessage(id);
+        auditLogService.logDeleted(
+                "CONTACT_MESSAGE",
+                String.valueOf(message.getId()),
+                message.getFullName(),
+                message.getEmail()
+        );
+        contactMessageRepository.delete(message);
     }
 
     private ContactMessage getMessage(Long id) {

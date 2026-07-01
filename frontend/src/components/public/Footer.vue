@@ -32,8 +32,8 @@ const contactLinks = [
   },
   {
     label: 'Zalo tư vấn',
-    value: '038 386 9235',
-    href: 'tel:0383869235',
+    value: '0984 666 077',
+    href: 'tel:0984 666 077',
     icon: MessageCircle,
   },
 ]
@@ -66,9 +66,9 @@ const socialLinks = [
         <RouterLink to="/" class="inline-block transition transform hover:scale-[1.02]">
           <img
             src="/logo-aloo.png"
-            alt="ALOO Kem Bơ"
-            class="h-12 w-auto max-w-[190px] object-contain object-left brightness-110"
-            width="220"
+            alt="ALOO"
+            class="h-11 w-auto max-w-[150px] object-contain object-left"
+            width="180"
             height="56"
           />
         </RouterLink>

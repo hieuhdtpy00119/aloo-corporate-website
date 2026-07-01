@@ -25,6 +25,8 @@ vi.mock('../../services/authService', () => ({
   getCurrentAdmin: vi.fn(),
   updateAdminProfile: vi.fn(),
   changeAdminPassword: vi.fn(),
+  requestPasswordChangeOtp: vi.fn(),
+  refreshAuthProfile: vi.fn(),
   uploadProfileAvatar: vi.fn(),
   usesGoogleSignIn: () => false,
 }))

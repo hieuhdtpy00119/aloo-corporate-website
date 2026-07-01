@@ -1,11 +1,64 @@
 export const FRANCHISE_ADVANTAGE_ICONS = ['product', 'operation', 'cost', 'support', 'marketing', 'brand']
 
+export const FRANCHISE_SINGLETON_SECTIONS = ['hero', 'founder_story', 'cta']
+
+export const FRANCHISE_ADMIN_SECTION_KEYS = [
+  'hero',
+  'advantages',
+  'models',
+  'investment',
+  'profit',
+  'process',
+  'founder_story',
+  'faq',
+  'cta',
+]
+
+const CONTENT_PRIMARY_TITLE_KEY = {
+  models: 'modelName',
+  investment: 'itemName',
+  profit: 'metric',
+  faq: 'question',
+}
+
+export const contentPrimaryTitleKey = (sectionKey) => {
+  const schema = FRANCHISE_SECTION_SCHEMAS[sectionKey] || []
+  if (schema.some((field) => field.key === 'title')) return 'title'
+  return CONTENT_PRIMARY_TITLE_KEY[sectionKey] || null
+}
+
+export const isValidFranchiseLinkUrl = (value) => {
+  const text = String(value || '').trim()
+  if (!text) return true
+  if (text.startsWith('#')) return text.length > 1
+  if (text.startsWith('/')) return true
+  try {
+    const url = new URL(text)
+    return ['http:', 'https:'].includes(url.protocol)
+  } catch {
+    return false
+  }
+}
+
+export const isValidFranchiseAssetUrl = (value) => {
+  const text = String(value || '').trim()
+  if (!text) return true
+  if (text.startsWith('/') || text.startsWith('./')) return true
+  if (/^uploads\//i.test(text)) return true
+  try {
+    const url = new URL(text)
+    return ['http:', 'https:'].includes(url.protocol)
+  } catch {
+    return false
+  }
+}
+
 export const FRANCHISE_SECTION_SCHEMAS = {
   hero: [
     { key: 'title', type: 'text', required: true },
     { key: 'subtitle', type: 'text' },
     { key: 'description', type: 'textarea', rows: 3 },
-    { key: 'image', type: 'url' },
+    { key: 'image', type: 'image' },
     { key: 'buttonText', type: 'text' },
     { key: 'buttonLink', type: 'url' },
     { key: 'secondaryButtonText', type: 'text' },
@@ -21,7 +74,7 @@ export const FRANCHISE_SECTION_SCHEMAS = {
     { key: 'area', type: 'text' },
     { key: 'investment', type: 'text' },
     { key: 'description', type: 'textarea', rows: 3 },
-    { key: 'image', type: 'url' },
+    { key: 'image', type: 'image' },
     { key: 'featured', type: 'checkbox' },
   ],
   investment: [
@@ -43,7 +96,7 @@ export const FRANCHISE_SECTION_SCHEMAS = {
   ],
   founder_story: [
     { key: 'founderName', type: 'text' },
-    { key: 'image', type: 'url' },
+    { key: 'image', type: 'image' },
     { key: 'title', type: 'text', required: true },
     { key: 'storyContent', type: 'textarea', rows: 5 },
   ],
@@ -71,7 +124,12 @@ export const FRANCHISE_SECTION_SCHEMAS = {
 export const defaultFranchiseContentFields = (sectionKey) => {
   const schema = FRANCHISE_SECTION_SCHEMAS[sectionKey] || [{ key: 'body', type: 'textarea', rows: 6 }]
   return Object.fromEntries(
-    schema.map((field) => [field.key, field.type === 'checkbox' ? false : field.type === 'number' ? 0 : '']),
+    schema.map((field) => {
+      if (field.type === 'checkbox') return [field.key, false]
+      if (field.type === 'number') return [field.key, field.key === 'stepNumber' ? 1 : 0]
+      if (field.type === 'select' && field.options?.length) return [field.key, field.options[0]]
+      return [field.key, '']
+    }),
   )
 }
 
@@ -107,6 +165,22 @@ export const serializeFranchiseContent = (sectionKey, fields) => {
 
 export const validateFranchiseContent = (sectionKey, fields) => {
   const schema = FRANCHISE_SECTION_SCHEMAS[sectionKey] || []
-  const missing = schema.filter((field) => field.required && !String(fields[field.key] ?? '').trim())
-  return missing.map((field) => field.key)
+  const errors = {}
+
+  schema.forEach((field) => {
+    const value = fields[field.key]
+    if (field.required && !String(value ?? '').trim()) {
+      errors[field.key] = 'required'
+      return
+    }
+    if (field.type === 'url' && String(value ?? '').trim() && !isValidFranchiseLinkUrl(value)) {
+      errors[field.key] = 'invalidUrl'
+      return
+    }
+    if (field.type === 'image' && String(value ?? '').trim() && !isValidFranchiseAssetUrl(value)) {
+      errors[field.key] = 'invalidImage'
+    }
+  })
+
+  return errors
 }

@@ -1,5 +1,8 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import AdminShellFrame from '../shell/AdminShellFrame.vue'
+import AdminShellTablePanel from '../shell/AdminShellTablePanel.vue'
+import AdminShellTabs from '../shell/AdminShellTabs.vue'
 import BaseModal from '../BaseModal.vue'
 import ConfirmModal from '../ConfirmModal.vue'
 import EmptyState from '../EmptyState.vue'
@@ -25,6 +28,9 @@ const currentPage = ref(1)
 const isUploadingImage = ref(false)
 const isUploadingGallery = ref(false)
 const pageSize = 6
+const formErrors = ref({})
+const slugTouched = ref(false)
+const modalFormTab = ref('required')
 
 const isLoading = computed(() => store.loading.products)
 const errorMessage = computed(() => store.errors.products)
@@ -34,10 +40,32 @@ const statusLabels = computed(() => ({
   INACTIVE: m('status.INACTIVE'),
 }))
 const statusFilters = computed(() => [t('admin.shared.all'), ...productStatuses.map((status) => statusLabels.value[status])])
-const categoryOptions = computed(() => [
-  '',
-  ...new Set(store.categories.filter((category) => category.status === 'ACTIVE').map((category) => category.name)),
+const categoryOptions = computed(() =>
+  [
+    ...new Set(
+      store.categories
+        .filter((category) => category.status === 'ACTIVE' && category.type === 'PRODUCT')
+        .map((category) => category.name),
+    ),
+  ].filter(Boolean),
+)
+
+const formTabItems = computed(() => [
+  { key: 'required', label: m('formTabs.required') },
+  { key: 'content', label: m('formTabs.content') },
+  { key: 'mediaSeo', label: m('formTabs.mediaSeo') },
 ])
+
+const formErrorTabMap = {
+  name: 'required',
+  slug: 'required',
+  sortOrder: 'required',
+  imageUrl: 'required',
+  gallery: 'mediaSeo',
+  faqs: 'mediaSeo',
+  seoTitle: 'mediaSeo',
+  seoDescription: 'mediaSeo',
+}
 
 const defaultProductForm = () => ({
   name: '',
@@ -46,6 +74,7 @@ const defaultProductForm = () => ({
   imageUrl: '',
   category: '',
   status: 'ACTIVE',
+  sortOrder: 0,
   shortDescription: '',
   detailContent: '',
   ingredients: '',
@@ -75,6 +104,17 @@ const formGalleryPreviewUrls = computed(() =>
   })),
 )
 
+const showImageWarning = computed(
+  () => form.status === 'ACTIVE' && !String(form.imageUrl || '').trim(),
+)
+
+const productCardPreview = computed(() => ({
+  name: form.name.trim() || m('placeholders.name'),
+  category: form.category.trim() || m('fieldHints.noCategory'),
+  description: form.shortDescription.trim() || form.description.trim() || m('misc.noDescription'),
+  image: formImagePreviewUrl.value,
+}))
+
 const slugify = (value) =>
   value
     .toLowerCase()
@@ -92,9 +132,40 @@ const normalizeGalleryForStorage = (gallery) =>
 
 const productPublicUrl = (slug) => (slug?.trim() ? `/products/${encodeURIComponent(slug.trim())}` : '')
 
+const isValidUrl = (value) => {
+  try {
+    const url = new URL(value)
+    return ['http:', 'https:'].includes(url.protocol)
+  } catch {
+    return false
+  }
+}
+
+const isValidAssetUrl = (value) => {
+  const text = String(value || '').trim()
+  if (!text) return true
+  if (text.startsWith('/')) return true
+  return isValidUrl(text)
+}
+
+const isValidFaqLine = (line) => {
+  const [question, ...answerParts] = String(line).split('|')
+  return Boolean(question?.trim() && answerParts.join('|').trim())
+}
+
+const isDuplicateSlug = (slug) => {
+  const normalized = slug.trim().toLowerCase()
+  return store.products.some(
+    (product) => String(product.slug || '').toLowerCase() === normalized && product.id !== editingId.value,
+  )
+}
+
 const resetForm = () => {
   Object.assign(form, defaultProductForm())
   editingId.value = null
+  formErrors.value = {}
+  slugTouched.value = false
+  modalFormTab.value = 'required'
 }
 
 const openCreateModal = () => {
@@ -106,6 +177,9 @@ const openCreateModal = () => {
 const openEditModal = (product) => {
   mode.value = 'edit'
   editingId.value = product.id
+  formErrors.value = {}
+  slugTouched.value = true
+  modalFormTab.value = 'required'
   Object.assign(form, {
     ...defaultProductForm(),
     name: product.name || '',
@@ -114,6 +188,7 @@ const openEditModal = (product) => {
     imageUrl: normalizeStorageAssetUrl(product.imageUrl || product.image || ''),
     category: product.category || '',
     status: product.status || 'ACTIVE',
+    sortOrder: Number(product.sortOrder || 0),
     shortDescription: product.shortDescription || '',
     detailContent: product.detailContent || '',
     ingredients: product.ingredients || '',
@@ -131,6 +206,50 @@ const openEditModal = (product) => {
 const closeModal = () => {
   showModal.value = false
   resetForm()
+}
+
+const validateForm = () => {
+  const errors = {}
+
+  if (!form.name.trim()) errors.name = m('validation.name')
+  if (mode.value === 'create' && !slugTouched.value && !form.slug.trim() && form.name.trim()) {
+    form.slug = slugify(form.name)
+  }
+  if (!form.slug.trim()) errors.slug = m('validation.slug')
+  else if (isDuplicateSlug(form.slug)) errors.slug = m('validation.duplicateSlug')
+
+  if (Number.isNaN(Number(form.sortOrder)) || Number(form.sortOrder) < 0) {
+    errors.sortOrder = m('validation.sortOrder')
+  }
+
+  if (form.imageUrl.trim() && !isValidAssetUrl(form.imageUrl)) {
+    errors.imageUrl = m('validation.imageUrl')
+  }
+
+  for (const url of formGalleryLines.value) {
+    if (!isValidAssetUrl(url)) {
+      errors.gallery = m('validation.gallery')
+      break
+    }
+  }
+
+  const faqLines = String(form.faqs || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+  if (faqLines.some((line) => !isValidFaqLine(line))) {
+    errors.faqs = m('validation.faqs')
+  }
+
+  if (form.seoTitle.trim().length > 260) errors.seoTitle = m('validation.seoTitle')
+  if (form.seoDescription.trim().length > 500) errors.seoDescription = m('validation.seoDescription')
+
+  formErrors.value = errors
+  if (Object.keys(errors).length) {
+    const firstErrorKey = Object.keys(errors)[0]
+    modalFormTab.value = formErrorTabMap[firstErrorKey] || 'required'
+  }
+  return Object.keys(errors).length === 0
 }
 
 const handleImageFileChange = async (event) => {
@@ -255,12 +374,10 @@ const totalPages = computed(() => Math.max(1, Math.ceil(filteredProducts.value.l
 const paginatedProducts = computed(() =>
   filteredProducts.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize),
 )
+const listCountText = computed(() => t('admin.shared.totalCount', { count: filteredProducts.value.length }))
 
 const saveProduct = async () => {
-  if (!form.name.trim() || !form.slug.trim()) {
-    toast.error(m('toasts.nameSlugRequired'))
-    return
-  }
+  if (!validateForm()) return
 
   try {
     await store.saveProduct({
@@ -268,11 +385,17 @@ const saveProduct = async () => {
       ...form,
       imageUrl: normalizeStorageAssetUrl(form.imageUrl),
       gallery: normalizeGalleryForStorage(form.gallery),
+      sortOrder: Number(form.sortOrder || 0),
     })
     toast.success(mode.value === 'create' ? m('toasts.productCreated') : m('toasts.productUpdated'))
     closeModal()
   } catch (error) {
-    toast.error(error.response?.data?.message || m('toasts.productSaveError'))
+    const message = error.response?.data?.message || m('toasts.productSaveError')
+    if (String(message).toLowerCase().includes('slug')) {
+      formErrors.value = { ...formErrors.value, slug: m('validation.duplicateSlug') }
+      modalFormTab.value = 'required'
+    }
+    toast.error(message)
   }
 }
 
@@ -290,7 +413,9 @@ const confirmDeleteProduct = async () => {
 watch(
   () => form.name,
   (name) => {
-    if (mode.value === 'create' && !form.slug) form.slug = slugify(name)
+    if (mode.value === 'create' && !slugTouched.value) {
+      form.slug = slugify(name)
+    }
   },
 )
 
@@ -310,7 +435,7 @@ defineExpose({ openCreate: openCreateModal })
 </script>
 
 <template>
-  <div class="space-y-6">
+  <AdminShellFrame variant="toolbar" inner="toolbar">
     <SearchFilterBar
       v-model:search="searchQuery"
       v-model:status="statusFilter"
@@ -319,83 +444,132 @@ defineExpose({ openCreate: openCreateModal })
       :status-label="m('filters.productsStatusLabel')"
       :status-options="statusFilters"
     />
+  </AdminShellFrame>
 
-    <p v-if="errorMessage" class="rounded-2xl bg-red-50 border border-red-200/50 px-4 py-3 text-xs font-bold text-red-700">
-      {{ errorMessage }}
-    </p>
+  <AdminShellFrame v-if="errorMessage" as="p" variant="alert" class="admin-list-alert">
+    {{ errorMessage }}
+  </AdminShellFrame>
 
-    <div class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-      <div class="overflow-x-auto">
-        <table v-if="!isLoading && filteredProducts.length" class="w-full min-w-[820px] table-fixed whitespace-nowrap text-left">
-          <colgroup>
-            <col class="w-[9%]" />
-            <col class="w-[28%]" />
-            <col class="w-[18%]" />
-            <col class="w-[18%]" />
-            <col class="w-[13%]" />
-            <col class="w-[14%]" />
-          </colgroup>
-          <thead class="bg-slate-50/50 border-b border-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            <tr>
-              <th class="px-6 py-4">{{ m('columns.products.image') }}</th>
-              <th class="px-6 py-4">{{ m('columns.products.name') }}</th>
-              <th class="px-6 py-4">{{ m('columns.products.slug') }}</th>
-              <th class="px-6 py-4">{{ m('columns.products.category') }}</th>
-              <th class="px-6 py-4">{{ m('columns.products.status') }}</th>
-              <th class="px-6 py-4 text-right">{{ m('columns.products.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-50 text-xs">
-            <tr v-for="product in paginatedProducts" :key="product.id" class="hover:bg-slate-50/30 transition">
-              <td class="px-6 py-4">
-                <img
-                  v-if="product.imageUrl"
-                  :src="product.imageUrl"
-                  :alt="product.name"
-                  class="h-10 w-12 rounded-xl object-cover border border-slate-100 shadow-sm"
-                />
-                <div v-else class="grid h-10 w-12 place-items-center rounded-xl bg-slate-50 border border-slate-100 text-[9px] font-bold text-slate-400">
-                  <Image class="h-4 w-4" />
-                </div>
-              </td>
-              <td class="px-6 py-4">
-                <p class="truncate font-bold text-xs text-avocado-950">{{ product.name }}</p>
-                <p class="mt-1 truncate text-[10px] text-slate-400 max-w-[200px]">{{ product.shortDescription || product.description || m('misc.noDescription') }}</p>
-              </td>
-              <td class="truncate px-6 py-4 font-semibold text-slate-500">/{{ product.slug }}</td>
-              <td class="truncate px-6 py-4 text-slate-500">
-                <span class="inline-block bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-lg font-medium">{{ product.category || '-' }}</span>
-              </td>
-              <td class="px-6 py-4">
-                <span class="inline-flex min-w-[92px] justify-center rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(product.status)">
-                  {{ statusLabels[product.status] || product.status }}
-                </span>
-              </td>
-              <td class="px-6 py-4">
-                <div class="flex justify-end gap-1.5">
-                  <button
-                    class="rounded-xl border border-avocado-100/50 p-2 font-bold text-avocado-700 hover:bg-avocado-50/50 transition"
-                    :title="m('actions.edit')"
-                    @click="openEditModal(product)"
-                  >
-                    <Edit2 class="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    class="rounded-xl border border-red-100 p-2 font-bold text-red-600 hover:bg-red-50 transition"
-                    :title="m('actions.delete')"
-                    @click="pendingDeleteId = product.id"
-                  >
-                    <Trash2 class="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <EmptyState v-if="isLoading || filteredProducts.length === 0" :loading="isLoading" :message="m('empty')" />
-    </div>
+  <AdminShellFrame v-if="isLoading" variant="body" inner="pad">
+    <div v-for="i in 5" :key="i" class="admin-shell-skeleton" />
+  </AdminShellFrame>
 
+  <AdminShellFrame v-else-if="!filteredProducts.length" variant="body" inner="pad">
+    <EmptyState :message="m('empty')" />
+  </AdminShellFrame>
+
+  <AdminShellFrame v-else variant="body" visibility="desktop">
+    <AdminShellTablePanel :title="m('tabs.products')" :count-text="listCountText">
+      <table class="admin-shell-table">
+        <colgroup>
+          <col style="width: 9%" />
+          <col style="width: 28%" />
+          <col style="width: 18%" />
+          <col style="width: 18%" />
+          <col style="width: 13%" />
+          <col style="width: 14%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>{{ m('columns.products.image') }}</th>
+            <th>{{ m('columns.products.name') }}</th>
+            <th>{{ m('columns.products.slug') }}</th>
+            <th>{{ m('columns.products.category') }}</th>
+            <th class="text-center">{{ m('columns.products.status') }}</th>
+            <th class="text-right">{{ m('columns.products.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="product in paginatedProducts" :key="product.id">
+            <td>
+              <img
+                v-if="product.imageUrl"
+                :src="product.imageUrl"
+                :alt="product.name"
+                class="h-10 w-12 rounded-xl border border-slate-100 object-cover shadow-sm"
+              />
+              <div v-else class="grid h-10 w-12 place-items-center rounded-xl border border-slate-100 bg-slate-50 text-slate-400">
+                <Image class="h-4 w-4" />
+              </div>
+            </td>
+            <td>
+              <p class="truncate font-bold text-avocado-950">{{ product.name }}</p>
+            </td>
+            <td class="admin-shell-cell-truncate admin-shell-cell-muted">/{{ product.slug }}</td>
+            <td class="admin-shell-cell-truncate admin-shell-cell-muted">
+              <span class="inline-block rounded-lg border border-slate-100 bg-slate-50 px-2 py-0.5 font-medium">{{ product.category || '-' }}</span>
+            </td>
+            <td class="text-center">
+              <span class="inline-flex min-w-[92px] justify-center rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(product.status)">
+                {{ statusLabels[product.status] || product.status }}
+              </span>
+            </td>
+            <td>
+              <div class="flex justify-end gap-1.5">
+                <button
+                  class="rounded-xl border border-avocado-100/50 p-2 font-bold text-avocado-700 transition hover:bg-avocado-50/50"
+                  :title="m('actions.edit')"
+                  @click="openEditModal(product)"
+                >
+                  <Edit2 class="h-3.5 w-3.5" />
+                </button>
+                <button
+                  class="rounded-xl border border-red-100 p-2 font-bold text-red-600 transition hover:bg-red-50"
+                  :title="m('actions.delete')"
+                  @click="pendingDeleteId = product.id"
+                >
+                  <Trash2 class="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </AdminShellTablePanel>
+  </AdminShellFrame>
+
+  <AdminShellFrame v-if="!isLoading && filteredProducts.length" variant="body" visibility="mobile">
+    <AdminShellTablePanel :title="m('tabs.products')" :count-text="listCountText">
+      <template #below>
+        <div class="admin-shell-frame__inner--pad admin-shell-frame__inner--stack">
+          <article v-for="product in paginatedProducts" :key="product.id" class="admin-shell-mobile-card">
+            <div class="flex items-start gap-3">
+              <img
+                v-if="product.imageUrl"
+                :src="product.imageUrl"
+                :alt="product.name"
+                class="h-14 w-14 rounded-xl border border-slate-100 object-cover"
+              />
+              <div v-else class="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-slate-100 bg-slate-50 text-slate-400">
+                <Image class="h-5 w-5" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="truncate font-black text-avocado-950">{{ product.name }}</h3>
+                <p class="mt-1 truncate text-xs font-semibold text-slate-500">/{{ product.slug }}</p>
+              </div>
+              <span class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(product.status)">
+                {{ statusLabels[product.status] || product.status }}
+              </span>
+            </div>
+            <p class="mt-3 text-sm text-slate-700">
+              <span class="font-bold text-slate-900">{{ m('columns.products.category') }}:</span>
+              {{ product.category || '-' }}
+            </p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button class="rounded-lg border border-avocado-200 px-3 py-2 text-xs font-bold text-avocado-700" @click="openEditModal(product)">
+                {{ m('actions.edit') }}
+              </button>
+              <button class="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600" @click="pendingDeleteId = product.id">
+                {{ m('actions.delete') }}
+              </button>
+            </div>
+          </article>
+        </div>
+      </template>
+    </AdminShellTablePanel>
+  </AdminShellFrame>
+
+  <AdminShellFrame v-if="filteredProducts.length" variant="footer">
     <Pagination
       :page="currentPage"
       :total-pages="totalPages"
@@ -405,34 +579,51 @@ defineExpose({ openCreate: openCreateModal })
       @prev="currentPage = Math.max(1, currentPage - 1)"
       @next="currentPage = Math.min(totalPages, currentPage + 1)"
     />
+  </AdminShellFrame>
 
-    <BaseModal :show="showModal" :title="mode === 'create' ? m('modals.createProduct') : m('modals.editProduct')" max-width="max-w-5xl" @close="closeModal">
-      <form id="product-form" class="grid gap-5" @submit.prevent="saveProduct">
+  <BaseModal :show="showModal" :title="mode === 'create' ? m('modals.createProduct') : m('modals.editProduct')" max-width="max-w-5xl" @close="closeModal">
+    <form id="product-form" class="grid gap-5" @submit.prevent="saveProduct">
+      <AdminShellTabs
+        v-model="modalFormTab"
+        :items="formTabItems"
+        :aria-label="m('formTabs.aria')"
+      />
+
+      <section v-show="modalFormTab === 'required'" class="product-form-panel grid gap-5 rounded-2xl bg-slate-50 p-5">
         <div class="grid gap-5 md:grid-cols-2">
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.name') }}
-            <input v-model="form.name" required class="admin-input-premium" :placeholder="m('placeholders.name')" />
+            <input v-model="form.name" class="admin-input-premium" :placeholder="m('placeholders.name')" />
+            <span v-if="formErrors.name" class="text-xs font-bold normal-case tracking-normal text-red-600">{{ formErrors.name }}</span>
           </label>
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.slug') }}
             <input
               v-model="form.slug"
-              required
               class="admin-input-premium"
               :class="{ 'cursor-not-allowed bg-slate-50 text-slate-500': mode === 'edit' }"
               :readonly="mode === 'edit'"
               :placeholder="m('placeholders.slug')"
+              @input="slugTouched = true"
             />
-            <span v-if="mode === 'edit'" class="text-[11px] font-semibold normal-case tracking-normal text-slate-400">{{ m('misc.slugLocked') }}</span>
+            <span v-if="formErrors.slug" class="text-xs font-bold normal-case tracking-normal text-red-600">{{ formErrors.slug }}</span>
+            <span v-else-if="mode === 'edit'" class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('misc.slugLocked') }}</span>
           </label>
         </div>
-        <div class="grid gap-5 md:grid-cols-2">
+
+        <div class="grid gap-5 md:grid-cols-3">
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.category') }}
-            <input v-model="form.category" list="product-categories" class="admin-input-premium" :placeholder="m('placeholders.category')" />
+            <input
+              v-model="form.category"
+              list="product-categories"
+              class="admin-input-premium"
+              :placeholder="m('placeholders.category')"
+            />
             <datalist id="product-categories">
               <option v-for="category in categoryOptions" :key="category" :value="category" />
             </datalist>
+            <span class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('fieldHints.category') }}</span>
           </label>
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.status') }}
@@ -440,16 +631,21 @@ defineExpose({ openCreate: openCreateModal })
               <option v-for="status in productStatuses" :key="status" :value="status">{{ statusLabels[status] }}</option>
             </select>
           </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            {{ m('fields.sortOrder') }}
+            <input v-model.number="form.sortOrder" type="number" min="0" class="admin-input-premium" />
+            <span v-if="formErrors.sortOrder" class="text-xs font-bold normal-case tracking-normal text-red-600">{{ formErrors.sortOrder }}</span>
+          </label>
         </div>
-
-        <div class="h-px bg-slate-100 w-full my-2"></div>
 
         <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
           {{ m('fields.imageUrl') }}
           <div class="relative">
-            <Link class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-4.5 w-4.5" />
+            <Link class="absolute left-4 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400" />
             <input v-model="form.imageUrl" class="admin-input-premium admin-input-with-icon" :placeholder="m('placeholders.imageUrl')" />
           </div>
+          <span v-if="formErrors.imageUrl" class="text-xs font-bold normal-case tracking-normal text-red-600">{{ formErrors.imageUrl }}</span>
+          <span v-else-if="showImageWarning" class="text-xs font-bold normal-case tracking-normal text-amber-700">{{ m('validation.imageRecommended') }}</span>
         </label>
 
         <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -457,74 +653,96 @@ defineExpose({ openCreate: openCreateModal })
           <input
             type="file"
             accept=".jpg,.jpeg,.jfif,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
-            class="w-full text-xs font-bold text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white file:cursor-pointer hover:file:bg-avocado-700 transition"
+            class="w-full text-xs font-bold text-slate-600 file:mr-4 file:cursor-pointer file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white transition hover:file:bg-avocado-700"
             :disabled="isUploadingImage || isUploadingGallery"
             @change="handleImageFileChange"
           />
-          <span v-if="isUploadingImage" class="text-xs font-bold text-avocado-700 animate-pulse">{{ m('misc.uploading') }}</span>
+          <span v-if="isUploadingImage" class="text-xs font-bold normal-case tracking-normal text-avocado-700 animate-pulse">{{ m('misc.uploading') }}</span>
         </label>
 
-        <div v-if="formImagePreviewUrl" class="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-          <p class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">{{ m('misc.imagePreview') }}</p>
-          <img :src="formImagePreviewUrl" :alt="m('misc.productImagePreview')" class="h-32 w-40 rounded-xl border border-slate-100 object-cover shadow-sm" />
+        <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+          <div v-if="formImagePreviewUrl" class="rounded-2xl border border-slate-100 bg-white p-4">
+            <p class="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">{{ m('misc.imagePreview') }}</p>
+            <img :src="formImagePreviewUrl" :alt="form.name || ''" class="h-40 w-full max-w-xs rounded-xl border border-slate-100 object-cover shadow-sm" />
+          </div>
+          <article class="rounded-2xl border border-brand-forest/5 bg-white p-4 shadow-sm">
+            <p class="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">{{ m('misc.productCardPreview') }}</p>
+            <div class="aspect-square overflow-hidden rounded-2xl bg-brand-cream/30">
+              <img v-if="productCardPreview.image" :src="productCardPreview.image" :alt="productCardPreview.name" class="h-full w-full object-cover" />
+              <div v-else class="grid h-full place-items-center text-lg font-black text-brand-forest">ALOO</div>
+            </div>
+            <div class="mt-3 space-y-1">
+              <p class="text-sm font-bold text-brand-dark">{{ productCardPreview.name }}</p>
+              <p class="text-xs font-medium text-brand-muted">{{ productCardPreview.category }}</p>
+              <p class="line-clamp-2 text-xs leading-relaxed text-brand-muted">{{ productCardPreview.description }}</p>
+            </div>
+          </article>
         </div>
+      </section>
+
+      <section v-show="modalFormTab === 'content'" class="product-form-panel grid gap-5 rounded-2xl bg-slate-50 p-5">
+        <p class="text-sm text-slate-500">{{ m('formTabs.contentHint') }}</p>
 
         <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
           {{ m('fields.shortDescription') }}
-          <textarea v-model="form.shortDescription" rows="3" class="admin-input-premium resize-none" :placeholder="m('placeholders.shortDescription')"></textarea>
+          <textarea v-model="form.shortDescription" rows="3" class="admin-input-premium resize-none" :placeholder="m('placeholders.shortDescription')" />
+          <span class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('fieldHints.shortDescription') }}</span>
         </label>
 
         <div class="grid gap-5 md:grid-cols-2">
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-            {{ m('fields.heroDescription') }}
-            <textarea v-model="form.description" rows="4" class="admin-input-premium resize-none" :placeholder="m('placeholders.heroDescription')"></textarea>
+            {{ m('fields.listDescription') }}
+            <textarea v-model="form.description" rows="4" class="admin-input-premium resize-none" :placeholder="m('placeholders.listDescription')" />
+            <span class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('fieldHints.listDescription') }}</span>
           </label>
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.tasteProfile') }}
-            <textarea v-model="form.tasteProfile" rows="4" class="admin-input-premium resize-none" :placeholder="m('placeholders.tasteProfile')"></textarea>
+            <textarea v-model="form.tasteProfile" rows="4" class="admin-input-premium resize-none" :placeholder="m('placeholders.tasteProfile')" />
           </label>
         </div>
 
         <div class="grid gap-5 md:grid-cols-2">
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.ingredients') }}
-            <textarea v-model="form.ingredients" rows="5" class="admin-input-premium resize-none" :placeholder="m('placeholders.ingredients')"></textarea>
+            <textarea v-model="form.ingredients" rows="5" class="admin-input-premium resize-none" :placeholder="m('placeholders.ingredients')" />
           </label>
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.servingSuggestion') }}
-            <textarea v-model="form.servingSuggestion" rows="5" class="admin-input-premium resize-none" :placeholder="m('placeholders.servingSuggestion')"></textarea>
+            <textarea v-model="form.servingSuggestion" rows="5" class="admin-input-premium resize-none" :placeholder="m('placeholders.servingSuggestion')" />
           </label>
         </div>
 
         <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
           {{ m('fields.detailContent') }}
-          <textarea v-model="form.detailContent" rows="6" class="admin-input-premium resize-none" :placeholder="m('placeholders.detailContent')"></textarea>
+          <textarea v-model="form.detailContent" rows="6" class="admin-input-premium resize-none" :placeholder="m('placeholders.detailContent')" />
+          <span class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('fieldHints.detailContent') }}</span>
         </label>
+      </section>
+
+      <section v-show="modalFormTab === 'mediaSeo'" class="product-form-panel grid gap-5 rounded-2xl bg-slate-50 p-5">
+        <p class="text-sm text-slate-500">{{ m('formTabs.mediaSeoHint') }}</p>
 
         <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
           {{ m('fields.gallery') }}
-          <textarea v-model="form.gallery" rows="4" class="admin-input-premium resize-none" :placeholder="m('placeholders.gallery')"></textarea>
+          <textarea v-model="form.gallery" rows="4" class="admin-input-premium resize-none" :placeholder="m('placeholders.gallery')" />
+          <span v-if="formErrors.gallery" class="text-xs font-bold normal-case tracking-normal text-red-600">{{ formErrors.gallery }}</span>
+          <span v-else class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('misc.galleryMultiHint') }}</span>
           <input
             type="file"
             accept=".jpg,.jpeg,.jfif,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
             multiple
-            class="w-full text-xs font-bold text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white file:cursor-pointer hover:file:bg-avocado-700 transition"
+            class="w-full text-xs font-bold text-slate-600 file:mr-4 file:cursor-pointer file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white transition hover:file:bg-avocado-700"
             :disabled="isUploadingGallery"
             @change="handleGalleryFilesChange"
           />
-          <span v-if="isUploadingGallery" class="text-xs font-bold text-avocado-700 animate-pulse">{{ m('misc.uploadingGallery') }}</span>
-          <span v-else class="text-[11px] font-semibold normal-case tracking-normal text-slate-400">{{ m('misc.galleryMultiHint') }}</span>
-          <div v-if="formGalleryPreviewUrls.length" class="grid grid-cols-3 gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3 sm:grid-cols-5">
+          <span v-if="isUploadingGallery" class="text-xs font-bold normal-case tracking-normal text-avocado-700 animate-pulse">{{ m('misc.uploadingGallery') }}</span>
+          <div v-if="formGalleryPreviewUrls.length" class="grid grid-cols-3 gap-3 rounded-2xl border border-slate-100 bg-white p-3 sm:grid-cols-5">
             <div
               v-for="(item, index) in formGalleryPreviewUrls"
               :key="item.raw"
               class="group relative overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm"
             >
-              <img
-                :src="item.preview"
-                :alt="m('misc.galleryAlt')"
-                class="aspect-square w-full object-cover"
-              />
+              <img :src="item.preview" :alt="m('misc.galleryAlt')" class="aspect-square w-full object-cover" />
               <button
                 type="button"
                 class="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-sm font-black text-red-600 shadow-md ring-1 ring-red-100 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
@@ -540,78 +758,70 @@ defineExpose({ openCreate: openCreateModal })
 
         <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
           {{ m('fields.faqs') }}
-          <textarea v-model="form.faqs" rows="4" class="admin-input-premium resize-none" :placeholder="m('placeholders.faqs')"></textarea>
+          <textarea v-model="form.faqs" rows="4" class="admin-input-premium resize-none" :placeholder="m('placeholders.faqs')" />
+          <span v-if="formErrors.faqs" class="text-xs font-bold normal-case tracking-normal text-red-600">{{ formErrors.faqs }}</span>
+          <span v-else class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('fieldHints.faqs') }}</span>
         </label>
 
         <div class="grid gap-5 md:grid-cols-2">
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.seoTitle') }}
             <input v-model="form.seoTitle" class="admin-input-premium" :placeholder="m('placeholders.seoTitle')" />
+            <span v-if="formErrors.seoTitle" class="text-xs font-bold normal-case tracking-normal text-red-600">{{ formErrors.seoTitle }}</span>
           </label>
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.seoDescription') }}
             <input v-model="form.seoDescription" class="admin-input-premium" :placeholder="m('placeholders.seoDescription')" />
+            <span v-if="formErrors.seoDescription" class="text-xs font-bold normal-case tracking-normal text-red-600">{{ formErrors.seoDescription }}</span>
           </label>
         </div>
 
-        <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 px-4 py-3 text-sm font-black text-slate-700">
+        <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 text-sm font-black text-slate-700">
           <input v-model="form.featured" type="checkbox" class="h-4 w-4 accent-avocado-700" />
           {{ m('fields.featured') }}
         </label>
-      </form>
-      <template #footer>
-        <div class="flex flex-col gap-3 border-t border-slate-100 pt-3 sm:flex-row sm:items-center sm:justify-between">
-          <a
-            v-if="mode === 'edit' && form.slug.trim()"
-            :href="productPublicUrl(form.slug)"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-avocado-700 hover:text-avocado-800"
+      </section>
+    </form>
+    <template #footer>
+      <div class="flex flex-col gap-3 border-t border-slate-100 pt-3 sm:flex-row sm:items-center sm:justify-between">
+        <a
+          v-if="form.slug.trim()"
+          :href="productPublicUrl(form.slug)"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-avocado-700 hover:text-avocado-800"
+        >
+          <Link class="h-3.5 w-3.5" />
+          {{ m('previewPublic') }}
+        </a>
+        <div v-else class="hidden sm:block"></div>
+        <div class="flex justify-end gap-3">
+          <button class="rounded-full border border-slate-200 px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 transition hover:bg-slate-50" @click="closeModal">{{ m('actions.cancel') }}</button>
+          <button
+            class="rounded-full bg-avocado-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-avocado-700 disabled:cursor-not-allowed disabled:opacity-60"
+            form="product-form"
+            type="submit"
+            :disabled="isUploadingImage || isUploadingGallery"
           >
-            <Link class="h-3.5 w-3.5" />
-            {{ m('previewPublic') }}
-          </a>
-          <div v-else class="hidden sm:block"></div>
-          <div class="flex justify-end gap-3">
-            <button class="rounded-full border border-slate-200 px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-slate-50 transition" @click="closeModal">{{ m('actions.cancel') }}</button>
-            <button
-              class="rounded-full bg-avocado-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:bg-avocado-700 disabled:cursor-not-allowed disabled:opacity-60 transition shadow-md"
-              form="product-form"
-              type="submit"
-              :disabled="isUploadingImage || isUploadingGallery"
-            >
-              {{ mode === 'create' ? m('addProduct') : m('actions.saveUpdate') }}
-            </button>
-          </div>
+            {{ mode === 'create' ? m('addProduct') : m('actions.saveUpdate') }}
+          </button>
         </div>
-      </template>
-    </BaseModal>
+      </div>
+    </template>
+  </BaseModal>
 
-    <ConfirmModal :show="Boolean(pendingDeleteId)" @cancel="pendingDeleteId = null" @confirm="confirmDeleteProduct" />
-  </div>
+  <ConfirmModal
+    :show="Boolean(pendingDeleteId)"
+    :title="m('confirmDelete.title')"
+    :message="m('confirmDelete.message')"
+    :confirm-text="m('confirmDelete.confirm')"
+    @cancel="pendingDeleteId = null"
+    @confirm="confirmDeleteProduct"
+  />
 </template>
 
 <style scoped>
-.admin-input-premium {
-  width: 100%;
-  border-radius: 1rem;
-  border: 1px solid rgb(241, 245, 249);
-  background: rgb(248, 250, 252, 0.5);
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: rgb(30, 41, 59);
-  outline: none;
-  transition: all 0.2s;
-}
-
-.admin-input-premium:focus {
-  background: white;
-  border-color: rgb(126, 199, 90);
-  box-shadow: 0 0 0 3px rgba(112, 149, 107, 0.1);
-}
-
-.admin-input-with-icon {
-  padding-left: 2.75rem;
+.product-form-panel {
+  min-height: 280px;
 }
 </style>

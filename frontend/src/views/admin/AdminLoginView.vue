@@ -21,11 +21,12 @@ const handleGoogleLogin = () => {
 }
 
 const resolvePostLoginPath = (user) => {
-  if (user.role !== 'ADMIN') return '/'
   const redirect = route.query.redirect
-  if (typeof redirect === 'string' && redirect.startsWith('/admin')) {
-    return redirect
+  if (typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')) {
+    if (user.role === 'ADMIN' && redirect.startsWith('/admin')) return redirect
+    if (user.role !== 'ADMIN' && !redirect.startsWith('/admin')) return redirect
   }
+  if (user.role !== 'ADMIN') return '/account'
   return '/admin'
 }
 
@@ -77,9 +78,6 @@ const handleLogin = async () => {
         </div>
 
         <h1 class="text-2xl font-black text-avocado-950 leading-tight">{{ t('admin.login.title') }}</h1>
-        <p class="mt-2 text-xs leading-relaxed text-slate-400">
-          {{ t('admin.login.description') }}
-        </p>
 
         <!-- Error panel -->
         <div

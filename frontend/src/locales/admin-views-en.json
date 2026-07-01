@@ -1,11 +1,11 @@
 {
   "products": {
     "title": "Products & display",
-    "description": "Manage products, product page banners and branch menu posters.",
+    "listTitle": "Product list",
+    "description": "Manage products and product page banners.",
     "tabs": {
       "products": "Products",
-      "hero": "Product banners",
-      "menu": "Menu posters"
+      "hero": "Product banners"
     },
     "addProduct": "Add product",
     "addHero": "Add banner",
@@ -111,32 +111,61 @@
       "editHero": "Update product page banner",
       "cropper": "Crop banner background"
     },
+    "formTabs": {
+      "aria": "Product form sections",
+      "required": "Required",
+      "content": "Content",
+      "mediaSeo": "Gallery & SEO",
+      "contentHint": "Short description appears on the detail page; list description is used on home and product listing.",
+      "mediaSeoHint": "Gallery, FAQ and SEO affect the public product detail page."
+    },
+    "validation": {
+      "name": "Product name is required",
+      "slug": "Slug is required",
+      "duplicateSlug": "Slug is already used by another product",
+      "sortOrder": "Order must be a non-negative number",
+      "imageUrl": "Invalid image URL (use /uploads/..., a /path or https://...)",
+      "imageRecommended": "Product is active but has no image — the site will show a placeholder.",
+      "gallery": "One or more gallery URLs are invalid",
+      "faqs": "Each FAQ line must be: Question | Answer",
+      "seoTitle": "SEO title must be at most 260 characters",
+      "seoDescription": "SEO description must be at most 500 characters"
+    },
+    "fieldHints": {
+      "category": "Only PRODUCT-type categories are suggested. Enter a new name to create a category.",
+      "shortDescription": "Shown in the intro section on the product detail page.",
+      "listDescription": "Used on homepage, product listing and search.",
+      "detailContent": "Long-form content on the product detail page (product story).",
+      "faqs": "Example: Is avocado ice cream served chilled? | Best enjoyed within 24 hours.",
+      "noCategory": "No category"
+    },
     "fields": {
       "name": "Product name *",
       "slug": "Slug *",
       "category": "Category",
       "status": "Status",
       "imageUrl": "Image URL",
-      "uploadImage": "Or upload a new image from your computer",
-      "shortDescription": "Short description on product card",
-      "heroDescription": "Detailed hero description",
+      "uploadImage": "Upload image",
+      "shortDescription": "Short description (detail page)",
+      "listDescription": "List description (home/menu)",
+      "heroDescription": "Detailed description",
       "tasteProfile": "Taste profile",
-      "ingredients": "Main ingredients",
-      "servingSuggestion": "Serving suggestions",
-      "detailContent": "Landing page content",
-      "gallery": "Detail image gallery",
-      "faqs": "Product FAQ",
+      "ingredients": "Ingredients",
+      "servingSuggestion": "Serving suggestion",
+      "detailContent": "Page content",
+      "gallery": "Gallery",
+      "faqs": "FAQ",
       "seoTitle": "SEO title",
       "seoDescription": "SEO description",
-      "featured": "Mark as featured product",
-      "branchKey": "Branch / region code *",
+      "featured": "Featured product",
+      "branchKey": "Branch code *",
       "menuTitle": "Menu name *",
       "menuSubtitle": "Short description",
       "sortOrder": "Order",
       "altText": "Alt text",
       "menuImageUrl": "Menu image URL",
-      "uploadMenuImage": "Or upload menu image from your computer",
-      "bannerTitle": "Internal banner name *",
+      "uploadMenuImage": "Upload menu image",
+      "bannerTitle": "Banner name *",
       "displayOrder": "Display order",
       "backgroundImage": "Background image"
     },
@@ -145,7 +174,8 @@
       "slug": "url-friendly-slug",
       "category": "Select or enter category",
       "imageUrl": "https://...",
-      "shortDescription": "Short description for product listing...",
+      "shortDescription": "Short description for the detail page...",
+      "listDescription": "Description shown on homepage and product listing...",
       "heroDescription": "An engaging intro for the detail page...",
       "tasteProfile": "Creamy, buttery, lightly sweet, crispy toppings...",
       "ingredients": "One ingredient per line: Avocado; Cream; Coconut...",
@@ -171,6 +201,7 @@
       "toneLight": "Light",
       "imagePreview": "Image preview",
       "productImagePreview": "Product preview",
+      "productCardPreview": "Listing card preview",
       "menuPreview": "Menu preview",
       "heroBgPreview": "Background preview",
       "galleryAlt": "Product gallery",
@@ -187,6 +218,7 @@
       "ratio16x9": "Standard 16:9",
       "ratio4x3": "4:3 ratio",
       "ratioFree": "Freeform",
+      "cropDragHint": "Drag the frame to move it, drag the 4 corners to resize. You can also use the sliders below.",
       "cropPosX": "Horizontal position (X): {value}%",
       "cropPosY": "Vertical position (Y): {value}%",
       "cropWidth": "Frame width: {value}%",
@@ -210,6 +242,9 @@
       "banner": "banner"
     },
     "confirmDelete": {
+      "title": "Delete product?",
+      "message": "This product will be removed from the CMS and will no longer appear on the website. This action cannot be undone.",
+      "confirm": "Delete product",
       "heroTitle": "Delete product page banner?",
       "heroMessage": "This banner will be removed from the product page slider. This action cannot be undone.",
       "heroConfirm": "Delete banner"
@@ -226,6 +261,8 @@
     "emptyDescription": "Add the first block to show in the featured section.",
     "loading": "Loading homepage content...",
     "paginationLabel": "blocks",
+    "listTitle": "Block list",
+    "totalCount": "Total: {count}",
     "previewHomepage": "View homepage",
     "filters": {
       "searchLabel": "Search blocks",
@@ -253,6 +290,20 @@
       "button": "Navigation button",
       "image": "Image",
       "preview": "Homepage card preview"
+    },
+    "formTabs": {
+      "aria": "Homepage block form sections",
+      "required": "Required",
+      "content": "Content & button",
+      "preview": "Preview",
+      "contentHint": "Badge appears on the image corner; description is the line below the title on the card.",
+      "previewHint": "Review the card before saving.",
+      "typeHint": "Choose how the card appears on the homepage — see the preview below."
+    },
+    "linkOptions": {
+      "inactive": "not visible",
+      "noActiveProducts": "No active products yet. Add or enable a product first.",
+      "noPublishedPosts": "No published articles yet. Publish an article before linking."
     },
     "fields": {
       "title": "Title",
@@ -312,6 +363,12 @@
       "PRODUCT_CARD": "Product card",
       "LOCATION_CARD": "Store card"
     },
+    "typeDescriptions": {
+      "FEATURED_CARD": "Standard layout: wide image, corner badge, text link in the footer.",
+      "CTA_CARD": "Action-focused: dark image overlay and prominent lime button (franchise, sign-up).",
+      "PRODUCT_CARD": "Product style: square image, eyebrow above title, soft pill button.",
+      "LOCATION_CARD": "Store style: location icon in badge, stronger card border."
+    },
     "linkTypes": {
       "NONE": "No button",
       "STATIC": "Existing page",
@@ -336,6 +393,20 @@
       "saveCreate": "Create",
       "saveUpdate": "Save changes"
     },
+    "validation": {
+      "title": "Title is required",
+      "sectionKey": "Block key is required",
+      "duplicateKey": "Block key is already in use",
+      "sortOrder": "Order must be a non-negative number",
+      "imageUrl": "Invalid image URL (use /uploads/..., a /path or https://...)",
+      "customLink": "Please enter a custom link",
+      "customLinkFormat": "Invalid link (use /path or https://...)",
+      "staticPage": "Please select a destination page",
+      "product": "Please select a product",
+      "post": "Please select an article",
+      "linkRequired": "Please select or enter a link for the button",
+      "imageRecommended": "This block is visible but has no image — the homepage will show an ALOO placeholder."
+    },
     "toasts": {
       "imageUploaded": "Homepage block image uploaded",
       "imageError": "Could not upload image",
@@ -353,6 +424,7 @@
   },
   "locations": {
     "title": "Store locator",
+    "listTitle": "Store list",
     "description": "Manage locations, amenities, status and public store pages.",
     "add": "Add store",
     "edit": "Edit store",
@@ -417,6 +489,53 @@
       "map": "Map & area",
       "promo": "Promotion"
     },
+    "formTabs": {
+      "aria": "Store form sections",
+      "required": "Required",
+      "content": "Content",
+      "preview": "Preview",
+      "contentHint": "Description, amenities, display order and extra images for the store detail page.",
+      "previewHint": "Preview the store card as it appears on the website before saving.",
+      "previewActive": "Active status — shown on /locations (except temporarily closed).",
+      "previewHidden": "This status may be hidden or shown differently on the website.",
+      "openPublic": "Open public page"
+    },
+    "modals": {
+      "create": "Add new store",
+      "edit": "Edit store"
+    },
+    "confirmDelete": {
+      "title": "Delete store?",
+      "message": "Store \"{name}\" will be permanently removed from the CMS. This cannot be undone.",
+      "confirm": "Delete store"
+    },
+    "linkTypes": {
+      "NONE": "No map link",
+      "STATIC": "Built-in page",
+      "PRODUCT": "Specific product",
+      "POST": "Specific article",
+      "CUSTOM": "Custom link (Google Maps)"
+    },
+    "staticLinks": {
+      "home": "Home",
+      "products": "Products",
+      "locations": "Store locator",
+      "franchise": "Franchise",
+      "about": "About ALOO",
+      "blog": "Blog",
+      "consultation": "Consultation",
+      "contact": "Contact"
+    },
+    "fieldHints": {
+      "storeCode": "Unique code in the CMS and store detail page.",
+      "storeCodeLocked": "Store code cannot change after creation.",
+      "slug": "Used for /locations/{slug}. Changing the slug will break old links.",
+      "displayOrder": "Sort order on /locations; lower numbers appear first.",
+      "mapUrl": "Use CUSTOM with a Google Maps link for the View map button.",
+      "imageUrl": "Use /uploads/... or upload from your computer.",
+      "galleryText": "One URL per line — shown on the store detail page.",
+      "menuPostersText": "CMS only — not shown on the website yet."
+    },
     "fields": {
       "storeCode": "Store code",
       "name": "Store name",
@@ -425,6 +544,8 @@
       "email": "Email",
       "addressText": "Display address",
       "openingHours": "Opening hours",
+      "opensAt": "Opens at",
+      "closesAt": "Closes at",
       "storeType": "Store type",
       "description": "Description",
       "mapUrl": "Google Maps URL",
@@ -447,6 +568,7 @@
     "placeholders": {
       "storeCode": "ALOO-QN-001",
       "slug": "kem-bo-aloo-395-nguyen-hue",
+      "mapUrl": "https://maps.google.com/...",
       "openingHours": "09:00 - 22:00",
       "galleryText": "Enter one image URL per line",
       "menuPostersText": "Enter one poster/menu URL per line",
@@ -466,10 +588,13 @@
       "city": "Province/city is required",
       "phone": "Phone must be at most 80 characters",
       "mapUrl": "Invalid Google Maps URL",
-      "linkUrl": "Invalid link URL",
+      "linkUrl": "Invalid link (use /path or https://...)",
+      "imageUrl": "Invalid image URL (use /uploads/..., /path or https://...)",
+      "imageRecommended": "Store is active but has no image — the website will show an ALOO placeholder.",
       "galleryText": "Each gallery line must be a valid URL",
       "menuPostersText": "Each menu poster line must be a valid URL",
       "openingHours": "Opening hours are required for active stores",
+      "openingHoursFormat": "Enter both open and close times in 24-hour format (e.g. 07:00 and 22:00)",
       "displayOrder": "Display order must be a number"
     },
     "storeTypes": {
@@ -491,11 +616,14 @@
     "featuredBadge": "Featured",
     "hints": {
       "galleryText": "Use when you want to show multiple detail images for the store.",
-      "menuPostersText": "If the store has its own menu poster, enter the image link here."
+      "menuPostersText": "If the store has its own menu poster, enter the image link here.",
+      "openingHours": "Use 24-hour format (e.g. 07:00 - 22:00). Required when status is Active.",
+      "mapUrl": "Used for the View map button on the website."
     }
   },
   "feedbacks": {
     "title": "Testimonial CMS",
+    "listTitle": "Testimonial list",
     "description": "Manage customer testimonials shown on the website.",
     "add": "Add testimonial",
     "edit": "Update testimonial",
@@ -547,8 +675,48 @@
     "fieldsPublicVisible": "Public visibility",
     "paginationLabel": "testimonial"
   },
+  "productReviews": {
+    "title": "Product reviews",
+    "listTitle": "Manage reviews",
+    "description": "Customer reviews appear on the product page immediately. Use Hide or Delete for inappropriate content.",
+    "searchPlaceholder": "Search by customer, product, content...",
+    "paginationLabel": "review",
+    "status": {
+      "pending": "Pending",
+      "approved": "Visible",
+      "rejected": "Hidden"
+    },
+    "filters": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Visible",
+      "rejected": "Hidden"
+    },
+    "columns": {
+      "customer": "Customer",
+      "product": "Product",
+      "content": "Content",
+      "rating": "Rating",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "approve": "Show again",
+      "reject": "Hide",
+      "delete": "Delete"
+    },
+    "toasts": {
+      "loadError": "Could not load product reviews",
+      "approved": "Review is visible on the product page again",
+      "rejected": "Review hidden from the product page",
+      "statusError": "Could not update review status",
+      "deleted": "Review deleted",
+      "deleteError": "Could not delete review"
+    }
+  },
   "leads": {
     "title": "Consultation registrations",
+    "listTitle": "Registration list",
     "description": "Prospective customers and franchise consultation processing status.",
     "empty": "No matching leads",
     "emptyTable": "No consultation registrations yet.",
@@ -602,6 +770,41 @@
       "deleted": "Consultation registration deleted",
       "deleteError": "Could not delete registration",
       "loadError": "Could not load consultation registrations"
+    }
+  },
+  "chat": {
+    "title": "Live chat",
+    "description": "Reply to website visitors in real time.",
+    "sessionsTitle": "Conversations",
+    "emptyTitle": "No conversations yet",
+    "emptyDescription": "New visitor chats will appear here.",
+    "selectTitle": "Select a conversation",
+    "selectDescription": "Choose a visitor on the left to view messages and reply.",
+    "send": "Send",
+    "composerPlaceholder": "Type a reply...",
+    "closedPlaceholder": "This conversation is completed — no more messages can be sent",
+    "searchPlaceholder": "Search name, phone, session id",
+    "statusLabel": "Conversation status",
+    "noMessages": "No messages in this conversation yet.",
+    "messageVisitor": "Visitor · {name}",
+    "messageVisitorFallback": "Visitor",
+    "messageAdmin": "You · ALOO",
+    "messageAuto": "ALOO Support",
+    "statuses": {
+      "open": "Wait",
+      "active": "Live",
+      "closed": "Done"
+    },
+    "statusHints": {
+      "open": "The visitor has messaged but ALOO has not replied yet.",
+      "active": "You are actively chatting with the visitor.",
+      "closed": "Conversation finished — the visitor cannot send new messages."
+    },
+    "toasts": {
+      "loadFailed": "Could not load chat data",
+      "sendFailed": "Could not send message",
+      "statusUpdated": "Conversation status updated",
+      "statusFailed": "Could not update conversation status"
     }
   },
   "articleEditor": {
@@ -669,6 +872,7 @@
   },
   "categories": {
     "description": "Manage categories used for blog and article filters.",
+    "listTitle": "Category list",
     "add": "Add category",
     "empty": "No matching categories",
     "noDescription": "No description",
@@ -717,6 +921,7 @@
   },
   "franchise": {
     "title": "Franchise page content",
+    "listTitle": "Content list",
     "description": "Manage hero, advantages, models, process, FAQ and CTA blocks shown on `/franchise`.",
     "add": "Add block",
     "previewPublic": "View franchise page",
@@ -758,17 +963,102 @@
     "fields": {
       "section": "Section",
       "title": "Title",
+      "adminTitle": "List title (CMS)",
       "amount": "Value / amount",
       "sortOrder": "Order",
       "status": "Status",
       "note": "Internal note",
-      "content": "Structured content"
+      "content": "Structured content",
+      "imageFile": "Upload image",
+      "uploading": "Uploading image...",
+      "linkType": "Link type",
+      "hashSection": "Page section",
+      "staticPage": "Select page",
+      "product": "Select product",
+      "post": "Select article",
+      "customLink": "Custom link",
+      "linkPreview": "Link to save",
+      "linkPending": "No link selected"
+    },
+    "formTabs": {
+      "aria": "Franchise form tabs",
+      "required": "Required",
+      "content": "Content",
+      "preview": "Preview",
+      "contentHint": "These fields appear on /franchise. The public title comes from the matching content field (not a separate CMS title).",
+      "previewActive": "This block is public (singleton sections only use the first ACTIVE block).",
+      "previewHidden": "This block is hidden — it will not appear on the public page.",
+      "openPublic": "Open franchise page"
+    },
+    "fieldHints": {
+      "sectionLocked": "Section cannot be changed when editing — avoids JSON mismatch.",
+      "adminTitle": "Only used in the CMS table when the section has no title in content.",
+      "adminNote": "Internal admin note — not shown on the website.",
+      "contentTitle": "This title appears on the website and in the CMS table.",
+      "linkUrl": "Pick a link type below — no need to type URLs manually.",
+      "imageUrl": "Enter a URL or upload — use /uploads/..., /about/... or https://...",
+      "sortOrder": "Order within the same section; lower numbers appear first."
+    },
+    "linkTypes": {
+      "NONE": "No link",
+      "HASH": "Section on franchise page",
+      "STATIC": "Built-in page",
+      "PRODUCT": "Specific product",
+      "POST": "Specific article",
+      "CUSTOM": "Custom link"
+    },
+    "staticLinks": {
+      "home": "Home",
+      "products": "Products",
+      "locations": "Store locator",
+      "franchise": "Franchise",
+      "about": "About ALOO",
+      "blog": "Blog",
+      "consultation": "Consultation",
+      "contact": "Contact"
+    },
+    "hashLinks": {
+      "investment": "Investment cost table",
+      "process": "6-step process"
+    },
+    "linkOptions": {
+      "inactive": "not visible",
+      "noActiveProducts": "No active products yet.",
+      "noPublishedPosts": "No published articles yet."
+    },
+    "sectionHints": {
+      "hero": "Only the first ACTIVE hero is used. Secondary button uses secondaryButtonLink (#investment, /path or URL).",
+      "advantages": "Each block = one advantage card; you can add multiple blocks.",
+      "models": "Each block = one business model; enable featured to highlight.",
+      "investment": "Each row = one line in the investment cost table.",
+      "profit": "Reference profit metrics — not a guarantee.",
+      "process": "Each block = one process step; stepNumber controls order.",
+      "founder_story": "Only the first ACTIVE block is shown.",
+      "faq": "Each block = one FAQ item.",
+      "cta": "Only the first ACTIVE CTA is shown at the bottom of the page.",
+      "costs": "Legacy section — not shown on the website (use Models + Investment).",
+      "benefits": "Legacy section — not shown on the website."
+    },
+    "validation": {
+      "title": "Title is required",
+      "sortOrder": "Order must be a non-negative number",
+      "fieldRequired": "{field} is required",
+      "linkUrl": "Invalid link (use #investment, /path or https://...)",
+      "imageUrl": "Invalid image URL (use /uploads/..., /path or https://...)",
+      "stepNumber": "Step number must be at least 1",
+      "singletonExists": "An ACTIVE {section} block already exists — the website only uses the first one.",
+      "legacySection": "Costs / Benefits sections are no longer shown on the website. Prefer Models or Investment."
+    },
+    "confirmDelete": {
+      "title": "Delete franchise block?",
+      "message": "Block \"{title}\" will be permanently removed from the CMS. This cannot be undone.",
+      "confirm": "Delete block"
     },
     "contentFields": {
       "title": "Title",
       "subtitle": "Subtitle",
       "description": "Description",
-      "image": "Image (URL)",
+      "image": "Image",
       "buttonText": "Primary button",
       "buttonLink": "Primary link",
       "secondaryButtonText": "Secondary button",
@@ -794,7 +1084,17 @@
       "body": "Content"
     },
     "placeholders": {
-      "content": "{\"description\":\"...\"}"
+      "content": "{\"description\":\"...\"}",
+      "adminTitle": "Label shown in the CMS table",
+      "adminNote": "Internal note (optional)",
+      "imageUrl": "/uploads/... or /about/...",
+      "selectProduct": "Select a product",
+      "selectPost": "Select an article",
+      "customLink": "/consultation or #investment or https://..."
+    },
+    "preview": {
+      "imageAlt": "Block image preview",
+      "noImage": "No image yet"
     },
     "modals": {
       "create": "Add franchise block",
@@ -815,7 +1115,10 @@
       "requiredFields": "Please fill in all required fields",
       "deleted": "Franchise content deleted",
       "deleteError": "Could not delete franchise content",
-      "loadError": "Could not load franchise content"
+      "loadError": "Could not load franchise content",
+      "imageUploaded": "Franchise block image uploaded",
+      "imageError": "Could not upload image",
+      "linkOptionsError": "Could not load link suggestions"
     }
   }
 }

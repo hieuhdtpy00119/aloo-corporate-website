@@ -3,7 +3,6 @@ import { ArrowRight, CalendarDays, Clock3 } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import SectionTitle from '../../components/public/SectionTitle.vue'
 import { useAppStore } from '../../stores/appStore'
 
 const { t, locale } = useI18n()
@@ -96,16 +95,25 @@ onMounted(() => {
 
 <template>
   <div class="bg-brand-cream text-brand-dark pb-16">
-    <section class="border-b border-brand-forest/10 bg-white">
-      <div class="mx-auto max-w-[1240px] px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
-        <SectionTitle
-          heading-level="h1"
-          :eyebrow="t('blog.eyebrow')"
-          :title="t('blog.title')"
-          :description="t('blog.description')"
+    <div class="relative overflow-hidden bg-avocado-950 text-white">
+      <div class="absolute inset-0">
+        <img
+          src="/about/aloo-blog-hero.png"
+          alt=""
+          aria-hidden="true"
+          class="h-full w-full object-cover object-center"
         />
       </div>
-    </section>
+      <div class="absolute inset-0 bg-black/35"></div>
+      <div class="relative mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-24">
+        <span class="mb-4 inline-block rounded-full border border-white/10 bg-white/5 px-3.5 py-1 text-xs font-bold uppercase tracking-[0.25em] text-cream-300">
+          {{ t('blog.eyebrow') }}
+        </span>
+        <h1 class="text-4xl font-black tracking-tight text-white sm:text-5xl">{{ t('blog.title') }}</h1>
+        <div class="mx-auto mt-4 h-1 w-12 rounded-full bg-cream-400"></div>
+        <p class="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-avocado-100/90">{{ t('blog.description') }}</p>
+      </div>
+    </div>
 
     <section
       v-if="!store.loading.posts && !hasLoadError && categoryOptions.length > 1"

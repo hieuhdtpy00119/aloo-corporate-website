@@ -1,0 +1,17 @@
+package com.aloo.cms.dto;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record ProductReviewSubmitRequest(
+        @Min(value = 1, message = "Rating must be at least 1")
+        @Max(value = 5, message = "Rating must be at most 5")
+        Integer rating,
+
+        @NotBlank(message = "Review content is required")
+        @Size(min = 10, max = 2000, message = "Review content must be between 10 and 2000 characters")
+        String content
+) {
+}

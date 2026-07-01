@@ -210,7 +210,7 @@ onBeforeUnmount(() => {
     </section>
     <section 
       v-else-if="slides.length" 
-      class="relative w-full h-[calc(100vh-4rem)] bg-brand-dark overflow-hidden group/carousel animate-fade-in"
+      class="relative w-full h-[calc(100vh-4rem)] bg-black overflow-hidden group/carousel animate-fade-in"
       @mouseenter="stopAutoplay"
       @mouseleave="startAutoplay"
     >
@@ -230,7 +230,7 @@ onBeforeUnmount(() => {
             loading="lazy"
             decoding="async"
           />
-          <div class="absolute inset-0 bg-gradient-to-r from-brand-dark/90 via-brand-dark/55 to-brand-dark/20"></div>
+          <div class="absolute inset-0 bg-gradient-to-r from-black/55 via-black/30 to-transparent"></div>
           <div class="relative z-10 mx-auto flex h-full max-w-[1240px] items-center px-4 sm:px-8 lg:px-12">
             <div class="max-w-2xl text-white">
               <span

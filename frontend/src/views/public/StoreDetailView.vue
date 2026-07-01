@@ -14,6 +14,25 @@ const errorMessage = ref('')
 const normalizedStore = computed(() => {
   if (!store.value) return null
   const links = Array.isArray(store.value.links) ? store.value.links : []
+  const galleryItems = Array.isArray(store.value.gallery)
+    ? store.value.gallery
+    : (() => {
+        try {
+          const parsed = JSON.parse(store.value.galleryJson || '[]')
+          return Array.isArray(parsed) ? parsed : []
+        } catch {
+          return []
+        }
+      })()
+  const galleryUrls = galleryItems
+    .map((item) => {
+      if (typeof item === 'string') return item
+      if (item && typeof item === 'object') return item.imageUrl || item.url || ''
+      return ''
+    })
+    .filter(Boolean)
+    .map((url) => resolveBackendAssetUrl(url))
+
   return {
     ...store.value,
     imageUrl: resolveBackendAssetUrl(store.value.coverImageUrl || store.value.imageUrl || ''),
@@ -22,6 +41,7 @@ const normalizedStore = computed(() => {
     amenities: Array.isArray(store.value.amenities) ? store.value.amenities : [],
     links,
     mapUrl: store.value.mapUrl || links.find((link) => link.type === 'GOOGLE_MAPS')?.url || '',
+    galleryUrls,
   }
 })
 
@@ -99,6 +119,16 @@ onMounted(async () => {
               <span v-for="amenity in normalizedStore.amenities" :key="amenity" class="rounded-full bg-avocado-50 px-3 py-1.5 text-xs font-bold text-avocado-800">
                 {{ amenity }}
               </span>
+            </div>
+
+            <div v-if="normalizedStore.galleryUrls.length" class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <img
+                v-for="(url, index) in normalizedStore.galleryUrls"
+                :key="`${url}-${index}`"
+                :src="url"
+                :alt="`${normalizedStore.name} gallery ${index + 1}`"
+                class="aspect-[4/3] w-full rounded-2xl border border-avocado-100 object-cover"
+              />
             </div>
           </section>
 

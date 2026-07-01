@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ChevronLeft, ChevronRight, MapPin, Award, ArrowRight } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, MapPin, Award, ArrowRight, ShoppingBag } from 'lucide-vue-next'
 import { useAppStore } from '../../stores/appStore'
 import { homeSectionService, resolveBackendAssetUrl } from '../../services/cmsService'
 
@@ -23,19 +23,39 @@ const activeProducts = computed(() =>
 
 const popularProducts = computed(() => activeProducts.value.slice(0, 8))
 
+const isExternalLink = (url) => /^https?:\/\//i.test(String(url || '').trim())
+
+const normalizeSectionType = (type) => {
+  const value = String(type || 'FEATURED_CARD').toUpperCase()
+  return ['FEATURED_CARD', 'CTA_CARD', 'PRODUCT_CARD', 'LOCATION_CARD'].includes(value) ? value : 'FEATURED_CARD'
+}
+
+const mapFeaturedSection = (section) => {
+  const buttonLink = String(section.buttonLink || '').trim()
+  const buttonText = String(section.buttonText || '').trim()
+  const hasLink = Boolean(buttonLink)
+  const cardType = normalizeSectionType(section.type)
+
+  return {
+    id: section.id,
+    type: cardType,
+    title: section.title,
+    subtitle: section.subtitle || '',
+    description: section.description || section.subtitle || '',
+    cta: buttonText || (hasLink ? t('home.featuredDefaultCta') : ''),
+    href: buttonLink,
+    hasLink,
+    isExternal: hasLink && isExternalLink(buttonLink),
+    image: resolveBackendAssetUrl(section.imageUrl || ''),
+    badge: section.badge || section.subtitle || t('home.featuredDefaultBadge'),
+  }
+}
+
 const featuredCards = computed(() =>
   homeSections.value
     .filter((section) => section.status === 'ACTIVE')
     .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-    .map((section) => ({
-      id: section.id,
-      title: section.title,
-      description: section.description || section.subtitle || '',
-      cta: section.buttonText || t('home.featuredDefaultCta'),
-      to: section.buttonLink || '/',
-      image: resolveBackendAssetUrl(section.imageUrl || ''),
-      badge: section.badge || section.subtitle || t('home.featuredDefaultBadge'),
-    }))
+    .map(mapFeaturedSection),
 )
 
 const activeLocations = computed(() =>
@@ -84,45 +104,24 @@ onMounted(() => {
 
 <template>
   <section class="bg-brand-cream">
-    <div class="relative h-[64vh] min-h-[460px] w-full overflow-hidden bg-brand-dark">
+    <div class="relative h-[calc(64vh+10rem)] max-h-[800px] min-h-[560px] w-full overflow-hidden bg-brand-dark sm:min-h-[600px]">
       <video
-        class="absolute inset-0 h-full w-full object-cover object-center"
+        class="absolute inset-0 h-full w-full object-cover object-center [transform:translateZ(0)]"
         autoplay
         muted
         loop
         playsinline
-        preload="metadata"
+        preload="auto"
         poster="/about/aloo-origin-story.png"
         :aria-label="t('home.heroVideoLabel')"
       >
         <source src="/videos/aloo-home-hero.mp4" type="video/mp4" />
       </video>
-      <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/85 via-brand-dark/25 to-brand-dark/10"></div>
-      <div class="relative mx-auto flex h-full max-w-[1240px] items-end px-4 pb-10 sm:px-6 sm:pb-12 lg:px-8">
-        <div class="max-w-xl rounded-3xl border border-white/10 bg-white/10 p-6 text-white shadow-2xl backdrop-blur-md sm:p-8">
-          <span class="inline-flex rounded-full border border-brand-lime/30 bg-brand-lime/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-brand-lime">
-            {{ t('home.heroBadge') }}
-          </span>
-          <h1 class="mt-4 text-3xl font-black leading-tight sm:text-4xl">
-            {{ t('home.heroHeadline') }}
-          </h1>
-          <p class="mt-3 text-sm leading-relaxed text-white/80 sm:text-base">
-            {{ t('home.heroDescription') }}
-          </p>
-          <div class="mt-6 flex flex-wrap gap-3">
-            <RouterLink to="/products" class="inline-flex items-center gap-2 rounded-full bg-brand-lime px-5 py-3 text-xs font-black uppercase tracking-wider text-brand-dark transition hover:bg-brand-lime/90">
-              {{ t('home.heroCtaProducts') }} <ArrowRight class="h-4 w-4" />
-            </RouterLink>
-            <RouterLink to="/franchise" class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-3 text-xs font-black uppercase tracking-wider text-white transition hover:bg-white/10">
-              {{ t('home.heroCtaFranchise') }}
-            </RouterLink>
-          </div>
-        </div>
-      </div>
+      <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/85 via-brand-dark/20 to-transparent"></div>
     </div>
 
     <!-- Featured Section -->
-    <section class="mx-auto max-w-[1240px] px-4 py-20 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-[1240px] px-4 py-10 sm:px-6 lg:px-8">
       <div class="mb-10 flex flex-col justify-between gap-4 border-b border-brand-forest/5 pb-4 text-center sm:flex-row sm:items-end sm:text-left">
         <div>
           <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">{{ t('home.featuredEyebrow') }}</span>
@@ -158,31 +157,79 @@ onMounted(() => {
         {{ t('home.featuredEmpty') }}
       </p>
       <div v-else ref="featuredRail" class="featured-scrollbar flex snap-x gap-5 overflow-x-auto pb-6">
-        <RouterLink
+        <component
+          :is="card.hasLink ? (card.isExternal ? 'a' : RouterLink) : 'article'"
           v-for="card in featuredCards"
           :key="card.id ?? card.title"
-          :to="card.to"
-          class="group flex min-w-[82vw] snap-start flex-col overflow-hidden rounded-3xl border border-brand-forest/5 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl sm:min-w-[360px] lg:min-w-[400px]"
+          v-bind="
+            card.hasLink
+              ? card.isExternal
+                ? { href: card.href, target: '_blank', rel: 'noreferrer' }
+                : { to: card.href }
+              : {}
+          "
+          :class="[
+            'group flex min-w-[82vw] shrink-0 grow basis-0 snap-start flex-col overflow-hidden rounded-3xl border bg-white shadow-sm transition sm:min-w-[360px] lg:min-w-[400px]',
+            card.type === 'LOCATION_CARD' ? 'border-brand-forest/15' : 'border-brand-forest/5',
+            card.hasLink ? 'hover:-translate-y-1 hover:shadow-xl' : '',
+          ]"
         >
           <div class="relative aspect-[5/3] overflow-hidden">
-            <div class="absolute top-4 left-4 z-10 rounded-full bg-brand-dark/80 backdrop-blur-md px-3.5 py-1.5 text-xs font-bold text-brand-lime">
+            <div
+              v-if="card.type === 'CTA_CARD'"
+              class="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-brand-dark/75 via-brand-dark/20 to-transparent"
+            />
+            <div
+              :class="[
+                'absolute top-4 left-4 z-10 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold backdrop-blur-md',
+                card.type === 'LOCATION_CARD' ? 'bg-brand-forest/90 text-brand-lime' : 'bg-brand-dark/80 text-brand-lime',
+              ]"
+            >
+              <MapPin v-if="card.type === 'LOCATION_CARD'" class="h-3.5 w-3.5" />
+              <ShoppingBag v-else-if="card.type === 'PRODUCT_CARD'" class="h-3.5 w-3.5" />
               {{ card.badge }}
             </div>
             <img v-if="card.image" :src="card.image" :alt="card.title" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
             <div v-else class="grid h-full place-items-center bg-brand-lime/10 text-2xl font-black text-brand-forest">ALOO</div>
           </div>
-          <div class="flex flex-1 flex-col justify-between p-5">
+          <div
+            :class="[
+              'flex flex-1 flex-col justify-between p-5',
+              card.type === 'CTA_CARD' ? 'bg-gradient-to-b from-white to-brand-cream/40' : '',
+            ]"
+          >
             <div>
+              <p
+                v-if="card.type === 'PRODUCT_CARD' && card.subtitle"
+                class="text-[11px] font-black uppercase tracking-[0.18em] text-brand-forest"
+              >
+                {{ card.subtitle }}
+              </p>
               <h3 class="text-xl font-bold text-brand-dark transition group-hover:text-brand-forest">{{ card.title }}</h3>
               <p class="mt-2.5 line-clamp-2 min-h-11 text-sm font-medium leading-relaxed text-brand-muted">{{ card.description }}</p>
             </div>
-            <div class="mt-5 flex items-center justify-between border-t border-slate-50 pt-4">
-              <span class="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-brand-forest group-hover:text-brand-lime transition">
+            <div v-if="card.cta" class="mt-5 flex items-center justify-between border-t border-slate-50 pt-4">
+              <span
+                v-if="card.type === 'CTA_CARD'"
+                class="inline-flex items-center gap-1.5 rounded-full bg-brand-lime px-4 py-2 text-xs font-black uppercase tracking-wider text-brand-dark shadow-sm transition group-hover:bg-brand-lime/90"
+              >
+                {{ card.cta }} <ArrowRight class="h-4 w-4 transition transform group-hover:translate-x-1" />
+              </span>
+              <span
+                v-else-if="card.type === 'PRODUCT_CARD'"
+                class="inline-flex items-center gap-1.5 rounded-full bg-brand-lime/15 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider text-brand-forest transition group-hover:bg-brand-lime/25"
+              >
+                {{ card.cta }} <ArrowRight class="h-4 w-4 transition transform group-hover:translate-x-1" />
+              </span>
+              <span
+                v-else
+                class="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-brand-forest group-hover:text-brand-lime transition"
+              >
                 {{ card.cta }} <ArrowRight class="h-4 w-4 transition transform group-hover:translate-x-1" />
               </span>
             </div>
           </div>
-        </RouterLink>
+        </component>
       </div>
     </section>
 

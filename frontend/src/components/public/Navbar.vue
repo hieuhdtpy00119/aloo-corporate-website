@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ChevronDown, LayoutDashboard, LogOut, Menu, ShieldCheck, UserRound, X } from 'lucide-vue-next'
 import LanguageSwitcher from './LanguageSwitcher.vue'
@@ -10,6 +10,7 @@ import { repairUtf8Mojibake } from '../../utils/textEncoding'
 import { isAdminToken, isAuthenticatedToken } from '../../router/authGuard'
 
 const route = useRoute()
+const router = useRouter()
 const { t } = useI18n()
 const isDrawerOpen = ref(false)
 const isAccountMenuOpen = ref(false)
@@ -86,6 +87,9 @@ const logout = () => {
   syncAuthState()
   closeAccountMenu()
   closeDrawer()
+  if (route.path === '/account' || route.path.startsWith('/admin')) {
+    router.push('/login')
+  }
 }
 
 const handleScroll = () => {
@@ -128,14 +132,14 @@ onBeforeUnmount(() => {
     <nav class="mx-auto flex h-full w-full max-w-[1240px] items-center justify-between px-4 sm:px-6 lg:px-8">
       <RouterLink
         to="/"
-        class="flex shrink-0 items-center outline-none ring-brand-lime focus-visible:rounded-xl focus-visible:ring-2 focus-visible:ring-offset-4 transition transform hover:scale-[1.03]"
+        class="nav-brand flex shrink-0 items-center outline-none ring-brand-lime focus-visible:rounded-xl focus-visible:ring-2 focus-visible:ring-offset-4 transition transform hover:scale-[1.02]"
       >
         <img
-          src="/logo-aloo.png"
+          src="/logo-aloo-nav.png"
           :alt="`${t('brand.name')} — ${t('brand.tagline')}`"
-          class="h-9 w-auto max-w-[min(160px,48vw)] object-contain object-left sm:h-10 transition-all duration-300"
-          width="200"
-          height="48"
+          class="nav-brand__logo"
+          width="148"
+          height="40"
         />
       </RouterLink>
 
@@ -278,11 +282,11 @@ onBeforeUnmount(() => {
         <div>
           <div class="mb-8 flex items-center justify-between gap-3">
             <img
-              src="/logo-aloo.png"
+              src="/logo-aloo-nav.png"
               :alt="`${t('brand.name')} — ${t('brand.tagline')}`"
-              class="h-9 w-auto max-w-[70%] object-contain object-left"
-              width="180"
-              height="44"
+              class="nav-brand__logo nav-brand__logo--drawer"
+              width="148"
+              height="40"
             />
             <button
               class="grid h-10 w-10 place-items-center rounded-full border border-slate-200 text-slate-600 transition hover:bg-slate-50"
@@ -380,3 +384,33 @@ onBeforeUnmount(() => {
     </div>
   </header>
 </template>
+
+<style scoped>
+.nav-brand__logo {
+  display: block;
+  height: 2rem;
+  width: auto;
+  max-width: min(7rem, 36vw);
+  object-fit: contain;
+  object-position: left center;
+}
+
+.nav-brand__logo--drawer {
+  height: 2.125rem;
+  max-width: 62%;
+}
+
+@media (min-width: 640px) {
+  .nav-brand__logo {
+    height: 2.25rem;
+    max-width: 7.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nav-brand__logo {
+    height: 2.375rem;
+    max-width: 8.25rem;
+  }
+}
+</style>

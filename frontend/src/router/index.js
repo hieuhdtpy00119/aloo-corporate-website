@@ -40,6 +40,8 @@ import AdminProductsView from '../views/admin/AdminProductsView.vue'
 
 import AdminFeedbackView from '../views/admin/AdminFeedbackView.vue'
 
+import AdminProductReviewsView from '../views/admin/AdminProductReviewsView.vue'
+
 import AdminRegistrationsView from '../views/admin/AdminRegistrationsView.vue'
 
 import AdminArticlesView from '../views/admin/AdminArticlesView.vue'
@@ -59,6 +61,8 @@ import AdminAuditLogsView from '../views/admin/AdminAuditLogsView.vue'
 import AdminHomeSectionsView from '../views/admin/AdminHomeSectionsView.vue'
 
 import AdminFranchiseContentView from '../views/admin/AdminFranchiseContentView.vue'
+
+import AdminChatView from '../views/admin/AdminChatView.vue'
 
 import { adminPaths } from '../constants/adminPaths'
 
@@ -176,7 +180,11 @@ const router = createRouter({
 
         { path: 'crm/feedbacks', name: 'admin-crm-feedbacks', component: AdminFeedbackView, meta: { adminScope: 'crm' } },
 
+        { path: 'crm/product-reviews', name: 'admin-crm-product-reviews', component: AdminProductReviewsView, meta: { adminScope: 'crm' } },
+
         { path: 'crm/leads', name: 'admin-crm-leads', component: AdminRegistrationsView, meta: { adminScope: 'crm' } },
+
+        { path: 'crm/live-chat', name: 'admin-crm-live-chat', component: AdminChatView, meta: { adminScope: 'crm' } },
 
         { path: 'system/accounts', name: 'admin-system-accounts', component: AdminAccountsView, meta: { adminScope: 'system' } },
 
@@ -204,7 +212,11 @@ const router = createRouter({
 
         { path: 'feedbacks', redirect: adminPaths.crm.feedbacks },
 
+        { path: 'product-reviews', redirect: adminPaths.crm.productReviews },
+
         { path: 'registrations', redirect: adminPaths.crm.leads },
+
+        { path: 'live-chat', redirect: adminPaths.crm.liveChat },
 
         { path: 'accounts', redirect: adminPaths.system.accounts },
 
@@ -264,7 +276,16 @@ router.afterEach((to) => {
 
 })
 
+const enforceAuthRedirect = () => {
+  const redirect = resolveAuthRedirect(router.currentRoute.value)
+  if (redirect !== true) {
+    router.push(redirect)
+  }
+}
 
+if (typeof window !== 'undefined') {
+  window.addEventListener('aloo-auth-change', enforceAuthRedirect)
+}
 
 export default router
 

@@ -79,6 +79,19 @@ const heroStats = computed(() => {
   return Array.isArray(items) ? items : []
 })
 
+const resolveFranchiseLinkAction = (link, fallbackTarget = 'investment') => {
+  const text = String(link || '').trim()
+  if (!text) return { type: 'scroll', target: fallbackTarget }
+  if (text.startsWith('#')) return { type: 'scroll', target: text.slice(1) || fallbackTarget }
+  if (/^https?:\/\//i.test(text)) return { type: 'external', href: text }
+  if (text.startsWith('/')) return { type: 'route', to: text }
+  return { type: 'scroll', target: fallbackTarget }
+}
+
+const secondaryHeroAction = computed(() =>
+  resolveFranchiseLinkAction(hero.value?.secondaryButtonLink, 'investment'),
+)
+
 const revenuePoints = computed(() => {
   const items = tm('franchise.revenuePoints')
   return Array.isArray(items) ? items : []
@@ -111,14 +124,14 @@ onMounted(async () => {
   <div class="bg-brand-cream text-avocado-950">
 
     <!-- ===== HERO ===== -->
-    <section class="relative min-h-[calc(100vh-80px)] overflow-hidden bg-avocado-950 text-white">
+    <section class="relative min-h-[calc(100vh-80px)] overflow-hidden bg-black text-white">
       <img
-        :src="hero?.image || '/about/aloo-franchise-hero.png'"
+        :src="hero?.image || '/about/aloo-franchise-banner.png'"
         :alt="hero?.title || t('franchise.heroAlt')"
-        class="absolute inset-0 h-full w-full object-cover opacity-40"
+        class="absolute inset-0 h-full w-full object-cover"
         loading="eager"
       />
-      <div class="absolute inset-0 bg-gradient-to-r from-avocado-950 via-avocado-950/85 to-avocado-950/30"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-black/55 via-black/30 to-transparent"></div>
       <!-- Decorative glow -->
       <div class="pointer-events-none absolute top-1/3 left-1/2 w-[500px] h-[500px] rounded-full bg-green-400/8 blur-3xl"></div>
 
@@ -152,10 +165,29 @@ onMounted(async () => {
               {{ hero?.buttonText || t('franchise.heroDefaultPrimaryCta') }}
               <ArrowRight class="h-4 w-4" />
             </RouterLink>
+            <RouterLink
+              v-if="secondaryHeroAction.type === 'route'"
+              :to="secondaryHeroAction.to"
+              class="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-7 py-4 text-sm font-black uppercase tracking-wider text-white transition hover:bg-white/15"
+              @click="trackEvent('click_franchise_cta', { location: 'hero_secondary' })"
+            >
+              {{ hero?.secondaryButtonText || t('franchise.heroDefaultSecondaryCta') }}
+            </RouterLink>
+            <a
+              v-else-if="secondaryHeroAction.type === 'external'"
+              :href="secondaryHeroAction.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-7 py-4 text-sm font-black uppercase tracking-wider text-white transition hover:bg-white/15"
+              @click="trackEvent('click_franchise_cta', { location: 'hero_secondary' })"
+            >
+              {{ hero?.secondaryButtonText || t('franchise.heroDefaultSecondaryCta') }}
+            </a>
             <button
+              v-else
               type="button"
               class="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-7 py-4 text-sm font-black uppercase tracking-wider text-white transition hover:bg-white/15"
-              @click="scrollToSection('investment')"
+              @click="scrollToSection(secondaryHeroAction.target)"
             >
               {{ hero?.secondaryButtonText || t('franchise.heroDefaultSecondaryCta') }}
             </button>

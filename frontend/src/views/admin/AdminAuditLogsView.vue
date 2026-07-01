@@ -1,14 +1,19 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AdminListPage from '../../components/admin/AdminListPage.vue'
+import AdminNestedShell from '../../components/admin/shell/AdminNestedShell.vue'
+import AdminShellFrame from '../../components/admin/shell/AdminShellFrame.vue'
+import AdminShellTablePanel from '../../components/admin/shell/AdminShellTablePanel.vue'
 import AdminPageHeader from '../../components/admin/AdminPageHeader.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
 import Pagination from '../../components/admin/Pagination.vue'
+import BaseModal from '../../components/admin/BaseModal.vue'
+import { Clock, FileText, Target, User } from 'lucide-vue-next'
 import { auditLogService } from '../../services/cmsService'
-import { useToastStore } from '../../stores/toastStore'
+import { formatAuditAction, formatAuditDetails, formatAuditEntity } from '../../utils/auditLogLabels'
 
 const { t } = useI18n()
-const toast = useToastStore()
 
 const logs = ref([])
 const isLoading = ref(false)
@@ -17,6 +22,13 @@ const currentPage = ref(1)
 const pageSize = 20
 const totalElements = ref(0)
 const totalPages = ref(1)
+const selectedLog = ref(null)
+
+const showDetailModal = computed(() => Boolean(selectedLog.value))
+
+const detailModalTitle = computed(() => (
+  selectedLog.value ? actionLabel(selectedLog.value) : t('admin.auditLogs.detailModal.title')
+))
 
 const filters = reactive({
   actor: '',
@@ -27,6 +39,20 @@ const filters = reactive({
 })
 
 const formatDate = (value) => (value ? String(value).replace('T', ' ').slice(0, 19) : '-')
+
+const actionLabel = (log) => formatAuditAction(log.action, t)
+const entityLabel = (log) => formatAuditEntity(log, t)
+const detailsLabel = (log) => formatAuditDetails(log, t)
+
+const openDetail = (log) => {
+  selectedLog.value = log
+}
+
+const closeDetail = () => {
+  selectedLog.value = null
+}
+
+const listCountText = computed(() => t('admin.shared.totalCount', { count: totalElements.value }))
 
 const queryParams = computed(() => {
   const params = {
@@ -70,6 +96,16 @@ const resetFilters = () => {
   applyFilters()
 }
 
+const goPrevPage = () => {
+  currentPage.value = Math.max(1, currentPage.value - 1)
+  loadLogs()
+}
+
+const goNextPage = () => {
+  currentPage.value = Math.min(totalPages.value, currentPage.value + 1)
+  loadLogs()
+}
+
 const exportCsv = () => {
   if (!logs.value.length) return
   const header = [
@@ -82,9 +118,9 @@ const exportCsv = () => {
   const rows = logs.value.map((log) => [
     formatDate(log.createdAt),
     log.actorEmail || '',
-    log.action || '',
-    `${log.entityType || ''}${log.entityId ? ` #${log.entityId}` : ''}`,
-    (log.details || '').replace(/\r?\n/g, ' '),
+    actionLabel(log),
+    entityLabel(log),
+    detailsLabel(log),
   ])
   const csv = [header, ...rows]
     .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
@@ -102,99 +138,234 @@ onMounted(loadLogs)
 </script>
 
 <template>
-  <div>
-    <AdminPageHeader
-      :eyebrow="t('admin.nav.groups.system')"
-      :title="t('admin.auditLogs.title')"
-      :description="t('admin.auditLogs.description')"
-    >
-      <template #actions>
-        <button
-          type="button"
-          class="aloo-btn aloo-btn--secondary disabled:cursor-not-allowed disabled:opacity-50"
-          :disabled="!logs.length"
-          @click="exportCsv"
+  <AdminListPage>
+    <AdminNestedShell>
+      <AdminShellFrame variant="header" inner="header">
+        <AdminPageHeader :title="t('admin.auditLogs.title')">
+          <template #actions>
+            <button
+              type="button"
+              class="admin-list-btn admin-list-btn--outline disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="!logs.length"
+              @click="exportCsv"
+            >
+              {{ t('admin.auditLogs.exportCsv') }}
+            </button>
+          </template>
+        </AdminPageHeader>
+      </AdminShellFrame>
+
+      <AdminShellFrame variant="toolbar" inner="toolbar" padded>
+        <section class="aloo-admin-toolbar admin-shell-toolbar admin-shell-toolbar--audit">
+          <label class="aloo-field">
+            <span class="aloo-label">{{ t('admin.auditLogs.filters.actor') }}</span>
+            <input
+              v-model="filters.actor"
+              class="aloo-input"
+              :placeholder="t('admin.auditLogs.filters.actorPlaceholder')"
+              @keyup.enter="applyFilters"
+            />
+          </label>
+          <label class="aloo-field">
+            <span class="aloo-label">{{ t('admin.auditLogs.filters.action') }}</span>
+            <input
+              v-model="filters.action"
+              class="aloo-input"
+              :placeholder="t('admin.auditLogs.filters.actionPlaceholder')"
+              @keyup.enter="applyFilters"
+            />
+          </label>
+          <label class="aloo-field">
+            <span class="aloo-label">{{ t('admin.auditLogs.filters.entityType') }}</span>
+            <input
+              v-model="filters.entityType"
+              class="aloo-input"
+              :placeholder="t('admin.auditLogs.filters.entityPlaceholder')"
+              @keyup.enter="applyFilters"
+            />
+          </label>
+          <label class="aloo-field">
+            <span class="aloo-label">{{ t('admin.auditLogs.filters.from') }}</span>
+            <input v-model="filters.from" type="date" class="aloo-input" />
+          </label>
+          <label class="aloo-field">
+            <span class="aloo-label">{{ t('admin.auditLogs.filters.to') }}</span>
+            <input v-model="filters.to" type="date" class="aloo-input" />
+          </label>
+          <div class="admin-shell-toolbar__actions">
+            <button type="button" class="admin-list-btn admin-list-btn--primary" @click="applyFilters">
+              {{ t('admin.auditLogs.filters.apply') }}
+            </button>
+            <button type="button" class="admin-list-btn admin-list-btn--outline" @click="resetFilters">
+              {{ t('admin.auditLogs.filters.reset') }}
+            </button>
+          </div>
+        </section>
+      </AdminShellFrame>
+
+      <AdminShellFrame
+        v-if="errorMessage"
+        as="p"
+        variant="alert"
+        class="admin-list-alert"
+      >
+        {{ errorMessage }}
+      </AdminShellFrame>
+
+      <AdminShellFrame v-if="isLoading" variant="body" inner="pad">
+        <div v-for="i in 5" :key="i" class="admin-shell-skeleton" />
+      </AdminShellFrame>
+
+      <AdminShellFrame v-else-if="!logs.length" variant="body" inner="pad">
+        <EmptyState
+          :title="t('admin.auditLogs.emptyTitle')"
+          :description="t('admin.auditLogs.emptyDescription')"
+        />
+      </AdminShellFrame>
+
+      <AdminShellFrame v-else variant="body" visibility="desktop">
+        <AdminShellTablePanel
+          :title="t('admin.auditLogs.listTitle')"
+          :count-text="listCountText"
         >
-          {{ t('admin.auditLogs.exportCsv') }}
-        </button>
-      </template>
-    </AdminPageHeader>
+          <table class="admin-shell-table">
+            <colgroup>
+              <col style="width: 16%" />
+              <col style="width: 18%" />
+              <col style="width: 16%" />
+              <col style="width: 16%" />
+              <col style="width: 34%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>{{ t('admin.auditLogs.columns.time') }}</th>
+                <th>{{ t('admin.auditLogs.columns.actor') }}</th>
+                <th>{{ t('admin.auditLogs.columns.action') }}</th>
+                <th>{{ t('admin.auditLogs.columns.entity') }}</th>
+                <th>{{ t('admin.auditLogs.columns.details') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="log in logs"
+                :key="log.id"
+                class="admin-audit-log-row"
+                tabindex="0"
+                @click="openDetail(log)"
+                @keyup.enter="openDetail(log)"
+              >
+                <td class="admin-shell-cell-muted admin-shell-cell-nowrap">{{ formatDate(log.createdAt) }}</td>
+                <td class="admin-shell-cell-strong admin-shell-cell-truncate">{{ log.actorEmail }}</td>
+                <td class="admin-shell-cell-action admin-shell-cell-truncate" :title="log.action">{{ actionLabel(log) }}</td>
+                <td class="admin-shell-cell-muted admin-shell-cell-truncate admin-shell-cell-strong">{{ entityLabel(log) }}</td>
+                <td class="admin-shell-cell-muted admin-shell-cell-truncate" :title="detailsLabel(log)">{{ detailsLabel(log) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </AdminShellTablePanel>
+      </AdminShellFrame>
 
-    <section class="aloo-admin-toolbar md:!grid-cols-2 xl:!grid-cols-5">
-      <label class="aloo-field">
-        <span class="aloo-label">{{ t('admin.auditLogs.filters.actor') }}</span>
-        <input v-model="filters.actor" class="aloo-input" :placeholder="t('admin.auditLogs.filters.actorPlaceholder')" />
-      </label>
-      <label class="aloo-field">
-        <span class="aloo-label">{{ t('admin.auditLogs.filters.action') }}</span>
-        <input v-model="filters.action" class="aloo-input" :placeholder="t('admin.auditLogs.filters.actionPlaceholder')" />
-      </label>
-      <label class="aloo-field">
-        <span class="aloo-label">{{ t('admin.auditLogs.filters.entityType') }}</span>
-        <input v-model="filters.entityType" class="aloo-input" :placeholder="t('admin.auditLogs.filters.entityPlaceholder')" />
-      </label>
-      <label class="aloo-field">
-        <span class="aloo-label">{{ t('admin.auditLogs.filters.from') }}</span>
-        <input v-model="filters.from" type="date" class="aloo-input" />
-      </label>
-      <label class="aloo-field">
-        <span class="aloo-label">{{ t('admin.auditLogs.filters.to') }}</span>
-        <input v-model="filters.to" type="date" class="aloo-input" />
-      </label>
-      <div class="flex flex-wrap gap-2 md:col-span-2 xl:col-span-5">
-        <button type="button" class="aloo-btn aloo-btn--primary" @click="applyFilters">
-          {{ t('admin.auditLogs.filters.apply') }}
-        </button>
-        <button type="button" class="aloo-btn aloo-btn--secondary" @click="resetFilters">
-          {{ t('admin.auditLogs.filters.reset') }}
-        </button>
-      </div>
-    </section>
+      <AdminShellFrame v-if="!isLoading && logs.length" variant="body" visibility="mobile">
+        <AdminShellTablePanel
+          :title="t('admin.auditLogs.listTitle')"
+          :count-text="listCountText"
+        >
+          <template #below>
+            <div class="admin-shell-frame__inner--pad admin-shell-frame__inner--stack">
+              <article
+                v-for="log in logs"
+                :key="log.id"
+                class="admin-shell-mobile-card admin-audit-log-row"
+                tabindex="0"
+                @click="openDetail(log)"
+                @keyup.enter="openDetail(log)"
+              >
+                <p class="admin-shell-mobile-card__time">{{ formatDate(log.createdAt) }}</p>
+                <p class="admin-shell-mobile-card__action">{{ actionLabel(log) }}</p>
+                <p class="admin-shell-mobile-card__actor">{{ log.actorEmail }}</p>
+                <p class="admin-shell-mobile-card__entity">{{ entityLabel(log) }}</p>
+                <p class="admin-shell-mobile-card__details">{{ detailsLabel(log) }}</p>
+              </article>
+            </div>
+          </template>
+        </AdminShellTablePanel>
+      </AdminShellFrame>
 
-    <p v-if="errorMessage" class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-bold text-red-700">{{ errorMessage }}</p>
-
-    <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div v-if="isLoading" class="grid gap-3 p-5">
-        <div v-for="i in 5" :key="i" class="h-14 animate-pulse rounded-2xl bg-slate-100" />
-      </div>
-      <EmptyState
-        v-else-if="!logs.length"
-        :title="t('admin.auditLogs.emptyTitle')"
-        :description="t('admin.auditLogs.emptyDescription')"
-      />
-      <div v-else class="overflow-x-auto">
-        <table class="min-w-[980px] w-full text-left text-sm">
-          <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-            <tr>
-              <th class="px-5 py-4">{{ t('admin.auditLogs.columns.time') }}</th>
-              <th class="px-5 py-4">{{ t('admin.auditLogs.columns.actor') }}</th>
-              <th class="px-5 py-4">{{ t('admin.auditLogs.columns.action') }}</th>
-              <th class="px-5 py-4">{{ t('admin.auditLogs.columns.entity') }}</th>
-              <th class="px-5 py-4">{{ t('admin.auditLogs.columns.details') }}</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-for="log in logs" :key="log.id">
-              <td class="whitespace-nowrap px-5 py-4 text-slate-600">{{ formatDate(log.createdAt) }}</td>
-              <td class="px-5 py-4 font-semibold text-slate-700">{{ log.actorEmail }}</td>
-              <td class="px-5 py-4 font-black text-avocado-900">{{ log.action }}</td>
-              <td class="px-5 py-4 text-slate-600">{{ log.entityType }}<span v-if="log.entityId"> #{{ log.entityId }}</span></td>
-              <td class="max-w-md truncate px-5 py-4 text-slate-600" :title="log.details">{{ log.details || '-' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div v-if="!isLoading && logs.length" class="px-5 pb-5 pt-2">
+      <AdminShellFrame v-if="!isLoading && totalElements" variant="footer">
         <Pagination
           :page="currentPage"
           :total-pages="totalPages"
           :visible-count="logs.length"
           :total-count="totalElements"
           :label="t('admin.auditLogs.paginationLabel')"
-          @prev="currentPage = Math.max(1, currentPage - 1); loadLogs()"
-          @next="currentPage = Math.min(totalPages, currentPage + 1); loadLogs()"
+          @prev="goPrevPage"
+          @next="goNextPage"
         />
+      </AdminShellFrame>
+    </AdminNestedShell>
+
+    <BaseModal
+      :show="showDetailModal"
+      :title="detailModalTitle"
+      max-width="max-w-xl"
+      @close="closeDetail"
+    >
+      <div v-if="selectedLog" class="space-y-5">
+        <section class="overflow-hidden rounded-2xl border border-avocado-100 bg-gradient-to-br from-avocado-50 via-white to-cream-50 p-5 shadow-sm">
+          <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-avocado-700">
+            {{ t('admin.auditLogs.detailModal.summaryEyebrow') }}
+          </p>
+          <p class="mt-2 text-xl font-bold tracking-tight text-avocado-950">
+            {{ entityLabel(selectedLog) }}
+          </p>
+          <div class="mt-3 inline-flex items-center gap-2 rounded-full border border-avocado-100 bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600">
+            <Clock class="h-3.5 w-3.5 text-avocado-600" />
+            {{ formatDate(selectedLog.createdAt) }}
+          </div>
+        </section>
+
+        <div class="grid gap-3 sm:grid-cols-2">
+          <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="mb-2 flex items-center gap-2 text-avocado-700">
+              <User class="h-4 w-4" />
+              <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                {{ t('admin.auditLogs.columns.actor') }}
+              </p>
+            </div>
+            <p class="break-all text-sm font-semibold text-slate-800">{{ selectedLog.actorEmail }}</p>
+          </article>
+
+          <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="mb-2 flex items-center gap-2 text-avocado-700">
+              <Target class="h-4 w-4" />
+              <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                {{ t('admin.auditLogs.columns.action') }}
+              </p>
+            </div>
+            <p class="text-sm font-semibold text-slate-800">{{ actionLabel(selectedLog) }}</p>
+          </article>
+        </div>
+
+        <section class="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 shadow-sm">
+          <div class="mb-3 flex items-center gap-2 text-avocado-700">
+            <FileText class="h-4 w-4" />
+            <h3 class="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
+              {{ t('admin.auditLogs.columns.details') }}
+            </h3>
+          </div>
+          <p class="text-sm leading-7 text-slate-700">
+            {{ detailsLabel(selectedLog) }}
+          </p>
+        </section>
       </div>
-    </section>
-  </div>
+
+      <template #footer>
+        <div class="flex justify-end">
+          <button type="button" class="admin-list-btn admin-list-btn--primary" @click="closeDetail">
+            {{ t('admin.auditLogs.detailModal.close') }}
+          </button>
+        </div>
+      </template>
+    </BaseModal>
+  </AdminListPage>
 </template>

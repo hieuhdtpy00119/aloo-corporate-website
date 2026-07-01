@@ -1,20 +1,38 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { KeyRound, Plus, Search, ShieldCheck, UserRound } from 'lucide-vue-next'
+import { Camera, KeyRound, MoreVertical, Plus, UserRound, UserCog } from 'lucide-vue-next'
+import AccountsRowActions from '../../components/admin/accounts/AccountsRowActions.vue'
 import BaseModal from '../../components/admin/BaseModal.vue'
+import AdminListPage from '../../components/admin/AdminListPage.vue'
+import AdminNestedShell from '../../components/admin/shell/AdminNestedShell.vue'
+import AdminShellFrame from '../../components/admin/shell/AdminShellFrame.vue'
+import AdminShellTablePanel from '../../components/admin/shell/AdminShellTablePanel.vue'
+import AdminShellTabs from '../../components/admin/shell/AdminShellTabs.vue'
 import AdminPageHeader from '../../components/admin/AdminPageHeader.vue'
 import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
-import { accountService } from '../../services/cmsService'
+import Pagination from '../../components/admin/Pagination.vue'
+import SearchFilterBar from '../../components/admin/SearchFilterBar.vue'
+import {
+  accountService,
+  normalizeStorageAssetUrl,
+  resolveBackendAssetUrl,
+  uploadService,
+} from '../../services/cmsService'
 import { useToastStore } from '../../stores/toastStore'
 import { MIN_PASSWORD_LENGTH, getNewPasswordErrorKey } from '../../utils/passwordPolicy'
+import { isGoogleManagedAccount, isCurrentSessionUser } from '../../utils/accountAuth'
 
 const toast = useToastStore()
 const { t } = useI18n()
 const activeTab = ref('admins')
 const searchQuery = ref('')
-const statusFilter = ref('ALL')
+const statusFilter = ref(t('admin.accounts.allStatuses'))
+const openMenuUserId = ref(null)
+const brokenAvatars = ref({})
+const currentPage = ref(1)
+const pageSize = 8
 const isLoading = ref(false)
 const errorMessage = ref('')
 const adminUsers = ref([])
@@ -24,10 +42,15 @@ const showPasswordModal = ref(false)
 const editingUser = ref(null)
 const pendingDelete = ref(null)
 const pendingStatusChange = ref(null)
+const pendingPromote = ref(null)
+const pendingDemote = ref(null)
+const promoteProfile = ref('FULL')
+const adminEmailWhitelist = ref({ enabled: false, emails: [] })
+const isUploadingAvatar = ref(false)
 
 const accountTypes = [
-  { key: 'admins', labelKey: 'admin.accounts.tabAdmins', icon: ShieldCheck },
-  { key: 'customers', labelKey: 'admin.accounts.tabCustomers', icon: UserRound },
+  { key: 'admins', labelKey: 'admin.accounts.tabAdmins' },
+  { key: 'customers', labelKey: 'admin.accounts.tabCustomers' },
 ]
 const adminProfileOptions = ['FULL', 'CONTENT', 'STORES', 'CRM', 'SYSTEM']
 const statusOptions = ['ACTIVE', 'INACTIVE', 'LOCKED']
@@ -36,6 +59,19 @@ const statusLabels = computed(() => ({
   INACTIVE: t('admin.accounts.status.INACTIVE'),
   LOCKED: t('admin.accounts.status.LOCKED'),
 }))
+const statusShortLabels = computed(() => ({
+  ACTIVE: t('admin.accounts.statusShort.ACTIVE'),
+  INACTIVE: t('admin.accounts.statusShort.INACTIVE'),
+  LOCKED: t('admin.accounts.statusShort.LOCKED'),
+}))
+const statusFilters = computed(() => [
+  t('admin.accounts.allStatuses'),
+  ...statusOptions.map((status) => statusLabels.value[status]),
+])
+const resolveStatusFilter = (label) => {
+  if (!label || label === t('admin.accounts.allStatuses')) return 'ALL'
+  return statusOptions.find((status) => statusLabels.value[status] === label) || 'ALL'
+}
 
 const form = reactive({
   email: '',
@@ -48,39 +84,120 @@ const form = reactive({
 })
 const passwordForm = reactive({ password: '' })
 
-const currentUsers = computed(() => activeTab.value === 'admins' ? adminUsers.value : customerUsers.value)
+const currentUsers = computed(() => (activeTab.value === 'admins' ? adminUsers.value : customerUsers.value))
 const filteredUsers = computed(() => {
   const keyword = searchQuery.value.trim().toLowerCase()
   return currentUsers.value.filter((user) => {
-    const matchesKeyword = !keyword || [user.email, user.fullName, user.phone, user.role]
+    const matchesKeyword = !keyword || [user.email, user.fullName, user.phone, roleLabel(user)]
       .filter(Boolean)
       .some((value) => String(value).toLowerCase().includes(keyword))
-    const matchesStatus = statusFilter.value === 'ALL' || user.status === statusFilter.value
+    const matchesStatus = resolveStatusFilter(statusFilter.value) === 'ALL'
+      || user.status === resolveStatusFilter(statusFilter.value)
     return matchesKeyword && matchesStatus
   })
 })
-const activeTitle = computed(() => (
-  activeTab.value === 'admins' ? t('admin.accounts.adminType') : t('admin.accounts.customerType')
-))
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredUsers.value.length / pageSize)))
+const paginatedUsers = computed(() =>
+  filteredUsers.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize),
+)
+const accountTabItems = computed(() =>
+  accountTypes.map((type) => ({
+    key: type.key,
+    label: tabLabel(type),
+  })),
+)
+const avatarPreviewUrl = computed(() => resolveBackendAssetUrl(form.avatarUrl || ''))
 
-const statusClass = (status) => ({
-  'border-green-200 bg-green-50 text-green-700': status === 'ACTIVE',
-  'border-slate-200 bg-slate-50 text-slate-600': status === 'INACTIVE',
-  'border-red-200 bg-red-50 text-red-700': status === 'LOCKED',
+const statusTextClass = (status) => ({
+  'accounts-status--inactive': status === 'INACTIVE',
+  'accounts-status--locked': status === 'LOCKED',
 })
 
-const formatDate = (value) => value ? String(value).replace('T', ' ').slice(0, 16) : '-'
+const menuLabels = computed(() => ({
+  actions: t('admin.accounts.columns.actions'),
+  promote: t('admin.accounts.actions.promote'),
+  demote: t('admin.accounts.actions.demote'),
+  password: t('admin.accounts.actions.password'),
+  edit: t('admin.accounts.actions.edit'),
+  delete: t('admin.accounts.actions.delete'),
+  lockAccount: t('admin.accounts.actions.lockAccount'),
+  activateAccount: t('admin.accounts.actions.activateAccount'),
+}))
+
+const formatDate = (value) => (value ? String(value).replace('T', ' ').slice(0, 16) : '-')
+
+const roleLabel = (user) => {
+  if (activeTab.value === 'admins') {
+    return t(`admin.roles.${user.adminProfile || 'FULL'}`)
+  }
+  return t('admin.accounts.customerRoleLabel')
+}
+
+const isGoogleAccount = isGoogleManagedAccount
+const isSessionUser = isCurrentSessionUser
+
+const editFormAccess = computed(() => {
+  const isCreate = !editingUser.value
+  const user = editingUser.value
+  const self = Boolean(user && isSessionUser(user))
+  const google = Boolean(user && isGoogleAccount(user))
+  const isAdminTab = activeTab.value === 'admins'
+
+  return {
+    fullName: true,
+    phone: true,
+    avatar: true,
+    email: isCreate || (!self && !google),
+    adminProfile: isAdminTab && (isCreate || !self),
+    status: isCreate || !self,
+    password: isCreate,
+  }
+})
+
+const fieldLockHint = (field) => {
+  const user = editingUser.value
+  if (!user) return ''
+  if (field === 'email' && isGoogleAccount(user)) return t('admin.accounts.modals.lockHints.googleEmail')
+  if (field === 'email' && isSessionUser(user)) return t('admin.accounts.modals.lockHints.selfEmail')
+  if (field === 'status' && isSessionUser(user)) return t('admin.accounts.modals.lockHints.selfStatus')
+  if (field === 'adminProfile' && isSessionUser(user)) return t('admin.accounts.modals.lockHints.selfProfile')
+  return ''
+}
+
+const lockedFieldClass = (locked) => (
+  locked
+    ? 'accounts-field-input accounts-field-input--locked'
+    : 'accounts-field-input'
+)
+
+const avatarUrlFor = (user) => resolveBackendAssetUrl(user.avatarUrl || '')
+
+const showAvatar = (user) => Boolean(user.avatarUrl) && !brokenAvatars.value[user.id]
+
+const onAvatarError = (userId) => {
+  brokenAvatars.value = { ...brokenAvatars.value, [userId]: true }
+}
+
+watch([activeTab, searchQuery, statusFilter], () => {
+  currentPage.value = 1
+})
+
+watch(totalPages, (pages) => {
+  if (currentPage.value > pages) currentPage.value = pages
+})
 
 const loadAccounts = async () => {
   isLoading.value = true
   errorMessage.value = ''
   try {
-    const [admins, customers] = await Promise.all([
+    const [admins, customers, whitelist] = await Promise.all([
       accountService.listAdmins(),
       accountService.listCustomers(),
+      accountService.getAdminEmailWhitelist(),
     ])
     adminUsers.value = Array.isArray(admins.data) ? admins.data : []
     customerUsers.value = Array.isArray(customers.data) ? customers.data : []
+    adminEmailWhitelist.value = whitelist.data || { enabled: false, emails: [] }
   } catch (error) {
     errorMessage.value = error.response?.data?.message || t('admin.accounts.loadError')
   } finally {
@@ -125,15 +242,47 @@ const closeUserModal = () => {
   resetForm()
 }
 
-const buildPayload = () => ({
-  email: form.email.trim(),
-  fullName: form.fullName.trim(),
-  phone: form.phone.trim(),
-  avatarUrl: form.avatarUrl.trim(),
-  status: form.status,
-  adminProfile: activeTab.value === 'admins' ? form.adminProfile : null,
-  password: form.password || null,
-})
+const handleAvatarUpload = async (event) => {
+  const file = event.target.files?.[0]
+  event.target.value = ''
+  if (!file) return
+
+  if (!file.type.startsWith('image/')) {
+    toast.error(t('admin.profile.toasts.invalidImageType'))
+    return
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    toast.error(t('admin.profile.toasts.imageTooLarge'))
+    return
+  }
+
+  isUploadingAvatar.value = true
+  try {
+    const { data } = await uploadService.image(file)
+    form.avatarUrl = normalizeStorageAssetUrl(data.url)
+  } catch (error) {
+    toast.error(error.response?.data?.message || t('admin.profile.toasts.avatarUploadError'))
+  } finally {
+    isUploadingAvatar.value = false
+  }
+}
+
+const buildPayload = () => {
+  const user = editingUser.value
+  const access = editFormAccess.value
+
+  return {
+    email: access.email ? form.email.trim() : (user?.email || form.email.trim()),
+    fullName: form.fullName.trim(),
+    phone: form.phone.trim(),
+    avatarUrl: normalizeStorageAssetUrl(form.avatarUrl.trim()),
+    status: access.status ? form.status : (user?.status || form.status),
+    adminProfile: activeTab.value === 'admins'
+      ? (access.adminProfile ? form.adminProfile : (user?.adminProfile || form.adminProfile))
+      : null,
+    password: form.password || null,
+  }
+}
 
 const saveUser = async () => {
   if (!editingUser.value) {
@@ -142,6 +291,11 @@ const saveUser = async () => {
       toast.error(t(errorKey))
       return
     }
+  }
+
+  if (activeTab.value === 'admins' && editFormAccess.value.email && !isEmailWhitelisted(form.email)) {
+    toast.error(t('admin.accounts.whitelistBlocked'))
+    return
   }
 
   try {
@@ -176,9 +330,9 @@ const updateStatus = async (user, status) => {
 }
 
 const requestStatusChange = (user, event) => {
-  const nextStatus = event.target.value
+  const nextStatus = event?.target?.value ?? event
   if (nextStatus === user.status) return
-  event.target.value = user.status
+  if (event?.target) event.target.value = user.status
   pendingStatusChange.value = { user, status: nextStatus }
 }
 
@@ -190,6 +344,10 @@ const confirmStatusChange = async () => {
 }
 
 const openPasswordModal = (user) => {
+  if (isGoogleAccount(user)) {
+    toast.error(t('admin.accounts.googlePasswordBlocked'))
+    return
+  }
   editingUser.value = user
   passwordForm.password = ''
   showPasswordModal.value = true
@@ -231,148 +389,415 @@ const confirmDelete = async () => {
   }
 }
 
+const isEmailWhitelisted = (email) => {
+  if (!adminEmailWhitelist.value.enabled) return true
+  const normalized = String(email || '').trim().toLowerCase()
+  return adminEmailWhitelist.value.emails.includes(normalized)
+}
+
+const openPromoteModal = (user) => {
+  if (!isEmailWhitelisted(user.email)) {
+    toast.error(t('admin.accounts.whitelistBlocked'))
+    return
+  }
+  pendingPromote.value = user
+  promoteProfile.value = 'FULL'
+}
+
+const confirmPromote = async () => {
+  if (!pendingPromote.value) return
+  try {
+    await accountService.promoteCustomer(pendingPromote.value.id, promoteProfile.value)
+    toast.success(t('admin.accounts.promoteSuccess'))
+    pendingPromote.value = null
+    await loadAccounts()
+  } catch (error) {
+    toast.error(error.response?.data?.message || t('admin.accounts.promoteError'))
+  }
+}
+
+const openDemoteModal = (user) => {
+  if (isSessionUser(user)) {
+    toast.error(t('admin.accounts.selfDemoteBlocked'))
+    return
+  }
+  pendingDemote.value = user
+}
+
+const confirmDemote = async () => {
+  if (!pendingDemote.value) return
+  try {
+    await accountService.demoteAdmin(pendingDemote.value.id)
+    toast.success(t('admin.accounts.demoteSuccess'))
+    pendingDemote.value = null
+    await loadAccounts()
+  } catch (error) {
+    toast.error(error.response?.data?.message || t('admin.accounts.demoteError'))
+  }
+}
+
+const tabLabel = (type) => {
+  const count = type.key === 'admins' ? adminUsers.value.length : customerUsers.value.length
+  return `${t(type.labelKey)} (${count})`
+}
+
+const closeActionMenu = () => {
+  openMenuUserId.value = null
+}
+
+const toggleActionMenu = (userId) => {
+  openMenuUserId.value = openMenuUserId.value === userId ? null : userId
+}
+
+const runMenuAction = (action, user, payload) => {
+  closeActionMenu()
+  if (action === 'delete' && isSessionUser(user)) {
+    toast.error(t('admin.accounts.selfDeleteBlocked'))
+    return
+  }
+  if (action === 'status' && isSessionUser(user)) {
+    toast.error(t('admin.accounts.selfStatusBlocked'))
+    return
+  }
+  if (action === 'promote') openPromoteModal(user)
+  else if (action === 'demote') openDemoteModal(user)
+  else if (action === 'password') openPasswordModal(user)
+  else if (action === 'edit') openEditModal(user)
+  else if (action === 'delete') pendingDelete.value = user
+  else if (action === 'status') requestStatusChange(user, payload)
+}
+
+const onRowAction = (user, action, payload) => {
+  runMenuAction(action, user, payload)
+}
+
 onMounted(loadAccounts)
 </script>
 
 <template>
-  <div>
-    <AdminPageHeader
-      :eyebrow="t('admin.accounts.systemEyebrow')"
-      :title="t('admin.accounts.title')"
-      :description="t('admin.accounts.description')"
-    >
-      <template #actions>
-        <button class="aloo-btn aloo-btn--primary inline-flex items-center gap-2" @click="openCreateModal">
-          <Plus class="h-4 w-4" />
-          {{ t('admin.accounts.addAccount', { type: activeTitle }) }}
-        </button>
-      </template>
-    </AdminPageHeader>
+  <AdminListPage @click="closeActionMenu">
+    <AdminNestedShell>
+      <AdminShellFrame variant="header" inner="header">
+        <AdminPageHeader :title="t('admin.accounts.title')">
+          <template #actions>
+            <button type="button" class="admin-list-btn admin-list-btn--primary" @click="openCreateModal">
+              <Plus class="h-4 w-4" />
+              {{ t('admin.accounts.addNew') }}
+            </button>
+          </template>
+        </AdminPageHeader>
+        <template #after>
+          <AdminShellTabs
+            v-model="activeTab"
+            :items="accountTabItems"
+            :aria-label="t('admin.accounts.title')"
+          />
+        </template>
+      </AdminShellFrame>
 
-    <section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <div class="inline-flex rounded-2xl bg-slate-100 p-1">
-          <button
-            v-for="type in accountTypes"
-            :key="type.key"
-            class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-black transition"
-            :class="activeTab === type.key ? 'bg-white text-avocado-900 shadow-sm' : 'text-slate-500 hover:text-avocado-800'"
-            @click="activeTab = type.key"
-          >
-            <component :is="type.icon" class="h-4 w-4" />
-            {{ t(type.labelKey) }}
-          </button>
-        </div>
-        <div class="grid gap-3 md:grid-cols-[minmax(260px,1fr)_220px] xl:min-w-[680px]">
-          <label class="relative block">
-            <Search class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input v-model="searchQuery" class="h-12 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-semibold outline-none focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100" :placeholder="t('admin.accounts.searchPlaceholder')" />
-          </label>
-          <select v-model="statusFilter" class="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold outline-none focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100">
-            <option value="ALL">{{ t('admin.accounts.allStatuses') }}</option>
-            <option v-for="status in statusOptions" :key="status" :value="status">{{ statusLabels[status] }}</option>
-          </select>
-        </div>
-      </div>
-    </section>
+      <AdminShellFrame variant="toolbar" inner="toolbar">
+        <SearchFilterBar
+          embedded
+          v-model:search="searchQuery"
+          v-model:status="statusFilter"
+          :search-placeholder="t('admin.accounts.searchPlaceholder')"
+          :status-label="t('admin.accounts.columns.status')"
+          :status-options="statusFilters"
+        />
+      </AdminShellFrame>
 
-    <p v-if="errorMessage" class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-bold text-red-700">{{ errorMessage }}</p>
+      <AdminShellFrame
+        v-if="errorMessage"
+        as="p"
+        variant="alert"
+        class="admin-list-alert"
+      >
+        {{ errorMessage }}
+      </AdminShellFrame>
 
-    <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div v-if="isLoading" class="grid gap-3 p-5">
-        <div v-for="i in 5" :key="i" class="h-16 animate-pulse rounded-2xl bg-slate-100" />
-      </div>
-      <EmptyState
-        v-else-if="!filteredUsers.length"
-        :title="t('admin.accounts.emptyTitle')"
-        :description="t('admin.accounts.emptyDescription')"
-      />
-      <div v-else class="overflow-x-auto">
-        <table class="min-w-[1100px] w-full text-left text-sm">
-          <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-            <tr>
-              <th class="px-5 py-4">{{ t('admin.accounts.columns.account') }}</th>
-              <th class="px-5 py-4">{{ t('admin.accounts.columns.phone') }}</th>
-              <th class="px-5 py-4">{{ t('admin.accounts.columns.role') }}</th>
-              <th class="px-5 py-4">{{ t('admin.accounts.columns.status') }}</th>
-              <th class="px-5 py-4">{{ t('admin.accounts.columns.createdAt') }}</th>
-              <th class="px-5 py-4 text-right">{{ t('admin.accounts.columns.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-for="user in filteredUsers" :key="user.id" class="align-middle">
-              <td class="px-5 py-4">
-                <div class="flex min-w-0 items-center gap-3">
-                  <img v-if="user.avatarUrl" :src="user.avatarUrl" :alt="user.fullName" class="h-11 w-11 rounded-full object-cover" />
-                  <div v-else class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-avocado-50 text-sm font-black text-avocado-800">
+      <AdminShellFrame v-if="isLoading" variant="body" inner="pad">
+        <div v-for="i in 5" :key="i" class="admin-shell-skeleton" />
+      </AdminShellFrame>
+
+      <AdminShellFrame v-else-if="!filteredUsers.length" variant="body" inner="pad">
+        <EmptyState
+          :title="t('admin.accounts.emptyTitle')"
+          :description="t('admin.accounts.emptyDescription')"
+        />
+      </AdminShellFrame>
+
+      <AdminShellFrame v-else variant="body" visibility="desktop">
+        <AdminShellTablePanel
+          :title="t('admin.accounts.listTitle')"
+          :count-text="t('admin.shared.totalCount', { count: filteredUsers.length })"
+        >
+          <table class="admin-shell-table accounts-table">
+            <colgroup>
+              <col class="accounts-col-name" />
+              <col class="accounts-col-email" />
+              <col class="accounts-col-status" />
+              <col class="accounts-col-login" />
+              <col class="accounts-col-actions" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="accounts-col-name">
+                  <span class="admin-shell-th-name">
+                    <span class="admin-shell-th-name__spacer" aria-hidden="true" />
+                    <span>{{ t('admin.accounts.columns.accountName') }}</span>
+                  </span>
+                </th>
+                <th class="accounts-col-email">{{ t('admin.accounts.columns.email') }}</th>
+                <th class="accounts-col-status">{{ t('admin.accounts.columns.status') }}</th>
+                <th class="accounts-col-login">{{ t('admin.accounts.columns.lastLoginAt') }}</th>
+                <th class="accounts-col-actions">{{ t('admin.accounts.columns.actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in paginatedUsers" :key="user.id">
+                <td class="accounts-col-name">
+                  <div class="accounts-cell-name">
+                    <img
+                      v-if="showAvatar(user)"
+                      :src="avatarUrlFor(user)"
+                      alt=""
+                      class="accounts-avatar"
+                      @error="onAvatarError(user.id)"
+                    />
+                    <div v-else class="accounts-avatar-fallback">
+                      {{ (user.fullName || user.email || 'A').charAt(0).toUpperCase() }}
+                    </div>
+                    <p class="accounts-name">
+                      {{ user.fullName }}
+                      <span v-if="isGoogleAccount(user)" class="accounts-badge">{{ t('admin.accounts.googleAccountBadge') }}</span>
+                      <span v-if="isSessionUser(user)" class="accounts-badge accounts-badge--session">{{ t('admin.accounts.sessionAccountBadge') }}</span>
+                    </p>
+                  </div>
+                </td>
+                <td class="accounts-col-email accounts-email">{{ user.email }}</td>
+                <td class="accounts-col-status">
+                  <span class="accounts-status" :class="statusTextClass(user.status)">
+                    {{ statusShortLabels[user.status] }}
+                  </span>
+                </td>
+                <td class="accounts-col-login accounts-login">{{ formatDate(user.lastLoginAt) }}</td>
+                <td class="accounts-col-actions">
+                  <div class="accounts-row-actions">
+                    <button
+                      v-if="activeTab === 'customers'"
+                      type="button"
+                      class="accounts-promote-btn"
+                      @click="openPromoteModal(user)"
+                    >
+                      {{ menuLabels.promote }}
+                    </button>
+                    <button
+                      v-if="activeTab === 'admins' && !isSessionUser(user)"
+                      type="button"
+                      class="accounts-demote-btn"
+                      @click="openDemoteModal(user)"
+                    >
+                      {{ menuLabels.demote }}
+                    </button>
+                    <AccountsRowActions
+                      :user="user"
+                      layout="desktop"
+                      :open="openMenuUserId === user.id"
+                      :show-promote="false"
+                      :show-demote="activeTab === 'admins' && !isSessionUser(user)"
+                      :actions-label="menuLabels.actions"
+                      :promote-label="menuLabels.promote"
+                      :demote-label="menuLabels.demote"
+                      :password-label="menuLabels.password"
+                      :edit-label="menuLabels.edit"
+                      :delete-label="menuLabels.delete"
+                      :lock-account-label="menuLabels.lockAccount"
+                      :activate-account-label="menuLabels.activateAccount"
+                      :show-password="!isGoogleAccount(user)"
+                      :show-delete="!isSessionUser(user)"
+                      :show-status-toggle="!isSessionUser(user)"
+                      @toggle="toggleActionMenu(user.id)"
+                      @action="(action, payload) => onRowAction(user, action, payload)"
+                    >
+                      <template #icon>
+                        <MoreVertical class="h-4 w-4" />
+                      </template>
+                    </AccountsRowActions>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </AdminShellTablePanel>
+      </AdminShellFrame>
+
+      <AdminShellFrame v-if="!isLoading && filteredUsers.length" variant="body" visibility="mobile">
+        <AdminShellTablePanel
+          :title="t('admin.accounts.listTitle')"
+          :count-text="t('admin.shared.totalCount', { count: filteredUsers.length })"
+        >
+          <template #below>
+            <div class="admin-shell-frame__inner--pad admin-shell-frame__inner--stack admin-shell-mobile-list">
+              <article v-for="user in paginatedUsers" :key="user.id" class="accounts-mobile-card">
+                <div class="accounts-mobile-row">
+                  <img
+                    v-if="showAvatar(user)"
+                    :src="avatarUrlFor(user)"
+                    alt=""
+                    class="accounts-avatar"
+                    @error="onAvatarError(user.id)"
+                  />
+                  <div v-else class="accounts-avatar-fallback">
                     {{ (user.fullName || user.email || 'A').charAt(0).toUpperCase() }}
                   </div>
-                  <div class="min-w-0">
-                    <p class="truncate font-black text-avocado-950">{{ user.fullName }}</p>
-                    <p class="truncate text-xs font-semibold text-slate-500">{{ user.email }}</p>
+                  <div class="accounts-mobile-info">
+                    <p class="accounts-name">{{ user.fullName }}</p>
+                    <p class="accounts-email">{{ user.email }}</p>
+                    <div class="accounts-mobile-meta">
+                      <span class="accounts-status" :class="statusTextClass(user.status)">
+                        {{ statusShortLabels[user.status] }}
+                      </span>
+                      <span v-if="isGoogleAccount(user)" class="accounts-badge">{{ t('admin.accounts.googleAccountBadge') }}</span>
+                      <span v-if="isSessionUser(user)" class="accounts-badge accounts-badge--session">{{ t('admin.accounts.sessionAccountBadge') }}</span>
+                    </div>
+                    <p class="accounts-mobile-login">
+                      {{ t('admin.accounts.columns.lastLoginAt') }}: {{ formatDate(user.lastLoginAt) }}
+                    </p>
+                    <div v-if="activeTab === 'customers'" class="accounts-mobile-promote">
+                      <button type="button" class="accounts-promote-btn accounts-promote-btn--full" @click="openPromoteModal(user)">
+                        {{ menuLabels.promote }}
+                      </button>
+                    </div>
+                    <div v-if="activeTab === 'admins' && !isSessionUser(user)" class="accounts-mobile-promote">
+                      <button type="button" class="accounts-demote-btn accounts-demote-btn--full" @click="openDemoteModal(user)">
+                        {{ menuLabels.demote }}
+                      </button>
+                    </div>
                   </div>
+                  <AccountsRowActions
+                    :user="user"
+                    layout="mobile"
+                    :open="openMenuUserId === user.id"
+                    :show-promote="false"
+                    :show-demote="activeTab === 'admins' && !isSessionUser(user)"
+                    :actions-label="menuLabels.actions"
+                    :promote-label="menuLabels.promote"
+                    :demote-label="menuLabels.demote"
+                    :password-label="menuLabels.password"
+                    :edit-label="menuLabels.edit"
+                    :delete-label="menuLabels.delete"
+                    :lock-account-label="menuLabels.lockAccount"
+                    :activate-account-label="menuLabels.activateAccount"
+                    :show-password="!isGoogleAccount(user)"
+                    :show-delete="!isSessionUser(user)"
+                    :show-status-toggle="!isSessionUser(user)"
+                    @toggle="toggleActionMenu(user.id)"
+                    @action="(action, payload) => onRowAction(user, action, payload)"
+                  >
+                    <template #icon>
+                      <MoreVertical class="h-4 w-4" />
+                    </template>
+                  </AccountsRowActions>
                 </div>
-              </td>
-              <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">{{ user.phone || '-' }}</td>
-              <td class="whitespace-nowrap px-5 py-4 font-black text-slate-700">
-                <span v-if="activeTab === 'admins'">{{ t(`admin.roles.${user.adminProfile || 'FULL'}`) }}</span>
-                <span v-else>{{ user.role }}</span>
-              </td>
-              <td class="whitespace-nowrap px-5 py-4">
-                <select class="rounded-full border px-3 py-2 text-xs font-black outline-none" :class="statusClass(user.status)" :value="user.status" @change="requestStatusChange(user, $event)">
-                  <option v-for="status in statusOptions" :key="status" :value="status">{{ statusLabels[status] }}</option>
-                </select>
-              </td>
-              <td class="whitespace-nowrap px-5 py-4 text-slate-600">{{ formatDate(user.createdAt) }}</td>
-              <td class="px-5 py-4">
-                <div class="flex justify-end gap-2">
-                  <button class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50" @click="openPasswordModal(user)">
-                    {{ t('admin.accounts.actions.password') }}
-                  </button>
-                  <button class="rounded-xl border border-avocado-200 px-3 py-2 text-xs font-bold text-avocado-800 hover:bg-avocado-50" @click="openEditModal(user)">
-                    {{ t('admin.accounts.actions.edit') }}
-                  </button>
-                  <button class="rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50" @click="pendingDelete = user">
-                    {{ t('admin.accounts.actions.delete') }}
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+              </article>
+            </div>
+          </template>
+        </AdminShellTablePanel>
+      </AdminShellFrame>
+
+      <AdminShellFrame v-if="filteredUsers.length" variant="footer">
+        <Pagination
+          :page="currentPage"
+          :total-pages="totalPages"
+          :visible-count="paginatedUsers.length"
+          :total-count="filteredUsers.length"
+          :label="t('admin.accounts.paginationLabel')"
+          @prev="currentPage--"
+          @next="currentPage++"
+        />
+      </AdminShellFrame>
+    </AdminNestedShell>
 
     <BaseModal :open="showUserModal" :title="editingUser ? t('admin.accounts.modals.editUser') : t('admin.accounts.modals.createUser')" @close="closeUserModal">
-      <form class="grid gap-4" @submit.prevent="saveUser">
-        <label class="grid gap-2 text-sm font-bold text-slate-700">{{ t('admin.accounts.modals.fullName') }}
-          <input v-model.trim="form.fullName" required class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100" />
+      <form class="accounts-user-form grid gap-4" @submit.prevent="saveUser">
+        <label class="accounts-field">
+          <span class="accounts-field__label">{{ t('admin.accounts.modals.fullName') }}</span>
+          <input
+            v-model.trim="form.fullName"
+            required
+            :class="lockedFieldClass(false)"
+          />
         </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700">{{ t('admin.accounts.modals.email') }}
-          <input v-model.trim="form.email" required type="email" class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100" />
+        <label class="accounts-field">
+          <span class="accounts-field__label">{{ t('admin.accounts.modals.email') }}</span>
+          <input
+            v-model.trim="form.email"
+            required
+            type="email"
+            :disabled="!editFormAccess.email"
+            :class="lockedFieldClass(!editFormAccess.email)"
+          />
+          <p v-if="!editFormAccess.email" class="accounts-field__hint">{{ fieldLockHint('email') }}</p>
         </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700">{{ t('admin.accounts.modals.phone') }}
-          <input v-model.trim="form.phone" class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100" />
+        <label class="accounts-field">
+          <span class="accounts-field__label">{{ t('admin.accounts.modals.phone') }}</span>
+          <input
+            v-model.trim="form.phone"
+            :class="lockedFieldClass(false)"
+          />
         </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700">{{ t('admin.accounts.modals.avatarUrl') }}
-          <input v-model.trim="form.avatarUrl" class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100" placeholder="https://..." />
-        </label>
-        <label v-if="activeTab === 'admins'" class="grid gap-2 text-sm font-bold text-slate-700">{{ t('admin.accounts.profileLabel') }}
-          <select v-model="form.adminProfile" class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100">
+        <div class="accounts-field">
+          <span class="accounts-field__label">{{ t('admin.accounts.modals.avatarUpload') }}</span>
+          <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
+            <div class="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-white">
+              <img v-if="avatarPreviewUrl" :src="avatarPreviewUrl" :alt="form.fullName || 'Avatar'" class="h-full w-full object-cover" />
+              <UserRound v-else class="h-7 w-7 text-avocado-700" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-semibold text-slate-500">{{ t('admin.accounts.modals.avatarUploadHint') }}</p>
+              <label class="mt-2 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-avocado-200 bg-white px-3 py-2 text-xs font-black text-avocado-800 hover:bg-avocado-50">
+                <Camera class="h-4 w-4" />
+                {{ isUploadingAvatar ? t('admin.profile.uploadingAvatar') : t('admin.profile.avatar.chooseLabel') }}
+                <input class="sr-only" type="file" accept="image/*" :disabled="isUploadingAvatar" @change="handleAvatarUpload" />
+              </label>
+            </div>
+          </div>
+        </div>
+        <label v-if="activeTab === 'admins'" class="accounts-field">
+          <span class="accounts-field__label">{{ t('admin.accounts.profileLabel') }}</span>
+          <select
+            v-model="form.adminProfile"
+            :disabled="!editFormAccess.adminProfile"
+            :class="lockedFieldClass(!editFormAccess.adminProfile)"
+          >
             <option v-for="profile in adminProfileOptions" :key="profile" :value="profile">{{ t(`admin.roles.${profile}`) }}</option>
           </select>
+          <p v-if="!editFormAccess.adminProfile" class="accounts-field__hint">{{ fieldLockHint('adminProfile') }}</p>
         </label>
-        <label class="grid gap-2 text-sm font-bold text-slate-700">{{ t('admin.accounts.modals.status') }}
-          <select v-model="form.status" class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100">
+        <label class="accounts-field">
+          <span class="accounts-field__label">{{ t('admin.accounts.modals.status') }}</span>
+          <select
+            v-model="form.status"
+            :disabled="!editFormAccess.status"
+            :class="lockedFieldClass(!editFormAccess.status)"
+          >
             <option v-for="status in statusOptions" :key="status" :value="status">{{ statusLabels[status] }}</option>
           </select>
+          <p v-if="!editFormAccess.status" class="accounts-field__hint">{{ fieldLockHint('status') }}</p>
         </label>
-        <label v-if="!editingUser" class="grid gap-2 text-sm font-bold text-slate-700">{{ t('admin.accounts.modals.password') }}
-          <input v-model="form.password" required :minlength="MIN_PASSWORD_LENGTH" type="password" class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100" />
+        <label v-if="editFormAccess.password" class="accounts-field">
+          <span class="accounts-field__label">{{ t('admin.accounts.modals.password') }}</span>
+          <input
+            v-model="form.password"
+            required
+            :minlength="MIN_PASSWORD_LENGTH"
+            type="password"
+            :class="lockedFieldClass(false)"
+          />
         </label>
         <div class="flex justify-end gap-3 pt-2">
           <button type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" @click="closeUserModal">{{ t('admin.accounts.actions.cancel') }}</button>
-          <button class="rounded-xl bg-avocado-800 px-4 py-2 text-sm font-black text-white">{{ t('admin.accounts.actions.save') }}</button>
+          <button class="rounded-xl bg-avocado-800 px-4 py-2 text-sm font-black text-white" :disabled="isUploadingAvatar">{{ t('admin.accounts.actions.save') }}</button>
         </div>
       </form>
     </BaseModal>
@@ -405,10 +830,64 @@ onMounted(loadAccounts)
     <ConfirmModal
       :open="Boolean(pendingDelete)"
       :title="t('admin.accounts.confirmDelete.title')"
-      :message="t('admin.accounts.confirmDelete.message')"
+      :message="pendingDelete ? t('admin.accounts.confirmDelete.message', { name: pendingDelete.fullName, email: pendingDelete.email }) : ''"
       :confirm-label="t('admin.accounts.confirmDelete.confirm')"
       @close="pendingDelete = null"
       @confirm="confirmDelete"
     />
-  </div>
+
+    <BaseModal
+      :open="Boolean(pendingPromote)"
+      :title="t('admin.accounts.promote.title')"
+      @close="pendingPromote = null"
+    >
+      <div class="grid gap-4">
+        <p class="text-sm leading-6 text-slate-600">
+          {{ t('admin.accounts.promote.message', { name: pendingPromote?.fullName, email: pendingPromote?.email }) }}
+        </p>
+        <p class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+          {{ t('admin.accounts.promote.reloginHint') }}
+        </p>
+        <label class="grid gap-2 text-sm font-bold text-slate-700">
+          {{ t('admin.accounts.profileLabel') }}
+          <select v-model="promoteProfile" class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100">
+            <option v-for="profile in adminProfileOptions" :key="profile" :value="profile">{{ t(`admin.roles.${profile}`) }}</option>
+          </select>
+        </label>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" @click="pendingPromote = null">
+            {{ t('admin.accounts.actions.cancel') }}
+          </button>
+          <button type="button" class="inline-flex items-center gap-2 rounded-xl bg-indigo-700 px-4 py-2 text-sm font-black text-white" @click="confirmPromote">
+            <UserCog class="h-4 w-4" />
+            {{ t('admin.accounts.promote.confirm') }}
+          </button>
+        </div>
+      </div>
+    </BaseModal>
+
+    <BaseModal
+      :open="Boolean(pendingDemote)"
+      :title="t('admin.accounts.demote.title')"
+      @close="pendingDemote = null"
+    >
+      <div class="grid gap-4">
+        <p class="text-sm leading-6 text-slate-600">
+          {{ t('admin.accounts.demote.message', { name: pendingDemote?.fullName, email: pendingDemote?.email }) }}
+        </p>
+        <p class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+          {{ t('admin.accounts.demote.reloginHint') }}
+        </p>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" @click="pendingDemote = null">
+            {{ t('admin.accounts.actions.cancel') }}
+          </button>
+          <button type="button" class="inline-flex items-center gap-2 rounded-xl bg-amber-700 px-4 py-2 text-sm font-black text-white" @click="confirmDemote">
+            <UserRound class="h-4 w-4" />
+            {{ t('admin.accounts.demote.confirm') }}
+          </button>
+        </div>
+      </div>
+    </BaseModal>
+  </AdminListPage>
 </template>

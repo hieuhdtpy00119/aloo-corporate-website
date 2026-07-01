@@ -8,6 +8,8 @@ import {
   MapPin,
   Package,
   Star,
+  MessageCircle,
+  MessagesSquare,
   Users,
   UserCog,
   ScrollText,
@@ -46,11 +48,15 @@ const navGroups = [
     items: [
       { labelKey: 'admin.nav.locations', path: adminPaths.stores.locations, icon: MapPin, scope: ADMIN_SCOPES.stores },
       { labelKey: 'admin.nav.feedbacks', path: adminPaths.crm.feedbacks, icon: Star, scope: ADMIN_SCOPES.crm },
+      { labelKey: 'admin.nav.productReviews', path: adminPaths.crm.productReviews, icon: MessageCircle, scope: ADMIN_SCOPES.crm },
     ],
   },
   {
     labelKey: 'admin.nav.groups.business',
-    items: [{ labelKey: 'admin.nav.registrations', path: adminPaths.crm.leads, icon: Users, scope: ADMIN_SCOPES.crm }],
+    items: [
+      { labelKey: 'admin.nav.registrations', path: adminPaths.crm.leads, icon: Users, scope: ADMIN_SCOPES.crm },
+      { labelKey: 'admin.nav.liveChat', path: adminPaths.crm.liveChat, icon: MessagesSquare, scope: ADMIN_SCOPES.crm },
+    ],
   },
   {
     labelKey: 'admin.nav.groups.system',
@@ -93,7 +99,7 @@ const isActive = (path, currentPath) => {
             A
           </div>
           <div>
-            <div class="text-lg font-black tracking-tight text-white transition group-hover:text-brand-lime">{{ t('admin.shell.brandTitle') }}</div>
+            <div class="text-sm font-bold tracking-tight text-white transition group-hover:text-brand-lime">{{ t('admin.shell.brandTitle') }}</div>
             <p class="text-[10px] uppercase font-bold tracking-widest text-brand-lime/85">{{ t('admin.shell.brandSubtitle') }}</p>
           </div>
         </div>
@@ -112,7 +118,7 @@ const isActive = (path, currentPath) => {
               v-for="item in group.items"
               :key="item.path"
               :to="item.path"
-              class="flex items-center gap-3.5 rounded-xl py-3 pr-4 transition duration-200"
+              class="flex items-center gap-3 rounded-xl py-2.5 pr-3 transition duration-200"
               :class="
                 isActive(item.path, $route.path)
                   ? 'bg-white/5 text-brand-lime border-l-[3px] border-brand-lime pl-3.5 font-bold shadow-sm'
@@ -126,7 +132,7 @@ const isActive = (path, currentPath) => {
               >
                 <component :is="item.icon" class="h-4.5 w-4.5" aria-hidden="true" />
               </span>
-              <span class="truncate text-current text-xs font-semibold tracking-wide">{{ t(item.labelKey) }}</span>
+              <span class="truncate text-current text-[11px] font-semibold tracking-wide">{{ t(item.labelKey) }}</span>
             </RouterLink>
           </div>
         </div>

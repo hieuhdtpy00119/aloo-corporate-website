@@ -2,7 +2,9 @@ package com.aloo.cms.controller;
 
 import com.aloo.cms.dto.AuthResponse;
 import com.aloo.cms.dto.ChangePasswordRequest;
+import com.aloo.cms.dto.ChangePasswordResponse;
 import com.aloo.cms.dto.LoginRequest;
+import com.aloo.cms.dto.PasswordChangeOtpResponse;
 import com.aloo.cms.dto.UpdateProfileRequest;
 import com.aloo.cms.dto.UploadResponse;
 import com.aloo.cms.dto.UserResponse;
@@ -54,13 +56,26 @@ public class AuthController {
         return authService.updateProfile(authentication, request);
     }
 
+    @PostMapping("/password-change/request-otp")
+    public PasswordChangeOtpResponse requestPasswordChangeOtp(
+            Authentication authentication,
+            HttpServletRequest httpRequest
+    ) {
+        rateLimitService.check(
+                "password-change-otp-request",
+                RequestClient.ip(httpRequest),
+                10,
+                Duration.ofMinutes(15)
+        );
+        return authService.requestPasswordChangeOtp(authentication);
+    }
+
     @PutMapping("/change-password")
-    public ResponseEntity<Void> changePassword(
+    public ChangePasswordResponse changePassword(
             Authentication authentication,
             @Valid @RequestBody ChangePasswordRequest request
     ) {
-        authService.changePassword(authentication, request);
-        return ResponseEntity.noContent().build();
+        return authService.changePassword(authentication, request);
     }
 
     @PostMapping(value = "/profile/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

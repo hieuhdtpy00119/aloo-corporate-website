@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Navbar from '../components/public/Navbar.vue'
 import Footer from '../components/public/Footer.vue'
+import ChatWidget from '../components/public/ChatWidget.vue'
 import { applyRouteSeo } from '../services/seoService'
 
 const route = useRoute()
@@ -23,5 +24,6 @@ watch(locale, () => {
       </RouterView>
     </main>
     <Footer />
+    <ChatWidget />
   </div>
 </template>

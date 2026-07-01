@@ -23,6 +23,7 @@ public class FranchiseRegistrationService {
 
     private final FranchiseRegistrationRepository registrationRepository;
     private final FranchiseRegistrationMapper registrationMapper;
+    private final AuditLogService auditLogService;
 
     @Transactional
     public FranchiseRegistrationResponse create(FranchiseRegistrationRequest request) {
@@ -56,12 +57,25 @@ public class FranchiseRegistrationService {
         if (request.lastContactedAt() != null && !request.lastContactedAt().isBlank()) {
             registration.setLastContactedAt(LocalDateTime.parse(request.lastContactedAt().trim()));
         }
-        return registrationMapper.toResponse(registrationRepository.save(registration));
+        FranchiseRegistrationResponse response = registrationMapper.toResponse(registrationRepository.save(registration));
+        auditLogService.logStatusChanged(
+                "FRANCHISE_REGISTRATION",
+                String.valueOf(response.id()),
+                response.fullName(),
+                response.status()
+        );
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
         FranchiseRegistration registration = getRegistration(id);
+        auditLogService.logDeleted(
+                "FRANCHISE_REGISTRATION",
+                String.valueOf(registration.getId()),
+                registration.getFullName(),
+                registration.getPhone()
+        );
         registrationRepository.delete(registration);
     }
 

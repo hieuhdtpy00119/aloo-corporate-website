@@ -2,6 +2,10 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import BaseModal from '../../components/admin/BaseModal.vue'
+import AdminListPage from '../../components/admin/AdminListPage.vue'
+import AdminNestedShell from '../../components/admin/shell/AdminNestedShell.vue'
+import AdminShellFrame from '../../components/admin/shell/AdminShellFrame.vue'
+import AdminShellTablePanel from '../../components/admin/shell/AdminShellTablePanel.vue'
 import AdminPageHeader from '../../components/admin/AdminPageHeader.vue'
 import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
@@ -145,6 +149,7 @@ const totalPages = computed(() => Math.max(1, Math.ceil(filteredCategories.value
 const paginatedCategories = computed(() =>
   filteredCategories.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize),
 )
+const listCountText = computed(() => t('admin.shared.totalCount', { count: filteredCategories.value.length }))
 
 watch(
   () => form.name,
@@ -165,91 +170,133 @@ onMounted(() => {
 </script>
 
 <template>
-  <section>
-    <RouterLink :to="adminPaths.content.articles" class="mb-4 inline-block text-sm font-black text-avocado-700 hover:text-avocado-900">
+  <AdminListPage>
+    <RouterLink :to="adminPaths.content.articles" class="inline-block text-sm font-semibold text-avocado-700 hover:text-avocado-900">
       {{ m('backToArticles', { label: t('admin.nav.articles') }) }}
     </RouterLink>
-    <AdminPageHeader :title="t('admin.nav.categories')" :description="m('description')">
-      <template #actions>
-        <button class="aloo-btn aloo-btn--primary" @click="openCreateModal">
-          {{ m('add') }}
-        </button>
-      </template>
-    </AdminPageHeader>
 
-    <SearchFilterBar
-      v-model:search="searchQuery"
-      v-model:status="statusFilter"
-      :search-label="m('filters.searchLabel')"
-      :search-placeholder="m('filters.searchPlaceholder')"
-      :status-label="t('admin.shared.status')"
-      :status-options="statusFilters"
-    />
-    <p v-if="errorMessage" class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
-      {{ errorMessage }}
-    </p>
+    <AdminNestedShell>
+      <AdminShellFrame variant="header" inner="header">
+        <AdminPageHeader :title="t('admin.nav.categories')">
+          <template #actions>
+            <button class="admin-list-btn admin-list-btn--primary" @click="openCreateModal">
+              {{ m('add') }}
+            </button>
+          </template>
+        </AdminPageHeader>
+      </AdminShellFrame>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div class="overflow-x-auto">
-        <table v-if="!isLoading && filteredCategories.length" class="min-w-[760px] w-full table-fixed whitespace-nowrap text-left">
-          <colgroup>
-            <col class="w-[22%]" />
-            <col class="w-[20%]" />
-            <col class="w-[28%]" />
-            <col class="w-[15%]" />
-            <col class="w-[15%]" />
-          </colgroup>
-          <thead class="bg-slate-50 text-sm font-black text-slate-600">
-            <tr>
-              <th class="px-5 py-4">{{ m('columns.name') }}</th>
-              <th class="px-5 py-4">{{ m('columns.slug') }}</th>
-              <th class="px-5 py-4">{{ m('columns.description') }}</th>
-              <th class="px-5 py-4">{{ m('columns.status') }}</th>
-              <th class="px-5 py-4 text-right">{{ m('columns.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 text-sm">
-            <tr v-for="category in paginatedCategories" :key="category.id" class="hover:bg-slate-50/70">
-              <td class="px-5 py-4">
-                <p class="font-black text-avocado-950">{{ category.name }}</p>
-              </td>
-              <td class="px-5 py-4 font-semibold text-slate-600">
-                <span class="block truncate">/{{ category.slug }}</span>
-              </td>
-              <td class="px-5 py-4 text-slate-600">
-                <p class="truncate">{{ category.description || m('noDescription') }}</p>
-              </td>
-              <td class="px-5 py-4">
-                <span class="inline-flex min-w-[122px] justify-center rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(category.status)">
-                  {{ statusLabels[category.status] || category.status }}
-                </span>
-              </td>
-              <td class="px-5 py-4">
-                <div class="flex justify-end gap-2">
-                  <button class="rounded-lg border border-avocado-200 px-3 py-2 font-bold text-avocado-700 hover:bg-avocado-50" @click="openEditModal(category)">
+      <AdminShellFrame variant="toolbar" inner="toolbar">
+        <SearchFilterBar
+          v-model:search="searchQuery"
+          v-model:status="statusFilter"
+          :search-label="m('filters.searchLabel')"
+          :search-placeholder="m('filters.searchPlaceholder')"
+          :status-label="t('admin.shared.status')"
+          :status-options="statusFilters"
+        />
+      </AdminShellFrame>
+
+      <AdminShellFrame v-if="errorMessage" as="p" variant="alert" class="admin-list-alert">
+        {{ errorMessage }}
+      </AdminShellFrame>
+
+      <AdminShellFrame v-if="isLoading" variant="body" inner="pad">
+        <div v-for="i in 5" :key="i" class="admin-shell-skeleton" />
+      </AdminShellFrame>
+
+      <AdminShellFrame v-else-if="!filteredCategories.length" variant="body" inner="pad">
+        <EmptyState :message="m('empty')" />
+      </AdminShellFrame>
+
+      <AdminShellFrame v-else variant="body" visibility="desktop">
+        <AdminShellTablePanel :title="m('listTitle')" :count-text="listCountText">
+          <table class="admin-shell-table">
+            <colgroup>
+              <col style="width: 22%" />
+              <col style="width: 20%" />
+              <col style="width: 28%" />
+              <col style="width: 15%" />
+              <col style="width: 15%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>{{ m('columns.name') }}</th>
+                <th>{{ m('columns.slug') }}</th>
+                <th>{{ m('columns.description') }}</th>
+                <th class="text-center">{{ m('columns.status') }}</th>
+                <th class="text-right">{{ m('columns.actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="category in paginatedCategories" :key="category.id">
+                <td class="font-black text-avocado-950">
+                  <span class="block truncate">{{ category.name }}</span>
+                </td>
+                <td class="admin-shell-cell-truncate admin-shell-cell-muted font-semibold">/{{ category.slug }}</td>
+                <td class="admin-shell-cell-truncate admin-shell-cell-muted">{{ category.description || m('noDescription') }}</td>
+                <td class="text-center">
+                  <span class="inline-flex min-w-[122px] justify-center rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(category.status)">
+                    {{ statusLabels[category.status] || category.status }}
+                  </span>
+                </td>
+                <td>
+                  <div class="flex justify-end gap-2">
+                    <button class="admin-list-btn admin-list-btn--outline shrink-0 !min-h-[32px] !px-2.5 !py-1.5 !text-xs" @click="openEditModal(category)">
+                      {{ m('actions.edit') }}
+                    </button>
+                    <button class="admin-list-btn admin-list-btn--danger shrink-0 !min-h-[32px] !px-2.5 !py-1.5 !text-xs" @click="pendingDeleteId = category.id">
+                      {{ m('actions.delete') }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </AdminShellTablePanel>
+      </AdminShellFrame>
+
+      <AdminShellFrame v-if="!isLoading && filteredCategories.length" variant="body" visibility="mobile">
+        <AdminShellTablePanel :title="m('listTitle')" :count-text="listCountText">
+          <template #below>
+            <div class="admin-shell-frame__inner--pad admin-shell-frame__inner--stack">
+              <article v-for="category in paginatedCategories" :key="category.id" class="admin-shell-mobile-card">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <h3 class="truncate font-black text-avocado-950">{{ category.name }}</h3>
+                    <p class="mt-1 truncate text-xs font-semibold text-slate-500">/{{ category.slug }}</p>
+                  </div>
+                  <span class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-black" :class="statusClass(category.status)">
+                    {{ statusLabels[category.status] || category.status }}
+                  </span>
+                </div>
+                <p class="mt-3 text-sm text-slate-600">{{ category.description || m('noDescription') }}</p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <button class="rounded-lg border border-avocado-200 px-3 py-2 text-xs font-bold text-avocado-700" @click="openEditModal(category)">
                     {{ m('actions.edit') }}
                   </button>
-                  <button class="rounded-lg border border-red-200 px-3 py-2 font-bold text-red-600 hover:bg-red-50" @click="pendingDeleteId = category.id">
+                  <button class="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600" @click="pendingDeleteId = category.id">
                     {{ m('actions.delete') }}
                   </button>
                 </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <EmptyState v-if="isLoading || filteredCategories.length === 0" :loading="isLoading" :message="m('empty')" />
-    </div>
+              </article>
+            </div>
+          </template>
+        </AdminShellTablePanel>
+      </AdminShellFrame>
 
-    <Pagination
-      :page="currentPage"
-      :total-pages="totalPages"
-      :visible-count="paginatedCategories.length"
-      :total-count="filteredCategories.length"
-      :label="m('paginationLabel')"
-      @prev="currentPage = Math.max(1, currentPage - 1)"
-      @next="currentPage = Math.min(totalPages, currentPage + 1)"
-    />
+      <AdminShellFrame v-if="filteredCategories.length" variant="footer">
+        <Pagination
+          :page="currentPage"
+          :total-pages="totalPages"
+          :visible-count="paginatedCategories.length"
+          :total-count="filteredCategories.length"
+          :label="m('paginationLabel')"
+          @prev="currentPage = Math.max(1, currentPage - 1)"
+          @next="currentPage = Math.min(totalPages, currentPage + 1)"
+        />
+      </AdminShellFrame>
+    </AdminNestedShell>
 
     <BaseModal :show="showModal" :title="mode === 'create' ? m('modals.create') : m('modals.edit')" max-width="max-w-2xl" @close="closeModal">
       <form id="category-form" class="grid gap-5 md:grid-cols-2" @submit.prevent="saveCategory">
@@ -285,5 +332,5 @@ onMounted(() => {
     </BaseModal>
 
     <ConfirmModal :show="Boolean(pendingDeleteId)" @cancel="pendingDeleteId = null" @confirm="confirmDeleteCategory" />
-  </section>
+  </AdminListPage>
 </template>

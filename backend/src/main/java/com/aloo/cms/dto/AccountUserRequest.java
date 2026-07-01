@@ -20,7 +20,7 @@ public record AccountUserRequest(
         @Size(max = 600, message = "Avatar URL must be at most 600 characters")
         String avatarUrl,
 
-        @Size(min = 6, max = 120, message = "Password must be from 6 to 120 characters")
+        @Size(min = 8, max = 120, message = "Password must be from 8 to 120 characters")
         String password,
 
         String status,

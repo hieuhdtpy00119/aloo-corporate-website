@@ -1,0 +1,336 @@
+/* Accounts page — styles on top of admin-shell-page.css */
+
+.admin-shell .accounts-table .accounts-col-name {
+  width: 28%;
+}
+
+.admin-shell .accounts-table .accounts-col-email {
+  width: 28%;
+}
+
+.admin-shell .accounts-table .accounts-col-status {
+  width: 12%;
+}
+
+.admin-shell .accounts-table .accounts-col-login {
+  width: 18%;
+}
+
+.admin-shell .accounts-table .accounts-col-actions {
+  width: 14%;
+  text-align: right;
+}
+
+.admin-shell-th-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.admin-shell-th-name__spacer {
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.accounts-cell-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.accounts-avatar,
+.accounts-avatar-fallback {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.accounts-avatar-fallback {
+  display: grid;
+  place-items: center;
+  background: #e7f6d2;
+  color: #006227;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.accounts-name {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+  color: #0d2f1b;
+}
+
+.accounts-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.accounts-login {
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.accounts-status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+.accounts-status--inactive {
+  color: #475569;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.accounts-status--locked {
+  color: #b91c1c;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.accounts-badge {
+  display: inline-flex;
+  margin-left: 6px;
+  border-radius: 999px;
+  border: 1px solid #bae6fd;
+  background: #f0f9ff;
+  padding: 1px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #0369a1;
+  vertical-align: middle;
+}
+
+.accounts-badge--session {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.accounts-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-left: auto;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.accounts-promote-btn {
+  border: 1px solid #c7d2fe;
+  border-radius: var(--admin-shell-radius-sm, 6px);
+  background: #eef2ff;
+  color: #4338ca;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background 0.12s ease;
+}
+
+.accounts-promote-btn:hover {
+  background: #e0e7ff;
+}
+
+.accounts-promote-btn--full {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.accounts-demote-btn {
+  border: 1px solid #fcd34d;
+  border-radius: var(--admin-shell-radius-sm, 6px);
+  background: #fffbeb;
+  color: #b45309;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background 0.12s ease;
+}
+
+.accounts-demote-btn:hover {
+  background: #fef3c7;
+}
+
+.accounts-demote-btn--full {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.accounts-mobile-promote {
+  margin-top: 8px;
+}
+
+.admin-shell .accounts-table tbody td:last-child {
+  overflow: visible;
+}
+
+.accounts-actions {
+  position: relative;
+  text-align: right;
+  overflow: visible;
+}
+
+.accounts-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--admin-shell-radius-sm, 6px);
+  background: #fff;
+  color: #64748b;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.accounts-menu-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+.accounts-dropdown {
+  z-index: 60;
+  min-width: 188px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--admin-shell-radius-sm, 6px);
+  background: #fff;
+  padding: 4px 0;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+}
+
+.accounts-dropdown--fixed {
+  position: fixed;
+  z-index: 200;
+}
+
+.accounts-dropdown button {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 8px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.accounts-dropdown button:hover {
+  background: #f8fafc;
+}
+
+.accounts-dropdown button.is-danger { color: #dc2626; }
+.accounts-dropdown button.is-danger:hover { background: #fef2f2; }
+.accounts-dropdown button.is-promote { color: #4338ca; }
+.accounts-dropdown button.is-promote:hover { background: #eef2ff; }
+.accounts-dropdown button.is-demote { color: #b45309; }
+.accounts-dropdown button.is-demote:hover { background: #fffbeb; }
+
+.accounts-dropdown-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: #f1f5f9;
+}
+
+.admin-shell-frame__inner--stack .accounts-mobile-card {
+  border: 1px solid #e2e8f0;
+  border-radius: var(--admin-shell-radius-sm, 6px);
+  background: #fff;
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.accounts-mobile-card:hover {
+  background: #f5fbea;
+}
+
+.accounts-mobile-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.accounts-mobile-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.accounts-mobile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.accounts-mobile-login {
+  margin: 6px 0 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.accounts-field {
+  display: grid;
+  gap: 8px;
+}
+
+.accounts-field__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.accounts-field__hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.accounts-field-input {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.accounts-field-input:focus {
+  border-color: #4d7c0f;
+  box-shadow: 0 0 0 4px rgba(132, 204, 22, 0.15);
+}
+
+.accounts-field-input--locked,
+.accounts-field-input:disabled {
+  cursor: not-allowed;
+  background: #f8fafc;
+  color: #64748b;
+  border-color: #e2e8f0;
+  box-shadow: none;
+}

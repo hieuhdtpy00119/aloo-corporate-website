@@ -20,6 +20,7 @@ public class MenuPosterService {
 
     private final MenuPosterRepository menuPosterRepository;
     private final MenuPosterMapper menuPosterMapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<MenuPosterResponse> findAll() {
@@ -41,7 +42,9 @@ public class MenuPosterService {
             throw new BadRequestException("Menu poster branch key is already used");
         }
         MenuPoster poster = menuPosterMapper.toEntity(request);
-        return menuPosterMapper.toResponse(menuPosterRepository.save(poster));
+        MenuPosterResponse response = menuPosterMapper.toResponse(menuPosterRepository.save(poster));
+        auditLogService.logCreated("MENU_POSTER", String.valueOf(response.id()), response.title(), response.branchKey());
+        return response;
     }
 
     @Transactional
@@ -52,12 +55,16 @@ public class MenuPosterService {
             throw new BadRequestException("Menu poster branch key is already used");
         }
         menuPosterMapper.updateEntity(poster, request);
-        return menuPosterMapper.toResponse(menuPosterRepository.save(poster));
+        MenuPosterResponse response = menuPosterMapper.toResponse(menuPosterRepository.save(poster));
+        auditLogService.logUpdated("MENU_POSTER", String.valueOf(response.id()), response.title(), response.branchKey());
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
-        menuPosterRepository.delete(getPoster(id));
+        MenuPoster poster = getPoster(id);
+        auditLogService.logDeleted("MENU_POSTER", String.valueOf(poster.getId()), poster.getTitle(), poster.getBranchKey());
+        menuPosterRepository.delete(poster);
     }
 
     private MenuPoster getPoster(Long id) {

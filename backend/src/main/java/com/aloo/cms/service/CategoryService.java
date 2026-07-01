@@ -19,6 +19,7 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<CategoryResponse> findAll() {
@@ -34,7 +35,9 @@ public class CategoryService {
     public CategoryResponse create(CategoryRequest request) {
         ensureSlugAvailable(request.slug(), request.type(), null);
         Category category = categoryMapper.toEntity(request);
-        return categoryMapper.toResponse(categoryRepository.save(category));
+        CategoryResponse response = categoryMapper.toResponse(categoryRepository.save(category));
+        auditLogService.logCreated("CATEGORY", String.valueOf(response.id()), response.name(), response.slug());
+        return response;
     }
 
     @Transactional
@@ -42,12 +45,15 @@ public class CategoryService {
         Category category = getCategory(id);
         ensureSlugAvailable(request.slug(), request.type(), id);
         categoryMapper.updateEntity(category, request);
-        return categoryMapper.toResponse(categoryRepository.save(category));
+        CategoryResponse response = categoryMapper.toResponse(categoryRepository.save(category));
+        auditLogService.logUpdated("CATEGORY", String.valueOf(response.id()), response.name(), response.slug());
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
         Category category = getCategory(id);
+        auditLogService.logDeleted("CATEGORY", String.valueOf(category.getId()), category.getName(), category.getSlug());
         categoryRepository.delete(category);
     }
 

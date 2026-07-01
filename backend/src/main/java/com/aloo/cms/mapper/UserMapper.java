@@ -4,8 +4,10 @@ import com.aloo.cms.dto.AccountUserResponse;
 import com.aloo.cms.dto.UserResponse;
 import com.aloo.cms.entity.AdminProfile;
 import com.aloo.cms.entity.AdminUser;
+import com.aloo.cms.entity.AuthProvider;
 import com.aloo.cms.entity.UserRole;
 import com.aloo.cms.service.AdminPermissionService;
+import com.aloo.cms.service.PasswordChangeOtpService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
 
     private final AdminPermissionService adminPermissionService;
+    private final PasswordChangeOtpService passwordChangeOtpService;
 
     public UserResponse toResponse(AdminUser user) {
         return new UserResponse(
@@ -27,6 +30,10 @@ public class UserMapper {
                 resolveAdminProfile(user),
                 adminPermissionService.resolveScopes(user),
                 user.getStatus(),
+                resolveAuthProvider(user),
+                hasPasswordLogin(user),
+                passwordChangeOtpService.isOtpRequired(user),
+                user.getPasswordSetAt(),
                 user.getLastLoginAt(),
                 user.getCreatedAt(),
                 user.getUpdatedAt()
@@ -44,10 +51,16 @@ public class UserMapper {
                 resolveAdminProfile(user),
                 adminPermissionService.resolveScopes(user),
                 user.getStatus(),
+                resolveAuthProvider(user),
                 user.getLastLoginAt(),
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );
+    }
+
+    private String resolveAuthProvider(AdminUser user) {
+        AuthProvider provider = user.getAuthProvider();
+        return provider == null ? AuthProvider.LOCAL.name() : provider.name();
     }
 
     private String resolveAdminProfile(AdminUser user) {
@@ -56,5 +69,13 @@ public class UserMapper {
         }
         AdminProfile profile = user.getAdminProfile() == null ? AdminProfile.FULL : user.getAdminProfile();
         return profile.name();
+    }
+
+    private boolean hasPasswordLogin(AdminUser user) {
+        if (user.getPasswordSetAt() != null) {
+            return true;
+        }
+        AuthProvider provider = user.getAuthProvider();
+        return provider == null || provider == AuthProvider.LOCAL;
     }
 }

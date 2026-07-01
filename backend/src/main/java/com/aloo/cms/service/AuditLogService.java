@@ -4,6 +4,7 @@ import com.aloo.cms.dto.AuditLogPageResponse;
 import com.aloo.cms.dto.AuditLogResponse;
 import com.aloo.cms.entity.AuditLog;
 import com.aloo.cms.repository.AuditLogRepository;
+import com.aloo.cms.support.AuditLogSupport;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -83,6 +84,36 @@ public class AuditLogService {
         entry.setEntityId(entityId);
         entry.setDetails(details);
         auditLogRepository.save(entry);
+    }
+
+    @Transactional
+    public void logCreated(String entityType, String entityId, String name, String reference) {
+        log("CREATE_" + entityType, entityType, entityId, AuditLogSupport.created(entityType, name, reference));
+    }
+
+    @Transactional
+    public void logUpdated(String entityType, String entityId, String name, String reference) {
+        log("UPDATE_" + entityType, entityType, entityId, AuditLogSupport.updated(entityType, name, reference));
+    }
+
+    @Transactional
+    public void logDeleted(String entityType, String entityId, String name, String reference) {
+        log("DELETE_" + entityType, entityType, entityId, AuditLogSupport.deleted(entityType, name, reference));
+    }
+
+    @Transactional
+    public void logStatusChanged(String entityType, String entityId, String name, String status) {
+        log("UPDATE_" + entityType + "_STATUS", entityType, entityId, AuditLogSupport.statusChanged(entityType, name, status));
+    }
+
+    @Transactional
+    public void logFeaturedChanged(String entityType, String entityId, String name, boolean featured) {
+        log("UPDATE_" + entityType + "_FEATURED", entityType, entityId, AuditLogSupport.featuredChanged(entityType, name, featured));
+    }
+
+    @Transactional
+    public void logUploaded(String fileName) {
+        log("UPLOAD_FILE", "FILE", null, AuditLogSupport.uploaded(fileName));
     }
 
     private String currentActorEmail() {

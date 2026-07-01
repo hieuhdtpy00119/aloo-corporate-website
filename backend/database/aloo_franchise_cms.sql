@@ -42,6 +42,8 @@ CREATE TABLE dbo.users (
     role NVARCHAR(30) NOT NULL CONSTRAINT df_users_role DEFAULT N'USER',
     admin_profile NVARCHAR(30) NULL,
     status NVARCHAR(30) NOT NULL CONSTRAINT df_users_status DEFAULT N'ACTIVE',
+    auth_provider NVARCHAR(20) NOT NULL CONSTRAINT df_users_auth_provider DEFAULT N'LOCAL',
+    password_set_at DATETIME2(0) NULL,
     last_login_at DATETIME2(0) NULL,
     created_at DATETIME2(0) NOT NULL CONSTRAINT df_users_created_at DEFAULT GETDATE(),
     updated_at DATETIME2(0) NOT NULL CONSTRAINT df_users_updated_at DEFAULT GETDATE(),

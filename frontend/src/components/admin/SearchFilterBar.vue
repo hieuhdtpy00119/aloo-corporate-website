@@ -3,6 +3,10 @@ import { Search } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 
 defineProps({
+  embedded: {
+    type: Boolean,
+    default: false,
+  },
   search: {
     type: String,
     default: '',
@@ -53,7 +57,10 @@ const { t } = useI18n()
 <template>
   <div
     class="aloo-admin-toolbar"
-    :class="extraOptions.length ? 'lg:!grid-cols-[1fr_220px_220px]' : 'md:!grid-cols-[1fr_220px]'"
+    :class="[
+      extraOptions.length ? 'lg:!grid-cols-[1fr_220px_220px]' : 'md:!grid-cols-[1fr_220px]',
+      embedded ? 'aloo-admin-toolbar--embedded' : '',
+    ]"
   >
     <label class="aloo-field">
       <span class="aloo-label">{{ searchLabel || t('admin.shared.search') }}</span>

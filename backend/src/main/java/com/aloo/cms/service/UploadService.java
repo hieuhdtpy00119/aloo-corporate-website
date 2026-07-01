@@ -10,13 +10,17 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@RequiredArgsConstructor
 public class UploadService {
+
+    private final AuditLogService auditLogService;
 
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "jfif", "png", "webp", "gif");
     private static final Map<String, Set<String>> ALLOWED_CONTENT_TYPES = Map.of(
@@ -65,6 +69,7 @@ public class UploadService {
             throw new BadRequestException("Could not upload image");
         }
 
+        auditLogService.logUploaded(fileName);
         return new UploadResponse("/uploads/" + fileName, fileName, file.getSize());
     }
 

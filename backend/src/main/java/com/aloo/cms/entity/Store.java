@@ -74,6 +74,9 @@ public class Store {
     @Column(length = 600)
     private String coverImageUrl;
 
+    @Column(columnDefinition = "nvarchar(max)")
+    private String amenitiesJson = "[]";
+
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreGallery> gallery = new ArrayList<>();
 

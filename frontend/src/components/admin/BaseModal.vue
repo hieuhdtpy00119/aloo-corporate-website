@@ -44,7 +44,7 @@ onBeforeUnmount(() => {
     <div v-if="isVisible" class="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 px-3 py-4 backdrop-blur-sm sm:px-4 sm:py-6" @click.self="$emit('close')">
       <section :class="['flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-[2rem]', maxWidth]">
         <header class="flex shrink-0 items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-8 sm:py-5">
-          <h2 class="min-w-0 truncate text-base font-black tracking-tight text-avocado-950 sm:text-lg">{{ title }}</h2>
+          <h2 class="min-w-0 truncate text-sm font-bold tracking-tight text-avocado-950 sm:text-base">{{ title }}</h2>
           <button class="rounded-xl p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-700 transition" type="button" @click="$emit('close')">
             <X class="h-5 w-5" />
           </button>

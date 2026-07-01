@@ -18,6 +18,7 @@ public class HeroBannerService {
 
     private final HeroBannerRepository heroBannerRepository;
     private final HeroBannerMapper heroBannerMapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<HeroBannerResponse> findAll() {
@@ -35,19 +36,25 @@ public class HeroBannerService {
     @Transactional
     public HeroBannerResponse create(HeroBannerRequest request) {
         HeroBanner banner = heroBannerMapper.toEntity(request);
-        return heroBannerMapper.toResponse(heroBannerRepository.save(banner));
+        HeroBannerResponse response = heroBannerMapper.toResponse(heroBannerRepository.save(banner));
+        auditLogService.logCreated("HERO_BANNER", String.valueOf(response.id()), response.title(), String.valueOf(response.id()));
+        return response;
     }
 
     @Transactional
     public HeroBannerResponse update(Long id, HeroBannerRequest request) {
         HeroBanner banner = getBanner(id);
         heroBannerMapper.updateEntity(banner, request);
-        return heroBannerMapper.toResponse(heroBannerRepository.save(banner));
+        HeroBannerResponse response = heroBannerMapper.toResponse(heroBannerRepository.save(banner));
+        auditLogService.logUpdated("HERO_BANNER", String.valueOf(response.id()), response.title(), String.valueOf(response.id()));
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
-        heroBannerRepository.delete(getBanner(id));
+        HeroBanner banner = getBanner(id);
+        auditLogService.logDeleted("HERO_BANNER", String.valueOf(banner.getId()), banner.getTitle(), String.valueOf(banner.getId()));
+        heroBannerRepository.delete(banner);
     }
 
     private HeroBanner getBanner(Long id) {

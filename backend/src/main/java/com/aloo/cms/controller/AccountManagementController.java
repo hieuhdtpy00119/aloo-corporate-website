@@ -1,10 +1,13 @@
 package com.aloo.cms.controller;
 
+import com.aloo.cms.dto.AdminEmailWhitelistResponse;
 import com.aloo.cms.dto.AccountPasswordRequest;
+import com.aloo.cms.dto.PromoteCustomerRequest;
 import com.aloo.cms.dto.AccountStatusRequest;
 import com.aloo.cms.dto.AccountUserRequest;
 import com.aloo.cms.dto.AccountUserResponse;
 import com.aloo.cms.service.AccountManagementService;
+import com.aloo.cms.service.AdminEmailWhitelistService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +31,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountManagementController {
 
     private final AccountManagementService accountManagementService;
+    private final AdminEmailWhitelistService adminEmailWhitelistService;
+
+    @GetMapping("/admin-email-whitelist")
+    public AdminEmailWhitelistResponse adminEmailWhitelist() {
+        return new AdminEmailWhitelistResponse(
+                adminEmailWhitelistService.isEnabled(),
+                adminEmailWhitelistService.getAllowedEmails()
+        );
+    }
 
     @GetMapping("/admins")
     public List<AccountUserResponse> findAdminUsers() {
@@ -61,6 +73,11 @@ public class AccountManagementController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/admins/{id}/demote")
+    public AccountUserResponse demoteAdmin(@PathVariable Long id) {
+        return accountManagementService.demoteAdminToCustomer(id);
+    }
+
     @GetMapping("/customers")
     public List<AccountUserResponse> findCustomerUsers() {
         return accountManagementService.findCustomerUsers();
@@ -85,6 +102,11 @@ public class AccountManagementController {
     public ResponseEntity<Void> changeCustomerPassword(@PathVariable Long id, @Valid @RequestBody AccountPasswordRequest request) {
         accountManagementService.changeCustomerPassword(id, request);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/customers/{id}/promote")
+    public AccountUserResponse promoteCustomer(@PathVariable Long id, @Valid @RequestBody PromoteCustomerRequest request) {
+        return accountManagementService.promoteCustomerToAdmin(id, request);
     }
 
     @DeleteMapping("/customers/{id}")

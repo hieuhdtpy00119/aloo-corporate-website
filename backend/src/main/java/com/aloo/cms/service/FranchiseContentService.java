@@ -18,6 +18,7 @@ public class FranchiseContentService {
 
     private final FranchiseContentRepository franchiseContentRepository;
     private final FranchiseContentMapper franchiseContentMapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<FranchiseContentResponse> findAll() {
@@ -33,19 +34,33 @@ public class FranchiseContentService {
         FranchiseContent content = franchiseContentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Franchise content not found"));
         franchiseContentMapper.updateEntity(content, request);
-        return franchiseContentMapper.toResponse(franchiseContentRepository.save(content));
+        FranchiseContentResponse response = franchiseContentMapper.toResponse(franchiseContentRepository.save(content));
+        auditLogService.logUpdated("FRANCHISE_CONTENT", String.valueOf(response.id()), label(response), response.sectionKey());
+        return response;
     }
 
+    @Transactional
     public FranchiseContentResponse create(FranchiseContentRequest request) {
         FranchiseContent content = new FranchiseContent();
         franchiseContentMapper.updateEntity(content, request);
-        return franchiseContentMapper.toResponse(franchiseContentRepository.save(content));
+        FranchiseContentResponse response = franchiseContentMapper.toResponse(franchiseContentRepository.save(content));
+        auditLogService.logCreated("FRANCHISE_CONTENT", String.valueOf(response.id()), label(response), response.sectionKey());
+        return response;
     }
 
+    @Transactional
     public void delete(Long id) {
-        if (!franchiseContentRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Franchise content not found");
+        FranchiseContent content = franchiseContentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Franchise content not found"));
+        FranchiseContentResponse response = franchiseContentMapper.toResponse(content);
+        auditLogService.logDeleted("FRANCHISE_CONTENT", String.valueOf(content.getId()), label(response), response.sectionKey());
+        franchiseContentRepository.delete(content);
+    }
+
+    private String label(FranchiseContentResponse response) {
+        if (response.title() != null && !response.title().isBlank()) {
+            return response.title();
         }
-        franchiseContentRepository.deleteById(id);
+        return response.sectionKey();
     }
 }

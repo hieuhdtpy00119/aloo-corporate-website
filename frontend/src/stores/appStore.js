@@ -174,8 +174,18 @@ export const useAppStore = defineStore('app', {
         menuPostersJson: location.menuPostersJson || '[]',
         linksJson: location.linksJson || '[]',
         links: Array.isArray(location.links) ? location.links : [],
-        mapUrl: location.mapUrl || location.links?.find?.((link) => link.type === 'GOOGLE_MAPS')?.url || '',
-        amenities: Array.isArray(location.amenities) ? location.amenities : [],
+        mapUrl: location.mapUrl || location.googleMapUrl || location.links?.find?.((link) => link.type === 'GOOGLE_MAPS')?.url || '',
+        amenities: (() => {
+          if (Array.isArray(location.amenities) && location.amenities.length) {
+            return location.amenities.filter((item) => typeof item === 'string' && item.trim())
+          }
+          try {
+            const parsed = JSON.parse(location.amenitiesJson || '[]')
+            return Array.isArray(parsed) ? parsed.filter((item) => typeof item === 'string' && item.trim()) : []
+          } catch {
+            return []
+          }
+        })(),
         displayOrder: Number(location.displayOrder || location.id || 1),
         featured: Boolean(location.featured),
         status: location.status || 'ACTIVE',
@@ -368,6 +378,7 @@ export const useAppStore = defineStore('app', {
         phone: location.phone || '',
         email: location.email || '',
         openingHours: location.openingHours || '',
+        googleMapUrl: location.mapUrl || location.googleMapUrl || '',
         storeType: location.storeType || 'STANDARD',
         description: location.description || '',
         coverImageUrl: location.coverImageUrl || location.imageUrl || '',

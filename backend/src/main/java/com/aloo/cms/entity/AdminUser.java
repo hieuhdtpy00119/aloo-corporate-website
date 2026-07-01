@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -52,6 +53,12 @@ public class AdminUser {
     @Column(nullable = false, length = 30)
     private String status = "ACTIVE";
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+
+    private LocalDateTime passwordSetAt;
+
     private LocalDateTime lastLoginAt;
 
     @Column(nullable = false)
@@ -65,10 +72,23 @@ public class AdminUser {
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
         updatedAt = now;
+        ensureAuthProvider();
     }
 
     @PreUpdate
     void preUpdate() {
         updatedAt = LocalDateTime.now();
+        ensureAuthProvider();
+    }
+
+    @PostLoad
+    void postLoad() {
+        ensureAuthProvider();
+    }
+
+    private void ensureAuthProvider() {
+        if (authProvider == null) {
+            authProvider = AuthProvider.LOCAL;
+        }
     }
 }

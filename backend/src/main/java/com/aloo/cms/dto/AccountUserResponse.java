@@ -13,6 +13,7 @@ public record AccountUserResponse(
         String adminProfile,
         List<String> scopes,
         String status,
+        String authProvider,
         LocalDateTime lastLoginAt,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

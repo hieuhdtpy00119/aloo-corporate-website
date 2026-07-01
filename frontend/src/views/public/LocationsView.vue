@@ -73,14 +73,14 @@ onMounted(() => {
 <template>
   <div class="min-h-screen bg-brand-cream pb-20 text-avocado-950">
     <div class="relative overflow-hidden bg-avocado-950 px-4 py-20 text-center text-white sm:px-6 lg:px-8">
-      <div class="absolute inset-0 opacity-15">
+      <div class="absolute inset-0">
         <img
-          src="/about/aloo-kiosk.png"
+          src="/about/aloo-locations-hero.png"
           alt="ALOO kiosk"
           class="h-full w-full object-cover object-center"
         />
       </div>
-      <div class="absolute inset-0 bg-gradient-to-b from-transparent to-avocado-950/90"></div>
+      <div class="absolute inset-0 bg-black/35"></div>
       <div class="relative mx-auto max-w-3xl space-y-4">
         <span class="inline-block rounded-full border border-white/10 bg-white/5 px-3.5 py-1 text-xs font-bold uppercase tracking-[0.25em] text-cream-300">
           {{ t('locations.eyebrow') }}

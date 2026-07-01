@@ -2,6 +2,7 @@ package com.aloo.cms.security;
 
 import com.aloo.cms.dto.AuthResponse;
 import com.aloo.cms.entity.AdminUser;
+import com.aloo.cms.entity.AuthProvider;
 import com.aloo.cms.entity.UserRole;
 import com.aloo.cms.exception.BadRequestException;
 import com.aloo.cms.mapper.UserMapper;
@@ -51,14 +52,13 @@ public class GoogleOAuthLoginService {
         user.setAvatarUrl(avatarUrl);
         user.setRole(UserRole.USER);
         user.setStatus("ACTIVE");
+        user.setAuthProvider(AuthProvider.GOOGLE);
         user.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
         return user;
     }
 
     private AdminUser updateGoogleProfile(AdminUser user, String fullName, String avatarUrl) {
-        if (fullName != null && !fullName.isBlank()) {
-            user.setFullName(fullName);
-        }
+        user.setAuthProvider(AuthProvider.GOOGLE);
         if (shouldSyncGoogleAvatar(user.getAvatarUrl(), avatarUrl)) {
             user.setAvatarUrl(avatarUrl);
         }

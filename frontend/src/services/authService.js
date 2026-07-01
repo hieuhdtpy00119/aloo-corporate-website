@@ -15,6 +15,7 @@ export const usesGoogleSignIn = () => {
 
   try {
     const user = JSON.parse(localStorage.getItem('admin_user') || 'null')
+    if (user?.authProvider === 'GOOGLE') return true
     const avatar = String(user?.avatarUrl || user?.avatar || '')
     return avatar.includes('googleusercontent.com')
   } catch {
@@ -52,3 +53,5 @@ export const uploadProfileAvatar = async (file) => {
 export const updateAdminProfile = (payload) => api.put('/auth/profile', payload)
 
 export const changeAdminPassword = (payload) => api.put('/auth/change-password', payload)
+
+export const requestPasswordChangeOtp = () => api.post('/auth/password-change/request-otp')

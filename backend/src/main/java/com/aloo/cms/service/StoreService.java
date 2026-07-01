@@ -35,6 +35,7 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final StoreMapper storeMapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<StoreResponse> findAll(String province, String status, Boolean featured) {
@@ -63,7 +64,9 @@ public class StoreService {
         validateUnique(request, null);
         Store store = storeMapper.toEntity(request);
         syncChildren(store, request);
-        return storeMapper.toResponse(storeRepository.save(store));
+        StoreResponse response = storeMapper.toResponse(storeRepository.save(store));
+        auditLogService.logCreated("STORE", String.valueOf(response.id()), response.name(), response.slug());
+        return response;
     }
 
     @Transactional
@@ -72,12 +75,16 @@ public class StoreService {
         validateUnique(request, id);
         storeMapper.updateEntity(store, request);
         syncChildren(store, request);
-        return storeMapper.toResponse(storeRepository.save(store));
+        StoreResponse response = storeMapper.toResponse(storeRepository.save(store));
+        auditLogService.logUpdated("STORE", String.valueOf(response.id()), response.name(), response.slug());
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
-        storeRepository.delete(getStore(id));
+        Store store = getStore(id);
+        auditLogService.logDeleted("STORE", String.valueOf(store.getId()), store.getName(), store.getSlug());
+        storeRepository.delete(store);
     }
 
     private Store getStore(Long id) {

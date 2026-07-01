@@ -65,10 +65,10 @@ describe('HomeView', () => {
     })
   }
 
-  it('renders hero headline', () => {
+  it('renders hero video', () => {
     const wrapper = mountView()
 
-    expect(wrapper.text()).toContain('Vị béo tự nhiên, mát lành từng ly')
+    expect(wrapper.find('video').exists()).toBe(true)
   })
 
   it('shows skeleton when loading products', () => {
@@ -86,5 +86,73 @@ describe('HomeView', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Chưa có nội dung nổi bật. Vào admin để thêm block trang chủ.')
+  })
+
+  it('hides featured CTA when block has no button link', async () => {
+    homeSectionListMock.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          status: 'ACTIVE',
+          sortOrder: 0,
+          title: 'Block không nút',
+          description: 'Mô tả block',
+          buttonText: '',
+          buttonLink: '',
+        },
+      ],
+    })
+
+    const wrapper = mountView()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Block không nút')
+    expect(wrapper.text()).not.toContain('Xem thêm')
+  })
+
+  it('renders external featured links as anchors', async () => {
+    homeSectionListMock.mockResolvedValue({
+      data: [
+        {
+          id: 2,
+          status: 'ACTIVE',
+          sortOrder: 0,
+          title: 'Block ngoài',
+          description: 'Mô tả',
+          buttonText: 'Mở Maps',
+          buttonLink: 'https://maps.google.com/example',
+        },
+      ],
+    })
+
+    const wrapper = mountView()
+    await flushPromises()
+
+    const externalLink = wrapper.find('a[href="https://maps.google.com/example"]')
+    expect(externalLink.exists()).toBe(true)
+    expect(externalLink.attributes('target')).toBe('_blank')
+  })
+
+  it('renders CTA card layout with lime button', async () => {
+    homeSectionListMock.mockResolvedValue({
+      data: [
+        {
+          id: 3,
+          status: 'ACTIVE',
+          sortOrder: 0,
+          type: 'CTA_CARD',
+          title: 'Nhượng quyền',
+          description: 'Mô tả CTA',
+          buttonText: 'Tìm hiểu',
+          buttonLink: '/franchise',
+        },
+      ],
+    })
+
+    const wrapper = mountView()
+    await flushPromises()
+
+    expect(wrapper.find('.bg-brand-lime').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Tìm hiểu')
   })
 })

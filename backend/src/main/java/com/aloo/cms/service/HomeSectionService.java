@@ -19,6 +19,7 @@ public class HomeSectionService {
 
     private final HomeSectionRepository homeSectionRepository;
     private final HomeSectionMapper homeSectionMapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<HomeSectionResponse> findAll(boolean activeOnly) {
@@ -38,7 +39,9 @@ public class HomeSectionService {
     public HomeSectionResponse create(HomeSectionRequest request) {
         assertUniqueSectionKey(request.sectionKey(), null);
         HomeSection section = homeSectionMapper.toEntity(request);
-        return homeSectionMapper.toResponse(homeSectionRepository.save(section));
+        HomeSectionResponse response = homeSectionMapper.toResponse(homeSectionRepository.save(section));
+        auditLogService.logCreated("HOME_SECTION", String.valueOf(response.id()), label(response), response.sectionKey());
+        return response;
     }
 
     @Transactional
@@ -49,12 +52,28 @@ public class HomeSectionService {
         }
         assertUniqueSectionKey(request.sectionKey(), id);
         homeSectionMapper.updateEntity(section, request);
-        return homeSectionMapper.toResponse(homeSectionRepository.save(section));
+        HomeSectionResponse response = homeSectionMapper.toResponse(homeSectionRepository.save(section));
+        auditLogService.logUpdated("HOME_SECTION", String.valueOf(response.id()), label(response), response.sectionKey());
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
-        homeSectionRepository.delete(getSection(id));
+        HomeSection section = getSection(id);
+        auditLogService.logDeleted(
+                "HOME_SECTION",
+                String.valueOf(section.getId()),
+                label(homeSectionMapper.toResponse(section)),
+                section.getSectionKey()
+        );
+        homeSectionRepository.delete(section);
+    }
+
+    private String label(HomeSectionResponse response) {
+        if (response.title() != null && !response.title().isBlank()) {
+            return response.title();
+        }
+        return response.sectionKey();
     }
 
     private HomeSection getSection(Long id) {

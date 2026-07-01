@@ -2,16 +2,21 @@ package com.aloo.cms.service;
 
 import com.aloo.cms.dto.AuthResponse;
 import com.aloo.cms.dto.ChangePasswordRequest;
+import com.aloo.cms.dto.ChangePasswordResponse;
 import com.aloo.cms.dto.LoginRequest;
+import com.aloo.cms.dto.PasswordChangeOtpResponse;
 import com.aloo.cms.dto.UpdateProfileRequest;
 import com.aloo.cms.dto.UserResponse;
 import com.aloo.cms.entity.AdminUser;
+import com.aloo.cms.entity.AuthProvider;
 import com.aloo.cms.exception.BadRequestException;
 import com.aloo.cms.exception.ResourceNotFoundException;
 import com.aloo.cms.mapper.UserMapper;
 import com.aloo.cms.repository.AdminUserRepository;
 import com.aloo.cms.security.CustomUserDetails;
 import com.aloo.cms.security.JwtService;
+import com.aloo.cms.support.PasswordChangePolicy;
+import com.aloo.cms.support.PasswordPolicySupport;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +36,10 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final AuditLogService auditLogService;
+    private final ChatService chatService;
+    private final MailNotificationService mailNotificationService;
+    private final PasswordChangeOtpService passwordChangeOtpService;
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
@@ -40,6 +50,9 @@ public class AuthService {
 
         AdminUser user = ((CustomUserDetails) authentication.getPrincipal()).getUser();
         user.setLastLoginAt(LocalDateTime.now());
+        if (user.getAuthProvider() != AuthProvider.GOOGLE) {
+            user.setAuthProvider(AuthProvider.LOCAL);
+        }
         adminUserRepository.save(user);
         String token = jwtService.generateToken(user);
         return AuthResponse.bearer(token, userMapper.toResponse(user));
@@ -53,32 +66,69 @@ public class AuthService {
     @Transactional
     public UserResponse updateProfile(Authentication authentication, UpdateProfileRequest request) {
         AdminUser user = currentUser(authentication);
-        String normalizedEmail = request.email().trim().toLowerCase();
 
-        if (!user.getEmail().equalsIgnoreCase(normalizedEmail)
-                && adminUserRepository.existsByEmailIgnoreCase(normalizedEmail)) {
-            throw new BadRequestException("Email is already used");
-        }
+        String priorPhone = user.getPhone();
+        String priorEmail = user.getEmail();
 
         user.setFullName(request.fullName().trim());
-        user.setEmail(normalizedEmail);
+        if (user.getAuthProvider() != AuthProvider.GOOGLE) {
+            String normalizedEmail = request.email().trim().toLowerCase();
+            if (!user.getEmail().equalsIgnoreCase(normalizedEmail)
+                    && adminUserRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+                throw new BadRequestException("Email is already used");
+            }
+            user.setEmail(normalizedEmail);
+        }
         user.setPhone(nullable(request.phone()));
         if (request.avatarUrl() != null) {
             user.setAvatarUrl(nullable(request.avatarUrl()));
         }
-        return userMapper.toResponse(adminUserRepository.save(user));
+        AdminUser saved = adminUserRepository.save(user);
+        chatService.syncVisitorSessionsForUser(saved, priorPhone, priorEmail);
+        UserResponse response = userMapper.toResponse(saved);
+        auditLogService.logUpdated("ADMIN_PROFILE", String.valueOf(user.getId()), user.getEmail(), user.getEmail());
+        return response;
     }
 
     @Transactional
-    public void changePassword(Authentication authentication, ChangePasswordRequest request) {
+    public PasswordChangeOtpResponse requestPasswordChangeOtp(Authentication authentication) {
         AdminUser user = currentUser(authentication);
+        return passwordChangeOtpService.requestOtp(user);
+    }
 
-        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
-            throw new BadRequestException("Current password is incorrect");
+    @Transactional
+    public ChangePasswordResponse changePassword(Authentication authentication, ChangePasswordRequest request) {
+        AdminUser user = currentUser(authentication);
+        String newPassword = request.newPassword();
+        PasswordPolicySupport.validateStrongPassword(newPassword);
+
+        if (PasswordChangePolicy.requiresCurrentPassword(user)) {
+            String currentPassword = request.currentPassword() == null ? "" : request.currentPassword().trim();
+            if (!StringUtils.hasText(currentPassword)) {
+                throw new BadRequestException("Current password is required");
+            }
+            if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+                throw new BadRequestException("Current password is incorrect");
+            }
+            if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+                throw new BadRequestException("New password must be different from current password");
+            }
+        } else if (passwordChangeOtpService.isOtpRequired(user)) {
+            passwordChangeOtpService.verifyAndConsume(user.getId(), request.otp());
         }
 
-        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        LocalDateTime changedAt = LocalDateTime.now();
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setPasswordSetAt(changedAt);
         adminUserRepository.save(user);
+        auditLogService.log(
+                "CHANGE_OWN_PASSWORD",
+                "ADMIN_PROFILE",
+                String.valueOf(user.getId()),
+                "Changed own password for " + user.getEmail()
+        );
+        boolean emailSent = mailNotificationService.sendPasswordChangedNotification(user, changedAt);
+        return new ChangePasswordResponse(changedAt, emailSent);
     }
 
     private AdminUser currentUser(Authentication authentication) {

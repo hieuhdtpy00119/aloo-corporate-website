@@ -1,10 +1,11 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { ArrowLeft, ArrowRight, CheckCircle2, Leaf, MessageCircle, Sparkles, Star } from 'lucide-vue-next'
-import { feedbackService, productService, resolveBackendAssetUrl } from '../../services/cmsService'
+import { productReviewService, productService, resolveBackendAssetUrl } from '../../services/cmsService'
 import { setSeoMeta } from '../../services/seoService'
 import { useAppStore } from '../../stores/appStore'
+import { isAuthenticatedToken } from '../../utils/authToken'
 
 const route = useRoute()
 const store = useAppStore()
@@ -12,7 +13,16 @@ const product = ref(null)
 const isLoading = ref(false)
 const errorMessage = ref('')
 const activeImageIndex = ref(0)
-const feedbacks = ref([])
+const reviews = ref([])
+const myReview = ref(null)
+const isAuthenticated = ref(isAuthenticatedToken(localStorage.getItem('admin_token')))
+const isSubmittingReview = ref(false)
+const reviewFormError = ref('')
+const reviewFormSuccess = ref('')
+const reviewForm = reactive({
+  rating: 5,
+  content: '',
+})
 
 const splitLines = (value) =>
   String(value || '')
@@ -43,13 +53,28 @@ const tasteItems = computed(() => splitLines(product.value?.tasteProfile))
 const servingItems = computed(() => splitLines(product.value?.servingSuggestion))
 const faqs = computed(() => parseFaqs(product.value?.faqs))
 const averageFeedbackRating = computed(() => {
-  if (!feedbacks.value.length) return null
-  const total = feedbacks.value.reduce((sum, feedback) => sum + Number(feedback.rating || 0), 0)
-  return Math.round((total / feedbacks.value.length) * 10) / 10
+  if (!reviews.value.length) return null
+  const total = reviews.value.reduce((sum, review) => sum + Number(review.rating || 0), 0)
+  return Math.round((total / reviews.value.length) * 10) / 10
 })
 const feedbackCountLabel = computed(() =>
-  feedbacks.value.length ? `${feedbacks.value.length} cảm nhận` : 'Chưa có cảm nhận',
+  reviews.value.length ? `${reviews.value.length} cảm nhận` : 'Chưa có cảm nhận',
 )
+const canSubmitReview = computed(() => {
+  if (!isAuthenticated.value) return false
+  if (!myReview.value) return true
+  return myReview.value.status === 'REJECTED'
+})
+const reviewStatusMessage = computed(() => {
+  if (!myReview.value) return ''
+  if (myReview.value.status === 'PENDING' || myReview.value.status === 'APPROVED') {
+    return 'Bạn đã đánh giá sản phẩm này. Cảm nhận của bạn đang hiển thị trong danh sách bên dưới.'
+  }
+  if (myReview.value.status === 'REJECTED') {
+    return 'Cảm nhận trước đó đã bị ẩn. Bạn có thể gửi lại đánh giá mới.'
+  }
+  return ''
+})
 
 const formatFeedbackDate = (value) => {
   if (!value) return ''
@@ -61,10 +86,61 @@ const formatFeedbackDate = (value) => {
 
 const customerInitial = (name) => String(name || '?').trim().charAt(0).toUpperCase() || '?'
 
-const feedbackContext = (feedback) => {
-  const parts = []
-  if (feedback.storeName) parts.push(feedback.storeName)
-  return parts.join(' | ')
+const syncAuthState = () => {
+  isAuthenticated.value = isAuthenticatedToken(localStorage.getItem('admin_token'))
+}
+
+const loadMyReview = async () => {
+  if (!isAuthenticated.value || !product.value?.id) {
+    myReview.value = null
+    return
+  }
+  try {
+    const response = await productReviewService.getMine(product.value.id)
+    myReview.value = response.status === 200 ? response.data : null
+  } catch {
+    myReview.value = null
+  }
+}
+
+const loadReviews = async () => {
+  try {
+    if (!product.value?.id) {
+      reviews.value = []
+      return
+    }
+    const { data } = await productReviewService.listByProduct(product.value.id)
+    reviews.value = Array.isArray(data) ? data : []
+  } catch {
+    reviews.value = []
+  }
+}
+
+const submitReview = async () => {
+  reviewFormError.value = ''
+  reviewFormSuccess.value = ''
+  if (!canSubmitReview.value || !product.value?.id) return
+  if (!reviewForm.content.trim() || reviewForm.content.trim().length < 10) {
+    reviewFormError.value = 'Vui lòng nhập cảm nhận ít nhất 10 ký tự.'
+    return
+  }
+
+  isSubmittingReview.value = true
+  try {
+    const { data } = await productReviewService.submit(product.value.id, {
+      rating: Number(reviewForm.rating || 5),
+      content: reviewForm.content.trim(),
+    })
+    myReview.value = data
+    reviewForm.content = ''
+    reviewForm.rating = 5
+    reviewFormSuccess.value = 'Đã gửi cảm nhận. Đánh giá của bạn đã hiển thị công khai.'
+    await loadReviews()
+  } catch (error) {
+    reviewFormError.value = error.response?.data?.message || 'Không gửi được cảm nhận. Vui lòng thử lại.'
+  } finally {
+    isSubmittingReview.value = false
+  }
 }
 
 // Premium dynamic fallback properties when details are not set in the CMS database
@@ -140,16 +216,7 @@ const relatedProducts = computed(() =>
 )
 
 const loadFeedbacks = async () => {
-  try {
-    if (!product.value?.id) {
-      feedbacks.value = []
-      return
-    }
-    const { data } = await feedbackService.listVisible()
-    feedbacks.value = Array.isArray(data) ? data : []
-  } catch {
-    feedbacks.value = []
-  }
+  await Promise.all([loadReviews(), loadMyReview()])
 }
 
 const loadProduct = async () => {
@@ -177,8 +244,17 @@ const loadProduct = async () => {
   }
 }
 
-onMounted(loadProduct)
+onMounted(() => {
+  window.addEventListener('aloo-auth-change', syncAuthState)
+  loadProduct()
+})
+onUnmounted(() => {
+  window.removeEventListener('aloo-auth-change', syncAuthState)
+})
 watch(() => route.params.slug, loadProduct)
+watch(isAuthenticated, () => {
+  loadMyReview()
+})
 </script>
 
 <template>
@@ -392,40 +468,37 @@ watch(() => route.params.slug, loadProduct)
               </div>
 
               <div class="border-y border-slate-100 bg-white">
-                <div v-if="feedbacks.length" class="divide-y divide-slate-100">
-                  <article v-for="feedback in feedbacks" :key="feedback.id" class="flex gap-4 py-6 sm:gap-5 sm:py-7">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-base font-semibold text-slate-500">
-                      {{ customerInitial(feedback.customerName) }}
+                <div v-if="reviews.length" class="divide-y divide-slate-100">
+                  <article v-for="review in reviews" :key="review.id" class="flex gap-4 py-6 sm:gap-5 sm:py-7">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-50 text-base font-semibold text-slate-500">
+                      <img
+                        v-if="review.avatarUrl"
+                        :src="resolveBackendAssetUrl(review.avatarUrl)"
+                        :alt="review.customerName"
+                        class="h-full w-full object-cover"
+                      />
+                      <span v-else>{{ customerInitial(review.customerName) }}</span>
                     </div>
 
                     <div class="min-w-0 flex-1">
                       <div class="flex items-start justify-between gap-4">
                         <div class="min-w-0">
-                          <h3 class="truncate text-sm font-semibold text-slate-950">{{ feedback.customerName }}</h3>
+                          <h3 class="truncate text-sm font-semibold text-slate-950">{{ review.customerName }}</h3>
                           <div class="mt-1 flex items-center gap-0.5 text-[#ee4d2d]">
                             <Star
                               v-for="star in 5"
                               :key="star"
                               class="h-4 w-4"
-                              :class="star <= feedback.rating ? 'fill-[#ee4d2d]' : 'fill-transparent text-slate-200'"
+                              :class="star <= review.rating ? 'fill-[#ee4d2d]' : 'fill-transparent text-slate-200'"
                             />
                           </div>
                           <p class="mt-2 text-sm font-medium text-slate-500">
-                            {{ formatFeedbackDate(feedback.createdAt) }}
-                            <template v-if="feedbackContext(feedback)"> | {{ feedbackContext(feedback) }}</template>
+                            {{ formatFeedbackDate(review.createdAt) }}
                           </p>
                         </div>
                       </div>
 
-                      <p class="mt-5 text-[15px] font-medium leading-7 text-slate-950">{{ feedback.content }}</p>
-
-                      <div v-if="feedback.avatarUrl" class="mt-5 flex flex-wrap gap-3">
-                        <img
-                          :src="resolveBackendAssetUrl(feedback.avatarUrl)"
-                          :alt="`Ảnh cảm nhận của ${feedback.customerName}`"
-                          class="h-24 w-24 rounded-sm object-cover ring-1 ring-slate-100"
-                        />
-                      </div>
+                      <p class="mt-5 text-[15px] font-medium leading-7 text-slate-950">{{ review.content }}</p>
                     </div>
                   </article>
                 </div>
@@ -434,6 +507,73 @@ watch(() => route.params.slug, loadProduct)
                 </div>
               </div>
             </div>
+
+            <aside class="rounded-2xl border border-slate-100 bg-cream-50 p-5 lg:sticky lg:top-24">
+              <div class="flex items-center gap-2">
+                <MessageCircle class="h-5 w-5 text-brand-forest" />
+                <h3 class="text-lg font-black text-brand-dark">Viết cảm nhận</h3>
+              </div>
+              <p class="mt-2 text-sm font-medium leading-6 text-brand-muted">
+                Chia sẻ trải nghiệm sau khi thưởng thức sản phẩm. Cảm nhận sẽ hiển thị ngay sau khi bạn gửi.
+              </p>
+
+              <div v-if="!isAuthenticated" class="mt-5 rounded-xl border border-brand-forest/10 bg-white p-4">
+                <p class="text-sm font-semibold text-brand-muted">Đăng nhập để gửi cảm nhận về sản phẩm này.</p>
+                <RouterLink
+                  :to="{ path: '/login', query: { redirect: route.fullPath } }"
+                  class="mt-4 inline-flex rounded-full bg-brand-lime px-5 py-2.5 text-xs font-black uppercase tracking-wider text-brand-dark transition hover:bg-brand-lime/90"
+                >
+                  Đăng nhập
+                </RouterLink>
+              </div>
+
+              <div v-else-if="reviewStatusMessage && !canSubmitReview" class="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-800">
+                {{ reviewStatusMessage }}
+              </div>
+
+              <form v-if="canSubmitReview" class="mt-5 space-y-4" @submit.prevent="submitReview">
+                <div>
+                  <p class="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Đánh giá sao</p>
+                  <div class="mt-2 flex items-center gap-1">
+                    <button
+                      v-for="star in 5"
+                      :key="star"
+                      type="button"
+                      class="rounded p-0.5 transition hover:scale-110"
+                      @click="reviewForm.rating = star"
+                    >
+                      <Star
+                        class="h-7 w-7"
+                        :class="star <= reviewForm.rating ? 'fill-[#ee4d2d] text-[#ee4d2d]' : 'fill-transparent text-slate-300'"
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                <label class="block">
+                  <span class="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Nội dung cảm nhận</span>
+                  <textarea
+                    v-model="reviewForm.content"
+                    rows="5"
+                    maxlength="2000"
+                    required
+                    placeholder="Chia sẻ cảm nhận của bạn về hương vị, độ béo, trải nghiệm thưởng thức..."
+                    class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-brand-dark outline-none transition focus:border-brand-forest"
+                  />
+                </label>
+
+                <p v-if="reviewFormError" class="text-sm font-semibold text-red-600">{{ reviewFormError }}</p>
+                <p v-if="reviewFormSuccess" class="text-sm font-semibold text-emerald-700">{{ reviewFormSuccess }}</p>
+
+                <button
+                  type="submit"
+                  class="inline-flex w-full items-center justify-center rounded-full bg-brand-forest px-5 py-3 text-xs font-black uppercase tracking-wider text-white transition hover:bg-brand-forest/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  :disabled="isSubmittingReview"
+                >
+                  {{ isSubmittingReview ? 'Đang gửi...' : 'Gửi cảm nhận' }}
+                </button>
+              </form>
+            </aside>
           </div>
         </div>
       </section>

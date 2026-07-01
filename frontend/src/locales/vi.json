@@ -431,9 +431,11 @@
       "openMenu": "Mở menu quản trị",
       "brandTitle": "ALOO Admin",
       "brandSubtitle": "Quản trị hệ thống",
-      "viewWebsite": "Xem website",
+      "viewWebsite": "Xem trang chủ",
       "logout": "Đăng xuất",
       "profile": "Hồ sơ tài khoản",
+      "personalInfo": "Thông tin cá nhân",
+      "manageCms": "Quản trị CMS",
       "security": "Bảo mật",
       "adminFallbackName": "ALOO Admin",
       "adminFallbackEmail": "admin{'@'}aloo.vn",
@@ -450,11 +452,13 @@
       "products": "Sản phẩm & hiển thị",
       "franchise": "Nhượng quyền",
       "feedbacks": "Cảm nhận khách hàng",
+      "productReviews": "Đánh giá sản phẩm",
       "homeSections": "Trang chủ",
       "articles": "Tin tức",
       "categories": "Danh mục bài viết",
       "locations": "Hệ thống cửa hàng",
       "registrations": "Lead tư vấn",
+      "liveChat": "Chat trực tuyến",
       "accounts": "Tài khoản & phân quyền",
       "auditLogs": "Nhật ký hệ thống"
     },
@@ -476,7 +480,9 @@
       "paginationPrev": "Trước",
       "paginationNext": "Sau",
       "paginationPage": "Trang {page} / {totalPages}",
-      "rows": "dòng"
+      "rows": "dòng",
+      "totalCount": "Tổng: {count}",
+      "listTitle": "Danh sách"
     },
     "roles": {
       "FULL": "Quản trị viên toàn quyền",
@@ -572,6 +578,7 @@
     "articles": {
       "eyebrow": "Article Management System",
       "title": "Quản lý tin tức",
+      "listTitle": "Danh sách bài viết",
       "description": "Quản lý bài SEO, review địa điểm ăn uống, tin thương hiệu và nội dung nhượng quyền của ALOO.",
       "add": "Thêm bài viết",
       "empty": "Không có dữ liệu phù hợp",
@@ -619,9 +626,15 @@
         "email": "Email",
         "phone": "Số điện thoại",
         "role": "Vai trò",
+        "adminProfile": "Phân quyền admin",
         "currentPassword": "Mật khẩu hiện tại",
         "newPassword": "Mật khẩu mới",
-        "confirmPassword": "Nhập lại mật khẩu mới"
+        "confirmPassword": "Nhập lại mật khẩu mới",
+        "otp": "Mã xác nhận OTP",
+        "otpPlaceholder": "6 chữ số"
+      },
+      "email": {
+        "googleLocked": "Email liên kết với Google, không thể thay đổi."
       },
       "avatar": {
         "chooseLabel": "Chọn ảnh đại diện",
@@ -631,12 +644,22 @@
       "security": {
         "accountTitle": "Bảo mật tài khoản",
         "adminTitle": "Bảo mật admin",
-        "accountDescription": "Đặt hoặc đổi mật khẩu để đăng nhập bằng email khi cần. Nếu bạn chỉ dùng Google, có thể bỏ qua mục này.",
-        "adminDescription": "Mật khẩu admin nên được đổi định kỳ và không dùng lại với tài khoản cá nhân."
+        "setDescription": "Đặt mật khẩu để đăng nhập bằng email khi không dùng Google. Bạn vẫn có thể đăng nhập Google như bình thường.",
+        "setDescriptionOtp": "Xác minh email bằng mã OTP trước khi đặt mật khẩu lần đầu. Bạn vẫn có thể đăng nhập Google như bình thường.",
+        "otpHint": "Nhấn gửi mã để nhận OTP 6 số qua email đã đăng ký.",
+        "otpSentTo": "Đã gửi tới {email}",
+        "accountDescription": "Đổi mật khẩu đăng nhập bằng email. Bạn vẫn có thể dùng Google nếu đã liên kết.",
+        "adminDescription": "Mật khẩu admin nên được đổi định kỳ và không dùng lại với tài khoản cá nhân.",
+        "lastChanged": "Đổi mật khẩu lần cuối: {time}"
       },
       "actions": {
         "saveProfile": "Cập nhật thông tin",
         "savingProfile": "Đang lưu...",
+        "setPassword": "Đặt mật khẩu",
+        "settingPassword": "Đang lưu...",
+        "sendOtp": "Gửi mã OTP",
+        "sendingOtp": "Đang gửi...",
+        "resendOtpIn": "Gửi lại sau {seconds}s",
         "changePassword": "Đổi mật khẩu",
         "changingPassword": "Đang đổi..."
       },
@@ -650,33 +673,64 @@
         "profileUpdateError": "Không cập nhật được thông tin",
         "checkForm": "Vui lòng kiểm tra lại thông tin",
         "passwordUpdated": "Đổi mật khẩu thành công",
-        "passwordUpdateError": "Không đổi được mật khẩu"
+        "passwordSet": "Đặt mật khẩu thành công",
+        "passwordEmailSent": "Email xác nhận đã được gửi.",
+        "otpSent": "Đã gửi mã OTP tới {email}.",
+        "otpSendError": "Không gửi được mã OTP",
+        "passwordUpdateError": "Không cập nhật được mật khẩu"
       }
     },
     "password": {
       "minLengthHint": "Mật khẩu tối thiểu {min} ký tự",
+      "strength": {
+        "weak": "Yếu",
+        "medium": "Trung bình",
+        "strong": "Mạnh"
+      },
+      "requirements": {
+        "minLength": "Ít nhất 8 ký tự",
+        "upperCase": "Có chữ hoa",
+        "lowerCase": "Có chữ thường",
+        "number": "Có số",
+        "special": "Có ký tự đặc biệt"
+      },
       "errors": {
         "currentRequired": "Vui lòng nhập mật khẩu hiện tại",
         "newRequired": "Vui lòng nhập mật khẩu mới",
         "confirmRequired": "Vui lòng nhập lại mật khẩu mới",
         "minLength": "Mật khẩu mới tối thiểu 8 ký tự",
+        "weak": "Mật khẩu chưa đủ mạnh theo yêu cầu bảo mật",
         "mismatch": "Mật khẩu nhập lại không khớp",
-        "tooShort": "Mật khẩu tối thiểu 8 ký tự"
+        "sameAsCurrent": "Mật khẩu mới phải khác mật khẩu hiện tại",
+        "tooShort": "Mật khẩu tối thiểu 8 ký tự",
+        "otpRequired": "Vui lòng nhập mã OTP",
+        "otpInvalid": "Mã OTP phải gồm 6 chữ số"
       }
     },
     "accounts": {
       "emptyTitle": "Chưa có dữ liệu",
       "emptyDescription": "Vui lòng thêm tài khoản trong trang quản trị.",
       "title": "Quản lý tài khoản",
+      "listTitle": "Danh sách tài khoản",
       "description": "Quản lý tài khoản admin CMS và người dùng public. Mật khẩu không bao giờ hiển thị lại.",
       "addAccount": "Thêm {type}",
       "adminType": "tài khoản admin",
       "customerType": "tài khoản người dùng",
-      "tabAdmins": "Admin CMS",
-      "tabCustomers": "Người dùng",
-      "searchPlaceholder": "Tìm theo tên, email, SĐT...",
+      "tabAdmins": "Quản trị viên",
+      "tabCustomers": "Khách hàng",
+      "addNew": "Thêm mới",
+      "subtitleAdmins": "{count} quản trị viên",
+      "subtitleCustomers": "{count} khách hàng",
+      "searchPlaceholder": "Tìm theo tên hoặc email...",
       "allStatuses": "Tất cả trạng thái",
       "profileLabel": "Phân quyền CMS",
+      "customerRoleLabel": "Khách hàng",
+      "googleAccountBadge": "Google",
+      "sessionAccountBadge": "Bạn",
+      "googlePasswordBlocked": "Tài khoản đăng nhập Google không dùng mật khẩu CMS. Hãy đổi mật khẩu trên Google.",
+      "selfDeleteBlocked": "Không thể xóa tài khoản bạn đang đăng nhập.",
+      "selfStatusBlocked": "Không thể khóa hoặc đổi trạng thái tài khoản bạn đang đăng nhập.",
+      "paginationLabel": "tài khoản",
       "loadError": "Không tải được danh sách tài khoản",
       "saveSuccessCreate": "Đã tạo tài khoản",
       "saveSuccessUpdate": "Đã cập nhật tài khoản",
@@ -693,18 +747,31 @@
         "INACTIVE": "Tạm ẩn",
         "LOCKED": "Đã khóa"
       },
+      "statusShort": {
+        "ACTIVE": "Hoạt động",
+        "INACTIVE": "Tạm ẩn",
+        "LOCKED": "Đã khóa"
+      },
       "columns": {
         "account": "Tài khoản",
+        "accountName": "Tên tài khoản",
+        "email": "Email",
         "phone": "SĐT",
         "role": "Vai trò",
         "status": "Trạng thái",
         "createdAt": "Ngày tạo",
+        "lastLoginAt": "Đăng nhập lần cuối",
         "actions": "Hành động"
       },
       "actions": {
-        "password": "Mật khẩu",
+        "password": "Đổi mật khẩu",
         "edit": "Sửa",
         "delete": "Xóa",
+        "promote": "Nâng admin",
+        "demote": "Hạ xuống khách",
+        "lockAccount": "Khóa tài khoản",
+        "activateAccount": "Kích hoạt lại",
+        "setStatus": "Đặt {status}",
         "cancel": "Hủy",
         "save": "Lưu",
         "changePassword": "Đổi mật khẩu"
@@ -718,9 +785,17 @@
         "email": "Email",
         "phone": "Số điện thoại",
         "avatarUrl": "Avatar URL",
+        "avatarUpload": "Ảnh đại diện",
+        "avatarUploadHint": "Chọn ảnh JPG/PNG tối đa 5MB.",
         "status": "Trạng thái",
         "password": "Mật khẩu",
-        "newPassword": "Mật khẩu mới"
+        "newPassword": "Mật khẩu mới",
+        "lockHints": {
+          "googleEmail": "Email đăng nhập Google — không đổi được tại đây.",
+          "selfEmail": "Đổi email tài khoản của bạn tại trang Hồ sơ.",
+          "selfStatus": "Không đổi trạng thái tài khoản đang đăng nhập.",
+          "selfProfile": "Phân quyền của chính bạn cần admin khác thay đổi."
+        }
       },
       "confirmStatus": {
         "title": "Đổi trạng thái tài khoản?",
@@ -729,37 +804,147 @@
       },
       "confirmDelete": {
         "title": "Xóa tài khoản?",
-        "message": "Tài khoản sẽ bị xóa khỏi hệ thống. Hành động này không nên dùng nếu chỉ muốn tạm khóa.",
+        "message": "Tài khoản {name} ({email}) sẽ bị xóa vĩnh viễn khỏi hệ thống. Hành động này không thể hoàn tác.",
         "confirm": "Xóa"
-      }
+      },
+      "promote": {
+        "title": "Nâng lên admin CMS",
+        "message": "Chuyển {name} ({email}) từ khách hàng sang tài khoản quản trị CMS.",
+        "reloginHint": "Người dùng cần đăng xuất và đăng nhập lại Google để vào /admin với quyền mới.",
+        "confirm": "Nâng lên admin"
+      },
+      "demote": {
+        "title": "Hạ xuống khách hàng?",
+        "message": "Chuyển {name} ({email}) từ quản trị viên về tài khoản khách. Người này sẽ mất quyền truy cập /admin.",
+        "reloginHint": "Người dùng nên đăng xuất để phiên đăng nhập hiện tại hết hiệu lực.",
+        "confirm": "Hạ xuống khách"
+      },
+      "promoteSuccess": "Đã nâng tài khoản lên admin",
+      "promoteError": "Không nâng được tài khoản lên admin",
+      "demoteSuccess": "Đã chuyển về tài khoản khách",
+      "demoteError": "Không hạ được tài khoản",
+      "selfDemoteBlocked": "Không thể hạ quyền tài khoản bạn đang đăng nhập.",
+      "whitelistTitle": "Danh sách email được phép làm admin",
+      "whitelistDescription": "Chỉ các email dưới đây mới tạo hoặc nâng lên admin CMS. Cấu hình qua biến ADMIN_EMAIL_WHITELIST trên server.",
+      "whitelistDisabled": "Whitelist admin đang tắt — mọi email đều có thể được nâng lên admin. Nên bật whitelist trên môi trường production.",
+      "whitelistBlocked": "Email này không nằm trong danh sách admin được phép."
     },
     "accessDenied": "Bạn không có quyền truy cập trang này.",
     "auditLogs": {
       "title": "Nhật ký hệ thống",
-      "description": "Theo dõi thay đổi tài khoản và thao tác quản trị quan trọng.",
+      "listTitle": "Danh sách nhật ký",
+      "description": "Theo dõi mọi thao tác quản trị trong CMS.",
       "loadError": "Không tải được nhật ký hệ thống",
       "emptyTitle": "Chưa có nhật ký",
-      "emptyDescription": "Các thao tác quản trị sẽ được ghi lại tại đây.",
+      "emptyDescription": "Mọi thao tác quản trị sẽ được ghi lại tại đây.",
       "exportCsv": "Xuất CSV",
       "filters": {
         "actor": "Người thực hiện",
         "actorPlaceholder": "Email admin...",
         "action": "Hành động",
-        "actionPlaceholder": "CREATE, UPDATE...",
+        "actionPlaceholder": "Tạo sản phẩm, Xóa bài viết...",
         "entityType": "Loại đối tượng",
-        "entityPlaceholder": "ACCOUNT, PRODUCT...",
+        "entityPlaceholder": "Sản phẩm, Bài viết, Cửa hàng...",
         "from": "Từ ngày",
         "to": "Đến ngày",
         "apply": "Lọc",
         "reset": "Xóa lọc"
       },
       "paginationLabel": "bản ghi",
+      "detailModal": {
+        "title": "Chi tiết nhật ký",
+        "summaryEyebrow": "Đối tượng",
+        "close": "Đóng",
+        "hint": "Bấm vào một dòng để xem đầy đủ"
+      },
       "columns": {
         "time": "Thời gian",
         "actor": "Người thực hiện",
         "action": "Hành động",
         "entity": "Đối tượng",
         "details": "Chi tiết"
+      },
+      "featured": {
+        "on": "hiển thị",
+        "off": "ẩn"
+      },
+      "actions": {
+        "createAdmin": "Tạo tài khoản admin",
+        "updateAdmin": "Cập nhật tài khoản admin",
+        "updateAdminStatus": "Đổi trạng thái admin",
+        "changeAdminPassword": "Đặt lại mật khẩu admin",
+        "changeCustomerPassword": "Đặt lại mật khẩu khách",
+        "changeOwnPassword": "Đổi mật khẩu của tôi",
+        "deleteAdmin": "Xóa tài khoản admin",
+        "createCustomer": "Tạo tài khoản khách",
+        "updateCustomer": "Cập nhật tài khoản khách",
+        "updateCustomerStatus": "Đổi trạng thái khách",
+        "deleteCustomer": "Xóa tài khoản khách",
+        "promoteCustomer": "Nâng khách lên admin",
+        "demoteAdmin": "Hạ admin xuống khách",
+        "uploadFile": "Tải lên tệp",
+        "genericUpdateStatus": "Đổi trạng thái {entity}",
+        "genericUpdateFeatured": "Đổi hiển thị nổi bật {entity}",
+        "generic": {
+          "create": "Tạo {entity}",
+          "update": "Cập nhật {entity}",
+          "delete": "Xóa {entity}"
+        }
+      },
+      "entityTypes": {
+        "adminUser": "Tài khoản admin",
+        "customerUser": "Tài khoản khách",
+        "adminProfile": "Hồ sơ admin",
+        "product": "Sản phẩm",
+        "post": "Bài viết",
+        "category": "Danh mục",
+        "store": "Cửa hàng",
+        "homeSection": "Mục trang chủ",
+        "heroBanner": "Banner hero",
+        "menuPoster": "Poster menu",
+        "brandTimeline": "Timeline thương hiệu",
+        "franchiseContent": "Nội dung nhượng quyền",
+        "feedback": "Phản hồi khách",
+        "productReview": "Đánh giá sản phẩm",
+        "contactMessage": "Tin nhắn liên hệ",
+        "franchiseRegistration": "Lead nhượng quyền",
+        "file": "Tệp tin"
+      },
+      "kinds": {
+        "product": "sản phẩm",
+        "post": "bài viết",
+        "category": "danh mục",
+        "store": "cửa hàng",
+        "homeSection": "mục trang chủ",
+        "heroBanner": "banner hero",
+        "menuPoster": "poster menu",
+        "brandTimeline": "mục timeline",
+        "franchiseContent": "khối nội dung nhượng quyền",
+        "feedback": "phản hồi",
+        "productReview": "đánh giá sản phẩm",
+        "contactMessage": "tin nhắn liên hệ",
+        "franchiseRegistration": "lead nhượng quyền",
+        "adminProfile": "hồ sơ admin",
+        "file": "tệp tin"
+      },
+      "details": {
+        "createAdmin": "Đã tạo tài khoản admin {email} với quyền {profile}",
+        "updateAdmin": "Đã cập nhật tài khoản admin {email}",
+        "updateStatus": "Đã đổi trạng thái sang {status}",
+        "changeAdminPassword": "Đã đặt lại mật khẩu cho {email}",
+        "changeOwnPassword": "Đã đổi mật khẩu của {email}",
+        "deleteAdmin": "Đã xóa tài khoản admin {email}",
+        "createCustomer": "Đã tạo tài khoản khách {email}",
+        "updateCustomer": "Đã cập nhật tài khoản khách {email}",
+        "deleteCustomer": "Đã xóa tài khoản khách {email}",
+        "promoteCustomer": "Đã nâng khách {email} lên admin với quyền {profile}",
+        "demoteAdmin": "Đã hạ admin {email} xuống khách",
+        "genericCreate": "Đã tạo {kind} {name} ({ref})",
+        "genericUpdate": "Đã cập nhật {kind} {name} ({ref})",
+        "genericDelete": "Đã xóa {kind} {name} ({ref})",
+        "genericStatus": "Đã đổi trạng thái {kind} {name} sang {status}",
+        "genericFeatured": "Đã đổi hiển thị nổi bật {kind} {name} thành {featured}",
+        "genericUpload": "Đã tải lên tệp {name}"
       }
     }
   }

@@ -1,11 +1,11 @@
 {
   "products": {
     "title": "Sản phẩm & hiển thị",
-    "description": "Quản lý sản phẩm, banner trang sản phẩm và menu poster theo chi nhánh.",
+    "listTitle": "Danh sách sản phẩm",
+    "description": "Quản lý sản phẩm và banner trang sản phẩm.",
     "tabs": {
       "products": "Sản phẩm",
-      "hero": "Banner trang SP",
-      "menu": "Menu poster"
+      "hero": "Banner trang SP"
     },
     "addProduct": "Thêm sản phẩm",
     "addHero": "Thêm banner",
@@ -111,32 +111,69 @@
       "editHero": "Cập nhật banner trang sản phẩm",
       "cropper": "Cắt Chỉnh Ảnh Nền Banner"
     },
+    "formTabs": {
+      "aria": "Phần form sản phẩm",
+      "required": "Bắt buộc",
+      "content": "Nội dung",
+      "mediaSeo": "Gallery & SEO",
+      "contentHint": "Mô tả ngắn hiện ở trang chi tiết; mô tả danh sách dùng trên home/menu.",
+      "mediaSeoHint": "Gallery, FAQ và SEO ảnh hưởng trang chi tiết sản phẩm."
+    },
+    "confirmDelete": {
+      "title": "Xóa sản phẩm?",
+      "message": "Sản phẩm sẽ bị xóa khỏi CMS và không còn hiển thị trên website. Hành động này không thể hoàn tác.",
+      "confirm": "Xóa sản phẩm",
+      "heroTitle": "Xóa banner trang sản phẩm?",
+      "heroMessage": "Banner này sẽ bị xóa khỏi slider đầu trang sản phẩm. Hành động này không thể hoàn tác.",
+      "heroConfirm": "Xóa banner"
+    },
+    "validation": {
+      "name": "Tên sản phẩm không được rỗng",
+      "slug": "Slug không được rỗng",
+      "duplicateSlug": "Slug đã được sử dụng bởi sản phẩm khác",
+      "sortOrder": "Thứ tự phải là số không âm",
+      "imageUrl": "URL ảnh không hợp lệ (dùng /uploads/..., đường dẫn /... hoặc https://...)",
+      "imageRecommended": "Sản phẩm đang bán nhưng chưa có ảnh — trang web sẽ hiện placeholder.",
+      "gallery": "Một hoặc nhiều URL gallery không hợp lệ",
+      "faqs": "Mỗi dòng FAQ phải theo dạng: Câu hỏi | Câu trả lời",
+      "seoTitle": "SEO title tối đa 260 ký tự",
+      "seoDescription": "SEO description tối đa 500 ký tự"
+    },
+    "fieldHints": {
+      "category": "Chỉ gợi ý danh mục loại PRODUCT. Có thể nhập tên mới để tạo danh mục.",
+      "shortDescription": "Hiển thị ở phần giới thiệu đầu trang chi tiết.",
+      "listDescription": "Dùng trên trang chủ, danh sách sản phẩm và tìm kiếm.",
+      "detailContent": "Đoạn nội dung dài trong trang chi tiết (câu chuyện sản phẩm).",
+      "faqs": "Ví dụ: Kem bơ có bảo quản lạnh không? | Nên dùng trong 24 giờ sau khi mua.",
+      "noCategory": "Chưa có danh mục"
+    },
     "fields": {
       "name": "Tên sản phẩm *",
       "slug": "Slug *",
       "category": "Danh mục",
       "status": "Trạng thái",
-      "imageUrl": "Đường dẫn ảnh (Image URL)",
-      "uploadImage": "Hoặc tải ảnh mới từ máy tính",
-      "shortDescription": "Mô tả ngắn trên thẻ sản phẩm",
-      "heroDescription": "Mô tả hero chi tiết",
-      "tasteProfile": "Hồ sơ hương vị",
-      "ingredients": "Nguyên liệu chính",
-      "servingSuggestion": "Gợi ý thưởng thức",
-      "detailContent": "Nội dung landing page",
-      "gallery": "Gallery ảnh chi tiết",
-      "faqs": "FAQ sản phẩm",
+      "imageUrl": "URL ảnh",
+      "uploadImage": "Tải ảnh",
+      "shortDescription": "Mô tả ngắn (trang chi tiết)",
+      "listDescription": "Mô tả danh sách (home/menu)",
+      "heroDescription": "Mô tả chi tiết",
+      "tasteProfile": "Hương vị",
+      "ingredients": "Nguyên liệu",
+      "servingSuggestion": "Gợi ý dùng",
+      "detailContent": "Nội dung trang",
+      "gallery": "Gallery",
+      "faqs": "FAQ",
       "seoTitle": "SEO title",
       "seoDescription": "SEO description",
-      "featured": "Đánh dấu sản phẩm nổi bật",
-      "branchKey": "Mã chi nhánh / khu vực *",
+      "featured": "Sản phẩm nổi bật",
+      "branchKey": "Mã chi nhánh *",
       "menuTitle": "Tên menu *",
       "menuSubtitle": "Mô tả ngắn",
       "sortOrder": "Thứ tự",
       "altText": "Alt text",
-      "menuImageUrl": "Đường dẫn ảnh menu",
-      "uploadMenuImage": "Hoặc tải ảnh menu từ máy tính",
-      "bannerTitle": "Tên banner nội bộ *",
+      "menuImageUrl": "URL ảnh menu",
+      "uploadMenuImage": "Tải ảnh menu",
+      "bannerTitle": "Tên banner *",
       "displayOrder": "Thứ tự hiển thị",
       "backgroundImage": "Ảnh nền"
     },
@@ -145,7 +182,8 @@
       "slug": "url-friendly-slug",
       "category": "Chọn hoặc nhập danh mục",
       "imageUrl": "https://...",
-      "shortDescription": "Mô tả ngắn dùng ở danh sách sản phẩm...",
+      "shortDescription": "Mô tả ngắn dùng ở trang chi tiết...",
+      "listDescription": "Mô tả hiển thị trên trang chủ và danh sách sản phẩm...",
       "heroDescription": "Một đoạn giới thiệu hấp dẫn cho trang chi tiết...",
       "tasteProfile": "Béo mịn, thơm bơ, ngọt nhẹ, topping giòn...",
       "ingredients": "Mỗi dòng một nguyên liệu: Bơ sáp; Kem sữa; Dừa khô...",
@@ -171,6 +209,7 @@
       "toneLight": "Sáng",
       "imagePreview": "Xem trước ảnh",
       "productImagePreview": "Xem trước sản phẩm",
+      "productCardPreview": "Xem trước card danh sách",
       "menuPreview": "Xem trước menu",
       "heroBgPreview": "Xem trước ảnh nền",
       "galleryAlt": "Gallery sản phẩm",
@@ -187,6 +226,7 @@
       "ratio16x9": "Chuẩn 16:9",
       "ratio4x3": "Tỷ lệ 4:3",
       "ratioFree": "Tùy chỉnh tự do",
+      "cropDragHint": "Kéo khung để di chuyển, kéo 4 góc để thay đổi kích thước. Có thể dùng thanh trượt bên dưới.",
       "cropPosX": "Vị trí ngang (X): {value}%",
       "cropPosY": "Vị trí dọc (Y): {value}%",
       "cropWidth": "Chiều rộng khung: {value}%",
@@ -208,11 +248,6 @@
       "products": "sản phẩm",
       "menu": "menu",
       "banner": "banner"
-    },
-    "confirmDelete": {
-      "heroTitle": "Xóa banner trang sản phẩm?",
-      "heroMessage": "Banner này sẽ bị xóa khỏi slider đầu trang sản phẩm. Hành động này không thể hoàn tác.",
-      "heroConfirm": "Xóa banner"
     }
   },
   "homeSections": {
@@ -226,6 +261,8 @@
     "emptyDescription": "Thêm block đầu tiên để hiển thị ở mục Nổi bật hôm nay.",
     "loading": "Đang tải nội dung trang chủ...",
     "paginationLabel": "block",
+    "listTitle": "Danh sách block",
+    "totalCount": "Tổng: {count}",
     "previewHomepage": "Xem trang chủ",
     "filters": {
       "searchLabel": "Tìm block",
@@ -253,6 +290,20 @@
       "button": "Nút điều hướng",
       "image": "Hình ảnh",
       "preview": "Xem trước card trang chủ"
+    },
+    "formTabs": {
+      "aria": "Phần form block trang chủ",
+      "required": "Bắt buộc",
+      "content": "Nội dung & nút",
+      "preview": "Xem trước",
+      "contentHint": "Badge hiển thị góc ảnh; mô tả là dòng chữ dưới tiêu đề trên card.",
+      "previewHint": "Kiểm tra card trước khi lưu.",
+      "typeHint": "Chọn kiểu hiển thị card trên trang chủ — xem preview bên dưới."
+    },
+    "linkOptions": {
+      "inactive": "không còn hiển thị",
+      "noActiveProducts": "Chưa có sản phẩm đang bán. Thêm hoặc bật trạng thái sản phẩm trước.",
+      "noPublishedPosts": "Chưa có bài viết đã đăng. Xuất bản bài viết trước khi gắn link."
     },
     "fields": {
       "title": "Tiêu đề",
@@ -312,6 +363,12 @@
       "PRODUCT_CARD": "Card sản phẩm",
       "LOCATION_CARD": "Card cửa hàng"
     },
+    "typeDescriptions": {
+      "FEATURED_CARD": "Layout chuẩn: ảnh ngang, badge góc trái, nút text ở chân card.",
+      "CTA_CARD": "Nhấn hành động: overlay tối trên ảnh và nút lime nổi bật (phù hợp nhượng quyền, đăng ký).",
+      "PRODUCT_CARD": "Kiểu sản phẩm: ảnh vuông, nhãn nhỏ trên tiêu đề, nút pill nhẹ.",
+      "LOCATION_CARD": "Kiểu cửa hàng: badge có icon vị trí, viền card đậm hơn."
+    },
     "linkTypes": {
       "NONE": "Không hiển thị nút",
       "STATIC": "Trang có sẵn",
@@ -336,6 +393,20 @@
       "saveCreate": "Thêm mới",
       "saveUpdate": "Lưu thay đổi"
     },
+    "validation": {
+      "title": "Tiêu đề không được rỗng",
+      "sectionKey": "Mã block không được rỗng",
+      "duplicateKey": "Mã block đã được sử dụng",
+      "sortOrder": "Thứ tự phải là số không âm",
+      "imageUrl": "URL ảnh không hợp lệ (dùng /uploads/..., đường dẫn /... hoặc https://...)",
+      "customLink": "Vui lòng nhập link tùy chỉnh",
+      "customLinkFormat": "Link không hợp lệ (dùng /duong-dan hoặc https://...)",
+      "staticPage": "Vui lòng chọn trang đích",
+      "product": "Vui lòng chọn sản phẩm",
+      "post": "Vui lòng chọn bài viết",
+      "linkRequired": "Vui lòng chọn hoặc nhập link cho nút",
+      "imageRecommended": "Block đang hiển thị nhưng chưa có ảnh — trang chủ sẽ dùng placeholder ALOO."
+    },
     "toasts": {
       "imageUploaded": "Đã tải ảnh block trang chủ",
       "imageError": "Không tải được ảnh",
@@ -353,6 +424,7 @@
   },
   "locations": {
     "title": "Hệ thống cửa hàng",
+    "listTitle": "Danh sách cửa hàng",
     "description": "Quản lý địa điểm, tiện ích, trạng thái và nội dung hiển thị trên website.",
     "add": "Thêm cửa hàng",
     "edit": "Sửa cửa hàng",
@@ -417,6 +489,53 @@
       "map": "Bản đồ & khu vực",
       "promo": "Quảng bá"
     },
+    "formTabs": {
+      "aria": "Phần form cửa hàng",
+      "required": "Bắt buộc",
+      "content": "Nội dung",
+      "preview": "Xem trước",
+      "contentHint": "Mô tả, tiện ích, thứ tự hiển thị và ảnh bổ sung cho trang chi tiết.",
+      "previewHint": "Xem thẻ cửa hàng như trên website trước khi lưu.",
+      "previewActive": "Trạng thái Đang hoạt động — hiển thị trên /locations (trừ Tạm nghỉ).",
+      "previewHidden": "Trạng thái này có thể ẩn hoặc hiển thị khác trên website.",
+      "openPublic": "Mở trang public"
+    },
+    "modals": {
+      "create": "Thêm cửa hàng mới",
+      "edit": "Sửa cửa hàng"
+    },
+    "confirmDelete": {
+      "title": "Xóa cửa hàng?",
+      "message": "Cửa hàng \"{name}\" sẽ bị xóa vĩnh viễn khỏi CMS. Hành động không thể hoàn tác.",
+      "confirm": "Xóa cửa hàng"
+    },
+    "linkTypes": {
+      "NONE": "Không có link bản đồ",
+      "STATIC": "Trang có sẵn",
+      "PRODUCT": "Sản phẩm cụ thể",
+      "POST": "Bài viết cụ thể",
+      "CUSTOM": "Link tùy chỉnh (Google Maps)"
+    },
+    "staticLinks": {
+      "home": "Trang chủ",
+      "products": "Sản phẩm",
+      "locations": "Hệ thống cửa hàng",
+      "franchise": "Nhượng quyền",
+      "about": "Về ALOO",
+      "blog": "Blog",
+      "consultation": "Đăng ký tư vấn",
+      "contact": "Liên hệ"
+    },
+    "fieldHints": {
+      "storeCode": "Mã duy nhất trong CMS và trang chi tiết.",
+      "storeCodeLocked": "Mã cửa hàng không đổi sau khi tạo.",
+      "slug": "Dùng cho URL /locations/{slug}. Đổi slug sẽ làm link cũ không còn hoạt động.",
+      "displayOrder": "Sắp xếp trên danh sách /locations; số nhỏ hiển thị trước.",
+      "mapUrl": "Dùng CUSTOM với link Google Maps cho nút Xem bản đồ.",
+      "imageUrl": "Dùng /uploads/... hoặc tải ảnh từ máy.",
+      "galleryText": "Mỗi dòng một URL — hiển thị trên trang chi tiết cửa hàng.",
+      "menuPostersText": "Chỉ lưu CMS — chưa hiển thị trên website."
+    },
     "fields": {
       "storeCode": "Mã cửa hàng",
       "name": "Tên cửa hàng",
@@ -425,6 +544,8 @@
       "email": "Email",
       "addressText": "Địa chỉ hiển thị",
       "openingHours": "Giờ hoạt động",
+      "opensAt": "Giờ mở cửa",
+      "closesAt": "Giờ đóng cửa",
       "storeType": "Loại cửa hàng",
       "description": "Mô tả",
       "mapUrl": "Google Maps URL",
@@ -447,6 +568,7 @@
     "placeholders": {
       "storeCode": "ALOO-QN-001",
       "slug": "kem-bo-aloo-395-nguyen-hue",
+      "mapUrl": "https://maps.google.com/...",
       "openingHours": "09:00 - 22:00",
       "galleryText": "Nhập mỗi URL ảnh trên một dòng",
       "menuPostersText": "Nhập mỗi URL poster/menu trên một dòng",
@@ -466,17 +588,20 @@
       "city": "Tỉnh/thành không được rỗng",
       "phone": "Số điện thoại tối đa 80 ký tự",
       "mapUrl": "Google Maps URL không hợp lệ",
-      "linkUrl": "URL liên kết không hợp lệ",
+      "linkUrl": "Link không hợp lệ (dùng /duong-dan hoặc https://...)",
+      "imageUrl": "URL ảnh không hợp lệ (dùng /uploads/..., /duong-dan hoặc https://...)",
+      "imageRecommended": "Cửa hàng đang hoạt động nhưng chưa có ảnh — website sẽ hiện placeholder ALOO.",
       "galleryText": "Mỗi dòng gallery phải là một URL hợp lệ",
       "menuPostersText": "Mỗi dòng menu poster phải là một URL hợp lệ",
-      "openingHours": "Giờ hoạt động là bắt buộc",
+      "openingHours": "Dùng định dạng 24 giờ (VD: 07:00 - 22:00). Bắt buộc khi trạng thái là Đang hoạt động.",
+      "openingHoursFormat": "Nhập đủ giờ mở và giờ đóng theo định dạng 24 giờ (VD: 07:00 và 22:00)",
       "displayOrder": "Thứ tự hiển thị phải là số"
     },
     "storeTypes": {
-      "FLAGSHIP": "Flagship",
-      "STANDARD": "Standard",
+      "FLAGSHIP": "Cửa hàng flagship",
+      "STANDARD": "Cửa hàng chuẩn",
       "KIOSK": "Kiosk",
-      "FRANCHISE": "Franchise",
+      "FRANCHISE": "Nhượng quyền",
       "POPUP": "Pop-up"
     },
     "paginationLabel": "cửa hàng",
@@ -491,11 +616,14 @@
     "featuredBadge": "Nổi bật",
     "hints": {
       "galleryText": "Dùng khi muốn hiển thị nhiều ảnh chi tiết cho cửa hàng.",
-      "menuPostersText": "Nếu cửa hàng có menu poster riêng, nhập link ảnh tại đây."
+      "menuPostersText": "Nếu cửa hàng có menu poster riêng, nhập link ảnh tại đây.",
+      "openingHours": "Dùng định dạng 24 giờ (VD: 07:00 - 22:00). Bắt buộc khi trạng thái là Đang hoạt động.",
+      "mapUrl": "Dùng cho nút Xem bản đồ trên website."
     }
   },
   "feedbacks": {
     "title": "Testimonial CMS",
+    "listTitle": "Danh sách testimonial",
     "description": "Quản lý cảm nhận khách hàng hiển thị trên website.",
     "add": "Thêm testimonial",
     "edit": "Cập nhật testimonial",
@@ -547,8 +675,48 @@
     "fieldsPublicVisible": "Hiển thị public",
     "paginationLabel": "testimonial"
   },
+  "productReviews": {
+    "title": "Đánh giá sản phẩm",
+    "listTitle": "Quản lý cảm nhận",
+    "description": "Cảm nhận khách gửi sẽ hiện ngay trên trang sản phẩm. Dùng Ẩn hoặc Xóa khi nội dung không phù hợp.",
+    "searchPlaceholder": "Tìm theo khách hàng, sản phẩm, nội dung...",
+    "paginationLabel": "cảm nhận",
+    "status": {
+      "pending": "Chờ xử lý",
+      "approved": "Đang hiển thị",
+      "rejected": "Đã ẩn"
+    },
+    "filters": {
+      "all": "Tất cả",
+      "pending": "Chờ xử lý",
+      "approved": "Đang hiển thị",
+      "rejected": "Đã ẩn"
+    },
+    "columns": {
+      "customer": "Khách hàng",
+      "product": "Sản phẩm",
+      "content": "Nội dung",
+      "rating": "Sao",
+      "status": "Trạng thái",
+      "actions": "Thao tác"
+    },
+    "actions": {
+      "approve": "Hiện lại",
+      "reject": "Ẩn",
+      "delete": "Xóa"
+    },
+    "toasts": {
+      "loadError": "Không tải được đánh giá sản phẩm",
+      "approved": "Đã hiện lại cảm nhận trên trang sản phẩm",
+      "rejected": "Đã ẩn cảm nhận khỏi trang sản phẩm",
+      "statusError": "Không cập nhật được trạng thái",
+      "deleted": "Đã xóa cảm nhận",
+      "deleteError": "Không xóa được cảm nhận"
+    }
+  },
   "leads": {
     "title": "Đăng ký tư vấn",
+    "listTitle": "Danh sách đăng ký",
     "description": "Danh sách khách hàng tiềm năng và trạng thái xử lý tư vấn nhượng quyền.",
     "empty": "Chưa có lead phù hợp",
     "emptyTable": "Chưa có đăng ký tư vấn nào.",
@@ -602,6 +770,41 @@
       "deleted": "Đã xóa đăng ký tư vấn thành công",
       "deleteError": "Không xóa được đăng ký tư vấn",
       "loadError": "Không tải được danh sách đăng ký tư vấn"
+    }
+  },
+  "chat": {
+    "title": "Chat trực tuyến",
+    "description": "Phản hồi khách truy cập website theo thời gian thực.",
+    "sessionsTitle": "Hội thoại",
+    "emptyTitle": "Chưa có hội thoại",
+    "emptyDescription": "Các phiên chat mới từ khách sẽ hiển thị tại đây.",
+    "selectTitle": "Chọn một hội thoại",
+    "selectDescription": "Chọn khách ở cột trái để xem tin nhắn và phản hồi.",
+    "send": "Gửi",
+    "composerPlaceholder": "Nhập phản hồi...",
+    "closedPlaceholder": "Hội thoại đã hoàn tất — không thể gửi thêm tin",
+    "searchPlaceholder": "Tìm tên, SĐT, mã phiên",
+    "statusLabel": "Trạng thái hội thoại",
+    "noMessages": "Chưa có tin nhắn trong hội thoại này.",
+    "messageVisitor": "Khách · {name}",
+    "messageVisitorFallback": "Khách",
+    "messageAdmin": "Bạn · ALOO",
+    "messageAuto": "ALOO Tư vấn",
+    "statuses": {
+      "open": "Chờ",
+      "active": "Đang",
+      "closed": "Xong"
+    },
+    "statusHints": {
+      "open": "Khách vừa nhắn, chưa có phản hồi từ ALOO.",
+      "active": "Đang trao đổi với khách, có thể gửi tin bình thường.",
+      "closed": "Đã xong việc — khách không gửi tin mới được."
+    },
+    "toasts": {
+      "loadFailed": "Không tải được dữ liệu chat",
+      "sendFailed": "Không gửi được tin nhắn",
+      "statusUpdated": "Đã cập nhật trạng thái hội thoại",
+      "statusFailed": "Không cập nhật được trạng thái hội thoại"
     }
   },
   "articleEditor": {
@@ -669,6 +872,7 @@
   },
   "categories": {
     "description": "Quản lý danh mục dùng cho blog và bộ lọc bài viết.",
+    "listTitle": "Danh sách danh mục",
     "add": "Thêm danh mục",
     "empty": "Không có dữ liệu phù hợp",
     "noDescription": "Chưa có mô tả",
@@ -718,6 +922,7 @@
   },
   "franchise": {
     "title": "Nội dung trang nhượng quyền",
+    "listTitle": "Danh sách nội dung",
     "description": "Quản lý hero, lợi thế, mô hình, quy trình, FAQ và CTA hiển thị tại `/franchise`.",
     "add": "Thêm block",
     "previewPublic": "Xem trang nhượng quyền",
@@ -759,17 +964,115 @@
     "fields": {
       "section": "Section",
       "title": "Tiêu đề",
+      "adminTitle": "Tiêu đề danh sách (CMS)",
       "amount": "Giá trị / amount",
       "sortOrder": "Thứ tự",
       "status": "Trạng thái",
       "note": "Ghi chú nội bộ",
-      "content": "Nội dung chi tiết"
+      "content": "Nội dung chi tiết",
+      "imageFile": "Tải ảnh lên",
+      "uploading": "Đang tải ảnh...",
+      "linkType": "Kiểu liên kết",
+      "hashSection": "Mục trên trang",
+      "staticPage": "Chọn trang",
+      "product": "Chọn sản phẩm",
+      "post": "Chọn bài viết",
+      "customLink": "Link tùy chỉnh",
+      "linkPreview": "Link sẽ lưu",
+      "linkPending": "Chưa chọn link"
+    },
+    "formTabs": {
+      "aria": "Tab biểu mẫu nhượng quyền",
+      "required": "Bắt buộc",
+      "content": "Nội dung",
+      "preview": "Xem trước",
+      "contentHint": "Các trường dưới đây hiển thị trên trang /franchise. Tiêu đề chính lấy từ trường nội dung tương ứng (không dùng tiêu đề CMS riêng).",
+      "previewActive": "Block đang hiển thị công khai (nếu là section singleton thì chỉ block ACTIVE đầu tiên được dùng).",
+      "previewHidden": "Block đang ẩn — không hiện trên trang công khai.",
+      "openPublic": "Mở trang nhượng quyền"
+    },
+    "fieldHints": {
+      "sectionLocked": "Không đổi section khi sửa — tránh lệch dữ liệu JSON.",
+      "adminTitle": "Chỉ dùng trong bảng CMS khi section không có tiêu đề trong nội dung.",
+      "adminNote": "Ghi chú nội bộ cho admin — không hiển thị trên website.",
+      "contentTitle": "Tiêu đề này hiển thị trên website và trong bảng CMS.",
+      "linkUrl": "Chọn kiểu liên kết bên dưới — không cần gõ URL thủ công.",
+      "imageUrl": "Nhập URL hoặc tải ảnh lên — dùng /uploads/..., /about/... hoặc https://...",
+      "sortOrder": "Sắp xếp trong cùng section; số nhỏ hiện trước."
+    },
+    "linkTypes": {
+      "NONE": "Không dùng link",
+      "HASH": "Mục trên trang nhượng quyền",
+      "STATIC": "Trang có sẵn",
+      "PRODUCT": "Sản phẩm cụ thể",
+      "POST": "Bài viết cụ thể",
+      "CUSTOM": "Link tùy chỉnh"
+    },
+    "staticLinks": {
+      "home": "Trang chủ",
+      "products": "Sản phẩm",
+      "locations": "Hệ thống cửa hàng",
+      "franchise": "Nhượng quyền",
+      "about": "Về ALOO",
+      "blog": "Blog",
+      "consultation": "Đăng ký tư vấn",
+      "contact": "Liên hệ"
+    },
+    "hashLinks": {
+      "investment": "Bảng chi phí đầu tư",
+      "process": "Quy trình 6 bước"
+    },
+    "linkOptions": {
+      "inactive": "không còn hiển thị",
+      "noActiveProducts": "Chưa có sản phẩm đang bán.",
+      "noPublishedPosts": "Chưa có bài viết đã đăng."
+    },
+    "sectionHints": {
+      "hero": "Chỉ hero ACTIVE đầu tiên được dùng. Nút phụ dùng secondaryButtonLink (#investment, /path hoặc URL).",
+      "advantages": "Mỗi block = một thẻ lợi thế; có thể thêm nhiều block.",
+      "models": "Mỗi block = một mô hình kinh doanh; bật featured để nổi bật.",
+      "investment": "Mỗi dòng = một hạng mục trong bảng chi phí đầu tư.",
+      "profit": "Các chỉ số tham khảo lợi nhuận — không phải cam kết.",
+      "process": "Mỗi block = một bước quy trình; stepNumber quyết định thứ tự.",
+      "founder_story": "Chỉ block ACTIVE đầu tiên được hiển thị.",
+      "faq": "Mỗi block = một câu hỏi thường gặp.",
+      "cta": "Chỉ CTA ACTIVE đầu tiên được hiển thị ở cuối trang.",
+      "costs": "Section cũ — không hiển thị trên website (dùng Mô hình + Đầu tư).",
+      "benefits": "Section cũ — không hiển thị trên website."
+    },
+    "validation": {
+      "title": "Tiêu đề không được rỗng",
+      "sortOrder": "Thứ tự phải là số không âm",
+      "fieldRequired": "{field} là bắt buộc",
+      "linkUrl": "Link không hợp lệ (dùng #investment, /duong-dan hoặc https://...)",
+      "imageUrl": "URL ảnh không hợp lệ (dùng /uploads/..., /duong-dan hoặc https://...)",
+      "stepNumber": "Bước số phải từ 1 trở lên",
+      "singletonExists": "Đã có block {section} đang ACTIVE — trang web chỉ dùng block đầu tiên.",
+      "legacySection": "Section Chi phí / Lợi ích không còn hiển thị trên website. Nên chuyển sang Mô hình hoặc Đầu tư."
+    },
+    "confirmDelete": {
+      "title": "Xóa block nhượng quyền?",
+      "message": "Block \"{title}\" sẽ bị xóa vĩnh viễn khỏi CMS. Hành động không thể hoàn tác.",
+      "confirm": "Xóa block"
+    },
+    "placeholders": {
+      "content": "{\"description\":\"...\"}",
+      "adminTitle": "Nhãn hiển thị trong bảng CMS",
+      "adminNote": "Ghi chú nội bộ (tuỳ chọn)",
+      "imageUrl": "/uploads/... hoặc /about/...",
+      "selectProduct": "Chọn sản phẩm",
+      "selectPost": "Chọn bài viết",
+      "customLink": "/consultation hoặc #investment hoặc https://..."
+    },
+    "preview": {
+      "imageAlt": "Xem trước ảnh block",
+      "noImage": "Chưa có ảnh"
     },
     "contentFields": {
       "title": "Tiêu đề",
       "subtitle": "Phụ đề",
       "description": "Mô tả",
-      "image": "Ảnh (URL)",
+      "image": "Ảnh",
       "buttonText": "Nút chính",
       "buttonLink": "Link nút chính",
       "secondaryButtonText": "Nút phụ",
@@ -794,9 +1097,6 @@
       "amount": "Số tiền",
       "body": "Nội dung"
     },
-    "placeholders": {
-      "content": "{\"description\":\"...\"}"
-    },
     "modals": {
       "create": "Thêm block nhượng quyền",
       "edit": "Sửa block nhượng quyền"
@@ -816,7 +1116,10 @@
       "requiredFields": "Vui lòng điền các trường bắt buộc",
       "deleted": "Đã xóa nội dung nhượng quyền",
       "deleteError": "Không xóa được nội dung nhượng quyền",
-      "loadError": "Không tải được nội dung nhượng quyền"
+      "loadError": "Không tải được nội dung nhượng quyền",
+      "imageUploaded": "Đã tải ảnh block nhượng quyền",
+      "imageError": "Không tải được ảnh",
+      "linkOptionsError": "Không tải được danh sách link gợi ý"
     }
   }
 }

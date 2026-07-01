@@ -13,6 +13,10 @@ public record UserResponse(
         String adminProfile,
         List<String> scopes,
         String status,
+        String authProvider,
+        boolean hasPasswordLogin,
+        boolean passwordChangeRequiresOtp,
+        LocalDateTime passwordChangedAt,
         LocalDateTime lastLoginAt,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

@@ -1,6 +1,10 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Edit3, Eye, EyeOff, Plus, Trash2 } from 'lucide-vue-next'
+import AdminListPage from '../../components/admin/AdminListPage.vue'
+import AdminNestedShell from '../../components/admin/shell/AdminNestedShell.vue'
+import AdminShellFrame from '../../components/admin/shell/AdminShellFrame.vue'
+import AdminShellTablePanel from '../../components/admin/shell/AdminShellTablePanel.vue'
 import AdminPageHeader from '../../components/admin/AdminPageHeader.vue'
 import BaseModal from '../../components/admin/BaseModal.vue'
 import ConfirmModal from '../../components/admin/ConfirmModal.vue'
@@ -10,7 +14,7 @@ import { useAdminModuleI18n } from '../../composables/useAdminModuleI18n'
 import { feedbackService, resolveBackendAssetUrl } from '../../services/cmsService'
 import { useToastStore } from '../../stores/toastStore'
 
-const { m } = useAdminModuleI18n('feedbacks')
+const { m, t } = useAdminModuleI18n('feedbacks')
 const toast = useToastStore()
 const testimonials = ref([])
 const isLoading = ref(false)
@@ -53,6 +57,7 @@ const totalPages = computed(() => Math.max(1, Math.ceil(filteredTestimonials.val
 const paginatedTestimonials = computed(() =>
   filteredTestimonials.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize),
 )
+const listCountText = computed(() => t('admin.shared.totalCount', { count: filteredTestimonials.value.length }))
 
 const resetForm = () => {
   Object.assign(form, {
@@ -161,95 +166,127 @@ onMounted(loadTestimonials)
 </script>
 
 <template>
-  <section>
-    <AdminPageHeader :title="m('title')" :description="m('description')">
-      <template #actions>
-        <button class="aloo-btn aloo-btn--primary inline-flex items-center gap-2 !min-h-[44px]" @click="openCreateModal">
-          <Plus class="h-4 w-4" />
-          {{ m('add') }}
-        </button>
-      </template>
-    </AdminPageHeader>
+  <AdminListPage>
+    <AdminNestedShell>
+      <AdminShellFrame variant="header" inner="header">
+        <AdminPageHeader :title="m('title')">
+          <template #actions>
+            <button class="admin-list-btn admin-list-btn--primary" @click="openCreateModal">
+              <Plus class="h-4 w-4" />
+              {{ m('add') }}
+            </button>
+          </template>
+        </AdminPageHeader>
+      </AdminShellFrame>
 
-    <div class="aloo-admin-toolbar md:!grid-cols-[1fr_180px]">
-      <input v-model="searchQuery" class="aloo-input" :placeholder="m('searchPlaceholder')" />
-      <select v-model="visibleFilter" class="aloo-select">
-        <option value="ALL">{{ m('filters.all') }}</option>
-        <option value="VISIBLE">{{ m('filters.visible') }}</option>
-        <option value="HIDDEN">{{ m('filters.hidden') }}</option>
-      </select>
-    </div>
+      <AdminShellFrame variant="toolbar" inner="toolbar" padded>
+        <section class="aloo-admin-toolbar md:!grid-cols-[1fr_180px]">
+          <input v-model="searchQuery" class="aloo-input" :placeholder="m('searchPlaceholder')" />
+          <select v-model="visibleFilter" class="aloo-select">
+            <option value="ALL">{{ m('filters.all') }}</option>
+            <option value="VISIBLE">{{ m('filters.visible') }}</option>
+            <option value="HIDDEN">{{ m('filters.hidden') }}</option>
+          </select>
+        </section>
+      </AdminShellFrame>
 
-    <p v-if="errorMessage" class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{{ errorMessage }}</p>
+      <AdminShellFrame v-if="errorMessage" as="p" variant="alert" class="admin-list-alert">
+        {{ errorMessage }}
+      </AdminShellFrame>
 
-    <div class="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:block">
-      <EmptyState v-if="isLoading || filteredTestimonials.length === 0" :loading="isLoading" />
-      <table v-else class="w-full divide-y divide-slate-200 text-left">
-        <thead class="bg-slate-50">
-          <tr>
-            <th class="px-4 py-3 text-xs font-black uppercase text-slate-500">{{ m('columns.customer') }}</th>
-            <th class="px-4 py-3 text-xs font-black uppercase text-slate-500">{{ m('columns.content') }}</th>
-            <th class="px-4 py-3 text-xs font-black uppercase text-slate-500">{{ m('columns.rating') }}</th>
-            <th class="px-4 py-3 text-xs font-black uppercase text-slate-500">{{ m('columns.visible') }}</th>
-            <th class="px-4 py-3 text-xs font-black uppercase text-slate-500">{{ m('columns.sortOrder') }}</th>
-            <th class="px-4 py-3 text-xs font-black uppercase text-slate-500">{{ m('columns.actions') }}</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr v-for="item in paginatedTestimonials" :key="item.id">
-            <td class="px-4 py-3">
-              <div class="flex items-center gap-3">
-                <img v-if="item.avatarUrl" :src="resolveBackendAssetUrl(item.avatarUrl)" :alt="item.customerName" class="h-11 w-11 rounded-full object-cover" />
-                <div v-else class="grid h-11 w-11 place-items-center rounded-full bg-avocado-50 font-black text-avocado-800">{{ item.customerName?.charAt(0) || 'A' }}</div>
-                <div>
-                  <p class="font-black text-avocado-950">{{ item.customerName }}</p>
-                  <p class="text-xs font-bold text-slate-500">{{ item.storeName || 'ALOO' }}</p>
+      <AdminShellFrame v-if="isLoading" variant="body" inner="pad">
+        <div v-for="i in 5" :key="i" class="admin-shell-skeleton" />
+      </AdminShellFrame>
+
+      <AdminShellFrame v-else-if="!filteredTestimonials.length" variant="body" inner="pad">
+        <EmptyState :title="m('empty')" />
+      </AdminShellFrame>
+
+      <AdminShellFrame v-else variant="body" visibility="desktop">
+        <AdminShellTablePanel :title="m('listTitle')" :count-text="listCountText">
+          <table class="admin-shell-table">
+            <colgroup>
+              <col style="width: 28%" />
+              <col style="width: 28%" />
+              <col style="width: 10%" />
+              <col style="width: 12%" />
+              <col style="width: 10%" />
+              <col style="width: 12%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>{{ m('columns.customer') }}</th>
+                <th>{{ m('columns.content') }}</th>
+                <th>{{ m('columns.rating') }}</th>
+                <th>{{ m('columns.visible') }}</th>
+                <th>{{ m('columns.sortOrder') }}</th>
+                <th>{{ m('columns.actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in paginatedTestimonials" :key="item.id">
+                <td>
+                  <div class="flex items-center gap-3">
+                    <img v-if="item.avatarUrl" :src="resolveBackendAssetUrl(item.avatarUrl)" :alt="item.customerName" class="h-11 w-11 rounded-full object-cover" />
+                    <div v-else class="grid h-11 w-11 place-items-center rounded-full bg-avocado-50 font-black text-avocado-800">{{ item.customerName?.charAt(0) || 'A' }}</div>
+                    <div class="min-w-0">
+                      <p class="truncate font-black text-avocado-950">{{ item.customerName }}</p>
+                      <p class="text-xs font-bold text-slate-500">{{ item.storeName || 'ALOO' }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="admin-shell-cell-muted admin-shell-cell-truncate">{{ item.content }}</td>
+                <td class="font-black text-amber-500">{{ item.rating }}/5</td>
+                <td>
+                  <span class="rounded-full border px-3 py-1 text-xs font-black" :class="item.visible ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-500'">
+                    {{ item.visible ? m('visible') : m('hidden') }}
+                  </span>
+                </td>
+                <td class="admin-shell-cell-strong">{{ item.sortOrder }}</td>
+                <td>
+                  <div class="flex gap-2">
+                    <button class="rounded-lg border border-slate-200 p-2 text-slate-700 hover:bg-slate-50" :title="m('actions.toggleVisible')" @click="toggleVisible(item)">
+                      <Eye v-if="!item.visible" class="h-4 w-4" />
+                      <EyeOff v-else class="h-4 w-4" />
+                    </button>
+                    <button class="rounded-lg border border-avocado-200 p-2 text-avocado-700 hover:bg-avocado-50" :title="m('actions.edit')" @click="openEditModal(item)"><Edit3 class="h-4 w-4" /></button>
+                    <button class="rounded-lg border border-red-200 p-2 text-red-600 hover:bg-red-50" :title="m('actions.delete')" @click="pendingDeleteId = item.id"><Trash2 class="h-4 w-4" /></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </AdminShellTablePanel>
+      </AdminShellFrame>
+
+      <AdminShellFrame v-if="!isLoading && filteredTestimonials.length" variant="body" visibility="mobile">
+        <AdminShellTablePanel :title="m('listTitle')" :count-text="listCountText">
+          <template #below>
+            <div class="admin-shell-frame__inner--pad admin-shell-frame__inner--stack">
+              <article v-for="item in paginatedTestimonials" :key="item.id" class="admin-shell-mobile-card">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <h2 class="truncate font-black text-avocado-950">{{ item.customerName }}</h2>
+                    <p class="text-xs font-bold text-slate-500">{{ item.storeName || 'ALOO' }} · {{ item.rating }}/5</p>
+                  </div>
+                  <span class="rounded-full border px-3 py-1 text-xs font-black" :class="item.visible ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-500'">{{ item.visible ? m('visible') : m('hidden') }}</span>
                 </div>
-              </div>
-            </td>
-            <td class="max-w-lg truncate px-4 py-3 text-sm text-slate-700">{{ item.content }}</td>
-            <td class="px-4 py-3 text-sm font-black text-amber-500">{{ item.rating }}/5</td>
-            <td class="px-4 py-3">
-              <span class="rounded-full border px-3 py-1 text-xs font-black" :class="item.visible ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-500'">
-                {{ item.visible ? m('visible') : m('hidden') }}
-              </span>
-            </td>
-            <td class="px-4 py-3 text-sm font-bold text-slate-600">{{ item.sortOrder }}</td>
-            <td class="px-4 py-3">
-              <div class="flex gap-2">
-                <button class="rounded-lg border border-slate-200 p-2 text-slate-700 hover:bg-slate-50" :title="m('actions.toggleVisible')" @click="toggleVisible(item)">
-                  <Eye v-if="!item.visible" class="h-4 w-4" />
-                  <EyeOff v-else class="h-4 w-4" />
-                </button>
-                <button class="rounded-lg border border-avocado-200 p-2 text-avocado-700 hover:bg-avocado-50" :title="m('actions.edit')" @click="openEditModal(item)"><Edit3 class="h-4 w-4" /></button>
-                <button class="rounded-lg border border-red-200 p-2 text-red-600 hover:bg-red-50" :title="m('actions.delete')" @click="pendingDeleteId = item.id"><Trash2 class="h-4 w-4" /></button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+                <p class="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">{{ item.content }}</p>
+                <div class="mt-4 flex gap-2">
+                  <button class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700" @click="toggleVisible(item)">{{ m('actions.toggleVisible') }}</button>
+                  <button class="rounded-lg border border-avocado-200 px-3 py-2 text-xs font-bold text-avocado-700" @click="openEditModal(item)">{{ m('actions.edit') }}</button>
+                  <button class="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600" @click="pendingDeleteId = item.id">{{ m('actions.delete') }}</button>
+                </div>
+              </article>
+            </div>
+          </template>
+        </AdminShellTablePanel>
+      </AdminShellFrame>
 
-    <div class="grid gap-4 lg:hidden">
-      <EmptyState v-if="isLoading || filteredTestimonials.length === 0" :loading="isLoading" />
-      <article v-for="item in paginatedTestimonials" v-else :key="item.id" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <h2 class="font-black text-avocado-950">{{ item.customerName }}</h2>
-            <p class="text-xs font-bold text-slate-500">{{ item.storeName || 'ALOO' }} · {{ item.rating }}/5</p>
-          </div>
-          <span class="rounded-full border px-3 py-1 text-xs font-black" :class="item.visible ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-500'">{{ item.visible ? m('visible') : m('hidden') }}</span>
-        </div>
-        <p class="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">{{ item.content }}</p>
-        <div class="mt-4 flex gap-2">
-          <button class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700" @click="toggleVisible(item)">{{ m('actions.toggleVisible') }}</button>
-          <button class="rounded-lg border border-avocado-200 px-3 py-2 text-xs font-bold text-avocado-700" @click="openEditModal(item)">{{ m('actions.edit') }}</button>
-          <button class="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600" @click="pendingDeleteId = item.id">{{ m('actions.delete') }}</button>
-        </div>
-      </article>
-    </div>
-
-    <Pagination :page="currentPage" :total-pages="totalPages" :visible-count="paginatedTestimonials.length" :total-count="filteredTestimonials.length" :label="m('paginationLabel')" @prev="currentPage--" @next="currentPage++" />
+      <AdminShellFrame v-if="filteredTestimonials.length" variant="footer">
+        <Pagination v-if="filteredTestimonials.length" :page="currentPage" :total-pages="totalPages" :visible-count="paginatedTestimonials.length" :total-count="filteredTestimonials.length" :label="m('paginationLabel')" @prev="currentPage--" @next="currentPage++" />
+      </AdminShellFrame>
+    </AdminNestedShell>
 
     <BaseModal :show="showModal" :title="editingId ? m('edit') : m('create')" max-width="max-w-3xl" @close="closeModal">
       <form class="grid gap-4 md:grid-cols-2" @submit.prevent="saveTestimonial">
@@ -291,5 +328,5 @@ onMounted(loadTestimonials)
     </BaseModal>
 
     <ConfirmModal :show="Boolean(pendingDeleteId)" @cancel="pendingDeleteId = null" @confirm="confirmDelete" />
-  </section>
+  </AdminListPage>
 </template>

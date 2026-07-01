@@ -42,13 +42,14 @@ public class StoreMapper {
         store.setStoreType(MapperUtils.status(request.storeType(), "STANDARD"));
         store.setDescription(MapperUtils.nullable(request.description()));
         store.setCoverImageUrl(MapperUtils.nullable(request.coverImageUrl()));
+        store.setAmenitiesJson(jsonOrDefault(MapperUtils.nullable(request.amenitiesJson()), "[]"));
         store.setFeatured(Boolean.TRUE.equals(request.featured()));
         store.setDisplayOrder(request.displayOrder() == null ? 0 : request.displayOrder());
         store.setStatus(MapperUtils.status(request.status(), "ACTIVE"));
     }
 
     public StoreResponse toResponse(Store store) {
-        List<String> amenities = List.of();
+        List<String> amenities = readStringList(store.getAmenitiesJson());
         List<Map<String, Object>> links = store.getGoogleMapUrl() == null
                 ? List.of()
                 : List.of(Map.of("type", "GOOGLE_MAPS", "title", "Xem bản đồ", "url", store.getGoogleMapUrl()));
@@ -79,7 +80,7 @@ public class StoreMapper {
                 store.getCoverImageUrl(),
                 store.getCoverImageUrl(),
                 toGalleryJson(store),
-                "[]",
+                jsonOrDefault(store.getAmenitiesJson(), "[]"),
                 toMenuPostersJson(store),
                 links.isEmpty() ? "[]" : jsonOrDefault(writeJson(links), "[]"),
                 store.getGoogleMapUrl(),
@@ -127,7 +128,10 @@ public class StoreMapper {
     }
 
     private String formatTime(java.time.LocalTime time) {
-        return time == null ? "" : time.toString();
+        if (time == null) {
+            return "";
+        }
+        return time.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
     }
 
     private String writeJson(Object value) {

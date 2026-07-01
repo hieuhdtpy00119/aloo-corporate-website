@@ -15,7 +15,9 @@ export const adminPaths = {
   },
   crm: {
     feedbacks: '/admin/crm/feedbacks',
+    productReviews: '/admin/crm/product-reviews',
     leads: '/admin/crm/leads',
+    liveChat: '/admin/crm/live-chat',
     leadDetail: (id) => `/admin/crm/leads?lead=${encodeURIComponent(id)}`,
   },
   system: {
@@ -34,6 +36,8 @@ export const adminLegacyRedirects = {
   '/admin/categories': adminPaths.content.articleCategories,
   '/admin/locations': adminPaths.stores.locations,
   '/admin/feedbacks': adminPaths.crm.feedbacks,
+  '/admin/product-reviews': adminPaths.crm.productReviews,
   '/admin/registrations': adminPaths.crm.leads,
+  '/admin/live-chat': adminPaths.crm.liveChat,
   '/admin/accounts': adminPaths.system.accounts,
 }

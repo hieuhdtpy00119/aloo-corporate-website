@@ -2,6 +2,9 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import RichTextEditor from '../../components/admin/RichTextEditor.vue'
+import AdminListPage from '../../components/admin/AdminListPage.vue'
+import AdminNestedShell from '../../components/admin/shell/AdminNestedShell.vue'
+import AdminShellFrame from '../../components/admin/shell/AdminShellFrame.vue'
 import { useAdminModuleI18n } from '../../composables/useAdminModuleI18n'
 import { uploadService } from '../../services/cmsService'
 import { useAppStore } from '../../stores/appStore'
@@ -271,8 +274,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="space-y-6">
-    <div class="sticky top-16 z-20 -mx-4 border-b border-slate-200 bg-slate-50/95 px-4 py-4 backdrop-blur md:-mx-8 md:px-8">
+  <AdminListPage>
+    <div class="admin-article-editor-toolbar sticky top-16 z-20 -mx-4 border-b border-slate-200 bg-slate-50/95 px-4 py-4 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
       <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div>
           <RouterLink :to="adminPaths.content.articles" class="text-sm font-black text-avocado-700 hover:text-avocado-900">
@@ -283,21 +286,23 @@ onMounted(async () => {
           </h1>
         </div>
         <div class="flex flex-wrap gap-3">
-          <button type="button" class="rounded-xl border border-slate-200 bg-white px-5 py-3 font-black text-slate-700 hover:bg-slate-50" @click="router.push(adminPaths.content.articles)">
+          <button type="button" class="admin-list-btn admin-list-btn--outline" @click="router.push(adminPaths.content.articles)">
             {{ m('exit') }}
           </button>
-          <button type="button" class="rounded-xl border border-avocado-200 bg-white px-5 py-3 font-black text-avocado-700 hover:bg-avocado-50 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isUploadingImages" @click="saveArticle('DRAFT')">
+          <button type="button" class="admin-list-btn admin-list-btn--outline" :disabled="isUploadingImages" @click="saveArticle('DRAFT')">
             {{ m('saveDraft') }}
           </button>
-          <button type="button" class="rounded-xl bg-brand-forest px-5 py-3 font-black text-white shadow-sm hover:bg-avocado-800 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isUploadingImages" @click="saveArticle('PUBLISHED')">
+          <button type="button" class="admin-list-btn admin-list-btn--primary" :disabled="isUploadingImages" @click="saveArticle('PUBLISHED')">
             {{ m('saveAndPublish') }}
           </button>
         </div>
       </div>
     </div>
 
-    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <div class="space-y-6">
+    <AdminNestedShell>
+      <AdminShellFrame variant="body" inner="pad">
+        <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div class="space-y-6">
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 class="text-xl font-black text-avocado-950">Thông tin bài viết</h2>
           <div class="mt-5 grid gap-4 md:grid-cols-2">
@@ -497,8 +502,10 @@ onMounted(async () => {
           </div>
         </div>
       </aside>
-    </div>
-  </section>
+        </div>
+      </AdminShellFrame>
+    </AdminNestedShell>
+  </AdminListPage>
 </template>
 
 <style scoped>

@@ -22,6 +22,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final PostMapper postMapper;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<PostResponse> findAll() {
@@ -47,7 +48,9 @@ public class PostService {
         ensureSlugAvailable(request.slug(), null);
         Post post = postMapper.toEntity(request);
         post.setCategory(resolveCategory(request));
-        return postMapper.toResponse(postRepository.save(post));
+        PostResponse response = postMapper.toResponse(postRepository.save(post));
+        auditLogService.logCreated("POST", String.valueOf(response.id()), response.title(), response.slug());
+        return response;
     }
 
     @Transactional
@@ -56,12 +59,15 @@ public class PostService {
         ensureSlugAvailable(request.slug(), id);
         postMapper.updateEntity(post, request);
         post.setCategory(resolveCategory(request));
-        return postMapper.toResponse(postRepository.save(post));
+        PostResponse response = postMapper.toResponse(postRepository.save(post));
+        auditLogService.logUpdated("POST", String.valueOf(response.id()), response.title(), response.slug());
+        return response;
     }
 
     @Transactional
     public void delete(Long id) {
         Post post = getPost(id);
+        auditLogService.logDeleted("POST", String.valueOf(post.getId()), post.getTitle(), post.getSlug());
         postRepository.findAll().forEach(item -> {
             if (item.getRelatedPostIds().remove(id)) {
                 postRepository.save(item);
