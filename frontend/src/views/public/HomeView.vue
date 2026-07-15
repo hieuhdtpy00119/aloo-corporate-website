@@ -117,7 +117,6 @@ onMounted(() => {
       >
         <source src="/videos/aloo-home-hero.mp4" type="video/mp4" />
       </video>
-      <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/85 via-brand-dark/20 to-transparent"></div>
     </div>
 
     <!-- Featured Section -->

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { MapPin } from 'lucide-vue-next'
 import AdminLinkPicker from '../../components/admin/AdminLinkPicker.vue'
 import BaseModal from '../../components/admin/BaseModal.vue'
@@ -389,10 +389,19 @@ const formPreviewOpeningHours = computed(() => buildOpeningHours(form.opensAt, f
 
 const publicPreviewUrl = computed(() => (form.slug.trim() ? `/locations/${form.slug.trim()}` : '/locations'))
 
+const scrollToFirstFormError = () => {
+  nextTick(() => {
+    const formEl = document.getElementById('location-form')
+    const errorEl = formEl?.querySelector('.text-red-600')
+    errorEl?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
+}
+
 const focusFirstErrorTab = (errors) => {
   const firstErrorKey = Object.keys(errors)[0]
   if (!firstErrorKey) return
   modalFormTab.value = formErrorTabMap[firstErrorKey] || 'required'
+  scrollToFirstFormError()
 }
 
 const openCreateModal = () => {
@@ -435,8 +444,16 @@ const isValidAssetUrl = (value) => {
   }
 }
 
+const hydrateOpeningTimes = () => {
+  if (form.opensAt && form.closesAt) return
+  const parsed = parseOpeningHours(form.openingHours || '')
+  if (parsed.opensAt && !form.opensAt) form.opensAt = parsed.opensAt
+  if (parsed.closesAt && !form.closesAt) form.closesAt = parsed.closesAt
+}
+
 const validateForm = () => {
   const errors = {}
+  hydrateOpeningTimes()
 
   if (!form.storeCode.trim()) errors.storeCode = m('validation.storeCode')
   if (!form.name.trim()) errors.name = m('validation.name')
@@ -522,7 +539,11 @@ const buildPayload = () => {
 }
 
 const saveLocation = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) {
+    const firstError = Object.values(formErrors.value)[0]
+    toast.error(firstError || m('validation.formInvalid'))
+    return
+  }
   const payload = buildPayload()
 
   try {
@@ -1043,7 +1064,7 @@ onMounted(() => {
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="rounded-lg border border-slate-200 px-4 py-3 font-bold text-slate-600 hover:bg-slate-50" type="button" @click="closeModal">{{ m('actions.cancel') }}</button>
-          <button class="rounded-lg bg-brand-forest px-4 py-3 font-black text-white hover:bg-avocado-800 disabled:cursor-not-allowed disabled:opacity-60" form="location-form" type="submit" :disabled="isUploadingImage">
+          <button class="rounded-lg bg-brand-forest px-4 py-3 font-black text-white hover:bg-avocado-800 disabled:cursor-not-allowed disabled:opacity-60" type="button" :disabled="isUploadingImage" @click="saveLocation">
             {{ mode === 'create' ? m('actions.saveCreate') : m('actions.saveUpdate') }}
           </button>
         </div>

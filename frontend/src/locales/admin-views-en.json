@@ -516,6 +516,11 @@
       "POST": "Specific article",
       "CUSTOM": "Custom link (Google Maps)"
     },
+    "linkOptions": {
+      "inactive": "not visible",
+      "noActiveProducts": "No active products yet.",
+      "noPublishedPosts": "No published articles yet."
+    },
     "staticLinks": {
       "home": "Home",
       "products": "Products",
@@ -556,6 +561,13 @@
       "longitude": "Longitude",
       "coverImageUrl": "Cover image URL",
       "uploadImage": "Choose store image file",
+      "linkType": "Link type",
+      "staticPage": "Select page",
+      "product": "Select product",
+      "post": "Select article",
+      "customLink": "Custom link",
+      "linkPreview": "Link to save",
+      "linkPending": "No link selected",
       "amenities": "Amenities",
       "galleryText": "Gallery images",
       "menuPostersText": "Menu poster",
@@ -573,7 +585,10 @@
       "galleryText": "Enter one image URL per line",
       "menuPostersText": "Enter one poster/menu URL per line",
       "linkTitle": "View map",
-      "linkUrl": "https://maps.google.com/..."
+      "linkUrl": "https://maps.google.com/...",
+      "customLink": "https://maps.google.com/...",
+      "selectProduct": "Select product",
+      "selectPost": "Select article"
     },
     "preview": {
       "title": "Store preview",
@@ -595,7 +610,8 @@
       "menuPostersText": "Each menu poster line must be a valid URL",
       "openingHours": "Opening hours are required for active stores",
       "openingHoursFormat": "Enter both open and close times in 24-hour format (e.g. 07:00 and 22:00)",
-      "displayOrder": "Display order must be a number"
+      "displayOrder": "Display order must be a number",
+      "formInvalid": "Please fix the required fields before saving."
     },
     "storeTypes": {
       "FLAGSHIP": "Flagship",

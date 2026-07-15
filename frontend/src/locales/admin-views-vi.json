@@ -516,6 +516,11 @@
       "POST": "Bài viết cụ thể",
       "CUSTOM": "Link tùy chỉnh (Google Maps)"
     },
+    "linkOptions": {
+      "inactive": "không còn hiển thị",
+      "noActiveProducts": "Chưa có sản phẩm đang bán.",
+      "noPublishedPosts": "Chưa có bài viết đã đăng."
+    },
     "staticLinks": {
       "home": "Trang chủ",
       "products": "Sản phẩm",
@@ -556,6 +561,13 @@
       "longitude": "Longitude",
       "coverImageUrl": "Ảnh cover URL",
       "uploadImage": "Chọn file ảnh cửa hàng",
+      "linkType": "Kiểu liên kết",
+      "staticPage": "Chọn trang",
+      "product": "Chọn sản phẩm",
+      "post": "Chọn bài viết",
+      "customLink": "Link tùy chỉnh",
+      "linkPreview": "Link sẽ lưu",
+      "linkPending": "Chưa chọn link",
       "amenities": "Tiện ích",
       "galleryText": "Ảnh gallery",
       "menuPostersText": "Menu poster",
@@ -573,7 +585,10 @@
       "galleryText": "Nhập mỗi URL ảnh trên một dòng",
       "menuPostersText": "Nhập mỗi URL poster/menu trên một dòng",
       "linkTitle": "Xem bản đồ",
-      "linkUrl": "https://maps.google.com/..."
+      "linkUrl": "https://maps.google.com/...",
+      "customLink": "https://maps.google.com/...",
+      "selectProduct": "Chọn sản phẩm",
+      "selectPost": "Chọn bài viết"
     },
     "preview": {
       "title": "Preview cửa hàng",
@@ -595,7 +610,8 @@
       "menuPostersText": "Mỗi dòng menu poster phải là một URL hợp lệ",
       "openingHours": "Dùng định dạng 24 giờ (VD: 07:00 - 22:00). Bắt buộc khi trạng thái là Đang hoạt động.",
       "openingHoursFormat": "Nhập đủ giờ mở và giờ đóng theo định dạng 24 giờ (VD: 07:00 và 22:00)",
-      "displayOrder": "Thứ tự hiển thị phải là số"
+      "displayOrder": "Thứ tự hiển thị phải là số",
+      "formInvalid": "Vui lòng kiểm tra lại các trường bắt buộc trước khi lưu."
     },
     "storeTypes": {
       "FLAGSHIP": "Cửa hàng flagship",
