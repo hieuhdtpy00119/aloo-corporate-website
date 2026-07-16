@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+const userJwt = 'eyJhbGciOiJub25lIn0.eyJyb2xlIjoiVVNFUiIsImV4cCI6NDEwMjQ0NDgwMH0.e2e'
+
 const user = {
   id: 10,
   email: 'user@aloo.vn',
@@ -8,6 +10,10 @@ const user = {
   avatarUrl: '/logo-aloo.png',
   role: 'USER',
   status: 'ACTIVE',
+  authProvider: 'LOCAL',
+  passwordSetAt: '2026-05-22T10:00:00',
+  hasPasswordLogin: true,
+  passwordChangeRequiresOtp: false,
 }
 
 const publishedPosts = [
@@ -61,22 +67,31 @@ async function mockPublicApis(page) {
       }),
     })
   })
+
+  await page.route('**/api/contact-messages', async (route) => {
+    if (route.request().method() !== 'POST') return route.continue()
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({ id: Date.now(), status: 'NEW' }),
+    })
+  })
 }
 
 async function mockUserApis(page, options = {}) {
-  await page.route('**/api/user-auth/login', async (route) => {
+  await page.route('**/api/auth/login', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        token: 'e2e.user.jwt',
+        token: userJwt,
         tokenType: 'Bearer',
         user,
       }),
     })
   })
 
-  await page.route('**/api/user-auth/me', async (route) => {
+  await page.route('**/api/auth/me', async (route) => {
     if (options.expiredToken) {
       await route.fulfill({
         status: 401,
@@ -93,7 +108,7 @@ async function mockUserApis(page, options = {}) {
     })
   })
 
-  await page.route('**/api/user-auth/profile', async (route) => {
+  await page.route('**/api/auth/profile', async (route) => {
     const payload = await route.request().postDataJSON()
     await route.fulfill({
       status: 200,
@@ -105,7 +120,7 @@ async function mockUserApis(page, options = {}) {
     })
   })
 
-  await page.route('**/api/user-auth/change-password', async (route) => {
+  await page.route('**/api/auth/change-password', async (route) => {
     await route.fulfill({
       status: 204,
     })
@@ -116,8 +131,8 @@ async function loginUser(page) {
   await page.goto('/login', { waitUntil: 'domcontentloaded' })
   await page.locator('input[type="email"]').fill('user@aloo.vn')
   await page.locator('input[type="password"]').fill('123456')
-  await page.getByRole('button', { name: /đăng nhập/i }).click()
-  await expect(page).toHaveURL(/\/profile/)
+  await page.getByRole('button', { name: /xác thực tài khoản/i }).click()
+  await expect(page).toHaveURL(/\/account/)
 }
 
 test.describe('ALOO public UI and user flows', () => {
@@ -127,10 +142,10 @@ test.describe('ALOO public UI and user flows', () => {
 
   test('guest navigates franchise funnel and submits consultation form', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' })
-    await expect(page.getByRole('link', { name: /nhượng quyền ngay/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: /đăng ký tư vấn miễn phí/i })).toBeVisible()
 
     await page.goto('/franchise', { waitUntil: 'domcontentloaded' })
-    await expect(page.getByRole('heading', { name: /nhượng quyền/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /nhượng quyền/i }).first()).toBeVisible()
 
     await page.goto('/cost', { waitUntil: 'domcontentloaded' })
     await expect(page).toHaveURL(/\/franchise#investment/)
@@ -147,7 +162,7 @@ test.describe('ALOO public UI and user flows', () => {
     await form.locator('textarea').fill('Can tu van')
     await form.getByRole('button').click()
 
-    await expect(page.getByText(/đăng ký tư vấn thành công/i)).toBeVisible()
+    await expect(page.getByText(/cảm ơn bạn đã quan tâm tới aloo/i)).toBeVisible()
   })
 
   test('contact form validates and submits a contact lead', async ({ page }) => {
@@ -180,43 +195,42 @@ test.describe('ALOO public UI and user flows', () => {
     await page.getByRole('button', { name: /cập nhật thông tin/i }).click()
     await expect(page.getByText(/cập nhật thông tin thành công/i)).toBeVisible()
 
-    await page.goto('/change-password', { waitUntil: 'domcontentloaded' })
+    await page.getByRole('button', { name: /^bảo mật$/i }).click()
     await page.locator('input[autocomplete="current-password"]').fill('123456')
-    await page.locator('input[autocomplete="new-password"]').first().fill('12345678')
-    await page.locator('input[autocomplete="new-password"]').last().fill('12345678')
+    await page.locator('input[autocomplete="new-password"]').first().fill('StrongPass1!')
+    await page.locator('input[autocomplete="new-password"]').last().fill('StrongPass1!')
     await page.getByRole('button', { name: /đổi mật khẩu/i }).click()
 
-    await expect(page).toHaveURL(/\/login/)
-    await expect(page.evaluate(() => localStorage.getItem('user_token'))).resolves.toBeNull()
+    await expect(page).toHaveURL(/\/account\?tab=security/)
+    await expect(page.getByText(/đổi mật khẩu thành công/i)).toBeVisible()
+    await expect(page.evaluate(() => localStorage.getItem('admin_token'))).resolves.toBe(userJwt)
   })
 
   test('protected user routes redirect to login and login redirects authenticated user away', async ({ page }) => {
-    await page.goto('/profile', { waitUntil: 'domcontentloaded' })
-    await expect(page).toHaveURL(/\/login/)
-
-    await page.goto('/change-password', { waitUntil: 'domcontentloaded' })
+    await page.goto('/account', { waitUntil: 'domcontentloaded' })
     await expect(page).toHaveURL(/\/login/)
 
     await mockUserApis(page)
     await page.addInitScript(() => {
-      localStorage.setItem('user_token', 'existing.user.jwt')
+      localStorage.setItem('admin_token', 'eyJhbGciOiJub25lIn0.eyJyb2xlIjoiVVNFUiIsImV4cCI6NDEwMjQ0NDgwMH0.e2e')
+      localStorage.setItem('admin_user', JSON.stringify({ role: 'USER', email: 'user@aloo.vn' }))
     })
     await page.goto('/login', { waitUntil: 'domcontentloaded' })
-    await expect(page).toHaveURL(/\/profile/)
+    await expect(page).toHaveURL(/\/account/)
   })
 
   test('expired user JWT clears token and redirects to login', async ({ page }) => {
     await mockUserApis(page, { expiredToken: true })
     await page.goto('/', { waitUntil: 'domcontentloaded' })
     await page.evaluate(() => {
-      localStorage.setItem('user_token', 'expired.user.jwt')
-      localStorage.setItem('user_user', '{"email":"user@aloo.vn"}')
+      localStorage.setItem('admin_token', 'eyJhbGciOiJub25lIn0.eyJyb2xlIjoiVVNFUiIsImV4cCI6NDEwMjQ0NDgwMH0.e2e')
+      localStorage.setItem('admin_user', '{"role":"USER","email":"user@aloo.vn"}')
     })
 
-    await page.goto('/profile', { waitUntil: 'domcontentloaded' })
+    await page.goto('/account', { waitUntil: 'domcontentloaded' })
 
     await expect(page).toHaveURL(/\/login/)
-    await expect(page.evaluate(() => localStorage.getItem('user_token'))).resolves.toBeNull()
+    await expect(page.evaluate(() => localStorage.getItem('admin_token'))).resolves.toBeNull()
   })
 
   test('blog navigation opens detail, browser back returns to list, missing slug is clear', async ({ page }) => {

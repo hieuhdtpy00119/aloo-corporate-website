@@ -1,6 +1,6 @@
 # ALOO Corporate Website
 
-Website frontend và bản demo admin CMS cho **ALOO - Kem Bơ Thuần Việt**.
+Website frontend và giao diện quản trị CMS tích hợp backend cho **ALOO - Kem Bơ Thuần Việt**.
 
 ## Công nghệ sử dụng
 
@@ -55,10 +55,10 @@ cp .env.example .env
 Default example:
 
 ```env
-VITE_API_URL=http://localhost:3000/api
+VITE_API_URL=http://localhost:8080/api
 ```
 
-Project hiện đang dùng dữ liệu mock, nên chưa bắt buộc cấu hình backend.
+Các chức năng nghiệp vụ dùng API backend. Khởi động backend tại cổng `8080` trước khi kiểm thử tích hợp hoặc dùng CMS.
 
 ## Chạy development server
 

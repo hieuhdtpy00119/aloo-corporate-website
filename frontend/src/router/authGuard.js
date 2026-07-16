@@ -41,6 +41,9 @@ export const resolveAuthRedirect = (to, storage = localStorage) => {
     if (isAdminToken(adminToken)) {
       return resolveAdminLoginTarget(to)
     }
+    if (isAuthenticatedToken(adminToken)) {
+      return '/account'
+    }
     return true
   }
 

@@ -148,6 +148,7 @@ const deleteArticle = async () => {
       </AdminShellFrame>
 
       <AdminShellFrame v-if="isLoading" variant="body" inner="pad">
+        <p class="sr-only" role="status">{{ t('admin.common.loading') }}</p>
         <div v-for="i in 5" :key="i" class="admin-shell-skeleton" />
       </AdminShellFrame>
 

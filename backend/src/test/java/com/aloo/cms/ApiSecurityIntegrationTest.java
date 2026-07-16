@@ -203,7 +203,7 @@ class ApiSecurityIntegrationTest {
     }
 
     @Test
-    void authenticatedUserCanUploadProfileAvatarAndImageUpload() throws Exception {
+    void authenticatedUserCanUploadProfileAvatarButCannotUseAdminImageUpload() throws Exception {
         ensureUserExists("user@example.com", UserRole.USER);
         String userToken = tokenFor("user@example.com", "USER");
         MockMultipartFile avatar = new MockMultipartFile(
@@ -228,8 +228,7 @@ class ApiSecurityIntegrationTest {
                                 new byte[] {(byte) 137, 80, 78, 71, 13, 10, 26, 10}
                         ))
                         .header("Authorization", "Bearer " + userToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.url").value(startsWith("/uploads/")));
+                .andExpect(status().isForbidden());
     }
 
     @Test

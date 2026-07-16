@@ -60,228 +60,239 @@ GO
 
 IF NOT EXISTS (SELECT 1 FROM dbo.products)
 BEGIN
+DECLARE @kemId BIGINT = (SELECT TOP (1) id FROM dbo.categories WHERE type = N'PRODUCT' AND slug = N'kem');
+DECLARE @kemBoId BIGINT = (SELECT TOP (1) id FROM dbo.categories WHERE type = N'PRODUCT' AND slug = N'kem-bo');
+DECLARE @thienDuongBoId BIGINT = (SELECT TOP (1) id FROM dbo.categories WHERE type = N'PRODUCT' AND slug = N'thien-duong-bo-ngon');
+DECLARE @caPheId BIGINT = (SELECT TOP (1) id FROM dbo.categories WHERE type = N'PRODUCT' AND slug = N'ca-phe');
+DECLARE @sinhToId BIGINT = (SELECT TOP (1) id FROM dbo.categories WHERE type = N'PRODUCT' AND slug = N'sinh-to');
+DECLARE @nuocEpNguyenChatId BIGINT = (SELECT TOP (1) id FROM dbo.categories WHERE type = N'PRODUCT' AND slug = N'nuoc-ep-nguyen-chat');
+DECLARE @nuocEpMixId BIGINT = (SELECT TOP (1) id FROM dbo.categories WHERE type = N'PRODUCT' AND slug = N'nuoc-ep-mix');
+DECLARE @traTraiCayId BIGINT = (SELECT TOP (1) id FROM dbo.categories WHERE type = N'PRODUCT' AND slug = N'tra-trai-cay');
+DECLARE @toppingId BIGINT = (SELECT TOP (1) id FROM dbo.categories WHERE type = N'PRODUCT' AND slug = N'topping');
+DECLARE @anVatId BIGINT = (SELECT TOP (1) id FROM dbo.categories WHERE type = N'PRODUCT' AND slug = N'an-vat');
+
 INSERT INTO dbo.products
 (category_id, name, slug, description, short_description, price, image_url, category, sort_order, featured, status)
 VALUES
 
 /* KEM */
-((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Kem dừa', N'kem-dua',
+(@kemId, N'Kem dừa', N'kem-dua',
  N'Kem vị dừa mát lạnh, thơm béo nhẹ.', N'Coconut ice cream', 18000, NULL, N'Kem', 1, 1, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Kem dâu', N'kem-dau',
+(@kemId, N'Kem dâu', N'kem-dau',
  N'Kem vị dâu chua ngọt, dễ ăn.', N'Strawberry ice cream', 18000, NULL, N'Kem', 2, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Kem socola', N'kem-socola',
+(@kemId, N'Kem socola', N'kem-socola',
  N'Kem socola đậm vị, phù hợp khách thích vị cacao.', N'Chocolate ice cream', 18000, NULL, N'Kem', 3, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Kem khoai môn', N'kem-khoai-mon',
+(@kemId, N'Kem khoai môn', N'kem-khoai-mon',
  N'Kem khoai môn thơm nhẹ, béo mịn.', N'Taro ice cream', 18000, NULL, N'Kem', 4, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Kem sắc màu tùy chọn', N'kem-sac-mau-tuy-chon',
+(@kemId, N'Kem sắc màu tùy chọn', N'kem-sac-mau-tuy-chon',
  N'Kem nhiều màu, khách có thể chọn vị theo sở thích.', N'Colorful ice cream', 25000, NULL, N'Kem', 5, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Trái cây tươi dầm kem', N'trai-cay-tuoi-dam-kem',
+(@kemId, N'Trái cây tươi dầm kem', N'trai-cay-tuoi-dam-kem',
  N'Trái cây tươi ăn kèm kem mát lạnh.', N'Mixed fresh fruit with ice cream', 28000, NULL, N'Kem', 6, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Buffet kem như ý', N'buffet-kem-nhu-y',
+(@kemId, N'Buffet kem như ý', N'buffet-kem-nhu-y',
  N'Buffet kem nhiều vị, phù hợp nhóm khách thích trải nghiệm đa dạng.', N'Buffet ice cream', 49000, NULL, N'Kem', 7, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem'), N'Kem ốc quế tùy vị', N'kem-oc-que-tuy-vi',
+(@kemId, N'Kem ốc quế tùy vị', N'kem-oc-que-tuy-vi',
  N'Kem ốc quế tùy chọn vị.', N'Ice cream cone', 12000, NULL, N'Kem', 8, 0, N'ACTIVE'),
 
 
 /* KEM BƠ */
-((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ ALOO đặc biệt', N'kem-bo-aloo-dac-biet',
+(@kemBoId, N'Kem bơ ALOO đặc biệt', N'kem-bo-aloo-dac-biet',
  N'Kem bơ signature với bơ sáp chín tự nhiên, kem tươi mát lạnh và topping giòn thơm.', N'ALOO Premium Avocado Ice Cream', 38000, NULL, N'Kem bơ', 9, 1, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ dừa', N'kem-bo-dua',
+(@kemBoId, N'Kem bơ dừa', N'kem-bo-dua',
  N'Kem bơ kết hợp dừa, vị béo mát và thơm nhẹ.', N'Avocado Coconut Ice Cream', 25000, NULL, N'Kem bơ', 10, 1, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ mãng cầu', N'kem-bo-mang-cau',
+(@kemBoId, N'Kem bơ mãng cầu', N'kem-bo-mang-cau',
  N'Kem bơ phối mãng cầu, vị chua nhẹ cân bằng độ béo.', N'Soursop & Avocado Ice Cream', 31000, NULL, N'Kem bơ', 11, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ xoài', N'kem-bo-xoai',
+(@kemBoId, N'Kem bơ xoài', N'kem-bo-xoai',
  N'Kem bơ kết hợp xoài chín, hương vị nhiệt đới.', N'Mango & Avocado Ice Cream', 31000, NULL, N'Kem bơ', 12, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ sầu riêng', N'kem-bo-sau-rieng',
+(@kemBoId, N'Kem bơ sầu riêng', N'kem-bo-sau-rieng',
  N'Kem bơ kết hợp sầu riêng đậm vị.', N'Durian & Avocado Ice Cream', 33000, NULL, N'Kem bơ', 13, 1, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem bơ sắc màu', N'kem-bo-sac-mau',
+(@kemBoId, N'Kem bơ sắc màu', N'kem-bo-sac-mau',
  N'Kem bơ nhiều màu, phù hợp khách thích món bắt mắt.', N'Colorful Avocado Ice Cream', 38000, NULL, N'Kem bơ', 14, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'kem-bo'), N'Kem sầu riêng tươi', N'kem-sau-rieng-tuoi',
+(@kemBoId, N'Kem sầu riêng tươi', N'kem-sau-rieng-tuoi',
  N'Kem sầu riêng tươi thơm béo, vị đặc trưng.', N'Fresh Durian Ice Cream', 42000, NULL, N'Kem bơ', 15, 0, N'ACTIVE'),
 
 
 /* THIÊN ĐƯỜNG BƠ NGON */
-((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Sinh tố bơ', N'sinh-to-bo',
+(@thienDuongBoId, N'Sinh tố bơ', N'sinh-to-bo',
  N'Sinh tố bơ sánh mịn, vị bơ tự nhiên.', N'Avocado smoothie', 29000, NULL, N'Thiên đường bơ ngon', 16, 1, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Sinh tố bơ mãng cầu', N'sinh-to-bo-mang-cau',
+(@thienDuongBoId, N'Sinh tố bơ mãng cầu', N'sinh-to-bo-mang-cau',
  N'Sinh tố bơ mix mãng cầu, vị chua ngọt dễ uống.', N'Avocado & Soursop Smoothie', 32000, NULL, N'Thiên đường bơ ngon', 17, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Sinh tố bơ xoài', N'sinh-to-bo-xoai',
+(@thienDuongBoId, N'Sinh tố bơ xoài', N'sinh-to-bo-xoai',
  N'Sinh tố bơ mix xoài chín.', N'Avocado & Mango Smoothie', 32000, NULL, N'Thiên đường bơ ngon', 18, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Sinh tố bơ cafe', N'sinh-to-bo-cafe',
+(@thienDuongBoId, N'Sinh tố bơ cafe', N'sinh-to-bo-cafe',
  N'Sinh tố bơ kết hợp cà phê, béo nhẹ và thơm.', N'Avocado & Coffee Smoothie', 32000, NULL, N'Thiên đường bơ ngon', 19, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Sinh tố bơ sầu riêng', N'sinh-to-bo-sau-rieng',
+(@thienDuongBoId, N'Sinh tố bơ sầu riêng', N'sinh-to-bo-sau-rieng',
  N'Sinh tố bơ sầu riêng đậm vị nhiệt đới.', N'Avocado & Durian Smoothie', 35000, NULL, N'Thiên đường bơ ngon', 20, 1, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Sinh tố bơ dâu', N'sinh-to-bo-dau',
+(@thienDuongBoId, N'Sinh tố bơ dâu', N'sinh-to-bo-dau',
  N'Sinh tố bơ dâu, vị béo và chua ngọt hài hòa.', N'Avocado & Strawberry Smoothie', 35000, NULL, N'Thiên đường bơ ngon', 21, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Bơ dầm', N'bo-dam',
+(@thienDuongBoId, N'Bơ dầm', N'bo-dam',
  N'Bơ dầm sữa đặc, món tráng miệng béo mịn.', N'Mashed Avocado with Condensed Milk', 35000, NULL, N'Thiên đường bơ ngon', 22, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'thien-duong-bo-ngon'), N'Chè bơ', N'che-bo',
+(@thienDuongBoId, N'Chè bơ', N'che-bo',
  N'Chè bơ kiểu Việt, mát lạnh và thơm bơ.', N'Vietnamese Avocado Dessert', 29000, NULL, N'Thiên đường bơ ngon', 23, 0, N'ACTIVE'),
 
 
 /* CÀ PHÊ */
-((SELECT id FROM dbo.categories ERE slug = N'ca-phe'), N'Cà phê đen', N'ca-phe-den',
+(@caPheId, N'Cà phê đen', N'ca-phe-den',
  N'Cà phê đen pha phin hoặc pha máy.', N'Black coffee', 18000, NULL, N'Cà phê', 24, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Cà phê sữa', N'ca-phe-sua',
+(@caPheId, N'Cà phê sữa', N'ca-phe-sua',
  N'Cà phê sữa pha phin hoặc pha máy.', N'Condensed milk coffee', 21000, NULL, N'Cà phê', 25, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Bạc xỉu', N'bac-xiu',
+(@caPheId, N'Bạc xỉu', N'bac-xiu',
  N'Bạc xỉu nóng hoặc đá, vị sữa nhiều hơn cà phê.', N'Vietnamese white coffee', 28000, NULL, N'Cà phê', 26, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Cà phê kem sữa dừa', N'ca-phe-kem-sua-dua',
+(@caPheId, N'Cà phê kem sữa dừa', N'ca-phe-kem-sua-dua',
  N'Cà phê kết hợp kem sữa dừa béo thơm.', N'Milk coffee with coconut cream', 32000, NULL, N'Cà phê', 27, 1, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Cacao nóng đá', N'cacao-nong-da',
+(@caPheId, N'Cacao nóng đá', N'cacao-nong-da',
  N'Cacao sữa dùng nóng hoặc đá.', N'Cocoa with milk', 25000, NULL, N'Cà phê', 28, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Matcha Latte', N'matcha-latte',
+(@caPheId, N'Matcha Latte', N'matcha-latte',
  N'Matcha latte thơm nhẹ, hậu vị thanh.', N'Matcha Latte', 28000, NULL, N'Cà phê', 29, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'ca-phe'), N'Sữa chua đá', N'sua-chua-da',
+(@caPheId, N'Sữa chua đá', N'sua-chua-da',
  N'Sữa chua đá mát lạnh, dễ uống.', N'Iced yogurt', 22000, NULL, N'Cà phê', 30, 0, N'ACTIVE'),
 
 
 /* SINH TỐ */
-((SELECT id FROM dbo.categories WHERE slug = N'sinh-to'), N'Rau má bơ', N'rau-ma-bo',
+(@sinhToId, N'Rau má bơ', N'rau-ma-bo',
  N'Sinh tố rau má bơ thanh mát.', N'Pennywort avocado smoothie', 21000, NULL, N'Sinh tố', 31, 1, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'sinh-to'), N'Sinh tố xoài', N'sinh-to-xoai',
+(@sinhToId, N'Sinh tố xoài', N'sinh-to-xoai',
  N'Sinh tố xoài chín thơm ngọt.', N'Mango smoothie', 27000, NULL, N'Sinh tố', 32, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'sinh-to'), N'Sinh tố dâu', N'sinh-to-dau',
+(@sinhToId, N'Sinh tố dâu', N'sinh-to-dau',
  N'Sinh tố dâu chua ngọt, mát lạnh.', N'Strawberry smoothie', 30000, NULL, N'Sinh tố', 33, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'sinh-to'), N'Sinh tố mãng cầu', N'sinh-to-mang-cau',
+(@sinhToId, N'Sinh tố mãng cầu', N'sinh-to-mang-cau',
  N'Sinh tố mãng cầu vị chua nhẹ.', N'Soursop smoothie', 31000, NULL, N'Sinh tố', 34, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'sinh-to'), N'Sinh tố sầu riêng', N'sinh-to-sau-rieng',
+(@sinhToId, N'Sinh tố sầu riêng', N'sinh-to-sau-rieng',
  N'Sinh tố sầu riêng đậm vị, béo thơm.', N'Durian smoothie', 38000, NULL, N'Sinh tố', 35, 0, N'ACTIVE'),
 
 
 /* NƯỚC ÉP NGUYÊN CHẤT */
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép ổi', N'nuoc-ep-oi',
+(@nuocEpNguyenChatId, N'Nước ép ổi', N'nuoc-ep-oi',
  N'Nước ép ổi nguyên chất.', N'Guava juice', 22000, NULL, N'Nước ép nguyên chất', 36, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép cóc', N'nuoc-ep-coc',
+(@nuocEpNguyenChatId, N'Nước ép cóc', N'nuoc-ep-coc',
  N'Nước ép cóc chua nhẹ, thanh mát.', N'Ambarella juice', 22000, NULL, N'Nước ép nguyên chất', 37, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép dưa hấu', N'nuoc-ep-dua-hau',
+(@nuocEpNguyenChatId, N'Nước ép dưa hấu', N'nuoc-ep-dua-hau',
  N'Nước ép dưa hấu ngọt mát.', N'Watermelon juice', 22000, NULL, N'Nước ép nguyên chất', 38, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép thơm', N'nuoc-ep-thom',
+(@nuocEpNguyenChatId, N'Nước ép thơm', N'nuoc-ep-thom',
  N'Nước ép thơm vị chua ngọt.', N'Pineapple juice', 25000, NULL, N'Nước ép nguyên chất', 39, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép cà rốt', N'nuoc-ep-ca-rot',
+(@nuocEpNguyenChatId, N'Nước ép cà rốt', N'nuoc-ep-ca-rot',
  N'Nước ép cà rốt nguyên chất.', N'Carrot juice', 23000, NULL, N'Nước ép nguyên chất', 40, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước chanh mật ong', N'nuoc-chanh-mat-ong',
+(@nuocEpNguyenChatId, N'Nước chanh mật ong', N'nuoc-chanh-mat-ong',
  N'Nước chanh mật ong thanh mát.', N'Honey lemon', 22000, NULL, N'Nước ép nguyên chất', 41, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước chanh dây', N'nuoc-chanh-day',
+(@nuocEpNguyenChatId, N'Nước chanh dây', N'nuoc-chanh-day',
  N'Nước chanh dây chua ngọt.', N'Passion fruit juice', 22000, NULL, N'Nước ép nguyên chất', 42, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép cà chua', N'nuoc-ep-ca-chua',
+(@nuocEpNguyenChatId, N'Nước ép cà chua', N'nuoc-ep-ca-chua',
  N'Nước ép cà chua nguyên chất.', N'Tomato juice', 23000, NULL, N'Nước ép nguyên chất', 43, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép táo', N'nuoc-ep-tao',
+(@nuocEpNguyenChatId, N'Nước ép táo', N'nuoc-ep-tao',
  N'Nước ép táo tươi.', N'Apple juice', 30000, NULL, N'Nước ép nguyên chất', 44, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép cam', N'nuoc-ep-cam',
+(@nuocEpNguyenChatId, N'Nước ép cam', N'nuoc-ep-cam',
  N'Nước ép cam tươi.', N'Orange juice', 27000, NULL, N'Nước ép nguyên chất', 45, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-nguyen-chat'), N'Nước ép dâu tây', N'nuoc-ep-dau-tay',
+(@nuocEpNguyenChatId, N'Nước ép dâu tây', N'nuoc-ep-dau-tay',
  N'Nước ép dâu tây chua ngọt.', N'Strawberry juice', 28000, NULL, N'Nước ép nguyên chất', 46, 0, N'ACTIVE'),
 
 
 /* NƯỚC ÉP MIX */
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Thơm ổi', N'thom-oi',
+(@nuocEpMixId, N'Thơm ổi', N'thom-oi',
  N'Nước ép mix thơm và ổi.', N'Pineapple - Guava', 25000, NULL, N'Nước ép mix', 47, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Cóc ổi', N'coc-oi',
+(@nuocEpMixId, N'Cóc ổi', N'coc-oi',
  N'Nước ép mix cóc và ổi.', N'Ambarella - Guava', 24000, NULL, N'Nước ép mix', 48, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Cam cà rốt', N'cam-ca-rot',
+(@nuocEpMixId, N'Cam cà rốt', N'cam-ca-rot',
  N'Nước ép mix cam và cà rốt.', N'Orange - Carrot', 24000, NULL, N'Nước ép mix', 49, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Thơm cà rốt', N'thom-ca-rot',
+(@nuocEpMixId, N'Thơm cà rốt', N'thom-ca-rot',
  N'Nước ép mix thơm và cà rốt.', N'Pineapple - Carrot', 25000, NULL, N'Nước ép mix', 50, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Táo thơm', N'tao-thom',
+(@nuocEpMixId, N'Táo thơm', N'tao-thom',
  N'Nước ép mix táo và thơm.', N'Apple - Pineapple', 28000, NULL, N'Nước ép mix', 51, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Cam táo', N'cam-tao',
+(@nuocEpMixId, N'Cam táo', N'cam-tao',
  N'Nước ép mix cam và táo.', N'Orange - Apple', 28000, NULL, N'Nước ép mix', 52, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Cam dâu', N'cam-dau',
+(@nuocEpMixId, N'Cam dâu', N'cam-dau',
  N'Nước ép mix cam và dâu.', N'Orange - Strawberry', 27000, NULL, N'Nước ép mix', 53, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'nuoc-ep-mix'), N'Dưa hấu dâu', N'dua-hau-dau',
+(@nuocEpMixId, N'Dưa hấu dâu', N'dua-hau-dau',
  N'Nước ép mix dưa hấu và dâu.', N'Watermelon - Strawberry', 27000, NULL, N'Nước ép mix', 54, 0, N'ACTIVE'),
 
 
 /* TRÀ TRÁI CÂY */
-((SELECT id FROM dbo.categories WHERE slug = N'tra-trai-cay'), N'Trà tắc mật ong', N'tra-tac-mat-ong',
+(@traTraiCayId, N'Trà tắc mật ong', N'tra-tac-mat-ong',
  N'Trà tắc mật ong dùng nóng hoặc đá.', N'Honey kumquat tea', 21000, NULL, N'Trà trái cây', 55, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'tra-trai-cay'), N'Trà đào cam', N'tra-dao-cam',
+(@traTraiCayId, N'Trà đào cam', N'tra-dao-cam',
  N'Trà đào cam vị trái cây thanh mát.', N'Peach orange tea', 27000, NULL, N'Trà trái cây', 56, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'tra-trai-cay'), N'Trà trái cây nhiệt đới', N'tra-trai-cay-nhiet-doi',
+(@traTraiCayId, N'Trà trái cây nhiệt đới', N'tra-trai-cay-nhiet-doi',
  N'Trà trái cây nhiệt đới nhiều tầng hương vị.', N'Tropical fruit tea', 27000, NULL, N'Trà trái cây', 57, 1, N'ACTIVE'),
 
 
 /* TOPPING */
-((SELECT id FROM dbo.categories WHERE slug = N'topping'), N'Kem viên', N'kem-vien',
+(@toppingId, N'Kem viên', N'kem-vien',
  N'Topping kem viên ăn kèm.', N'Ice cream scoop', 9000, NULL, N'Topping', 58, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'topping'), N'Bơ thêm', N'bo-them',
+(@toppingId, N'Bơ thêm', N'bo-them',
  N'Topping bơ thêm cho món kem hoặc sinh tố.', N'Avocado added', 9000, NULL, N'Topping', 59, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'topping'), N'Sầu riêng thêm', N'sau-rieng-them',
+(@toppingId, N'Sầu riêng thêm', N'sau-rieng-them',
  N'Topping sầu riêng thêm.', N'Durian added', 9000, NULL, N'Topping', 60, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'topping'), N'Dừa khô 40g', N'dua-kho-40g',
+(@toppingId, N'Dừa khô 40g', N'dua-kho-40g',
  N'Dừa khô giòn dùng kèm.', N'Dried coconut 40g', 9000, NULL, N'Topping', 61, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'topping'), N'Bánh quế 4 cái', N'banh-que-4-cai',
+(@toppingId, N'Bánh quế 4 cái', N'banh-que-4-cai',
  N'Bánh quế giòn ăn kèm kem.', N'Wafer biscuits 4 pieces', 9000, NULL, N'Topping', 62, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'topping'), N'Hạnh nhân 20g', N'hanh-nhan-20g',
+(@toppingId, N'Hạnh nhân 20g', N'hanh-nhan-20g',
  N'Hạnh nhân giòn thơm.', N'Almonds 20g', 9000, NULL, N'Topping', 63, 0, N'ACTIVE'),
 
 
 /* ĂN VẶT */
-((SELECT id FROM dbo.categories WHERE slug = N'an-vat'), N'Hạt dưa hạt hướng dương', N'hat-dua-hat-huong-duong',
+(@anVatId, N'Hạt dưa hạt hướng dương', N'hat-dua-hat-huong-duong',
  N'Hạt dưa và hạt hướng dương ăn vặt.', N'Watermelon seeds - Sunflower seeds', 15000, NULL, N'Ăn vặt', 64, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'an-vat'), N'Bánh tráng trộn', N'banh-trang-tron',
+(@anVatId, N'Bánh tráng trộn', N'banh-trang-tron',
  N'Bánh tráng trộn vị đậm đà.', N'Mixed rice paper salad', 25000, NULL, N'Ăn vặt', 65, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'an-vat'), N'Mực xé tẩm gia vị', N'muc-xe-tam-gia-vi',
+(@anVatId, N'Mực xé tẩm gia vị', N'muc-xe-tam-gia-vi',
  N'Mực xé tẩm gia vị ăn vặt.', N'Seasoned shredded squid', 23000, NULL, N'Ăn vặt', 66, 0, N'ACTIVE'),
 
-((SELECT id FROM dbo.categories WHERE slug = N'an-vat'), N'Trái cây hộp xắt lát', N'trai-cay-hop-xat-lat',
+(@anVatId, N'Trái cây hộp xắt lát', N'trai-cay-hop-xat-lat',
  N'Trái cây hộp xắt lát tiện dùng.', N'Sliced canned fruit', 28000, NULL, N'Ăn vặt', 67, 0, N'ACTIVE');
 END
 GO

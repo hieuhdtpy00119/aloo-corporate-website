@@ -25,11 +25,15 @@ class FranchiseRegistrationServiceTest {
     @Mock
     private FranchiseRegistrationRepository registrationRepository;
 
+    @Mock
+    private AuditLogService auditLogService;
+
     @Test
     void createStoresNewLeadWithDefaultStatus() {
         FranchiseRegistrationService service = new FranchiseRegistrationService(
                 registrationRepository,
-                new FranchiseRegistrationMapper()
+                new FranchiseRegistrationMapper(),
+                auditLogService
         );
 
         when(registrationRepository.save(any(FranchiseRegistration.class))).thenAnswer(invocation -> {
@@ -56,7 +60,8 @@ class FranchiseRegistrationServiceTest {
     void updateStatusUppercasesAndRejectsMissingLead() {
         FranchiseRegistrationService service = new FranchiseRegistrationService(
                 registrationRepository,
-                new FranchiseRegistrationMapper()
+                new FranchiseRegistrationMapper(),
+                auditLogService
         );
 
         FranchiseRegistration registration = new FranchiseRegistration();

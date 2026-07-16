@@ -47,6 +47,12 @@ describe('router auth guards', () => {
     expect(resolveAuthRedirect({ path: '/account', meta: {} }, storage)).toBe('/admin/profile')
   })
 
+  it('redirects authenticated customers away from login', () => {
+    const storage = storageWith([['admin_token', jwt({ role: 'USER', exp: Math.floor(Date.now() / 1000) + 3600 })]])
+
+    expect(resolveAuthRedirect({ path: '/login', query: {}, meta: {} }, storage)).toBe('/account')
+  })
+
   it('redirects non-admin users away from cms routes', async () => {
     const storage = storageWith([['admin_token', jwt({ role: 'USER', exp: Math.floor(Date.now() / 1000) + 3600 })]])
 

@@ -30,9 +30,12 @@ class ProductServiceTest {
     @Mock
     private CategoryRepository categoryRepository;
 
+    @Mock
+    private AuditLogService auditLogService;
+
     @Test
     void createNormalizesSlugAndSavesProduct() {
-        ProductService service = new ProductService(productRepository, categoryRepository, new ProductMapper());
+        ProductService service = new ProductService(productRepository, categoryRepository, new ProductMapper(), auditLogService);
         Category category = new Category();
         category.setId(10L);
         category.setName("Kem bo");
@@ -77,7 +80,7 @@ class ProductServiceTest {
 
     @Test
     void createRejectsDuplicateSlug() {
-        ProductService service = new ProductService(productRepository, categoryRepository, new ProductMapper());
+        ProductService service = new ProductService(productRepository, categoryRepository, new ProductMapper(), auditLogService);
         when(productRepository.existsBySlug("used-slug")).thenReturn(true);
 
         ProductRequest request = new ProductRequest(
