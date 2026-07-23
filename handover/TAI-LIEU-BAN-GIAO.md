@@ -132,7 +132,7 @@ Chỉ dùng local/demo cách ly và đổi ngay nếu môi trường có interne
 | Frontend Vitest | 27 files, 84/84 pass |
 | Frontend production build | Pass |
 | Backend Maven test | 12 suites, 39/39 pass |
-| E2E thật với SQL Server | Chưa chạy trong lượt bàn giao |
+| E2E thật với SQL Server | Đã chạy desktop ngày 23/07/2026: 5/8 pass; chưa đạt pass toàn bộ |
 
 ## 10. Known issues và technical debt
 

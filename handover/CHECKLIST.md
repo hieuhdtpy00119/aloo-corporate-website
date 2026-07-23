@@ -13,8 +13,8 @@
 ## Cần chủ dự án thực hiện
 
 - [ ] Xác nhận tên người bàn giao và phần tự code/thư viện/kế thừa trong PDF.
-- [ ] Khởi chạy SQL Server, import đúng hai tệp database.
-- [ ] Chạy E2E thật và lưu log/ảnh vào `evidence/`.
+- [x] Khởi chạy SQL Server và xác minh database demo local.
+- [ ] Cập nhật ba test E2E còn lệch selector, chạy lại 8/8 và lưu log/ảnh cuối vào `evidence/` (lần rehearsal hiện tại: 5/8).
 - [ ] Quay video single-take theo kịch bản, đặt file trong `video/`.
 - [ ] Điền trạng thái dịch vụ production và bàn giao quyền qua kênh an toàn.
 - [ ] Review `git diff`, loại bỏ tệp tạm/secret, commit toàn bộ thay đổi cần bàn giao.
