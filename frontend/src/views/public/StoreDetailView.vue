@@ -33,6 +33,28 @@ const normalizedStore = computed(() => {
     .filter(Boolean)
     .map((url) => resolveBackendAssetUrl(url))
 
+  const posterItems = Array.isArray(store.value.menuPosters)
+    ? store.value.menuPosters
+    : (() => {
+        try {
+          const parsed = JSON.parse(store.value.menuPostersJson || '[]')
+          return Array.isArray(parsed) ? parsed : []
+        } catch {
+          return []
+        }
+      })()
+  const menuPosterUrls = posterItems
+    .filter((item) => {
+      if (!item || typeof item !== 'object') return Boolean(item)
+      return item.isActive !== false && item.active !== false
+    })
+    .map((item) => {
+      if (typeof item === 'string') return item
+      return item.imageUrl || item.url || ''
+    })
+    .filter(Boolean)
+    .map((url) => resolveBackendAssetUrl(url))
+
   return {
     ...store.value,
     imageUrl: resolveBackendAssetUrl(store.value.coverImageUrl || store.value.imageUrl || ''),
@@ -42,6 +64,7 @@ const normalizedStore = computed(() => {
     links,
     mapUrl: store.value.mapUrl || links.find((link) => link.type === 'GOOGLE_MAPS')?.url || '',
     galleryUrls,
+    menuPosterUrls,
   }
 })
 
@@ -129,6 +152,19 @@ onMounted(async () => {
                 :alt="`${normalizedStore.name} gallery ${index + 1}`"
                 class="aspect-[4/3] w-full rounded-2xl border border-avocado-100 object-cover"
               />
+            </div>
+
+            <div v-if="normalizedStore.menuPosterUrls.length" class="mt-8">
+              <h2 class="text-lg font-black text-avocado-950">Menu poster</h2>
+              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <img
+                  v-for="(url, index) in normalizedStore.menuPosterUrls"
+                  :key="`poster-${url}-${index}`"
+                  :src="url"
+                  :alt="`${normalizedStore.name} menu poster ${index + 1}`"
+                  class="w-full rounded-2xl border border-avocado-100 object-contain bg-brand-cream/40"
+                />
+              </div>
             </div>
           </section>
 

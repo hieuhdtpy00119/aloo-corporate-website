@@ -48,3 +48,18 @@ backend/src/main/resources/application-local.properties
 backend/maven.zip
 backend/apache-maven-*/
 
+# Local handover archives and review artifacts
+ALOO-handover-*.zip
+tmp/
+
+# Local proposal extraction artifacts
+proposal.zip
+proposal_text.txt
+proposal_extract/
+
+# Local editor instructions
+.cursor/
+
+# Emergency local-only database reset
+backend/database/reset_admin_password.sql
+

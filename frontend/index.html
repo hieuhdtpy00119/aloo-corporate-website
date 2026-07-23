@@ -5,6 +5,36 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <script>
+      // Remove service workers and Workbox caches left by the previous React/PWA
+      // application on this localhost origin. This runs before the Vue entrypoint.
+      ;(() => {
+        if (!('serviceWorker' in navigator)) return
+
+        window.addEventListener('load', async () => {
+          try {
+            const registrations = await navigator.serviceWorker.getRegistrations()
+            const hadLegacyWorker = registrations.length > 0 || Boolean(navigator.serviceWorker.controller)
+            await Promise.all(registrations.map((registration) => registration.unregister()))
+
+            if ('caches' in window) {
+              const cacheNames = await caches.keys()
+              await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)))
+            }
+
+            const reloadKey = 'aloo-legacy-pwa-cleanup-v1'
+            if (hadLegacyWorker && !sessionStorage.getItem(reloadKey)) {
+              sessionStorage.setItem(reloadKey, 'done')
+              window.location.reload()
+            }
+          } catch (error) {
+            console.warn('Could not remove the legacy service worker cache.', error)
+          }
+        })
+      })()
+    </script>
     <!-- Google Fonts preconnect for Be Vietnam Pro -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

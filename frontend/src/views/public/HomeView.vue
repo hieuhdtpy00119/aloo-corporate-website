@@ -11,6 +11,14 @@ const store = useAppStore()
 const productRail = ref(null)
 const featuredRail = ref(null)
 
+const brandMoments = [
+  { src: '/media/drive/aloo-news-01.jpg', key: 'store', className: 'sm:col-span-2 sm:row-span-2' },
+  { src: '/media/drive/aloo-news-02.jpg', key: 'mascot', className: '' },
+  { src: '/media/drive/aloo-news-03.jpg', key: 'community', className: '' },
+  { src: '/media/drive/aloo-ktv-01.jpg', key: 'media', className: '' },
+  { src: '/media/drive/aloo-ktv-02.jpg', key: 'craft', className: '' },
+]
+
 const homeSections = ref([])
 const homeSectionsLoading = ref(false)
 const homeSectionsError = ref('')
@@ -320,6 +328,36 @@ onMounted(() => {
               />
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Real brand moments sourced from ALOO's media archive -->
+    <section class="bg-white py-20">
+      <div class="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+        <div class="mb-10 max-w-2xl">
+          <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">{{ t('home.momentsEyebrow') }}</span>
+          <h2 class="mt-2 text-3xl font-black text-brand-dark lg:text-4xl">{{ t('home.momentsTitle') }}</h2>
+          <p class="mt-3 text-sm font-medium leading-relaxed text-brand-muted">{{ t('home.momentsDescription') }}</p>
+        </div>
+        <div class="grid auto-rows-[220px] gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <figure
+            v-for="moment in brandMoments"
+            :key="moment.key"
+            :class="['group relative overflow-hidden rounded-3xl bg-brand-dark', moment.className]"
+          >
+            <img
+              :src="moment.src"
+              :alt="t(`home.moments.${moment.key}`)"
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent"></div>
+            <figcaption class="absolute inset-x-0 bottom-0 p-5 text-sm font-bold leading-snug text-white">
+              {{ t(`home.moments.${moment.key}`) }}
+            </figcaption>
+          </figure>
         </div>
       </div>
     </section>

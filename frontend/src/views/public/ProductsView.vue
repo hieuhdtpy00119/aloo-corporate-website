@@ -59,7 +59,7 @@ const defaultSlide = computed(() => ({
   title: t('products.defaultSlideTitle'),
   subtitle: t('products.defaultSlideSubtitle'),
   description: t('products.defaultSlideDescription'),
-  backgroundImage: '/about/aloo-quality-ingredients.png',
+  backgroundImage: '/media/products/aloo-products-hero-ai.webp',
   tone: 'light',
 }))
 

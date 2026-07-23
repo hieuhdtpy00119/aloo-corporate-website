@@ -33,7 +33,10 @@ const messages = ref([])
 const draft = ref('')
 const searchQuery = ref('')
 const isLoading = ref(false)
+const loadError = ref('')
 const isSending = ref(false)
+const isUpdatingStatus = ref(false)
+let openSessionRequestId = 0
 const messagesEl = ref(null)
 const clientRef = ref(null)
 const inboxSubscriptionRef = ref(null)
@@ -127,9 +130,11 @@ const upsertSession = (session) => {
 
 const loadSessions = async () => {
   isLoading.value = true
+  loadError.value = ''
   try {
     sessions.value = await fetchAdminChatSessions()
   } catch (error) {
+    loadError.value = error.response?.data?.message || m('loadErrorDescription')
     toast.error(error.response?.data?.message || m('toasts.loadFailed'))
   } finally {
     isLoading.value = false
@@ -150,8 +155,10 @@ const subscribeSessionTopic = (sessionId) => {
 }
 
 const openSession = async (session) => {
+  const requestId = ++openSessionRequestId
   try {
     const data = await fetchAdminChatSession(session.id)
+    if (requestId !== openSessionRequestId) return
     selectedSession.value = data
     messages.value = (data.messages || []).map(normalizeMessage)
     upsertSession(data)
@@ -161,6 +168,7 @@ const openSession = async (session) => {
       router.replace({ query: { ...route.query, session: data.id } })
     }
   } catch (error) {
+    if (requestId !== openSessionRequestId) return
     toast.error(error.response?.data?.message || m('toasts.loadFailed'))
   }
 }
@@ -202,14 +210,19 @@ const submitMessage = async () => {
 }
 
 const changeStatus = async (status) => {
-  if (!selectedSessionId.value || selectedSession.value?.status === status) return
+  if (!selectedSessionId.value || selectedSession.value?.status === status || isUpdatingStatus.value) return
+  const sessionId = selectedSessionId.value
+  isUpdatingStatus.value = true
   try {
-    const updated = await updateAdminChatSessionStatus(selectedSessionId.value, status)
+    const updated = await updateAdminChatSessionStatus(sessionId, status)
+    if (selectedSessionId.value !== sessionId) return
     selectedSession.value = { ...selectedSession.value, ...updated }
     upsertSession(updated)
     toast.success(m('toasts.statusUpdated'))
   } catch (error) {
     toast.error(error.response?.data?.message || m('toasts.statusFailed'))
+  } finally {
+    isUpdatingStatus.value = false
   }
 }
 
@@ -277,6 +290,14 @@ onBeforeUnmount(() => {
             <div class="admin-chat-session-list">
               <p v-if="isLoading" class="admin-chat-muted">{{ t('admin.shared.loading') }}</p>
 
+              <div v-else-if="loadError" class="admin-chat-load-error" role="alert">
+                <strong>{{ m('loadErrorTitle') }}</strong>
+                <p>{{ loadError }}</p>
+                <button type="button" class="admin-chat-retry" @click="loadSessions">
+                  {{ m('retry') }}
+                </button>
+              </div>
+
               <div v-else-if="!filteredSessions.length" class="admin-chat-empty-wrap">
                 <EmptyState :title="m('emptyTitle')" :description="m('emptyDescription')" />
               </div>
@@ -327,6 +348,7 @@ onBeforeUnmount(() => {
                       class="admin-chat-status-group__btn"
                       :class="{ 'is-active': selectedSession.status === status }"
                       :title="statusHint(status)"
+                      :disabled="isUpdatingStatus"
                       @click="changeStatus(status)"
                     >
                       {{ statusLabel(status) }}
@@ -455,6 +477,38 @@ onBeforeUnmount(() => {
   flex: 1;
   overflow-y: auto;
   padding: 0 4px 6px;
+}
+
+.admin-chat-load-error {
+  margin: 6px 4px;
+  padding: 12px 10px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+  text-align: center;
+}
+
+.admin-chat-load-error strong {
+  display: block;
+  font-size: 12px;
+}
+
+.admin-chat-load-error p {
+  margin: 5px 0 9px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.admin-chat-retry {
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  background: #fff;
+  color: #b91c1c;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .admin-chat-session {

@@ -47,7 +47,7 @@ public class ProductReview {
     private String content;
 
     @Column(nullable = false, length = 20)
-    private String status = STATUS_APPROVED;
+    private String status = STATUS_PENDING;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

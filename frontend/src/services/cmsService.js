@@ -56,6 +56,14 @@ export const productService = {
   remove: (id) => api.delete(`/products/${id}`),
 }
 
+export const menuPosterService = {
+  list: () => api.get('/menu-posters'),
+  get: (id) => api.get(`/menu-posters/${id}`),
+  create: (payload) => api.post('/menu-posters', payload),
+  update: (id, payload) => api.put(`/menu-posters/${id}`, payload),
+  remove: (id) => api.delete(`/menu-posters/${id}`),
+}
+
 export const feedbackService = {
   listVisible: () => api.get('/testimonials'),
   featured: () => api.get('/testimonials'),
@@ -136,20 +144,21 @@ export const auditLogService = {
 }
 
 export const accountService = {
+  search: (params = {}) => api.get('/accounts', { params }),
   listAdmins: () => api.get('/accounts/admins'),
   getAdminEmailWhitelist: () => api.get('/accounts/admin-email-whitelist'),
   createAdmin: (payload) => api.post('/accounts/admins', payload),
   updateAdmin: (id, payload) => api.put(`/accounts/admins/${id}`, payload),
-  updateAdminStatus: (id, status) => api.patch(`/accounts/admins/${id}/status`, { status }),
+  updateAdminStatus: (id, payload) => api.patch(`/accounts/admins/${id}/status`, payload),
   changeAdminPassword: (id, password) => api.put(`/accounts/admins/${id}/password`, { password }),
   removeAdmin: (id) => api.delete(`/accounts/admins/${id}`),
-  demoteAdmin: (id) => api.patch(`/accounts/admins/${id}/demote`),
+  demoteAdmin: (id, payload) => api.patch(`/accounts/admins/${id}/demote`, payload),
   listCustomers: () => api.get('/accounts/customers'),
   createCustomer: (payload) => api.post('/accounts/customers', payload),
   updateCustomer: (id, payload) => api.put(`/accounts/customers/${id}`, payload),
-  updateCustomerStatus: (id, status) => api.patch(`/accounts/customers/${id}/status`, { status }),
+  updateCustomerStatus: (id, payload) => api.patch(`/accounts/customers/${id}/status`, payload),
   changeCustomerPassword: (id, password) => api.put(`/accounts/customers/${id}/password`, { password }),
-  promoteCustomer: (id, adminProfile) => api.patch(`/accounts/customers/${id}/promote`, { adminProfile }),
+  promoteCustomer: (id, payload) => api.patch(`/accounts/customers/${id}/promote`, payload),
   removeCustomer: (id) => api.delete(`/accounts/customers/${id}`),
 }
 
@@ -168,4 +177,3 @@ export const brandTimelineService = {
   update: (id, payload) => api.put(`/brand-timelines/${id}`, payload),
   remove: (id) => api.delete(`/brand-timelines/${id}`),
 }
-

@@ -8,6 +8,7 @@ Backend Spring Boot cho ALOO Franchise CMS.
 - Spring Boot 3
 - Maven
 - SQL Server
+- Flyway
 - Spring Data JPA
 - Spring Security JWT
 - Lombok
@@ -21,6 +22,8 @@ Production bắt buộc set env, không có fallback mật khẩu/secret trong `
 DB_URL=jdbc:sqlserver://<host>:1433;databaseName=ALOO_Franchise_CMS;encrypt=true;trustServerCertificate=false
 DB_USERNAME=<production-user>
 DB_PASSWORD=<production-password>
+DB_MIGRATION_USERNAME=<migration-user-with-ddl-permission>
+DB_MIGRATION_PASSWORD=<migration-password>
 JWT_SECRET=<random-secret-at-least-32-characters>
 CORS_ALLOWED_ORIGIN=https://your-domain.com
 ```
@@ -49,13 +52,29 @@ Các endpoint đang được giới hạn:
 - User upload: 30 lần / 10 phút / IP
 
 
-## Chạy backend
+## Quản lý schema database
 
-Tạo database/schema bằng script:
+`database/aloo_franchise_cms.sql` là script khởi tạo database mới. Script có
+lớp bảo vệ và tự ngừng trước phần reset nếu phát hiện database đã có bảng. Chỉ
+dùng file này khi tạo database trống; mọi lần nâng cấp sau đó phải qua Flyway.
+
+Các thay đổi schema mới phải nằm trong `src/main/resources/db/migration` và dùng
+tên `V<version>__<description>.sql`. Flyway chạy migration trước khi Hibernate
+kiểm tra schema. Không sửa migration đã được áp dụng và không dùng `DROP TABLE`
+trong migration thông thường.
+
+Production nên tách hai tài khoản:
+
+- `DB_MIGRATION_USERNAME`: có quyền `CREATE`/`ALTER`, chỉ dùng khi triển khai.
+- `DB_USERNAME`: tài khoản runtime, chỉ có `SELECT`/`INSERT`/`UPDATE`/`DELETE`.
+
+Khởi tạo database mới lần đầu:
 
 ```powershell
 sqlcmd -S localhost -E -C -i database/aloo_franchise_cms.sql
 ```
+
+## Chạy backend
 
 Chạy app:
 
@@ -110,73 +129,56 @@ Các API admin dùng header:
 Authorization: Bearer <token>
 ```
 
-## User Auth
+## Auth (unified for admin + customer)
 
-Login user:
+Login:
 
 ```http
-POST /api/user-auth/login
+POST /api/auth/login
 Content-Type: application/json
 
 {
   "email": "user@aloo.vn",
-  "password": "123456"
+  "password": "your-password"
 }
 ```
 
-Các API user dùng header:
+Authenticated calls use:
 
 ```http
-Authorization: Bearer <user-token>
+Authorization: Bearer <token>
 ```
 
-- `GET /api/user-auth/me`
-- `PUT /api/user-auth/profile`
-- `PUT /api/user-auth/change-password`
-- `POST /api/user-auth/uploads/images`
+- `GET /api/auth/me`
+- `PUT /api/auth/profile`
+- `POST /api/auth/profile/avatar`
+- `PUT /api/auth/change-password`
+- `POST /api/auth/password-change/request-otp`
+- Google OAuth: `/oauth2/**` → frontend `/oauth/callback` (token delivered in URL fragment)
 
 ## Public API
 
-- `GET /api/products`
-- `GET /api/products/{id}`
-- `GET /api/posts`
-- `GET /api/posts/{id}`
+- `GET /api/products` (active only for anonymous)
+- `GET /api/products/slug/{slug}`
+- `GET /api/posts` (published only for anonymous)
 - `GET /api/posts/slug/{slug}`
 - `GET /api/stores`
 - `GET /api/stores/featured`
 - `GET /api/stores/{slug}`
 - `GET /api/franchise-contents`
+- `GET /api/home-sections?activeOnly=true`
+- `GET /api/brand-timelines?activeOnly=true`
 - `GET /api/hero-banners`
 - `GET /api/menu-posters`
+- `GET /api/testimonials`
+- `POST /api/contact-messages`
 - `POST /api/franchise-registrations`
+- `POST /api/chat/sessions`
 
-## Admin API
+## Admin API (requires ADMIN + scope)
 
-- `GET /api/auth/me`
-- `PUT /api/auth/profile`
-- `PUT /api/auth/change-password`
-- `POST /api/products`
-- `PUT /api/products/{id}`
-- `DELETE /api/products/{id}`
-- `POST /api/posts`
-- `PUT /api/posts/{id}`
-- `DELETE /api/posts/{id}`
-- `GET /api/categories`
-- `POST /api/categories`
-- `PUT /api/categories/{id}`
-- `DELETE /api/categories/{id}`
-- `GET /api/franchise-registrations`
-- `GET /api/franchise-registrations/{id}`
-- `PATCH /api/franchise-registrations/{id}/status`
-- `DELETE /api/franchise-registrations/{id}`
-- `GET /api/admin/stores`
-- `POST /api/admin/stores`
-- `PUT /api/admin/stores/{id}`
-- `DELETE /api/admin/stores/{id}`
-- `PUT /api/franchise-contents/{id}`
-- `POST /api/hero-banners`
-- `PUT /api/hero-banners/{id}`
-- `DELETE /api/hero-banners/{id}`
-- `POST /api/menu-posters`
-- `PUT /api/menu-posters/{id}`
-- `DELETE /api/menu-posters/{id}`
+- Content: products, posts, categories, home-sections, franchise-contents, hero-banners, brand-timelines, menu-posters
+- Stores: `/api/admin/stores`
+- CRM: franchise-registrations, contact-messages, testimonials, product reviews, live chat
+- System: accounts, audit-logs
+- `POST /api/uploads/images`

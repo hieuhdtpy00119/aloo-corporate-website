@@ -5,6 +5,7 @@
     "description": "Quản lý sản phẩm và banner trang sản phẩm.",
     "tabs": {
       "products": "Sản phẩm",
+      "menu": "Menu poster",
       "hero": "Banner trang SP"
     },
     "addProduct": "Thêm sản phẩm",
@@ -125,13 +126,17 @@
       "confirm": "Xóa sản phẩm",
       "heroTitle": "Xóa banner trang sản phẩm?",
       "heroMessage": "Banner này sẽ bị xóa khỏi slider đầu trang sản phẩm. Hành động này không thể hoàn tác.",
-      "heroConfirm": "Xóa banner"
+      "heroConfirm": "Xóa banner",
+      "posterTitle": "Xóa menu poster?",
+      "posterMessage": "Menu poster này sẽ bị xóa khỏi website. Hành động này không thể hoàn tác.",
+      "posterConfirm": "Xóa menu poster"
     },
     "validation": {
       "name": "Tên sản phẩm không được rỗng",
       "slug": "Slug không được rỗng",
       "duplicateSlug": "Slug đã được sử dụng bởi sản phẩm khác",
       "sortOrder": "Thứ tự phải là số không âm",
+      "price": "Giá phải là số không âm",
       "imageUrl": "URL ảnh không hợp lệ (dùng /uploads/..., đường dẫn /... hoặc https://...)",
       "imageRecommended": "Sản phẩm đang bán nhưng chưa có ảnh — trang web sẽ hiện placeholder.",
       "gallery": "Một hoặc nhiều URL gallery không hợp lệ",
@@ -151,6 +156,7 @@
       "name": "Tên sản phẩm *",
       "slug": "Slug *",
       "category": "Danh mục",
+      "price": "Giá bán",
       "status": "Trạng thái",
       "imageUrl": "URL ảnh",
       "uploadImage": "Tải ảnh",
@@ -174,6 +180,11 @@
       "menuImageUrl": "URL ảnh menu",
       "uploadMenuImage": "Tải ảnh menu",
       "bannerTitle": "Tên banner *",
+      "bannerSubtitle": "Nhãn phụ",
+      "bannerDescription": "Mô tả banner",
+      "tone": "Tông màu",
+      "productImage": "Ảnh sản phẩm nổi",
+      "thumbnailImage": "Ảnh thumbnail",
       "displayOrder": "Thứ tự hiển thị",
       "backgroundImage": "Ảnh nền"
     },
@@ -539,7 +550,7 @@
       "mapUrl": "Dùng CUSTOM với link Google Maps cho nút Xem bản đồ.",
       "imageUrl": "Dùng /uploads/... hoặc tải ảnh từ máy.",
       "galleryText": "Mỗi dòng một URL — hiển thị trên trang chi tiết cửa hàng.",
-      "menuPostersText": "Chỉ lưu CMS — chưa hiển thị trên website."
+      "menuPostersText": "Hiển thị trên trang chi tiết cửa hàng, dưới phần gallery."
     },
     "fields": {
       "storeCode": "Mã cửa hàng",
@@ -691,10 +702,55 @@
     "fieldsPublicVisible": "Hiển thị public",
     "paginationLabel": "testimonial"
   },
+  "brandTimeline": {
+    "title": "Hành trình thương hiệu",
+    "listTitle": "Các mốc thời gian",
+    "add": "Thêm mốc",
+    "edit": "Sửa mốc",
+    "create": "Thêm mốc",
+    "empty": "Chưa có mốc hành trình",
+    "searchPlaceholder": "Tìm theo năm, tiêu đề, mô tả...",
+    "paginationLabel": "mốc",
+    "filters": {
+      "all": "Tất cả",
+      "active": "Đang hiện",
+      "inactive": "Đã ẩn"
+    },
+    "columns": {
+      "year": "Năm",
+      "title": "Tiêu đề",
+      "status": "Trạng thái",
+      "sortOrder": "Thứ tự",
+      "actions": "Thao tác"
+    },
+    "fields": {
+      "year": "Năm",
+      "title": "Tiêu đề",
+      "description": "Mô tả",
+      "imageUrl": "URL ảnh",
+      "sortOrder": "Thứ tự",
+      "status": "Trạng thái"
+    },
+    "actions": {
+      "edit": "Sửa",
+      "delete": "Xóa",
+      "save": "Lưu",
+      "cancel": "Hủy"
+    },
+    "toasts": {
+      "loadError": "Không tải được hành trình thương hiệu",
+      "requiredFields": "Nhập năm và tiêu đề",
+      "created": "Đã thêm mốc",
+      "updated": "Đã cập nhật mốc",
+      "saveError": "Không lưu được mốc",
+      "deleted": "Đã xóa mốc",
+      "deleteError": "Không xóa được mốc"
+    }
+  },
   "productReviews": {
     "title": "Đánh giá sản phẩm",
     "listTitle": "Quản lý cảm nhận",
-    "description": "Cảm nhận khách gửi sẽ hiện ngay trên trang sản phẩm. Dùng Ẩn hoặc Xóa khi nội dung không phù hợp.",
+    "description": "Cảm nhận khách gửi cần được duyệt trước khi hiển thị trên trang sản phẩm.",
     "searchPlaceholder": "Tìm theo khách hàng, sản phẩm, nội dung...",
     "paginationLabel": "cảm nhận",
     "status": {
@@ -717,17 +773,63 @@
       "actions": "Thao tác"
     },
     "actions": {
-      "approve": "Hiện lại",
+      "approve": "Duyệt",
       "reject": "Ẩn",
       "delete": "Xóa"
     },
     "toasts": {
       "loadError": "Không tải được đánh giá sản phẩm",
-      "approved": "Đã hiện lại cảm nhận trên trang sản phẩm",
+      "approved": "Đã duyệt cảm nhận và hiển thị trên trang sản phẩm",
       "rejected": "Đã ẩn cảm nhận khỏi trang sản phẩm",
       "statusError": "Không cập nhật được trạng thái",
       "deleted": "Đã xóa cảm nhận",
       "deleteError": "Không xóa được cảm nhận"
+    }
+  },
+  "contactMessages": {
+    "title": "Tin nhắn liên hệ",
+    "listTitle": "Hộp thư",
+    "empty": "Chưa có tin nhắn liên hệ",
+    "searchPlaceholder": "Tìm theo tên, SĐT, email, chủ đề...",
+    "noSubject": "Không có chủ đề",
+    "detailTitle": "Chi tiết tin nhắn",
+    "paginationLabel": "tin nhắn",
+    "status": {
+      "NEW": "Mới",
+      "READ": "Đã đọc",
+      "REPLIED": "Đã trả lời",
+      "ARCHIVED": "Lưu trữ"
+    },
+    "filters": {
+      "all": "Tất cả"
+    },
+    "columns": {
+      "name": "Họ tên",
+      "contact": "Liên hệ",
+      "subject": "Chủ đề",
+      "status": "Trạng thái",
+      "createdAt": "Nhận lúc",
+      "actions": "Thao tác"
+    },
+    "fields": {
+      "name": "Họ tên",
+      "phone": "Điện thoại",
+      "email": "Email",
+      "subject": "Chủ đề",
+      "message": "Nội dung",
+      "status": "Trạng thái",
+      "createdAt": "Thời gian nhận"
+    },
+    "actions": {
+      "detail": "Chi tiết",
+      "delete": "Xóa"
+    },
+    "toasts": {
+      "loadError": "Không tải được tin nhắn liên hệ",
+      "statusUpdated": "Đã cập nhật trạng thái",
+      "statusError": "Không cập nhật được trạng thái",
+      "deleted": "Đã xóa tin nhắn",
+      "deleteError": "Không xóa được tin nhắn"
     }
   },
   "leads": {
@@ -794,6 +896,9 @@
     "sessionsTitle": "Hội thoại",
     "emptyTitle": "Chưa có hội thoại",
     "emptyDescription": "Các phiên chat mới từ khách sẽ hiển thị tại đây.",
+    "loadErrorTitle": "Không tải được hội thoại",
+    "loadErrorDescription": "Máy chủ chưa trả về dữ liệu chat. Vui lòng thử lại.",
+    "retry": "Thử lại",
     "selectTitle": "Chọn một hội thoại",
     "selectDescription": "Chọn khách ở cột trái để xem tin nhắn và phản hồi.",
     "send": "Gửi",
@@ -854,6 +959,7 @@
       "author": "Tác giả",
       "source": "Nguồn",
       "sourceLink": "Link nguồn",
+      "articleType": "Loại bài viết",
       "excerpt": "Mô tả ngắn",
       "content": "Nội dung chi tiết",
       "coverImage": "Ảnh đại diện",
@@ -870,6 +976,7 @@
       "slug": "review-aloo-kem-bo-quy-nhon",
       "source": "ALOO / Báo chí / Cộng tác viên",
       "sourceLink": "https://...",
+      "articleType": "Bài SEO, Tin tức, Review...",
       "excerpt": "Tóm tắt ngắn dùng cho trang blog và SEO.",
       "image": "https://...",
       "metaKeywords": "kem bơ, Quy Nhơn, ALOO"
@@ -913,7 +1020,11 @@
       "name": "Tên danh mục",
       "slug": "Slug",
       "status": "Trạng thái",
-      "description": "Mô tả ngắn"
+      "description": "Mô tả ngắn",
+      "parent": "Danh mục cha",
+      "noParent": "Không có danh mục cha",
+      "sortOrder": "Thứ tự",
+      "language": "Ngôn ngữ"
     },
     "modals": {
       "create": "Thêm danh mục",
@@ -933,7 +1044,8 @@
       "deleted": "Đã xóa danh mục thành công",
       "deleteError": "Không xóa được danh mục",
       "loadError": "Không tải được danh mục",
-      "requiredFields": "Vui lòng nhập tên và slug danh mục"
+      "requiredFields": "Vui lòng nhập tên và slug danh mục",
+      "sortOrderInvalid": "Thứ tự phải là số không âm"
     }
   },
   "franchise": {

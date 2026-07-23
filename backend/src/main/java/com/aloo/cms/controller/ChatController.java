@@ -2,8 +2,12 @@ package com.aloo.cms.controller;
 
 import com.aloo.cms.dto.ChatSessionCreateRequest;
 import com.aloo.cms.dto.ChatSessionResponse;
+import com.aloo.cms.security.RateLimitService;
+import com.aloo.cms.security.RequestClient;
 import com.aloo.cms.service.ChatService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +25,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChatController {
 
     private final ChatService chatService;
+    private final RateLimitService rateLimitService;
 
     @PostMapping("/sessions")
-    public ResponseEntity<ChatSessionResponse> createSession(@Valid @RequestBody ChatSessionCreateRequest request) {
+    public ResponseEntity<ChatSessionResponse> createSession(
+            @Valid @RequestBody ChatSessionCreateRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        rateLimitService.check("chat-session-create", RequestClient.ip(httpRequest), 10, Duration.ofMinutes(15));
         return ResponseEntity.status(HttpStatus.CREATED).body(chatService.createSession(request));
     }
 
@@ -34,7 +43,11 @@ public class ChatController {
     }
 
     @GetMapping("/sessions/mine")
-    public ChatSessionResponse getMySession(@RequestHeader("X-Chat-Token") String sessionToken) {
+    public ChatSessionResponse getMySession(
+            @RequestHeader("X-Chat-Token") String sessionToken,
+            HttpServletRequest httpRequest
+    ) {
+        rateLimitService.check("chat-session-mine", RequestClient.ip(httpRequest), 60, Duration.ofMinutes(10));
         return chatService.getVisitorSession(sessionToken);
     }
 }

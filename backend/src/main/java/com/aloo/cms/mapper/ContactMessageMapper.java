@@ -20,7 +20,8 @@ public class ContactMessageMapper {
         message.setPhone(MapperUtils.required(request.phone()));
         message.setSubject(MapperUtils.nullable(request.subject()));
         message.setMessage(MapperUtils.required(request.message()));
-        message.setStatus(MapperUtils.status(request.status(), "NEW"));
+        // Public create always starts as NEW — ignore any client-supplied status.
+        message.setStatus("NEW");
     }
 
     public ContactMessageResponse toResponse(ContactMessage message) {

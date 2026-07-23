@@ -27,6 +27,7 @@ const statusFilter = ref(t('admin.shared.all'))
 const currentPage = ref(1)
 const isUploadingImage = ref(false)
 const isUploadingGallery = ref(false)
+const isSaving = ref(false)
 const pageSize = 6
 const formErrors = ref({})
 const slugTouched = ref(false)
@@ -73,6 +74,7 @@ const defaultProductForm = () => ({
   description: '',
   imageUrl: '',
   category: '',
+  price: 0,
   status: 'ACTIVE',
   sortOrder: 0,
   shortDescription: '',
@@ -187,6 +189,7 @@ const openEditModal = (product) => {
     description: product.description || '',
     imageUrl: normalizeStorageAssetUrl(product.imageUrl || product.image || ''),
     category: product.category || '',
+    price: Number(product.price ?? 0),
     status: product.status || 'ACTIVE',
     sortOrder: Number(product.sortOrder || 0),
     shortDescription: product.shortDescription || '',
@@ -220,6 +223,9 @@ const validateForm = () => {
 
   if (Number.isNaN(Number(form.sortOrder)) || Number(form.sortOrder) < 0) {
     errors.sortOrder = m('validation.sortOrder')
+  }
+  if (Number.isNaN(Number(form.price)) || Number(form.price) < 0) {
+    errors.price = m('validation.price')
   }
 
   if (form.imageUrl.trim() && !isValidAssetUrl(form.imageUrl)) {
@@ -377,8 +383,10 @@ const paginatedProducts = computed(() =>
 const listCountText = computed(() => t('admin.shared.totalCount', { count: filteredProducts.value.length }))
 
 const saveProduct = async () => {
+  if (isSaving.value) return
   if (!validateForm()) return
 
+  isSaving.value = true
   try {
     await store.saveProduct({
       id: editingId.value,
@@ -396,6 +404,8 @@ const saveProduct = async () => {
       modalFormTab.value = 'required'
     }
     toast.error(message)
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -421,6 +431,10 @@ watch(
 
 watch([searchQuery, statusFilter], () => {
   currentPage.value = 1
+})
+
+watch(totalPages, (value) => {
+  currentPage.value = Math.min(currentPage.value, value)
 })
 
 onMounted(() => {
@@ -611,7 +625,7 @@ defineExpose({ openCreate: openCreateModal })
           </label>
         </div>
 
-        <div class="grid gap-5 md:grid-cols-3">
+        <div class="grid gap-5 md:grid-cols-4">
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.category') }}
             <input
@@ -624,6 +638,11 @@ defineExpose({ openCreate: openCreateModal })
               <option v-for="category in categoryOptions" :key="category" :value="category" />
             </datalist>
             <span class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('fieldHints.category') }}</span>
+          </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            {{ m('fields.price') }}
+            <input v-model.number="form.price" type="number" min="0" step="1000" class="admin-input-premium" />
+            <span v-if="formErrors.price" class="text-xs font-bold normal-case tracking-normal text-red-600">{{ formErrors.price }}</span>
           </label>
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
             {{ m('fields.status') }}
@@ -654,7 +673,7 @@ defineExpose({ openCreate: openCreateModal })
             type="file"
             accept=".jpg,.jpeg,.jfif,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
             class="w-full text-xs font-bold text-slate-600 file:mr-4 file:cursor-pointer file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white transition hover:file:bg-avocado-700"
-            :disabled="isUploadingImage || isUploadingGallery"
+            :disabled="isUploadingImage || isUploadingGallery || isSaving"
             @change="handleImageFileChange"
           />
           <span v-if="isUploadingImage" class="text-xs font-bold normal-case tracking-normal text-avocado-700 animate-pulse">{{ m('misc.uploading') }}</span>
@@ -801,7 +820,7 @@ defineExpose({ openCreate: openCreateModal })
             class="rounded-full bg-avocado-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-avocado-700 disabled:cursor-not-allowed disabled:opacity-60"
             form="product-form"
             type="submit"
-            :disabled="isUploadingImage || isUploadingGallery"
+            :disabled="isUploadingImage || isUploadingGallery || isSaving"
           >
             {{ mode === 'create' ? m('addProduct') : m('actions.saveUpdate') }}
           </button>

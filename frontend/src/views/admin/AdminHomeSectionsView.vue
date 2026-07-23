@@ -38,6 +38,7 @@ const statusFilter = ref(t('admin.shared.all'))
 const typeFilter = ref(t('admin.shared.all'))
 const currentPage = ref(1)
 const isUploadingImage = ref(false)
+const isSaving = ref(false)
 const isLoadingLinkOptions = ref(false)
 const linkType = ref('NONE')
 const linkTarget = ref('')
@@ -394,6 +395,7 @@ const validateForm = () => {
 }
 
 const saveSection = async () => {
+  if (isSaving.value) return
   if (!validateForm()) return
 
   const sectionKey = form.sectionKey.trim()
@@ -411,6 +413,7 @@ const saveSection = async () => {
     status: form.status,
   }
 
+  isSaving.value = true
   try {
     const request = editingId.value ? homeSectionService.update(editingId.value, payload) : homeSectionService.create(payload)
     const { data } = await request
@@ -422,6 +425,8 @@ const saveSection = async () => {
     closeModal()
   } catch (error) {
     toast.error(error.response?.data?.message || m('toasts.saveError'))
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -470,6 +475,10 @@ watch(
 
 watch([searchQuery, statusFilter, typeFilter], () => {
   currentPage.value = 1
+})
+
+watch(totalPages, (value) => {
+  currentPage.value = Math.min(currentPage.value, value)
 })
 
 onMounted(() => {
@@ -877,7 +886,7 @@ onMounted(() => {
             class="rounded-lg bg-brand-forest px-4 py-3 font-black text-white hover:bg-avocado-800 disabled:cursor-not-allowed disabled:opacity-60"
             form="home-section-form"
             type="submit"
-            :disabled="isUploadingImage"
+            :disabled="isUploadingImage || isSaving"
           >
             {{ mode === 'create' ? m('actions.saveCreate') : m('actions.saveUpdate') }}
           </button>

@@ -35,6 +35,7 @@ const errorMessage = ref('')
 const showModal = ref(false)
 const mode = ref('create')
 const editingId = ref(null)
+const isSaving = ref(false)
 const pendingDeleteId = ref(null)
 const formErrors = ref({})
 const modalFormTab = ref('required')
@@ -276,6 +277,10 @@ watch([searchQuery, sectionFilter, statusFilter], () => {
   currentPage.value = 1
 })
 
+watch(totalPages, (value) => {
+  currentPage.value = Math.min(currentPage.value, value)
+})
+
 const openCreateModal = () => {
   mode.value = 'create'
   resetForm()
@@ -361,7 +366,7 @@ const buildPayload = () => {
     sectionKey: form.sectionKey,
     title: resolvePayloadTitle(),
     content,
-    amount: null,
+    amount: form.amount.trim() || null,
     note: form.note.trim() || null,
     sortOrder: Number(form.sortOrder || 0),
     status: form.status,
@@ -369,8 +374,10 @@ const buildPayload = () => {
 }
 
 const saveItem = async () => {
+  if (isSaving.value) return
   try {
     const payload = buildPayload()
+    isSaving.value = true
     const request = editingId.value
       ? franchiseContentService.update(editingId.value, payload)
       : franchiseContentService.create(payload)
@@ -387,6 +394,8 @@ const saveItem = async () => {
       return
     }
     toast.error(error.response?.data?.message || m('toasts.saveError'))
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -623,11 +632,17 @@ watch(
             </label>
           </div>
 
-          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-            {{ m('fields.note') }}
-            <input v-model="form.note" class="admin-input-premium" :placeholder="m('placeholders.adminNote')" />
-            <span class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('fieldHints.adminNote') }}</span>
-          </label>
+          <div class="grid gap-5 md:grid-cols-2">
+            <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+              {{ m('fields.amount') }}
+              <input v-model="form.amount" class="admin-input-premium" />
+            </label>
+            <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+              {{ m('fields.note') }}
+              <input v-model="form.note" class="admin-input-premium" :placeholder="m('placeholders.adminNote')" />
+              <span class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('fieldHints.adminNote') }}</span>
+            </label>
+          </div>
         </section>
 
         <section v-show="modalFormTab === 'content'" class="franchise-form-panel grid gap-4 rounded-2xl border border-slate-200 bg-white p-5">
@@ -748,7 +763,7 @@ watch(
           <button class="rounded-lg border border-slate-200 px-4 py-3 font-bold text-slate-600 hover:bg-slate-50" type="button" @click="closeModal">
             {{ m('actions.cancel') }}
           </button>
-          <button class="rounded-lg bg-brand-forest px-4 py-3 font-black text-white hover:bg-avocado-800" form="franchise-content-form" type="submit">
+          <button class="rounded-lg bg-brand-forest px-4 py-3 font-black text-white hover:bg-avocado-800 disabled:cursor-not-allowed disabled:opacity-60" form="franchise-content-form" type="submit" :disabled="isSaving">
             {{ mode === 'create' ? m('actions.saveCreate') : m('actions.saveUpdate') }}
           </button>
         </div>

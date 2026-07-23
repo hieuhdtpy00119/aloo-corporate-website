@@ -31,8 +31,28 @@ public class MenuPosterService {
     }
 
     @Transactional(readOnly = true)
+    public List<MenuPosterResponse> findActive() {
+        return menuPosterRepository.findByStatusIgnoreCase(
+                        "ACTIVE",
+                        Sort.by("sortOrder").ascending().and(Sort.by("id").ascending())
+                )
+                .stream()
+                .map(menuPosterMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public MenuPosterResponse findById(Long id) {
         return menuPosterMapper.toResponse(getPoster(id));
+    }
+
+    @Transactional(readOnly = true)
+    public MenuPosterResponse findActiveById(Long id) {
+        MenuPoster poster = getPoster(id);
+        if (poster.getStatus() == null || !"ACTIVE".equalsIgnoreCase(poster.getStatus())) {
+            throw new ResourceNotFoundException("Menu poster not found");
+        }
+        return menuPosterMapper.toResponse(poster);
     }
 
     @Transactional

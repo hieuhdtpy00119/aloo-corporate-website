@@ -67,7 +67,10 @@ const canSubmitReview = computed(() => {
 })
 const reviewStatusMessage = computed(() => {
   if (!myReview.value) return ''
-  if (myReview.value.status === 'PENDING' || myReview.value.status === 'APPROVED') {
+  if (myReview.value.status === 'PENDING') {
+    return 'Cảm nhận của bạn đang chờ quản trị viên duyệt trước khi hiển thị công khai.'
+  }
+  if (myReview.value.status === 'APPROVED') {
     return 'Bạn đã đánh giá sản phẩm này. Cảm nhận của bạn đang hiển thị trong danh sách bên dưới.'
   }
   if (myReview.value.status === 'REJECTED') {
@@ -134,7 +137,7 @@ const submitReview = async () => {
     myReview.value = data
     reviewForm.content = ''
     reviewForm.rating = 5
-    reviewFormSuccess.value = 'Đã gửi cảm nhận. Đánh giá của bạn đã hiển thị công khai.'
+    reviewFormSuccess.value = 'Đã gửi cảm nhận. Đánh giá của bạn đang chờ quản trị viên duyệt.'
     await loadReviews()
   } catch (error) {
     reviewFormError.value = error.response?.data?.message || 'Không gửi được cảm nhận. Vui lòng thử lại.'

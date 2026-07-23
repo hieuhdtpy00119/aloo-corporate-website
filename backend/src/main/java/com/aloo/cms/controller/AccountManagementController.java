@@ -6,6 +6,8 @@ import com.aloo.cms.dto.PromoteCustomerRequest;
 import com.aloo.cms.dto.AccountStatusRequest;
 import com.aloo.cms.dto.AccountUserRequest;
 import com.aloo.cms.dto.AccountUserResponse;
+import com.aloo.cms.dto.AccountPageResponse;
+import com.aloo.cms.dto.DemoteAdminRequest;
 import com.aloo.cms.service.AccountManagementService;
 import com.aloo.cms.service.AdminEmailWhitelistService;
 import jakarta.validation.Valid;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -32,6 +35,21 @@ public class AccountManagementController {
 
     private final AccountManagementService accountManagementService;
     private final AdminEmailWhitelistService adminEmailWhitelistService;
+
+    @GetMapping
+    public AccountPageResponse searchAccounts(
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String adminProfile,
+            @RequestParam(required = false) String authProvider,
+            @RequestParam(required = false, name = "q") String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return accountManagementService.searchAccounts(
+                role, status, adminProfile, authProvider, query, page, size
+        );
+    }
 
     @GetMapping("/admin-email-whitelist")
     public AdminEmailWhitelistResponse adminEmailWhitelist() {
@@ -74,8 +92,11 @@ public class AccountManagementController {
     }
 
     @PatchMapping("/admins/{id}/demote")
-    public AccountUserResponse demoteAdmin(@PathVariable Long id) {
-        return accountManagementService.demoteAdminToCustomer(id);
+    public AccountUserResponse demoteAdmin(
+            @PathVariable Long id,
+            @Valid @RequestBody DemoteAdminRequest request
+    ) {
+        return accountManagementService.demoteAdminToCustomer(id, request);
     }
 
     @GetMapping("/customers")

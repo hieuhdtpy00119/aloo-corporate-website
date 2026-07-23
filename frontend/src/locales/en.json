@@ -84,6 +84,16 @@
     "brandStoryP2": "We proudly built a youthful store model with synchronized operations from the prep counter to guest service — so every cup of avocado ice cream keeps its most delicate natural flavor.",
     "brandStoryCta": "Read the full story",
     "brandStoryImageAlt": "Fresh ALOO avocado ingredients",
+    "momentsEyebrow": "ALOO in real life",
+    "momentsTitle": "A brand shaped by real moments",
+    "momentsDescription": "From lively stores and children's smiles to a preparation process captured by local media, these authentic moments show how ALOO connects with its community.",
+    "moments": {
+      "store": "A lively ALOO store after dark",
+      "mascot": "The avocado mascot sharing family moments",
+      "community": "ALOO taking part in community events",
+      "media": "Our preparation process featured by the media",
+      "craft": "Care in every step of preparation"
+    },
     "locationsEyebrow": "Experience in person",
     "locationsTitle": "Find your nearest ALOO store",
     "locationsViewAll": "View all store locations",
@@ -454,10 +464,12 @@
       "feedbacks": "Testimonials",
       "productReviews": "Product reviews",
       "homeSections": "Homepage",
+      "brandTimeline": "Brand timeline",
       "articles": "News",
       "categories": "Article categories",
       "locations": "Store locator",
       "registrations": "Consultation leads",
+      "contactMessages": "Contact messages",
       "liveChat": "Live chat",
       "accounts": "Accounts & access",
       "auditLogs": "Audit log"
@@ -723,8 +735,12 @@
       "subtitleCustomers": "{count} customers",
       "searchPlaceholder": "Search by name or email...",
       "allStatuses": "All statuses",
+      "allProfiles": "All access profiles",
+      "allProviders": "All sign-in methods",
       "profileLabel": "CMS access profile",
+      "authProviderLabel": "Sign-in method",
       "customerRoleLabel": "Customer",
+      "localAccountBadge": "CMS password",
       "googleAccountBadge": "Google",
       "sessionAccountBadge": "You",
       "googlePasswordBlocked": "Google sign-in accounts do not use a CMS password. Change it in your Google account.",
@@ -741,16 +757,36 @@
       "passwordError": "Could not change password",
       "deleteSuccess": "Account deleted",
       "deleteError": "Could not delete account",
+      "deactivateSuccess": "Account deactivated",
+      "reasonLabel": "Reason for change",
+      "reasonRequired": "Enter a reason for this change",
+      "defaultActionReason": "Updated from account management",
+      "transferAdminLabel": "Transfer live chats to administrator",
+      "transferAdminOptional": "No assignments or choose later",
+      "transferAdminSearch": "Find an administrator by name or email...",
+      "transferAdminLimitHint": "Shows up to 20 recent matches; enter a keyword to narrow the results.",
+      "retry": "Try again",
       "systemEyebrow": "System administration",
       "status": {
+        "INVITED": "Invitation pending",
         "ACTIVE": "Active",
-        "INACTIVE": "Hidden",
-        "LOCKED": "Locked"
+        "SUSPENDED": "Suspended",
+        "LOCKED": "Locked",
+        "DEACTIVATED": "Deactivated"
       },
       "statusShort": {
+        "INVITED": "Invited",
         "ACTIVE": "Active",
-        "INACTIVE": "Hidden",
-        "LOCKED": "Locked"
+        "SUSPENDED": "Suspended",
+        "LOCKED": "Locked",
+        "DEACTIVATED": "Deactivated"
+      },
+      "roleShort": {
+        "FULL": "Full access",
+        "CONTENT": "Content",
+        "STORES": "Stores",
+        "CRM": "CRM",
+        "SYSTEM": "System"
       },
       "columns": {
         "account": "Account",
@@ -766,7 +802,7 @@
       "actions": {
         "password": "Change password",
         "edit": "Edit",
-        "delete": "Delete",
+        "delete": "Deactivate",
         "promote": "Promote",
         "demote": "Demote to customer",
         "lockAccount": "Lock account",
@@ -803,9 +839,9 @@
         "confirm": "Confirm"
       },
       "confirmDelete": {
-        "title": "Delete account?",
-        "message": "Account {name} ({email}) will be permanently removed from the system. This cannot be undone.",
-        "confirm": "Delete"
+        "title": "Deactivate account?",
+        "message": "Account {name} ({email}) will lose sign-in access while business data and history are retained.",
+        "confirm": "Deactivate"
       },
       "promote": {
         "title": "Promote to CMS admin",

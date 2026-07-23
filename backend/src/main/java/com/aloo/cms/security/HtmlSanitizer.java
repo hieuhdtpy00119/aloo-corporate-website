@@ -1,21 +1,20 @@
 package com.aloo.cms.security;
 
-import java.util.regex.Pattern;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.safety.Safelist;
 
 public final class HtmlSanitizer {
 
-    private static final Pattern DANGEROUS_ELEMENTS = Pattern.compile(
-            "(?is)<\\s*(script|style|iframe|object|embed|meta|link|base|form|input|button|textarea|select|option)\\b[^>]*>.*?<\\s*/\\s*\\1\\s*>"
-    );
-    private static final Pattern SELF_CLOSING_DANGEROUS_ELEMENTS = Pattern.compile(
-            "(?is)<\\s*(script|style|iframe|object|embed|meta|link|base|form|input|button|textarea|select|option)\\b[^>]*?/?>"
-    );
-    private static final Pattern EVENT_HANDLER_ATTRIBUTES = Pattern.compile(
-            "(?is)\\s+on[a-z0-9_-]+\\s*=\\s*(\"[^\"]*\"|'[^']*'|[^\\s>]+)"
-    );
-    private static final Pattern DANGEROUS_URLS = Pattern.compile(
-            "(?is)\\s+(href|src)\\s*=\\s*(\"\\s*(javascript:|data:text/html)[^\"]*\"|'\\s*(javascript:|data:text/html)[^']*'|\\s*(javascript:|data:text/html)[^\\s>]+)"
-    );
+    private static final Safelist SAFELIST = Safelist.relaxed()
+            .addTags("h1", "h2", "h3", "h4", "h5", "h6", "figure", "figcaption", "picture", "source")
+            .addAttributes(":all", "class", "id")
+            .addAttributes("a", "target", "rel")
+            .addAttributes("img", "loading", "decoding")
+            .addAttributes("source", "srcset", "type", "media")
+            .addProtocols("a", "href", "http", "https", "mailto")
+            .addProtocols("img", "src", "http", "https")
+            .addProtocols("source", "srcset", "http", "https");
 
     private HtmlSanitizer() {
     }
@@ -25,10 +24,7 @@ public final class HtmlSanitizer {
             return html;
         }
 
-        String sanitized = DANGEROUS_ELEMENTS.matcher(html).replaceAll("");
-        sanitized = SELF_CLOSING_DANGEROUS_ELEMENTS.matcher(sanitized).replaceAll("");
-        sanitized = EVENT_HANDLER_ATTRIBUTES.matcher(sanitized).replaceAll("");
-        sanitized = DANGEROUS_URLS.matcher(sanitized).replaceAll("");
-        return sanitized;
+        Document.OutputSettings settings = new Document.OutputSettings().prettyPrint(false);
+        return Jsoup.clean(html, "", SAFELIST, settings);
     }
 }

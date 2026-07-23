@@ -107,8 +107,13 @@ onMounted(async () => {
     try {
       await refreshAuthProfile()
       syncAuthState()
-    } catch {
-      // Token expired or backend unavailable — keep cached profile.
+    } catch (error) {
+      // A backend response means the token/account is no longer trustworthy.
+      // Keep the cached profile only for a temporary network outage.
+      if (error?.response) {
+        clearAuthSession()
+        syncAuthState()
+      }
     }
   }
 })

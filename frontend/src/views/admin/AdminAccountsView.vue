@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Camera, KeyRound, MoreVertical, Plus, UserRound, UserCog } from 'lucide-vue-next'
 import AccountsRowActions from '../../components/admin/accounts/AccountsRowActions.vue'
@@ -10,7 +10,6 @@ import AdminShellFrame from '../../components/admin/shell/AdminShellFrame.vue'
 import AdminShellTablePanel from '../../components/admin/shell/AdminShellTablePanel.vue'
 import AdminShellTabs from '../../components/admin/shell/AdminShellTabs.vue'
 import AdminPageHeader from '../../components/admin/AdminPageHeader.vue'
-import ConfirmModal from '../../components/admin/ConfirmModal.vue'
 import EmptyState from '../../components/admin/EmptyState.vue'
 import Pagination from '../../components/admin/Pagination.vue'
 import SearchFilterBar from '../../components/admin/SearchFilterBar.vue'
@@ -29,6 +28,7 @@ const { t } = useI18n()
 const activeTab = ref('admins')
 const searchQuery = ref('')
 const statusFilter = ref(t('admin.accounts.allStatuses'))
+const accountTypeFilter = ref(t('admin.accounts.allProfiles'))
 const openMenuUserId = ref(null)
 const brokenAvatars = ref({})
 const currentPage = ref(1)
@@ -45,32 +45,62 @@ const pendingStatusChange = ref(null)
 const pendingPromote = ref(null)
 const pendingDemote = ref(null)
 const promoteProfile = ref('FULL')
+const actionReason = ref('')
+const deactivationReason = ref('')
+const demoteTransferAdminId = ref('')
+const transferAdminOptions = ref([])
+const transferAdminSearch = ref('')
+const isLoadingTransferAdmins = ref(false)
 const adminEmailWhitelist = ref({ enabled: false, emails: [] })
 const isUploadingAvatar = ref(false)
+const isSavingUser = ref(false)
+const isSavingPassword = ref(false)
+const isPerformingAction = ref(false)
 
 const accountTypes = [
   { key: 'admins', labelKey: 'admin.accounts.tabAdmins' },
   { key: 'customers', labelKey: 'admin.accounts.tabCustomers' },
 ]
 const adminProfileOptions = ['FULL', 'CONTENT', 'STORES', 'CRM', 'SYSTEM']
-const statusOptions = ['ACTIVE', 'INACTIVE', 'LOCKED']
+const statusOptions = ['INVITED', 'ACTIVE', 'SUSPENDED', 'LOCKED', 'DEACTIVATED']
 const statusLabels = computed(() => ({
+  INVITED: t('admin.accounts.status.INVITED'),
   ACTIVE: t('admin.accounts.status.ACTIVE'),
-  INACTIVE: t('admin.accounts.status.INACTIVE'),
+  SUSPENDED: t('admin.accounts.status.SUSPENDED'),
   LOCKED: t('admin.accounts.status.LOCKED'),
+  DEACTIVATED: t('admin.accounts.status.DEACTIVATED'),
 }))
 const statusShortLabels = computed(() => ({
+  INVITED: t('admin.accounts.statusShort.INVITED'),
   ACTIVE: t('admin.accounts.statusShort.ACTIVE'),
-  INACTIVE: t('admin.accounts.statusShort.INACTIVE'),
+  SUSPENDED: t('admin.accounts.statusShort.SUSPENDED'),
   LOCKED: t('admin.accounts.statusShort.LOCKED'),
+  DEACTIVATED: t('admin.accounts.statusShort.DEACTIVATED'),
 }))
 const statusFilters = computed(() => [
   t('admin.accounts.allStatuses'),
   ...statusOptions.map((status) => statusLabels.value[status]),
 ])
+const accountTypeFilterOptions = computed(() => (
+  activeTab.value === 'admins'
+    ? [t('admin.accounts.allProfiles'), ...adminProfileOptions.map((profile) => t(`admin.roles.${profile}`))]
+    : [t('admin.accounts.allProviders'), t('admin.accounts.localAccountBadge'), t('admin.accounts.googleAccountBadge')]
+))
+const accountTypeFilterLabel = computed(() => (
+  activeTab.value === 'admins' ? t('admin.accounts.profileLabel') : t('admin.accounts.authProviderLabel')
+))
 const resolveStatusFilter = (label) => {
   if (!label || label === t('admin.accounts.allStatuses')) return 'ALL'
   return statusOptions.find((status) => statusLabels.value[status] === label) || 'ALL'
+}
+const resolveAccountTypeFilter = () => {
+  if (activeTab.value === 'admins') {
+    const adminProfile = adminProfileOptions.find((profile) => t(`admin.roles.${profile}`) === accountTypeFilter.value)
+    return adminProfile ? { adminProfile } : {}
+  }
+  if (accountTypeFilter.value === t('admin.accounts.localAccountBadge')) return { authProvider: 'LOCAL' }
+  if (accountTypeFilter.value === t('admin.accounts.googleAccountBadge')) return { authProvider: 'GOOGLE' }
+  return {}
 }
 
 const form = reactive({
@@ -81,25 +111,18 @@ const form = reactive({
   status: 'ACTIVE',
   adminProfile: 'FULL',
   password: '',
+  changeReason: '',
 })
 const passwordForm = reactive({ password: '' })
 
+const adminTotal = ref(0)
+const customerTotal = ref(0)
+const serverTotalPages = ref(1)
 const currentUsers = computed(() => (activeTab.value === 'admins' ? adminUsers.value : customerUsers.value))
-const filteredUsers = computed(() => {
-  const keyword = searchQuery.value.trim().toLowerCase()
-  return currentUsers.value.filter((user) => {
-    const matchesKeyword = !keyword || [user.email, user.fullName, user.phone, roleLabel(user)]
-      .filter(Boolean)
-      .some((value) => String(value).toLowerCase().includes(keyword))
-    const matchesStatus = resolveStatusFilter(statusFilter.value) === 'ALL'
-      || user.status === resolveStatusFilter(statusFilter.value)
-    return matchesKeyword && matchesStatus
-  })
-})
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredUsers.value.length / pageSize)))
-const paginatedUsers = computed(() =>
-  filteredUsers.value.slice((currentPage.value - 1) * pageSize, currentPage.value * pageSize),
-)
+const filteredUsers = computed(() => currentUsers.value)
+const totalElements = computed(() => (activeTab.value === 'admins' ? adminTotal.value : customerTotal.value))
+const totalPages = computed(() => Math.max(1, serverTotalPages.value))
+const paginatedUsers = computed(() => filteredUsers.value)
 const accountTabItems = computed(() =>
   accountTypes.map((type) => ({
     key: type.key,
@@ -109,7 +132,7 @@ const accountTabItems = computed(() =>
 const avatarPreviewUrl = computed(() => resolveBackendAssetUrl(form.avatarUrl || ''))
 
 const statusTextClass = (status) => ({
-  'accounts-status--inactive': status === 'INACTIVE',
+  'accounts-status--inactive': ['INVITED', 'SUSPENDED', 'DEACTIVATED'].includes(status),
   'accounts-status--locked': status === 'LOCKED',
 })
 
@@ -127,6 +150,13 @@ const menuLabels = computed(() => ({
 const formatDate = (value) => (value ? String(value).replace('T', ' ').slice(0, 16) : '-')
 
 const roleLabel = (user) => {
+  if (activeTab.value === 'admins') {
+    return t(`admin.accounts.roleShort.${user.adminProfile || 'FULL'}`)
+  }
+  return t('admin.accounts.customerRoleLabel')
+}
+
+const roleTitle = (user) => {
   if (activeTab.value === 'admins') {
     return t(`admin.roles.${user.adminProfile || 'FULL'}`)
   }
@@ -149,7 +179,7 @@ const editFormAccess = computed(() => {
     avatar: true,
     email: isCreate || (!self && !google),
     adminProfile: isAdminTab && (isCreate || !self),
-    status: isCreate || !self,
+    status: isCreate,
     password: isCreate,
   }
 })
@@ -178,32 +208,77 @@ const onAvatarError = (userId) => {
   brokenAvatars.value = { ...brokenAvatars.value, [userId]: true }
 }
 
-watch([activeTab, searchQuery, statusFilter], () => {
-  currentPage.value = 1
-})
-
-watch(totalPages, (pages) => {
-  if (currentPage.value > pages) currentPage.value = pages
-})
+let searchTimer = null
+let transferSearchTimer = null
+let accountRequestId = 0
 
 const loadAccounts = async () => {
+  const requestId = ++accountRequestId
+  const requestedTab = activeTab.value
   isLoading.value = true
   errorMessage.value = ''
-  try {
-    const [admins, customers, whitelist] = await Promise.all([
-      accountService.listAdmins(),
-      accountService.listCustomers(),
-      accountService.getAdminEmailWhitelist(),
-    ])
-    adminUsers.value = Array.isArray(admins.data) ? admins.data : []
-    customerUsers.value = Array.isArray(customers.data) ? customers.data : []
-    adminEmailWhitelist.value = whitelist.data || { enabled: false, emails: [] }
-  } catch (error) {
-    errorMessage.value = error.response?.data?.message || t('admin.accounts.loadError')
-  } finally {
-    isLoading.value = false
+  const sharedParams = {
+    q: searchQuery.value.trim() || undefined,
+    status: resolveStatusFilter(statusFilter.value),
+    page: currentPage.value - 1,
+    size: pageSize,
   }
+  const typeParams = resolveAccountTypeFilter()
+  const countParams = { ...sharedParams, page: 0, size: 1 }
+  const [admins, customers, whitelist] = await Promise.allSettled([
+    accountService.search({
+      ...(requestedTab === 'admins' ? sharedParams : countParams),
+      role: 'ADMIN',
+      ...(requestedTab === 'admins' ? typeParams : {}),
+    }),
+    accountService.search({
+      ...(requestedTab === 'customers' ? sharedParams : countParams),
+      role: 'USER',
+      ...(requestedTab === 'customers' ? typeParams : {}),
+    }),
+    accountService.getAdminEmailWhitelist(),
+  ])
+
+  if (requestId !== accountRequestId) return
+
+  if (admins.status === 'fulfilled') {
+    if (requestedTab === 'admins') adminUsers.value = admins.value.data?.items || []
+    adminTotal.value = admins.value.data?.totalElements || 0
+    if (requestedTab === 'admins') serverTotalPages.value = admins.value.data?.totalPages || 1
+  }
+  if (customers.status === 'fulfilled') {
+    if (requestedTab === 'customers') customerUsers.value = customers.value.data?.items || []
+    customerTotal.value = customers.value.data?.totalElements || 0
+    if (requestedTab === 'customers') serverTotalPages.value = customers.value.data?.totalPages || 1
+  }
+  if (whitelist.status === 'fulfilled') {
+    adminEmailWhitelist.value = whitelist.value.data || { enabled: false, emails: [] }
+  }
+
+  const activeResult = requestedTab === 'admins' ? admins : customers
+  if (activeResult.status === 'rejected') {
+    errorMessage.value = activeResult.reason?.response?.data?.message || t('admin.accounts.loadError')
+  }
+  isLoading.value = false
 }
+
+watch(activeTab, () => {
+  accountTypeFilter.value = activeTab.value === 'admins'
+    ? t('admin.accounts.allProfiles')
+    : t('admin.accounts.allProviders')
+})
+
+watch([activeTab, searchQuery, statusFilter, accountTypeFilter], () => {
+  currentPage.value = 1
+  clearTimeout(searchTimer)
+  searchTimer = window.setTimeout(loadAccounts, 300)
+})
+
+watch(currentPage, loadAccounts)
+
+watch(totalPages, (value) => {
+  currentPage.value = Math.min(currentPage.value, value)
+})
 
 const resetForm = () => {
   Object.assign(form, {
@@ -214,6 +289,7 @@ const resetForm = () => {
     status: 'ACTIVE',
     adminProfile: 'FULL',
     password: '',
+    changeReason: '',
   })
   editingUser.value = null
 }
@@ -233,6 +309,7 @@ const openEditModal = (user) => {
     status: user.status || 'ACTIVE',
     adminProfile: user.adminProfile || 'FULL',
     password: '',
+    changeReason: '',
   })
   showUserModal.value = true
 }
@@ -281,10 +358,13 @@ const buildPayload = () => {
       ? (access.adminProfile ? form.adminProfile : (user?.adminProfile || form.adminProfile))
       : null,
     password: form.password || null,
+    changeReason: form.changeReason.trim() || null,
+    expectedVersion: user?.version ?? null,
   }
 }
 
 const saveUser = async () => {
+  if (isSavingUser.value) return
   if (!editingUser.value) {
     const errorKey = getNewPasswordErrorKey(form.password)
     if (errorKey) {
@@ -293,11 +373,22 @@ const saveUser = async () => {
     }
   }
 
+  const adminProfileChanged = Boolean(
+    editingUser.value
+      && activeTab.value === 'admins'
+      && form.adminProfile !== (editingUser.value.adminProfile || 'FULL'),
+  )
+  if (adminProfileChanged && !form.changeReason.trim()) {
+    toast.error(t('admin.accounts.reasonRequired'))
+    return
+  }
+
   if (activeTab.value === 'admins' && editFormAccess.value.email && !isEmailWhitelisted(form.email)) {
     toast.error(t('admin.accounts.whitelistBlocked'))
     return
   }
 
+  isSavingUser.value = true
   try {
     const payload = buildPayload()
     if (activeTab.value === 'admins') {
@@ -314,14 +405,17 @@ const saveUser = async () => {
     await loadAccounts()
   } catch (error) {
     toast.error(error.response?.data?.message || t('admin.accounts.saveError'))
+  } finally {
+    isSavingUser.value = false
   }
 }
 
-const updateStatus = async (user, status) => {
+const updateStatus = async (user, status, reason) => {
   try {
+    const payload = { status, reason, expectedVersion: user.version }
     activeTab.value === 'admins'
-      ? await accountService.updateAdminStatus(user.id, status)
-      : await accountService.updateCustomerStatus(user.id, status)
+      ? await accountService.updateAdminStatus(user.id, payload)
+      : await accountService.updateCustomerStatus(user.id, payload)
     toast.success(t('admin.accounts.statusUpdated'))
     await loadAccounts()
   } catch (error) {
@@ -333,14 +427,14 @@ const requestStatusChange = (user, event) => {
   const nextStatus = event?.target?.value ?? event
   if (nextStatus === user.status) return
   if (event?.target) event.target.value = user.status
-  pendingStatusChange.value = { user, status: nextStatus }
+  pendingStatusChange.value = { user, status: nextStatus, reason: '' }
 }
 
 const confirmStatusChange = async () => {
   if (!pendingStatusChange.value) return
-  const { user, status } = pendingStatusChange.value
+  const { user, status, reason } = pendingStatusChange.value
   pendingStatusChange.value = null
-  await updateStatus(user, status)
+  await updateStatus(user, status, reason || t('admin.accounts.defaultActionReason'))
 }
 
 const openPasswordModal = (user) => {
@@ -354,12 +448,14 @@ const openPasswordModal = (user) => {
 }
 
 const savePassword = async () => {
+  if (isSavingPassword.value) return
   const errorKey = getNewPasswordErrorKey(passwordForm.password)
   if (errorKey) {
     toast.error(t(errorKey))
     return
   }
 
+  isSavingPassword.value = true
   try {
     if (activeTab.value === 'admins') {
       await accountService.changeAdminPassword(editingUser.value.id, passwordForm.password)
@@ -372,20 +468,32 @@ const savePassword = async () => {
     editingUser.value = null
   } catch (error) {
     toast.error(error.response?.data?.message || t('admin.accounts.passwordError'))
+  } finally {
+    isSavingPassword.value = false
   }
 }
 
 const confirmDelete = async () => {
+  if (isPerformingAction.value) return
+  isPerformingAction.value = true
   try {
+    const user = pendingDelete.value
+    const payload = {
+      status: 'DEACTIVATED',
+      reason: deactivationReason.value || t('admin.accounts.defaultActionReason'),
+      expectedVersion: user.version,
+    }
     activeTab.value === 'admins'
-      ? await accountService.removeAdmin(pendingDelete.value.id)
-      : await accountService.removeCustomer(pendingDelete.value.id)
-    toast.success(t('admin.accounts.deleteSuccess'))
+      ? await accountService.updateAdminStatus(user.id, payload)
+      : await accountService.updateCustomerStatus(user.id, payload)
+    toast.success(t('admin.accounts.deactivateSuccess'))
     await loadAccounts()
   } catch (error) {
     toast.error(error.response?.data?.message || t('admin.accounts.deleteError'))
   } finally {
     pendingDelete.value = null
+    deactivationReason.value = ''
+    isPerformingAction.value = false
   }
 }
 
@@ -402,42 +510,96 @@ const openPromoteModal = (user) => {
   }
   pendingPromote.value = user
   promoteProfile.value = 'FULL'
+  actionReason.value = ''
 }
 
 const confirmPromote = async () => {
-  if (!pendingPromote.value) return
+  if (!pendingPromote.value || isPerformingAction.value) return
+  if (!actionReason.value.trim()) {
+    toast.error(t('admin.accounts.reasonRequired'))
+    return
+  }
+
+  isPerformingAction.value = true
   try {
-    await accountService.promoteCustomer(pendingPromote.value.id, promoteProfile.value)
+    await accountService.promoteCustomer(pendingPromote.value.id, {
+      adminProfile: promoteProfile.value,
+      reason: actionReason.value,
+      expectedVersion: pendingPromote.value.version,
+    })
     toast.success(t('admin.accounts.promoteSuccess'))
     pendingPromote.value = null
     await loadAccounts()
   } catch (error) {
     toast.error(error.response?.data?.message || t('admin.accounts.promoteError'))
+  } finally {
+    isPerformingAction.value = false
   }
 }
 
-const openDemoteModal = (user) => {
+const loadTransferAdminCandidates = async () => {
+  if (!pendingDemote.value) return
+  isLoadingTransferAdmins.value = true
+  try {
+    const { data } = await accountService.search({
+      role: 'ADMIN',
+      status: 'ACTIVE',
+      q: transferAdminSearch.value.trim() || undefined,
+      page: 0,
+      size: 20,
+    })
+    transferAdminOptions.value = (data?.items || []).filter((item) => item.id !== pendingDemote.value?.id)
+  } catch {
+    transferAdminOptions.value = []
+  } finally {
+    isLoadingTransferAdmins.value = false
+  }
+}
+
+watch(transferAdminSearch, () => {
+  if (!pendingDemote.value) return
+  clearTimeout(transferSearchTimer)
+  transferSearchTimer = window.setTimeout(loadTransferAdminCandidates, 250)
+})
+
+const openDemoteModal = async (user) => {
   if (isSessionUser(user)) {
     toast.error(t('admin.accounts.selfDemoteBlocked'))
     return
   }
   pendingDemote.value = user
+  actionReason.value = ''
+  demoteTransferAdminId.value = ''
+  transferAdminSearch.value = ''
+  transferAdminOptions.value = []
+  await loadTransferAdminCandidates()
 }
 
 const confirmDemote = async () => {
-  if (!pendingDemote.value) return
+  if (!pendingDemote.value || isPerformingAction.value) return
+  if (!actionReason.value.trim()) {
+    toast.error(t('admin.accounts.reasonRequired'))
+    return
+  }
+  isPerformingAction.value = true
   try {
-    await accountService.demoteAdmin(pendingDemote.value.id)
+    await accountService.demoteAdmin(pendingDemote.value.id, {
+      reason: actionReason.value,
+      transferToAdminId: demoteTransferAdminId.value ? Number(demoteTransferAdminId.value) : null,
+      expectedVersion: pendingDemote.value.version,
+    })
     toast.success(t('admin.accounts.demoteSuccess'))
     pendingDemote.value = null
     await loadAccounts()
   } catch (error) {
     toast.error(error.response?.data?.message || t('admin.accounts.demoteError'))
+  } finally {
+    isPerformingAction.value = false
   }
 }
 
 const tabLabel = (type) => {
-  const count = type.key === 'admins' ? adminUsers.value.length : customerUsers.value.length
+  const count = type.key === 'admins' ? adminTotal.value : customerTotal.value
   return `${t(type.labelKey)} (${count})`
 }
 
@@ -463,7 +625,10 @@ const runMenuAction = (action, user, payload) => {
   else if (action === 'demote') openDemoteModal(user)
   else if (action === 'password') openPasswordModal(user)
   else if (action === 'edit') openEditModal(user)
-  else if (action === 'delete') pendingDelete.value = user
+  else if (action === 'delete') {
+    pendingDelete.value = user
+    deactivationReason.value = ''
+  }
   else if (action === 'status') requestStatusChange(user, payload)
 }
 
@@ -472,6 +637,10 @@ const onRowAction = (user, action, payload) => {
 }
 
 onMounted(loadAccounts)
+onBeforeUnmount(() => {
+  clearTimeout(searchTimer)
+  clearTimeout(transferSearchTimer)
+})
 </script>
 
 <template>
@@ -503,19 +672,25 @@ onMounted(loadAccounts)
           :search-placeholder="t('admin.accounts.searchPlaceholder')"
           :status-label="t('admin.accounts.columns.status')"
           :status-options="statusFilters"
+          v-model:extra-filter="accountTypeFilter"
+          :extra-options="accountTypeFilterOptions"
+          :extra-label="accountTypeFilterLabel"
         />
       </AdminShellFrame>
 
       <AdminShellFrame
         v-if="errorMessage"
-        as="p"
+        as="div"
         variant="alert"
         class="admin-list-alert"
       >
-        {{ errorMessage }}
+        <span>{{ errorMessage }}</span>
+        <button type="button" class="ml-3 font-black underline" @click="loadAccounts">
+          {{ t('admin.accounts.retry') }}
+        </button>
       </AdminShellFrame>
 
-      <AdminShellFrame v-if="isLoading" variant="body" inner="pad">
+      <AdminShellFrame v-else-if="isLoading" variant="body" inner="pad">
         <div v-for="i in 5" :key="i" class="admin-shell-skeleton" />
       </AdminShellFrame>
 
@@ -529,12 +704,13 @@ onMounted(loadAccounts)
       <AdminShellFrame v-else variant="body" visibility="desktop">
         <AdminShellTablePanel
           :title="t('admin.accounts.listTitle')"
-          :count-text="t('admin.shared.totalCount', { count: filteredUsers.length })"
+          :count-text="t('admin.shared.totalCount', { count: totalElements })"
         >
           <table class="admin-shell-table accounts-table">
             <colgroup>
               <col class="accounts-col-name" />
               <col class="accounts-col-email" />
+              <col class="accounts-col-role" />
               <col class="accounts-col-status" />
               <col class="accounts-col-login" />
               <col class="accounts-col-actions" />
@@ -548,6 +724,7 @@ onMounted(loadAccounts)
                   </span>
                 </th>
                 <th class="accounts-col-email">{{ t('admin.accounts.columns.email') }}</th>
+                <th class="accounts-col-role">{{ t('admin.accounts.columns.role') }}</th>
                 <th class="accounts-col-status">{{ t('admin.accounts.columns.status') }}</th>
                 <th class="accounts-col-login">{{ t('admin.accounts.columns.lastLoginAt') }}</th>
                 <th class="accounts-col-actions">{{ t('admin.accounts.columns.actions') }}</th>
@@ -567,14 +744,17 @@ onMounted(loadAccounts)
                     <div v-else class="accounts-avatar-fallback">
                       {{ (user.fullName || user.email || 'A').charAt(0).toUpperCase() }}
                     </div>
-                    <p class="accounts-name">
-                      {{ user.fullName }}
-                      <span v-if="isGoogleAccount(user)" class="accounts-badge">{{ t('admin.accounts.googleAccountBadge') }}</span>
-                      <span v-if="isSessionUser(user)" class="accounts-badge accounts-badge--session">{{ t('admin.accounts.sessionAccountBadge') }}</span>
-                    </p>
+                    <div class="accounts-identity">
+                      <p class="accounts-name" :title="user.fullName">{{ user.fullName }}</p>
+                      <div v-if="isGoogleAccount(user) || isSessionUser(user)" class="accounts-identity__badges">
+                        <span v-if="isGoogleAccount(user)" class="accounts-badge">{{ t('admin.accounts.googleAccountBadge') }}</span>
+                        <span v-if="isSessionUser(user)" class="accounts-badge accounts-badge--session">{{ t('admin.accounts.sessionAccountBadge') }}</span>
+                      </div>
+                    </div>
                   </div>
                 </td>
                 <td class="accounts-col-email accounts-email">{{ user.email }}</td>
+                <td class="accounts-col-role"><span class="accounts-badge accounts-role-badge" :title="roleTitle(user)">{{ roleLabel(user) }}</span></td>
                 <td class="accounts-col-status">
                   <span class="accounts-status" :class="statusTextClass(user.status)">
                     {{ statusShortLabels[user.status] }}
@@ -584,7 +764,7 @@ onMounted(loadAccounts)
                 <td class="accounts-col-actions">
                   <div class="accounts-row-actions">
                     <button
-                      v-if="activeTab === 'customers'"
+                      v-if="activeTab === 'customers' && user.status === 'ACTIVE'"
                       type="button"
                       class="accounts-promote-btn"
                       @click="openPromoteModal(user)"
@@ -614,7 +794,7 @@ onMounted(loadAccounts)
                       :lock-account-label="menuLabels.lockAccount"
                       :activate-account-label="menuLabels.activateAccount"
                       :show-password="!isGoogleAccount(user)"
-                      :show-delete="!isSessionUser(user)"
+                      :show-delete="!isSessionUser(user) && user.status !== 'DEACTIVATED'"
                       :show-status-toggle="!isSessionUser(user)"
                       @toggle="toggleActionMenu(user.id)"
                       @action="(action, payload) => onRowAction(user, action, payload)"
@@ -631,10 +811,10 @@ onMounted(loadAccounts)
         </AdminShellTablePanel>
       </AdminShellFrame>
 
-      <AdminShellFrame v-if="!isLoading && filteredUsers.length" variant="body" visibility="mobile">
+      <AdminShellFrame v-if="!errorMessage && !isLoading && filteredUsers.length" variant="body" visibility="mobile">
         <AdminShellTablePanel
           :title="t('admin.accounts.listTitle')"
-          :count-text="t('admin.shared.totalCount', { count: filteredUsers.length })"
+          :count-text="t('admin.shared.totalCount', { count: totalElements })"
         >
           <template #below>
             <div class="admin-shell-frame__inner--pad admin-shell-frame__inner--stack admin-shell-mobile-list">
@@ -654,6 +834,7 @@ onMounted(loadAccounts)
                     <p class="accounts-name">{{ user.fullName }}</p>
                     <p class="accounts-email">{{ user.email }}</p>
                     <div class="accounts-mobile-meta">
+                      <span class="accounts-badge accounts-role-badge">{{ roleLabel(user) }}</span>
                       <span class="accounts-status" :class="statusTextClass(user.status)">
                         {{ statusShortLabels[user.status] }}
                       </span>
@@ -663,7 +844,7 @@ onMounted(loadAccounts)
                     <p class="accounts-mobile-login">
                       {{ t('admin.accounts.columns.lastLoginAt') }}: {{ formatDate(user.lastLoginAt) }}
                     </p>
-                    <div v-if="activeTab === 'customers'" class="accounts-mobile-promote">
+                    <div v-if="activeTab === 'customers' && user.status === 'ACTIVE'" class="accounts-mobile-promote">
                       <button type="button" class="accounts-promote-btn accounts-promote-btn--full" @click="openPromoteModal(user)">
                         {{ menuLabels.promote }}
                       </button>
@@ -689,7 +870,7 @@ onMounted(loadAccounts)
                     :lock-account-label="menuLabels.lockAccount"
                     :activate-account-label="menuLabels.activateAccount"
                     :show-password="!isGoogleAccount(user)"
-                    :show-delete="!isSessionUser(user)"
+                    :show-delete="!isSessionUser(user) && user.status !== 'DEACTIVATED'"
                     :show-status-toggle="!isSessionUser(user)"
                     @toggle="toggleActionMenu(user.id)"
                     @action="(action, payload) => onRowAction(user, action, payload)"
@@ -705,12 +886,12 @@ onMounted(loadAccounts)
         </AdminShellTablePanel>
       </AdminShellFrame>
 
-      <AdminShellFrame v-if="filteredUsers.length" variant="footer">
+      <AdminShellFrame v-if="!errorMessage && filteredUsers.length" variant="footer">
         <Pagination
           :page="currentPage"
           :total-pages="totalPages"
           :visible-count="paginatedUsers.length"
-          :total-count="filteredUsers.length"
+          :total-count="totalElements"
           :label="t('admin.accounts.paginationLabel')"
           @prev="currentPage--"
           @next="currentPage++"
@@ -774,6 +955,13 @@ onMounted(loadAccounts)
           </select>
           <p v-if="!editFormAccess.adminProfile" class="accounts-field__hint">{{ fieldLockHint('adminProfile') }}</p>
         </label>
+        <label
+          v-if="editingUser && activeTab === 'admins' && form.adminProfile !== (editingUser.adminProfile || 'FULL')"
+          class="accounts-field"
+        >
+          <span class="accounts-field__label">{{ t('admin.accounts.reasonLabel') }}</span>
+          <textarea v-model.trim="form.changeReason" required maxlength="500" rows="3" :class="lockedFieldClass(false)" />
+        </label>
         <label class="accounts-field">
           <span class="accounts-field__label">{{ t('admin.accounts.modals.status') }}</span>
           <select
@@ -797,7 +985,7 @@ onMounted(loadAccounts)
         </label>
         <div class="flex justify-end gap-3 pt-2">
           <button type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" @click="closeUserModal">{{ t('admin.accounts.actions.cancel') }}</button>
-          <button class="rounded-xl bg-avocado-800 px-4 py-2 text-sm font-black text-white" :disabled="isUploadingAvatar">{{ t('admin.accounts.actions.save') }}</button>
+          <button class="rounded-xl bg-avocado-800 px-4 py-2 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-60" :disabled="isUploadingAvatar || isSavingUser">{{ t('admin.accounts.actions.save') }}</button>
         </div>
       </form>
     </BaseModal>
@@ -810,7 +998,7 @@ onMounted(loadAccounts)
         </label>
         <div class="flex justify-end gap-3 pt-2">
           <button type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" @click="showPasswordModal = false">{{ t('admin.accounts.actions.cancel') }}</button>
-          <button class="inline-flex items-center gap-2 rounded-xl bg-avocado-800 px-4 py-2 text-sm font-black text-white">
+          <button class="inline-flex items-center gap-2 rounded-xl bg-avocado-800 px-4 py-2 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-60" :disabled="isSavingPassword">
             <KeyRound class="h-4 w-4" />
             {{ t('admin.accounts.actions.changePassword') }}
           </button>
@@ -818,23 +1006,35 @@ onMounted(loadAccounts)
       </form>
     </BaseModal>
 
-    <ConfirmModal
-      :open="Boolean(pendingStatusChange)"
-      :title="t('admin.accounts.confirmStatus.title')"
-      :message="pendingStatusChange ? t('admin.accounts.confirmStatus.message', { name: pendingStatusChange.user.fullName, status: statusLabels[pendingStatusChange.status] }) : ''"
-      :confirm-label="t('admin.accounts.confirmStatus.confirm')"
-      @close="pendingStatusChange = null"
-      @confirm="confirmStatusChange"
-    />
+    <BaseModal :open="Boolean(pendingStatusChange)" :title="t('admin.accounts.confirmStatus.title')" @close="pendingStatusChange = null">
+      <div class="grid gap-4">
+        <p class="text-sm text-slate-600">
+          {{ pendingStatusChange ? t('admin.accounts.confirmStatus.message', { name: pendingStatusChange.user.fullName, status: statusLabels[pendingStatusChange.status] }) : '' }}
+        </p>
+        <label class="grid gap-2 text-sm font-bold text-slate-700">
+          {{ t('admin.accounts.reasonLabel') }}
+          <textarea v-if="pendingStatusChange" v-model.trim="pendingStatusChange.reason" required maxlength="500" rows="3" class="rounded-2xl border border-slate-200 px-4 py-3" />
+        </label>
+        <div class="flex justify-end gap-3">
+          <button type="button" class="rounded-xl border border-slate-200 px-4 py-2 font-bold" @click="pendingStatusChange = null">{{ t('admin.accounts.actions.cancel') }}</button>
+          <button type="button" class="rounded-xl bg-avocado-800 px-4 py-2 font-black text-white" :disabled="!pendingStatusChange?.reason?.trim()" @click="confirmStatusChange">{{ t('admin.accounts.confirmStatus.confirm') }}</button>
+        </div>
+      </div>
+    </BaseModal>
 
-    <ConfirmModal
-      :open="Boolean(pendingDelete)"
-      :title="t('admin.accounts.confirmDelete.title')"
-      :message="pendingDelete ? t('admin.accounts.confirmDelete.message', { name: pendingDelete.fullName, email: pendingDelete.email }) : ''"
-      :confirm-label="t('admin.accounts.confirmDelete.confirm')"
-      @close="pendingDelete = null"
-      @confirm="confirmDelete"
-    />
+    <BaseModal :open="Boolean(pendingDelete)" :title="t('admin.accounts.confirmDelete.title')" @close="pendingDelete = null">
+      <div class="grid gap-4">
+        <p class="text-sm text-slate-600">{{ pendingDelete ? t('admin.accounts.confirmDelete.message', { name: pendingDelete.fullName, email: pendingDelete.email }) : '' }}</p>
+        <label class="grid gap-2 text-sm font-bold text-slate-700">
+          {{ t('admin.accounts.reasonLabel') }}
+          <textarea v-model.trim="deactivationReason" required maxlength="500" rows="3" class="rounded-2xl border border-slate-200 px-4 py-3" />
+        </label>
+        <div class="flex justify-end gap-3">
+          <button type="button" class="rounded-xl border border-slate-200 px-4 py-2 font-bold" @click="pendingDelete = null">{{ t('admin.accounts.actions.cancel') }}</button>
+          <button type="button" class="rounded-xl bg-red-700 px-4 py-2 font-black text-white disabled:cursor-not-allowed disabled:opacity-60" :disabled="!deactivationReason.trim() || isPerformingAction" @click="confirmDelete">{{ t('admin.accounts.confirmDelete.confirm') }}</button>
+        </div>
+      </div>
+    </BaseModal>
 
     <BaseModal
       :open="Boolean(pendingPromote)"
@@ -854,11 +1054,15 @@ onMounted(loadAccounts)
             <option v-for="profile in adminProfileOptions" :key="profile" :value="profile">{{ t(`admin.roles.${profile}`) }}</option>
           </select>
         </label>
+        <label class="grid gap-2 text-sm font-bold text-slate-700">
+          {{ t('admin.accounts.reasonLabel') }}
+          <textarea v-model.trim="actionReason" required maxlength="500" rows="3" class="rounded-2xl border border-slate-200 px-4 py-3" />
+        </label>
         <div class="flex justify-end gap-3 pt-2">
           <button type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" @click="pendingPromote = null">
             {{ t('admin.accounts.actions.cancel') }}
           </button>
-          <button type="button" class="inline-flex items-center gap-2 rounded-xl bg-indigo-700 px-4 py-2 text-sm font-black text-white" @click="confirmPromote">
+          <button type="button" class="inline-flex items-center gap-2 rounded-xl bg-indigo-700 px-4 py-2 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-60" :disabled="!actionReason.trim() || isPerformingAction" @click="confirmPromote">
             <UserCog class="h-4 w-4" />
             {{ t('admin.accounts.promote.confirm') }}
           </button>
@@ -878,11 +1082,29 @@ onMounted(loadAccounts)
         <p class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
           {{ t('admin.accounts.demote.reloginHint') }}
         </p>
+        <label class="grid gap-2 text-sm font-bold text-slate-700">
+          {{ t('admin.accounts.reasonLabel') }}
+          <textarea v-model.trim="actionReason" required maxlength="500" rows="3" class="rounded-2xl border border-slate-200 px-4 py-3" />
+        </label>
+        <label class="grid gap-2 text-sm font-bold text-slate-700">
+          {{ t('admin.accounts.transferAdminLabel') }}
+          <input
+            v-model.trim="transferAdminSearch"
+            type="search"
+            :placeholder="t('admin.accounts.transferAdminSearch')"
+            class="rounded-2xl border border-slate-200 px-4 py-3"
+          />
+          <select v-model="demoteTransferAdminId" class="rounded-2xl border border-slate-200 px-4 py-3">
+            <option value="">{{ isLoadingTransferAdmins ? t('admin.shared.loading') : t('admin.accounts.transferAdminOptional') }}</option>
+            <option v-for="admin in transferAdminOptions" :key="admin.id" :value="admin.id">{{ admin.fullName }} — {{ admin.email }}</option>
+          </select>
+          <span class="text-xs font-medium text-slate-500">{{ t('admin.accounts.transferAdminLimitHint') }}</span>
+        </label>
         <div class="flex justify-end gap-3 pt-2">
           <button type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" @click="pendingDemote = null">
             {{ t('admin.accounts.actions.cancel') }}
           </button>
-          <button type="button" class="inline-flex items-center gap-2 rounded-xl bg-amber-700 px-4 py-2 text-sm font-black text-white" @click="confirmDemote">
+          <button type="button" class="inline-flex items-center gap-2 rounded-xl bg-amber-700 px-4 py-2 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-60" :disabled="!actionReason.trim() || isPerformingAction" @click="confirmDemote">
             <UserRound class="h-4 w-4" />
             {{ t('admin.accounts.demote.confirm') }}
           </button>

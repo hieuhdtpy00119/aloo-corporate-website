@@ -52,6 +52,10 @@ public class UserMapper {
                 adminPermissionService.resolveScopes(user),
                 user.getStatus(),
                 resolveAuthProvider(user),
+                user.getVersion(),
+                user.getStatusReason(),
+                user.getDeactivatedAt(),
+                user.getRoleChangedAt(),
                 user.getLastLoginAt(),
                 user.getCreatedAt(),
                 user.getUpdatedAt()
@@ -67,7 +71,7 @@ public class UserMapper {
         if (user.getRole() != UserRole.ADMIN) {
             return null;
         }
-        AdminProfile profile = user.getAdminProfile() == null ? AdminProfile.FULL : user.getAdminProfile();
+        AdminProfile profile = user.getAdminProfile() == null ? AdminProfile.CONTENT : user.getAdminProfile();
         return profile.name();
     }
 

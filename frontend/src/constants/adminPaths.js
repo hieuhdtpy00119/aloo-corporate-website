@@ -9,6 +9,7 @@ export const adminPaths = {
     articleCategories: '/admin/content/articles/categories',
     articleNew: '/admin/content/articles/new',
     articleEdit: (id) => `/admin/content/articles/${id}/edit`,
+    brandTimeline: '/admin/content/brand-timeline',
   },
   stores: {
     locations: '/admin/stores/locations',
@@ -17,6 +18,7 @@ export const adminPaths = {
     feedbacks: '/admin/crm/feedbacks',
     productReviews: '/admin/crm/product-reviews',
     leads: '/admin/crm/leads',
+    contactMessages: '/admin/crm/contact-messages',
     liveChat: '/admin/crm/live-chat',
     leadDetail: (id) => `/admin/crm/leads?lead=${encodeURIComponent(id)}`,
   },

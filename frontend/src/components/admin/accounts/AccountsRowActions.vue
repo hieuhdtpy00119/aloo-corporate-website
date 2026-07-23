@@ -24,7 +24,7 @@ const statusToggle = computed(() => {
   if (props.user.status === 'ACTIVE') {
     return { status: 'LOCKED', label: props.lockAccountLabel }
   }
-  if (props.user.status === 'INACTIVE' || props.user.status === 'LOCKED') {
+  if (['INVITED', 'SUSPENDED', 'LOCKED', 'DEACTIVATED'].includes(props.user.status)) {
     return { status: 'ACTIVE', label: props.activateAccountLabel }
   }
   return null

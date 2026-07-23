@@ -10,6 +10,7 @@ import com.aloo.cms.mapper.PostMapper;
 import com.aloo.cms.repository.CategoryRepository;
 import com.aloo.cms.repository.PostRepository;
 import java.util.List;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class PostService {
+
+    public static final String STATUS_PUBLISHED = "PUBLISHED";
 
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
@@ -33,14 +36,42 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
+    public List<PostResponse> findPublished() {
+        return postRepository.findByStatusIgnoreCase(STATUS_PUBLISHED, Sort.by(Sort.Direction.DESC, "createdAt"))
+                .stream()
+                .map(postMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public PostResponse findById(Long id) {
         return postMapper.toResponse(getPost(id));
+    }
+
+    @Transactional(readOnly = true)
+    public PostResponse findPublishedById(Long id) {
+        Post post = getPost(id);
+        ensurePublished(post);
+        return postMapper.toResponse(post);
     }
 
     @Transactional(readOnly = true)
     public PostResponse findBySlug(String slug) {
         return postMapper.toResponse(postRepository.findBySlug(slug.trim().toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found")));
+    }
+
+    @Transactional(readOnly = true)
+    public PostResponse findPublishedBySlug(String slug) {
+        Post post = postRepository.findBySlugAndStatusIgnoreCase(slug.trim().toLowerCase(Locale.ROOT), STATUS_PUBLISHED)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+        return postMapper.toResponse(post);
+    }
+
+    private void ensurePublished(Post post) {
+        if (post.getStatus() == null || !STATUS_PUBLISHED.equalsIgnoreCase(post.getStatus())) {
+            throw new ResourceNotFoundException("Post not found");
+        }
     }
 
     @Transactional

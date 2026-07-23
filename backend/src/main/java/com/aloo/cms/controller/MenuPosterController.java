@@ -2,6 +2,7 @@ package com.aloo.cms.controller;
 
 import com.aloo.cms.dto.MenuPosterRequest;
 import com.aloo.cms.dto.MenuPosterResponse;
+import com.aloo.cms.security.AdminScopeChecker;
 import com.aloo.cms.service.MenuPosterService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -24,15 +25,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class MenuPosterController {
 
     private final MenuPosterService menuPosterService;
+    private final AdminScopeChecker adminScopeChecker;
 
     @GetMapping
     public List<MenuPosterResponse> findAll() {
-        return menuPosterService.findAll();
+        if (adminScopeChecker.has("content")) {
+            return menuPosterService.findAll();
+        }
+        return menuPosterService.findActive();
     }
 
     @GetMapping("/{id}")
     public MenuPosterResponse findById(@PathVariable Long id) {
-        return menuPosterService.findById(id);
+        if (adminScopeChecker.has("content")) {
+            return menuPosterService.findById(id);
+        }
+        return menuPosterService.findActiveById(id);
     }
 
     @PostMapping

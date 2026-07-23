@@ -23,6 +23,7 @@ const toast = useToastStore()
 const showModal = ref(false)
 const mode = ref('create')
 const editingId = ref(null)
+const isSaving = ref(false)
 const pendingDeleteId = ref(null)
 const searchQuery = ref('')
 const statusFilter = ref(t('admin.shared.all'))
@@ -37,11 +38,17 @@ const statusLabels = computed(() => ({
   INACTIVE: m('status.INACTIVE'),
 }))
 const statusFilters = computed(() => [t('admin.shared.all'), ...categoryStatuses.map((status) => statusLabels.value[status])])
+const parentCategoryOptions = computed(() =>
+  store.categories.filter((category) => category.type === 'ARTICLE' && category.id !== editingId.value),
+)
 
 const form = reactive({
   name: '',
   slug: '',
   description: '',
+  parentId: '',
+  sortOrder: 0,
+  languageCode: 'vi',
   status: 'ACTIVE',
 })
 
@@ -58,6 +65,9 @@ const resetForm = () => {
     name: '',
     slug: '',
     description: '',
+    parentId: '',
+    sortOrder: 0,
+    languageCode: 'vi',
     status: 'ACTIVE',
   })
   editingId.value = null
@@ -84,6 +94,9 @@ const openEditModal = (category) => {
     name: category.name,
     slug: category.slug,
     description: category.description || '',
+    parentId: category.parentId ?? '',
+    sortOrder: Number(category.sortOrder ?? 0),
+    languageCode: category.languageCode || 'vi',
     status: category.status || 'ACTIVE',
   })
   showModal.value = true
@@ -95,8 +108,13 @@ const closeModal = () => {
 }
 
 const saveCategory = async () => {
+  if (isSaving.value) return
   if (!form.name.trim() || !form.slug.trim()) {
     toast.error(m('toasts.requiredFields'))
+    return
+  }
+  if (Number.isNaN(Number(form.sortOrder)) || Number(form.sortOrder) < 0) {
+    toast.error(m('toasts.sortOrderInvalid'))
     return
   }
 
@@ -105,15 +123,21 @@ const saveCategory = async () => {
     name: form.name.trim(),
     slug: form.slug.trim(),
     description: form.description.trim(),
+    parentId: form.parentId === '' ? null : Number(form.parentId),
+    sortOrder: Number(form.sortOrder),
+    languageCode: form.languageCode,
     status: form.status,
   }
 
+  isSaving.value = true
   try {
     await store.saveCategory(payload)
     toast.success(mode.value === 'create' ? m('toasts.created') : m('toasts.updated'))
     closeModal()
   } catch (error) {
     toast.error(error.response?.data?.message || m('toasts.saveError'))
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -160,6 +184,10 @@ watch(
 
 watch([searchQuery, statusFilter], () => {
   currentPage.value = 1
+})
+
+watch(totalPages, (value) => {
+  currentPage.value = Math.min(currentPage.value, value)
 })
 
 onMounted(() => {
@@ -314,6 +342,24 @@ onMounted(() => {
             <option v-for="status in categoryStatuses" :key="status" :value="status">{{ statusLabels[status] }}</option>
           </select>
         </label>
+        <label class="grid gap-2 text-sm font-bold text-slate-700">
+          {{ m('fields.parent') }}
+          <select v-model="form.parentId" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500">
+            <option value="">{{ m('fields.noParent') }}</option>
+            <option v-for="category in parentCategoryOptions" :key="category.id" :value="category.id">{{ category.name }}</option>
+          </select>
+        </label>
+        <label class="grid gap-2 text-sm font-bold text-slate-700">
+          {{ m('fields.sortOrder') }}
+          <input v-model.number="form.sortOrder" type="number" min="0" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500" />
+        </label>
+        <label class="grid gap-2 text-sm font-bold text-slate-700">
+          {{ m('fields.language') }}
+          <select v-model="form.languageCode" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500">
+            <option value="vi">Tiếng Việt</option>
+            <option value="en">English</option>
+          </select>
+        </label>
         <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
           {{ m('fields.description') }}
           <textarea v-model="form.description" rows="3" class="rounded-lg border border-slate-200 px-4 py-3 outline-none focus:border-avocado-500"></textarea>
@@ -324,7 +370,7 @@ onMounted(() => {
           <button class="rounded-lg border border-slate-200 px-4 py-3 font-bold text-slate-600 hover:bg-slate-50" @click="closeModal">
             {{ m('actions.cancel') }}
           </button>
-          <button class="rounded-lg bg-brand-forest px-4 py-3 font-black text-white hover:bg-avocado-800" form="category-form" type="submit">
+          <button class="rounded-lg bg-brand-forest px-4 py-3 font-black text-white hover:bg-avocado-800 disabled:cursor-not-allowed disabled:opacity-60" form="category-form" type="submit" :disabled="isSaving">
             {{ mode === 'create' ? m('actions.saveCreate') : m('actions.saveUpdate') }}
           </button>
         </div>

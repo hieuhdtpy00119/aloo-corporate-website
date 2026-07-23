@@ -1,8 +1,12 @@
 package com.aloo.cms.config;
 
+import com.aloo.cms.entity.AdminUser;
+import com.aloo.cms.entity.UserRole;
 import com.aloo.cms.repository.ChatSessionRepository;
 import com.aloo.cms.security.AdminUserDetailsService;
+import com.aloo.cms.security.CustomUserDetails;
 import com.aloo.cms.security.JwtService;
+import com.aloo.cms.service.AdminPermissionService;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,13 +40,18 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private static final String BEARER_PREFIX = "Bearer ";
+    private static final String CRM_SCOPE = "crm";
 
     private final ChatSessionRepository chatSessionRepository;
     private final JwtService jwtService;
     private final AdminUserDetailsService adminUserDetailsService;
+    private final AdminPermissionService adminPermissionService;
 
     @Value("${app.cors.allowed-origin}")
     private String allowedOrigin;
+
+    @Value("${app.cors.include-localhost:false}")
+    private boolean includeLocalhost;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -53,7 +62,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins(allowedOrigin, "http://localhost:5173", "http://127.0.0.1:5173")
+                .setAllowedOrigins(corsOrigins())
                 .addInterceptors(chatHandshakeInterceptor())
                 .setHandshakeHandler(new DefaultHandshakeHandler());
     }
@@ -61,6 +70,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(stompAuthInterceptor());
+    }
+
+    private String[] corsOrigins() {
+        if (includeLocalhost) {
+            return new String[]{allowedOrigin, "http://localhost:5173", "http://127.0.0.1:5173"};
+        }
+        return new String[]{allowedOrigin};
     }
 
     private HandshakeInterceptor chatHandshakeInterceptor() {
@@ -120,7 +136,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     }
 
                     if (destination.startsWith("/topic/admin/")) {
-                        requireAdmin(accessor);
+                        requireCrmAdmin(accessor);
                         return message;
                     }
 
@@ -130,7 +146,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                             throw new IllegalArgumentException("Invalid chat session destination");
                         }
 
-                        if (isAdmin(accessor)) {
+                        if (isCrmAdmin(accessor)) {
                             return message;
                         }
 
@@ -144,7 +160,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 if (StompCommand.SEND.equals(accessor.getCommand())) {
                     String destination = accessor.getDestination();
                     if (destination != null && destination.equals("/app/chat.admin.send")) {
-                        requireAdmin(accessor);
+                        requireCrmAdmin(accessor);
                     }
                 }
 
@@ -177,19 +193,25 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         }
     }
 
-    private void requireAdmin(StompHeaderAccessor accessor) {
-        if (!isAdmin(accessor)) {
-            throw new IllegalArgumentException("Admin authentication required");
+    private void requireCrmAdmin(StompHeaderAccessor accessor) {
+        if (!isCrmAdmin(accessor)) {
+            throw new IllegalArgumentException("CRM admin authentication required");
         }
     }
 
-    private boolean isAdmin(StompHeaderAccessor accessor) {
+    private boolean isCrmAdmin(StompHeaderAccessor accessor) {
         var user = accessor.getUser();
         if (!(user instanceof Authentication authentication)) {
             return false;
         }
-        return authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+        if (!(authentication.getPrincipal() instanceof CustomUserDetails details)) {
+            return false;
+        }
+        AdminUser adminUser = details.getUser();
+        if (adminUser == null || adminUser.getRole() != UserRole.ADMIN) {
+            return false;
+        }
+        return adminPermissionService.resolveScopes(adminUser).contains(CRM_SCOPE);
     }
 
     private Long parseSessionId(String destination) {

@@ -125,7 +125,7 @@ public class ProductReviewService {
         review.setAvatarUrl(user.getAvatarUrl());
         review.setRating(request.rating());
         review.setContent(request.content().trim());
-        review.setStatus(ProductReview.STATUS_APPROVED);
+        review.setStatus(ProductReview.STATUS_PENDING);
         return productReviewMapper.toResponse(productReviewRepository.save(review), product);
     }
 
@@ -144,7 +144,7 @@ public class ProductReviewService {
         existing.setAvatarUrl(user.getAvatarUrl());
         existing.setRating(request.rating());
         existing.setContent(request.content().trim());
-        existing.setStatus(ProductReview.STATUS_APPROVED);
+        existing.setStatus(ProductReview.STATUS_PENDING);
         return productReviewMapper.toResponse(productReviewRepository.save(existing), product);
     }
 

@@ -2,6 +2,12 @@ package com.aloo.cms.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Resolves client identity for rate limiting.
+ * Prefer {@link HttpServletRequest#getRemoteAddr()} so spoofable
+ * {@code X-Forwarded-For} headers are ignored unless the reverse proxy
+ * rewrites the remote address via Spring's forwarded-header strategy.
+ */
 public final class RequestClient {
 
     private RequestClient() {
@@ -12,10 +18,6 @@ public final class RequestClient {
     }
 
     public static String ip(HttpServletRequest request) {
-        String forwardedFor = request.getHeader("X-Forwarded-For");
-        if (forwardedFor != null && !forwardedFor.isBlank()) {
-            return forwardedFor.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
+        return request.getRemoteAddr() == null ? "unknown" : request.getRemoteAddr();
     }
 }

@@ -24,8 +24,3 @@ BEGIN
     CREATE INDEX ix_product_reviews_status_created ON dbo.product_reviews(status, created_at DESC);
 END
 GO
-
-UPDATE dbo.product_reviews
-SET status = N'APPROVED'
-WHERE status = N'PENDING';
-GO

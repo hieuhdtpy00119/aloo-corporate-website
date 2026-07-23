@@ -6,6 +6,7 @@ import AdminShellFrame from '../../components/admin/shell/AdminShellFrame.vue'
 import AdminShellTabs from '../../components/admin/shell/AdminShellTabs.vue'
 import AdminPageHeader from '../../components/admin/AdminPageHeader.vue'
 import AdminProductsCatalogTab from '../../components/admin/products/AdminProductsCatalogTab.vue'
+import AdminProductsMenuPostersTab from '../../components/admin/products/AdminProductsMenuPostersTab.vue'
 import AdminProductsHeroTab from '../../components/admin/products/AdminProductsHeroTab.vue'
 import { useAdminModuleI18n } from '../../composables/useAdminModuleI18n'
 import { Plus } from 'lucide-vue-next'
@@ -14,16 +15,20 @@ const { m } = useAdminModuleI18n('products')
 
 const activeTab = ref('products')
 const catalogTabRef = ref(null)
+const menuTabRef = ref(null)
 const heroTabRef = ref(null)
 
 const productTabItems = computed(() => [
   { key: 'products', label: m('tabs.products') },
+  { key: 'menu', label: m('tabs.menu') },
   { key: 'hero', label: m('tabs.hero') },
 ])
 
 const handleAddClick = () => {
   if (activeTab.value === 'products') {
     catalogTabRef.value?.openCreate()
+  } else if (activeTab.value === 'menu') {
+    menuTabRef.value?.openCreate()
   } else {
     heroTabRef.value?.openCreate()
   }
@@ -38,7 +43,7 @@ const handleAddClick = () => {
           <template #actions>
             <button class="admin-list-btn admin-list-btn--primary" @click="handleAddClick">
               <Plus class="h-4 w-4" />
-              {{ activeTab === 'products' ? m('addProduct') : m('addHero') }}
+              {{ activeTab === 'products' ? m('addProduct') : activeTab === 'menu' ? m('addPoster') : m('addHero') }}
             </button>
           </template>
         </AdminPageHeader>
@@ -52,6 +57,7 @@ const handleAddClick = () => {
       </AdminShellFrame>
 
       <AdminProductsCatalogTab v-if="activeTab === 'products'" ref="catalogTabRef" />
+      <AdminProductsMenuPostersTab v-else-if="activeTab === 'menu'" ref="menuTabRef" />
       <AdminProductsHeroTab v-else ref="heroTabRef" />
     </AdminNestedShell>
   </AdminListPage>

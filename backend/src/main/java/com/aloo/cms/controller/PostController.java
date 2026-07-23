@@ -2,6 +2,7 @@ package com.aloo.cms.controller;
 
 import com.aloo.cms.dto.PostRequest;
 import com.aloo.cms.dto.PostResponse;
+import com.aloo.cms.security.AdminScopeChecker;
 import com.aloo.cms.service.PostService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -24,20 +25,30 @@ import org.springframework.web.bind.annotation.RestController;
 public class PostController {
 
     private final PostService postService;
+    private final AdminScopeChecker adminScopeChecker;
 
     @GetMapping
     public List<PostResponse> findAll() {
-        return postService.findAll();
+        if (adminScopeChecker.has("content")) {
+            return postService.findAll();
+        }
+        return postService.findPublished();
     }
 
     @GetMapping("/{id}")
     public PostResponse findById(@PathVariable Long id) {
-        return postService.findById(id);
+        if (adminScopeChecker.has("content")) {
+            return postService.findById(id);
+        }
+        return postService.findPublishedById(id);
     }
 
     @GetMapping("/slug/{slug}")
     public PostResponse findBySlug(@PathVariable String slug) {
-        return postService.findBySlug(slug);
+        if (adminScopeChecker.has("content")) {
+            return postService.findBySlug(slug);
+        }
+        return postService.findPublishedBySlug(slug);
     }
 
     @PostMapping

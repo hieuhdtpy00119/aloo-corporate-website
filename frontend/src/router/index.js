@@ -60,9 +60,13 @@ import AdminAuditLogsView from '../views/admin/AdminAuditLogsView.vue'
 
 import AdminHomeSectionsView from '../views/admin/AdminHomeSectionsView.vue'
 
+import AdminBrandTimelineView from '../views/admin/AdminBrandTimelineView.vue'
+
 import AdminFranchiseContentView from '../views/admin/AdminFranchiseContentView.vue'
 
 import AdminChatView from '../views/admin/AdminChatView.vue'
+
+import AdminContactMessagesView from '../views/admin/AdminContactMessagesView.vue'
 
 import { adminPaths } from '../constants/adminPaths'
 
@@ -164,6 +168,8 @@ const router = createRouter({
 
         { path: 'content/home-sections', name: 'admin-content-home-sections', component: AdminHomeSectionsView, meta: { adminScope: 'content' } },
 
+        { path: 'content/brand-timeline', name: 'admin-content-brand-timeline', component: AdminBrandTimelineView, meta: { adminScope: 'content' } },
+
         { path: 'content/products', name: 'admin-content-products', component: AdminProductsView, meta: { adminScope: 'content' } },
 
         { path: 'content/franchise', name: 'admin-content-franchise', component: AdminFranchiseContentView, meta: { adminScope: 'content' } },
@@ -183,6 +189,8 @@ const router = createRouter({
         { path: 'crm/product-reviews', name: 'admin-crm-product-reviews', component: AdminProductReviewsView, meta: { adminScope: 'crm' } },
 
         { path: 'crm/leads', name: 'admin-crm-leads', component: AdminRegistrationsView, meta: { adminScope: 'crm' } },
+
+        { path: 'crm/contact-messages', name: 'admin-crm-contact-messages', component: AdminContactMessagesView, meta: { adminScope: 'crm' } },
 
         { path: 'crm/live-chat', name: 'admin-crm-live-chat', component: AdminChatView, meta: { adminScope: 'crm' } },
 

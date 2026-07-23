@@ -41,6 +41,7 @@ const pageSize = 5
 const formErrors = ref({})
 const imagePreviewError = ref(false)
 const isUploadingImage = ref(false)
+const isSaving = ref(false)
 const slugTouched = ref(false)
 const modalFormTab = ref('required')
 
@@ -319,7 +320,7 @@ const normalizeLocation = (location) => {
     amenities: parseAmenities(location),
     galleryText: jsonArrayToLines(location.galleryJson),
     menuPostersText: menuPostersJsonToLines(location.menuPostersJson),
-    displayOrder: Number(location.displayOrder || location.id || 1),
+    displayOrder: Number(location.displayOrder ?? location.id ?? 1),
     featured: Boolean(location.featured),
     status:
       location.status === 'Đang hoạt động'
@@ -480,7 +481,7 @@ const validateForm = () => {
     if (!openTime || !closeTime) errors.openingHours = m('validation.openingHours')
     else if (!openingHours) errors.openingHours = m('validation.openingHoursFormat')
   }
-  if (Number.isNaN(Number(form.displayOrder))) errors.displayOrder = m('validation.displayOrder')
+  if (Number.isNaN(Number(form.displayOrder)) || Number(form.displayOrder) < 0) errors.displayOrder = m('validation.displayOrder')
 
   formErrors.value = errors
   if (Object.keys(errors).length) focusFirstErrorTab(errors)
@@ -525,20 +526,21 @@ const buildPayload = () => {
     province: form.city.trim(),
     district: form.district.trim(),
     ward: form.ward.trim(),
-    latitude: form.latitude || null,
-    longitude: form.longitude || null,
+    latitude: form.latitude === '' || form.latitude == null ? null : Number(form.latitude),
+    longitude: form.longitude === '' || form.longitude == null ? null : Number(form.longitude),
     amenities: [...form.amenities],
     galleryJson: linesToJsonArray(form.galleryText),
     amenitiesJson: JSON.stringify(form.amenities),
     menuPostersJson: linesToMenuPostersJson(form.menuPostersText),
     linksJson: buildLinksJson(),
-    displayOrder: Number(form.displayOrder) || 1,
+    displayOrder: Number(form.displayOrder),
     featured: form.featured,
     status: form.status,
   }
 }
 
 const saveLocation = async () => {
+  if (isSaving.value) return
   if (!validateForm()) {
     const firstError = Object.values(formErrors.value)[0]
     toast.error(firstError || m('validation.formInvalid'))
@@ -546,12 +548,15 @@ const saveLocation = async () => {
   }
   const payload = buildPayload()
 
+  isSaving.value = true
   try {
     await store.saveLocation(payload)
     toast.success(mode.value === 'create' ? m('toasts.created') : m('toasts.updated'))
     closeModal()
   } catch (error) {
     toast.error(error.response?.data?.message || m('toasts.saveError'))
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -599,6 +604,10 @@ const listCountText = computed(() => t('admin.shared.totalCount', { count: filte
 
 watch([searchQuery, statusFilter, cityFilter, featuredFilter], () => {
   currentPage.value = 1
+})
+
+watch(totalPages, (value) => {
+  currentPage.value = Math.min(currentPage.value, value)
 })
 
 watch(
@@ -1064,7 +1073,7 @@ onMounted(() => {
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="rounded-lg border border-slate-200 px-4 py-3 font-bold text-slate-600 hover:bg-slate-50" type="button" @click="closeModal">{{ m('actions.cancel') }}</button>
-          <button class="rounded-lg bg-brand-forest px-4 py-3 font-black text-white hover:bg-avocado-800 disabled:cursor-not-allowed disabled:opacity-60" type="button" :disabled="isUploadingImage" @click="saveLocation">
+          <button class="rounded-lg bg-brand-forest px-4 py-3 font-black text-white hover:bg-avocado-800 disabled:cursor-not-allowed disabled:opacity-60" type="button" :disabled="isUploadingImage || isSaving" @click="saveLocation">
             {{ mode === 'create' ? m('actions.saveCreate') : m('actions.saveUpdate') }}
           </button>
         </div>

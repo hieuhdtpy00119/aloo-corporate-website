@@ -25,6 +25,11 @@ public record AccountUserRequest(
 
         String status,
 
-        String adminProfile
+        String adminProfile,
+
+        @Size(max = 500, message = "Change reason must be at most 500 characters")
+        String changeReason,
+
+        Long expectedVersion
 ) {
 }

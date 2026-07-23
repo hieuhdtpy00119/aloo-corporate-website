@@ -4,7 +4,10 @@ import { adminLegacyRedirects, adminPaths } from './adminPaths'
 describe('adminPaths', () => {
   it('defines canonical enterprise admin routes', () => {
     expect(adminPaths.content.products).toBe('/admin/content/products')
+    expect(adminPaths.content.brandTimeline).toBe('/admin/content/brand-timeline')
     expect(adminPaths.crm.leads).toBe('/admin/crm/leads')
+    expect(adminPaths.crm.contactMessages).toBe('/admin/crm/contact-messages')
+    expect(adminPaths.crm.liveChat).toBe('/admin/crm/live-chat')
     expect(adminPaths.system.accounts).toBe('/admin/system/accounts')
   })
 
