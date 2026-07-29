@@ -35,20 +35,12 @@ class LiveChatMigrationSafetyTest {
     }
 
     @Test
-    void manualMigrationCopyCannotDeleteExistingChatData() throws IOException {
-        String sql = read(Path.of("database/20260625_live_chat.sql"));
+    void postgresLiveChatMigrationIsIdempotent() throws IOException {
+        String sql = read(Path.of("src/main/resources/db/migration/V20260625__create_live_chat_tables.sql"));
 
         assertFalse(DESTRUCTIVE_SQL.matcher(sql).find(), "Live-chat migration must not contain destructive SQL");
-        assertTrue(sql.contains("OBJECT_ID(N'dbo.chat_sessions', N'U') IS NULL"));
-        assertTrue(sql.contains("OBJECT_ID(N'dbo.chat_messages', N'U') IS NULL"));
-    }
-
-    @Test
-    void legacyBootstrapIsNonDestructiveAndRejectsNonEmptyDatabases() throws IOException {
-        String sql = read(Path.of("database/aloo_franchise_cms.sql"));
-
-        assertFalse(DESTRUCTIVE_SQL.matcher(sql).find(), "Bootstrap must not contain destructive SQL");
-        assertTrue(sql.contains("SET NOEXEC ON"), "Bootstrap must reject a non-empty database");
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS chat_sessions"));
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS chat_messages"));
     }
 
     private static String read(Path path) throws IOException {

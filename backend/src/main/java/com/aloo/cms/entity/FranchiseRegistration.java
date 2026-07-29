@@ -40,7 +40,7 @@ public class FranchiseRegistration {
     @Column(precision = 18, scale = 2)
     private BigDecimal expectedBudget;
 
-    @Column(columnDefinition = "nvarchar(max)")
+    @Column(columnDefinition = "text")
     private String note;
 
     private LocalDateTime lastContactedAt;

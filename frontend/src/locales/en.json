@@ -41,7 +41,7 @@
     "hotline": "Hotline",
     "email": "Email",
     "address": "Address",
-    "addressValue": "Ho Chi Minh City, Vietnam",
+    "addressValue": "395 Nguyen Hue, Tran Phu Ward, Quy Nhon City, Binh Dinh",
     "copyright": "© 2026 ALOO. All rights reserved."
   },
   "home": {
@@ -188,9 +188,9 @@
     ],
     "menuItems": [
       { "name": "Traditional Avocado Ice Cream", "tag": "Signature", "color": "#007A35" },
-      { "name": "Mango Avocado", "tag": "Tropical", "color": "#C9933F" },
+      { "name": "Avocado ice cream cup", "tag": "Alocado", "color": "#C9933F" },
       { "name": "Durian Avocado", "tag": "Special", "color": "#A8742D" },
-      { "name": "Soursop Avocado", "tag": "Seasonal", "color": "#7EC75A" },
+      { "name": "Childhood cone", "tag": "Classic", "color": "#7EC75A" },
       { "name": "Special Aloo Avocado", "tag": "Premium", "color": "#006227" }
     ],
     "ctaConclusionTitle": "More than a decade built on",
@@ -219,6 +219,7 @@
     "categories": "Product categories",
     "listEyebrow": "Product list",
     "allProducts": "All products",
+    "topSeo": "Top 5 SEO products",
     "servingCount": "{count} products available",
     "searchPlaceholder": "Search products...",
     "explore": "Explore",
@@ -332,6 +333,7 @@
     "active": "Open",
     "comingSoon": "Coming soon",
     "maintenance": "Under maintenance",
+    "formerlyActive": "Previously operated",
     "statsTotal": "Total branches",
     "statsActive": "Open now",
     "statsFeatured": "Featured",
@@ -383,7 +385,7 @@
   "contact": {
     "eyebrow": "Contact",
     "title": "Connect with ALOO",
-    "description": "Sample contact information for the brand and franchise website."
+    "description": "Contact ALOO directly for store, product and franchise support."
   },
   "process": {
     "eyebrow": "Opening process",

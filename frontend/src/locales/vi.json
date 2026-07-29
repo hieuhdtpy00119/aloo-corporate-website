@@ -41,7 +41,7 @@
     "hotline": "Hotline",
     "email": "Email",
     "address": "Địa chỉ",
-    "addressValue": "TP.HCM, Việt Nam",
+    "addressValue": "395 Nguyễn Huệ, P. Trần Phú, TP. Quy Nhơn, Bình Định",
     "copyright": "© 2026 ALOO. All rights reserved."
   },
   "home": {
@@ -71,8 +71,8 @@
     "featuredLoadError": "Không tải được nội dung nổi bật trang chủ",
     "featuredDefaultCta": "Xem thêm",
     "featuredDefaultBadge": "Nổi bật",
-    "popularEyebrow": "Món ngon nước tiếng",
-    "popularTitle": "Sản phẩm được yêu thích",
+    "popularEyebrow": "Món ngon phải thử",
+    "popularTitle": "Top 5 món ngon được yêu thích",
     "scrollLeft": "Cuộn trái",
     "scrollRight": "Cuộn phải",
     "viewDetail": "Xem chi tiết",
@@ -155,13 +155,13 @@
     "qualityPoints": [
       "Kiểm soát vùng trồng nghiêm ngặt",
       "Quy trình sơ chế & bảo quản chuẩn hoá",
-      "Hương vị đồng đều tại mọi cửa hàng",
+      "Hương vị kem truyền thống được Aloo sản xuất trực tiếp",
       "Không chất bảo quản · Bơ tươi 100%"
     ],
     "section2ImageCaption": "Bơ tươi thật · Xanh · Lành · Ngon",
     "section3Eyebrow": "Hệ sinh thái & Tầm nhìn",
     "section3Title": "Vươn mình ra biển lớn",
-    "section3P1": "Tính đến năm 2026, Aloo Kem Bơ sở hữu hệ thống chuỗi cửa hàng tại hai thành phố du lịch biển sầm uất là Quy Nhơn và Nha Trang. Không ngừng mở rộng menu với các vị sáng tạo và mô hình ALooBike phục vụ linh hoạt.",
+    "section3P1": "Tính đến năm 2026, Aloo Kem Bơ sở hữu hệ thống chuỗi cửa hàng tại hai thành phố du lịch biển sầm uất là Quy Nhơn và Nha Trang. Không ngừng mở rộng menu với các vị sáng tạo và mô hình A Bơ Bike biến đường phố thành không gian trải nghiệm, làm hình ảnh maketing, là cầu nối cho các điểm bán - cửa hàng tương lai.",
     "section3MenuLabel": "Menu đặc sắc",
     "section3AudienceTitle": "Phục vụ đa dạng đối tượng",
     "section3AudienceText": "Học sinh · Sinh viên · Gia đình · Khách du lịch\nGiá chỉ từ 20.000đ — kem bơ tươi dành cho tất cả mọi người.",
@@ -188,9 +188,9 @@
     ],
     "menuItems": [
       { "name": "Kem Bơ Truyền Thống", "tag": "Signature", "color": "#007A35" },
-      { "name": "Bơ Xoài", "tag": "Tropical", "color": "#C9933F" },
+      { "name": "Kem bơ hộp", "tag": "Alocado", "color": "#C9933F" },
       { "name": "Bơ Sầu Riêng", "tag": "Special", "color": "#A8742D" },
-      { "name": "Bơ Mãng Cầu", "tag": "Seasonal", "color": "#7EC75A" },
+      { "name": "Kem ốc quế", "tag": "Tuổi thơ", "color": "#7EC75A" },
       { "name": "Bơ Aloo Đặc Biệt", "tag": "Premium", "color": "#006227" }
     ],
     "ctaConclusionTitle": "Hơn một thập kỷ đi lên từ",
@@ -219,6 +219,7 @@
     "categories": "Danh mục sản phẩm",
     "listEyebrow": "Danh sách sản phẩm",
     "allProducts": "Tất cả sản phẩm",
+    "topSeo": "Top 5 sản phẩm best SEO",
     "servingCount": "{count} sản phẩm đang phục vụ",
     "searchPlaceholder": "Tìm sản phẩm...",
     "explore": "Khám phá",
@@ -332,6 +333,7 @@
     "active": "Đang hoạt động",
     "comingSoon": "Sắp khai trương",
     "maintenance": "Đang sửa chữa",
+    "formerlyActive": "Từng hoạt động",
     "statsTotal": "Tổng chi nhánh",
     "statsActive": "Đang hoạt động",
     "statsFeatured": "Nổi bật",
@@ -383,7 +385,7 @@
   "contact": {
     "eyebrow": "Liên hệ",
     "title": "Kết nối với ALOO",
-    "description": "Thông tin liên hệ mẫu cho website thương hiệu và nhượng quyền."
+    "description": "Liên hệ trực tiếp với ALOO để được hỗ trợ về cửa hàng, sản phẩm và nhượng quyền."
   },
   "process": {
     "eyebrow": "Quy trình mở cửa hàng",

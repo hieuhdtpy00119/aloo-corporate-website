@@ -33,7 +33,7 @@ public class Feedback {
     @Column(nullable = false)
     private Integer rating;
 
-    @Column(columnDefinition = "nvarchar(max)", nullable = false)
+    @Column(columnDefinition = "text", nullable = false)
     private String content;
 
     @Column(length = 180)

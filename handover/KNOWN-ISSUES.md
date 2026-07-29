@@ -1,13 +1,13 @@
 # KNOWN ISSUES & TECHNICAL DEBT
 
-Ngày rà soát gần nhất: 23/07/2026.
+Ngày rà soát gần nhất: 24/07/2026.
 
 ## Đã xác minh
 
 - Frontend unit test 84/84 pass; backend test 39/39 pass; frontend build thành công.
 - Bundle JS production khoảng 1.472 MB (gzip 427 kB), Vite cảnh báo chunk vượt 500 kB. Nên lazy-load route/admin editor và tách vendor chunks.
 - Frontend chủ động hủy service worker và xóa cache do ứng dụng PWA cũ để tránh phục vụ giao diện lỗi thời. Đây là cơ chế dọn cache, không phải hỗ trợ offline/PWA; cần smoke test trên trình duyệt từng từng truy cập origin cũ.
-- Playwright desktop đã chạy thật với SQL Server local và hai server: 5/8 test pass. Ba test chưa pass do test Product CRUD còn tìm trường giá đã thay đổi, locator tên lead khớp hai phần tử, và test profile dùng mock/selector cũ. Luồng lead thật đã tạo và xuất hiện trong Admin; không đánh dấu E2E pass toàn bộ.
+- Playwright desktop đã chạy lại với SQL Server local, backend và frontend: 8/8 test pass ngày 24/07/2026. Ba lỗi test cũ đã được sửa: selector form Product CRUD, locator lead và mock API chat nền của luồng profile. Log: `evidence/PLAYWRIGHT-DESKTOP-8-8-2026-07-24.log`.
 - Bộ test backend in nhiều cảnh báo do Spring Data Redis quét các JPA repository; không làm test fail nhưng nên tách rõ repository scanning nếu muốn log sạch.
 - H2 test cấu hình dialect tường minh và phát cảnh báo deprecated; có thể bỏ `hibernate.dialect` trong test profile.
 - Working tree đang có nhiều tệp modified/untracked. Chưa thể xác nhận “toàn bộ code mới nhất đã commit và push” cho tới khi chủ dự án review phạm vi và commit.

@@ -122,7 +122,7 @@ def header_footer(canvas, doc):
     canvas.setStrokeColor(LINE); canvas.setLineWidth(0.5)
     canvas.line(20*mm, 18*mm, 190*mm, 18*mm)
     canvas.setFont(FONT, 7.5); canvas.setFillColor(MUTED)
-    canvas.drawString(20*mm, 11*mm, "ALOO Corporate Website & Franchise CMS — Tài liệu bàn giao 22/07/2026")
+    canvas.drawString(20*mm, 11*mm, "ALOO Corporate Website & Franchise CMS — Tài liệu bàn giao 24/07/2026")
     canvas.drawRightString(190*mm, 11*mm, f"Trang {doc.page}")
     canvas.restoreState()
 
@@ -142,7 +142,7 @@ def build():
         img = Image(str(logo), width=32*mm, height=32*mm)
         img.hAlign = "CENTER"; story += [Spacer(1, 7*mm), img, Spacer(1, 4*mm)]
     story += [p("TÀI LIỆU BÀN GIAO DỰ ÁN", TITLE), p("ALOO Corporate Website & Franchise CMS", TITLE), Spacer(1, 3*mm), p("Kiến trúc · Tính năng · Cài đặt · Database · API · Nghiệm thu", SUBTITLE), Spacer(1, 8*mm)]
-    story.append(Table([[p("PHIÊN BẢN", CELL_BOLD), p("22/07/2026 — cập nhật source sau 19:30", CELL)], [p("NGUỒN ĐỐI CHIẾU", CELL_BOLD), p("Router frontend, Spring controllers, schema SQL, media source, test và lịch sử Git", CELL)], [p("KẾT QUẢ KIỂM TRA", CELL_BOLD), p("Frontend 84/84 pass · Backend 39/39 pass · Build production pass", CELL)]], colWidths=[42*mm, 116*mm], style=TableStyle([("BACKGROUND",(0,0),(0,-1),GREEN),("GRID",(0,0),(-1,-1),0.4,LINE),("VALIGN",(0,0),(-1,-1),"MIDDLE"),("LEFTPADDING",(0,0),(-1,-1),7),("RIGHTPADDING",(0,0),(-1,-1),7),("TOPPADDING",(0,0),(-1,-1),7),("BOTTOMPADDING",(0,0),(-1,-1),7)])))
+    story.append(Table([[p("PHIÊN BẢN", CELL_BOLD), p("24/07/2026", CELL)], [p("NGUỒN ĐỐI CHIẾU", CELL_BOLD), p("Router frontend, Spring controllers, schema SQL, media source, test và lịch sử Git", CELL)], [p("KẾT QUẢ KIỂM TRA", CELL_BOLD), p("Frontend 84/84 pass · Backend 39/39 pass · Build production pass · Playwright desktop 8/8 pass", CELL)]], colWidths=[42*mm, 116*mm], style=TableStyle([("BACKGROUND",(0,0),(0,-1),GREEN),("GRID",(0,0),(-1,-1),0.4,LINE),("VALIGN",(0,0),(-1,-1),"MIDDLE"),("LEFTPADDING",(0,0),(-1,-1),7),("RIGHTPADDING",(0,0),(-1,-1),7),("TOPPADDING",(0,0),(-1,-1),7),("BOTTOMPADDING",(0,0),(-1,-1),7)])))
     story += [Spacer(1, 9*mm), Table([[p("Mục tiêu", CALLOUT)]], colWidths=[158*mm], style=TableStyle([("BACKGROUND",(0,0),(-1,-1),LIGHT_GREEN),("BOX",(0,0),(-1,-1),1,GREEN),("LEFTPADDING",(0,0),(-1,-1),10),("RIGHTPADDING",(0,0),(-1,-1),10),("TOPPADDING",(0,0),(-1,-1),8),("BOTTOMPADDING",(0,0),(-1,-1),8)])), p("Giúp người nhận hiểu hệ thống, dựng môi trường, import dữ liệu, kiểm thử API và tiếp tục bảo trì mà không phụ thuộc vào trao đổi miệng.", BODY), PageBreak()]
 
     add_section(story, "1. Kiến trúc và luồng hoạt động", ["Hệ thống gồm Vue SPA, Spring Boot REST API, SQL Server và kênh WebSocket cho live chat. JWT xác thực cả user/admin; admin được giới hạn theo scope."])
@@ -175,17 +175,30 @@ def build():
     story += [table(["Scope/module", "Tính năng"], admin_rows, [42*mm, 116*mm]), PageBreak()]
 
     story.append(p("5. Báo cáo đóng góp cá nhân", H1))
-    story.append(p("Lịch sử Git hiện có 28 commit, đều mang tên Trung Hi hoặc Huỳnh Đoàn Trung Hiếu. Đây là bằng chứng kỹ thuật hỗ trợ đối chiếu, không thay thế xác nhận của người bàn giao đối với từng dòng code hoặc tài nguyên."))
+    story.append(p("Lịch sử Git hiện có 28 commit, đều mang tên Trung Hi hoặc Huỳnh Đoàn Trung Hiếu. Git author không tự chứng minh người viết từng dòng; bảng dưới đây được xác nhận theo phạm vi công việc và bằng chứng hiện có trong repo."))
     contribution_rows = [
-        ("Public Vue UI + account flow", "Git/router/views/tests", "Trực tiếp phát triển*"),
-        ("Admin CMS + RBAC UI", "Git/views/components", "Trực tiếp phát triển*"),
-        ("Spring REST/security/services", "Git/controllers/services/tests", "Trực tiếp phát triển*"),
-        ("SQL schema/seed/migrations", "Git/SQL", "Phát triển/điều chỉnh*"),
+        ("Public Vue UI + account flow", "Git/router/views/tests", "Trực tiếp phát triển"),
+        ("Admin CMS + RBAC UI", "Git/views/components", "Trực tiếp phát triển"),
+        ("Spring REST/security/services", "Git/controllers/services/tests", "Trực tiếp phát triển"),
+        ("SQL schema/seed/migrations", "Git/SQL", "Phát triển/điều chỉnh"),
         ("Vue/Spring/Tiptap/Axios/Tailwind/JWT", "Dependency manifests", "Framework/thư viện"),
         ("Media trong frontend/public", "Ảnh Drive có SOURCES.md; ảnh AI chưa có metadata", "Xác nhận quyền sử dụng"),
         ("Proposal/báo cáo cũ", "Tệp tài liệu", "Kế thừa/tham khảo"),
     ]
-    story += [table(["Phạm vi", "Bằng chứng", "Phân loại"], contribution_rows, [57*mm, 55*mm, 46*mm]), p("* Người bàn giao phải xác nhận trước nghiệm thu; working tree còn thay đổi chưa commit.", SMALL), Spacer(1, 5*mm)]
+    story += [
+        table(["Phạm vi", "Bằng chứng", "Phân loại"], contribution_rows, [57*mm, 55*mm, 46*mm]),
+        Spacer(1, 4*mm),
+        p("Xác nhận của người bàn giao", H2),
+        p("Tôi, <b>Huỳnh Đoàn Trung Hiếu</b>, xác nhận:", BODY),
+        bullet("Các phần Public Vue UI, Admin CMS, Spring REST API và database nêu trên là phần tôi trực tiếp phát triển hoặc điều chỉnh trong phạm vi dự án, theo lịch sử Git và mã nguồn hiện có."),
+        bullet("Vue, Spring Boot, Tiptap, Axios, Tailwind, JWT và các dependency khác là framework/thư viện có sẵn; tôi không tuyên bố quyền tác giả đối với các thư viện này."),
+        bullet("Proposal, báo cáo cũ và các tài nguyên do bên khác cung cấp được phân loại là kế thừa/tham khảo."),
+        bullet("Công cụ AI có thể đã được dùng để hỗ trợ rà soát mã, kiểm thử và soạn tài liệu; tôi chịu trách nhiệm kiểm tra, tích hợp và kết quả bàn giao cuối cùng."),
+        bullet("Xác nhận này không thay thế giấy phép hoặc bằng chứng quyền sử dụng media. Ba ảnh hero AI vẫn cần bổ sung công cụ/model, prompt, ngày tạo và xác nhận quyền thương mại trước nghiệm thu."),
+        p("<b>Ngày xác nhận:</b> 23/07/2026", BODY),
+        p("<b>Chữ ký người bàn giao:</b> ______________________________", BODY),
+        Spacer(1, 5*mm),
+    ]
     story.append(p("6. Database và API", H1))
     for text in ["Schema khởi tạo mới: database/aloo_franchise_cms.sql.", "Dữ liệu demo: database/aloo_franchise_cms_sample_data.sql; tài khoản mẫu đều dùng 123456 và chỉ dành cho local/demo.", "Nâng cấp sau khởi tạo phải dùng Flyway trong backend/src/main/resources/db/migration.", "Postman: api/ALOO-CMS.postman_collection.json; Login tự lưu JWT vào biến token; collection bao phủ toàn bộ REST mappings hiện có."]:
         story.append(bullet(text))
@@ -203,14 +216,14 @@ def build():
     story += [Spacer(1, 5*mm), p("9. Dịch vụ và tài nguyên bên thứ ba", H1), table(["Dịch vụ/tài nguyên", "Hiện trạng", "Cách bàn giao"], [("Google OAuth", "Có, tùy chọn", "Invite Google Cloud + secret manager"), ("SMTP", "Có, tùy chọn", "Mailbox/app password qua password manager"), ("Redis", "Có, tùy chọn", "Endpoint/password qua secret manager"), ("SQL Server", "Bắt buộc", "Tách migration/runtime users"), ("Upload", "Local filesystem", "Volume, quyền ghi, backup"), ("Media Google Drive", "Có SOURCES.md", "Xác nhận quyền sử dụng của khách hàng"), ("Ảnh hero AI", "Chưa có metadata", "Bổ sung công cụ/prompt/quyền thương mại"), ("Firebase/AWS/Cloudinary/Payment", "Không thấy SDK", "Không áp dụng theo dependency hiện tại")], [38*mm, 40*mm, 80*mm]), PageBreak()]
 
     story.append(p("10. Kết quả kiểm thử và tồn đọng", H1))
-    story += [table(["Kiểm tra", "Kết quả", "Ghi chú"], [("Frontend Vitest", "84/84 pass", "27 test files"), ("Frontend build", "Pass", "JS ~1.472 MB; gzip 427 kB"), ("Backend Maven", "39/39 pass", "12 suites"), ("Playwright desktop", "5/8 pass", "SQL Server local + hai server; 3 test lệch selector")], [50*mm, 35*mm, 73*mm]), Spacer(1, 5*mm)]
-    for text in ["Tối ưu bundle bằng route lazy-loading/code splitting.", "Service worker hiện chỉ dọn worker/cache PWA cũ; không hỗ trợ offline.", "Cập nhật ba test Playwright còn lệch selector rồi chạy lại 8/8 trên SQL Server demo.", "Kiểm chứng OAuth, SMTP, Redis, upload và WebSocket sau reverse proxy production.", "Dọn cảnh báo Redis/JPA repository scanning và H2 dialect trong test.", "Ảnh Drive có bảng nguồn; ảnh hero AI cần metadata và xác nhận quyền.", "Review working tree, commit và push có chủ đích; hiện chưa thể xác nhận code mới nhất đã lên remote."]:
+    story += [table(["Kiểm tra", "Kết quả", "Ghi chú"], [("Frontend Vitest", "84/84 pass", "27 test files"), ("Frontend build", "Pass", "JS ~1.472 MB; gzip 427 kB"), ("Backend Maven", "39/39 pass", "12 suites"), ("Playwright desktop", "8/8 pass", "Chromium + SQL Server demo; log 24/07/2026")], [50*mm, 35*mm, 73*mm]), Spacer(1, 5*mm)]
+    for text in ["Tối ưu bundle bằng route lazy-loading/code splitting.", "Service worker hiện chỉ dọn worker/cache PWA cũ; không hỗ trợ offline.", "Playwright desktop đã đạt 8/8 trên SQL Server demo; vẫn cần smoke test đa trình duyệt và production.", "Kiểm chứng OAuth, SMTP, Redis, upload và WebSocket sau reverse proxy production.", "Dọn cảnh báo Redis/JPA repository scanning và H2 dialect trong test.", "Ảnh Drive có bảng nguồn; ảnh hero AI cần metadata và xác nhận quyền.", "Review working tree, commit và push có chủ đích; hiện chưa thể xác nhận code mới nhất đã lên remote."]:
         story.append(bullet(text))
 
     story += [p("11. Video và nghiệm thu", H1)]
     for text in ["Quay single-take 12–18 phút theo video/KICH-BAN-DEMO.md.", "Bắt buộc chứng minh dữ liệu User tạo xuất hiện trong Admin.", "Không để secret production/token/cửa sổ nhạy cảm xuất hiện.", "Điền repo/branch/SHA, link video và người bàn giao trong CHECKLIST.md.", "Nén thư mục handover sau khi bổ sung video và quyền dịch vụ."]:
         story.append(bullet(text))
-    story += [Spacer(1, 8*mm), Table([[p("KẾT LUẬN", CELL_BOLD)], [p("Source hiện có đủ frontend, backend, database, API collection, test và dữ liệu demo để bàn giao kỹ thuật. Video thật, credential/quyền production, xác nhận đóng góp và quyết định commit/push phải do chủ dự án hoàn tất.", BODY)]], colWidths=[158*mm], style=TableStyle([("BACKGROUND",(0,0),(-1,0),GREEN),("BOX",(0,0),(-1,-1),0.8,GREEN),("LEFTPADDING",(0,0),(-1,-1),8),("RIGHTPADDING",(0,0),(-1,-1),8),("TOPPADDING",(0,0),(-1,-1),8),("BOTTOMPADDING",(0,0),(-1,-1),8)]))]
+    story += [Spacer(1, 8*mm), Table([[p("KẾT LUẬN", CELL_BOLD)], [p("Source hiện có đủ frontend, backend, database, API collection, test và dữ liệu demo để bàn giao kỹ thuật. Xác nhận đóng góp cá nhân đã được bổ sung. Video thật, credential/quyền production, quyền sử dụng media và commit/push cập nhật tài liệu mới nhất vẫn phải được chủ dự án hoàn tất.", BODY)]], colWidths=[158*mm], style=TableStyle([("BACKGROUND",(0,0),(-1,0),GREEN),("BOX",(0,0),(-1,-1),0.8,GREEN),("LEFTPADDING",(0,0),(-1,-1),8),("RIGHTPADDING",(0,0),(-1,-1),8),("TOPPADDING",(0,0),(-1,-1),8),("BOTTOMPADDING",(0,0),(-1,-1),8)]))]
     doc.build(story, onFirstPage=header_footer, onLaterPages=header_footer)
     print(OUTPUT)
 

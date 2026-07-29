@@ -38,7 +38,7 @@ public class HomeSection {
     private String subtitle;
 
     @Lob
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "text")
     private String description;
 
     @Column(length = 600)

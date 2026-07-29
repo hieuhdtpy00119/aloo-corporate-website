@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { ChevronLeft, ChevronRight, MapPin, Award, ArrowRight, ShoppingBag } from 'lucide-vue-next'
 import { useAppStore } from '../../stores/appStore'
 import { homeSectionService, resolveBackendAssetUrl } from '../../services/cmsService'
+import ProductImage from '../../components/public/ProductImage.vue'
 
 const { t } = useI18n()
 const store = useAppStore()
@@ -29,7 +30,10 @@ const activeProducts = computed(() =>
     .sort((a, b) => (a.sortOrder || a.id || 0) - (b.sortOrder || b.id || 0)),
 )
 
-const popularProducts = computed(() => activeProducts.value.slice(0, 8))
+const popularProducts = computed(() => {
+  const featuredProducts = activeProducts.value.filter((product) => product.featured)
+  return (featuredProducts.length ? featuredProducts : activeProducts.value).slice(0, 5)
+})
 
 const isExternalLink = (url) => /^https?:\/\//i.test(String(url || '').trim())
 
@@ -273,12 +277,14 @@ onMounted(() => {
       <div v-else-if="popularProducts.length" ref="productRail" class="product-scrollbar flex snap-x gap-6 overflow-x-auto pb-8">
         <article v-for="product in popularProducts" :key="product.id" class="min-w-[75vw] snap-start sm:min-w-[280px] lg:min-w-[290px] bg-white rounded-3xl p-4 shadow-sm border border-brand-forest/5 hover-lift group">
           <div class="aspect-square overflow-hidden rounded-2xl bg-brand-cream/30 relative">
-            <img v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105" />
+            <ProductImage v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" class="h-full w-full" />
             <div v-else class="grid h-full place-items-center text-xl font-black text-brand-forest bg-brand-lime/10">ALOO</div>
           </div>
           <div class="mt-4 space-y-1.5">
             <h3 class="text-base font-bold text-brand-dark transition group-hover:text-brand-forest">{{ product.name }}</h3>
-            <p class="text-xs leading-relaxed text-brand-muted font-medium h-8 line-clamp-2">{{ product.description }}</p>
+            <p class="truncate text-xs font-medium leading-relaxed text-brand-muted" :title="product.description">
+              {{ product.description }}
+            </p>
           </div>
           <div class="mt-4 flex items-center justify-between border-t border-slate-50 pt-3">
             <p class="text-sm font-black text-brand-forest font-display">{{ productMeta(product) }}</p>

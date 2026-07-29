@@ -7,7 +7,7 @@ Backend Spring Boot cho ALOO Franchise CMS.
 - Java 21
 - Spring Boot 3
 - Maven
-- SQL Server
+- PostgreSQL
 - Flyway
 - Spring Data JPA
 - Spring Security JWT
@@ -19,7 +19,7 @@ Backend Spring Boot cho ALOO Franchise CMS.
 Production bắt buộc set env, không có fallback mật khẩu/secret trong `application.properties`:
 
 ```bash
-DB_URL=jdbc:sqlserver://<host>:1433;databaseName=ALOO_Franchise_CMS;encrypt=true;trustServerCertificate=false
+DB_URL=jdbc:postgresql://<host>:5432/aloo_cms
 DB_USERNAME=<production-user>
 DB_PASSWORD=<production-password>
 DB_MIGRATION_USERNAME=<migration-user-with-ddl-permission>
@@ -54,9 +54,9 @@ Các endpoint đang được giới hạn:
 
 ## Quản lý schema database
 
-`database/aloo_franchise_cms.sql` là script khởi tạo database mới. Script có
-lớp bảo vệ và tự ngừng trước phần reset nếu phát hiện database đã có bảng. Chỉ
-dùng file này khi tạo database trống; mọi lần nâng cấp sau đó phải qua Flyway.
+Flyway trong `src/main/resources/db/migration` quản lý các thay đổi schema
+PostgreSQL. Các script SQL Server cũ trong `database/` chỉ được giữ lại làm
+tài liệu tham khảo khi di chuyển dữ liệu và không được dùng cho môi trường mới.
 
 Các thay đổi schema mới phải nằm trong `src/main/resources/db/migration` và dùng
 tên `V<version>__<description>.sql`. Flyway chạy migration trước khi Hibernate

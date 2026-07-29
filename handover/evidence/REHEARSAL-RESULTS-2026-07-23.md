@@ -29,7 +29,8 @@ Tài khoản Admin trong database demo ban đầu bị lệch thành role `USER`
 | Review User → Admin | PASS | Review ID 3 hiện trong Admin, trạng thái `APPROVED` |
 | Admin Dashboard | PASS | Đăng nhập `ADMIN/FULL`, sidebar đủ Content/Stores/CRM/System |
 | Tìm kiếm/lọc/phân trang CMS | PASS kiểm tra giao diện | Products, Menu poster, CRM, Accounts có control tương ứng |
-| Product/Menu poster CRUD | CHƯA XÁC NHẬN TOÀN BỘ | Form và dữ liệu hiển thị; test CRUD tự động bị lệch selector form mới |
+| Product CRUD | PASS ngày 24/07/2026 | Tạo, tìm, cập nhật và xóa sản phẩm bằng API/UI thật |
+| Menu poster CRUD | CHƯA XÁC NHẬN TOÀN BỘ | Form và dữ liệu hiển thị; chưa có test E2E CRUD riêng |
 
 ## Kiểm thử
 
@@ -38,15 +39,15 @@ Tài khoản Admin trong database demo ban đầu bị lệch thành role `USER`
 | Frontend Vitest | PASS — 27 files, 84/84 tests |
 | Frontend production build | PASS |
 | Backend Maven | PASS — 39/39 tests |
-| Playwright desktop | PARTIAL — 5/8 pass |
+| Playwright desktop | PASS — 8/8 ngày 24/07/2026 |
 
-Ba Playwright test chưa pass:
+Ba lỗi test ghi nhận trong rehearsal ngày 23/07/2026 đã được sửa:
 
-1. Product CRUD vẫn tìm trường `Giá sản phẩm`, trong khi form hiện tại đã thay đổi.
-2. Lead đã tạo và hiển thị trong Admin, nhưng locator tên lead khớp cả table row và card nên bị strict-mode violation.
-3. User profile test dùng mock/selector cũ và không tìm được nút cập nhật, trong khi nút `Cập nhật thông tin` có trên UI thật.
+1. Product CRUD dùng nhãn/tab và nút thao tác của form hiện tại.
+2. Locator lead được giới hạn trong bảng, không còn strict-mode violation.
+3. Luồng profile mock API chat nền để phản ánh phiên User hợp lệ, không bị 401 ngoài phạm vi test làm đăng xuất.
 
-Không đánh dấu E2E pass toàn bộ cho đến khi cập nhật ba test và chạy lại xanh.
+Lần xác nhận cuối chạy đủ 8 test Chromium desktop và đạt 8/8 trong 10,1 giây. Bằng chứng: `PLAYWRIGHT-DESKTOP-8-8-2026-07-24.log`.
 
 ## Cảnh báo khi quay
 

@@ -137,6 +137,7 @@
       "duplicateSlug": "Slug đã được sử dụng bởi sản phẩm khác",
       "sortOrder": "Thứ tự phải là số không âm",
       "price": "Giá phải là số không âm",
+      "featuredOrder": "Thứ tự Top 5 phải từ 1 đến 5.",
       "imageUrl": "URL ảnh không hợp lệ (dùng /uploads/..., đường dẫn /... hoặc https://...)",
       "imageRecommended": "Sản phẩm đang bán nhưng chưa có ảnh — trang web sẽ hiện placeholder.",
       "gallery": "Một hoặc nhiều URL gallery không hợp lệ",
@@ -146,6 +147,7 @@
     },
     "fieldHints": {
       "category": "Chỉ gợi ý danh mục loại PRODUCT. Có thể nhập tên mới để tạo danh mục.",
+      "featured": "Bật để đưa sản phẩm vào mục “Top 5 món ngon được yêu thích” trên trang chủ. Chọn tối đa 5 sản phẩm.",
       "shortDescription": "Hiển thị ở phần giới thiệu đầu trang chi tiết.",
       "listDescription": "Dùng trên trang chủ, danh sách sản phẩm và tìm kiếm.",
       "detailContent": "Đoạn nội dung dài trong trang chi tiết (câu chuyện sản phẩm).",
@@ -172,6 +174,7 @@
       "seoTitle": "SEO title",
       "seoDescription": "SEO description",
       "featured": "Sản phẩm nổi bật",
+      "featuredOrder": "Thứ tự Top 5",
       "branchKey": "Mã chi nhánh *",
       "menuTitle": "Tên menu *",
       "menuSubtitle": "Mô tả ngắn",
@@ -447,6 +450,7 @@
       "COMING_SOON": "Sắp khai trương",
       "TEMPORARILY_CLOSED": "Tạm nghỉ",
       "MAINTENANCE": "Đang sửa chữa",
+      "FORMERLY_ACTIVE": "Từng hoạt động",
       "INACTIVE": "Ẩn"
     },
     "amenities": {
@@ -640,11 +644,29 @@
       "loadFailed": "Không tải được ảnh",
       "noImage": "Chưa có ảnh"
     },
+    "gallery": {
+      "chooseFiles": "Chọn nhiều ảnh",
+      "uploading": "Đang tải ảnh lên...",
+      "uploadHint": "Chọn nhiều ảnh cùng lúc. Có thể xóa hoặc đổi thứ tự sau khi tải.",
+      "uploaded": "Đã tải lên {count} ảnh gallery",
+      "uploadError": "Không tải được ảnh",
+      "unsupportedFormat": "Định dạng ảnh không được hỗ trợ",
+      "fileTooLarge": "Ảnh vượt quá giới hạn 5 MB",
+      "noValidImages": "Không có ảnh hợp lệ để tải lên",
+      "empty": "Chưa có ảnh gallery",
+      "remove": "Xóa ảnh",
+      "moveBack": "Chuyển ảnh về trước",
+      "moveForward": "Chuyển ảnh ra sau",
+      "manualUrls": "Nhập URL thủ công (tùy chọn nâng cao)",
+      "manualUrlsLabel": "Mỗi dòng một URL ảnh"
+    },
     "featuredBadge": "Nổi bật",
     "hints": {
       "galleryText": "Dùng khi muốn hiển thị nhiều ảnh chi tiết cho cửa hàng.",
       "menuPostersText": "Nếu cửa hàng có menu poster riêng, nhập link ảnh tại đây.",
       "openingHours": "Dùng định dạng 24 giờ (VD: 07:00 - 22:00). Bắt buộc khi trạng thái là Đang hoạt động.",
+      "optionalOpeningHours": "Giờ hoạt động không bắt buộc với trạng thái này.",
+      "inactiveOpeningHours": "Cửa hàng đã ngừng hoạt động nên không cần nhập giờ mở cửa và đóng cửa.",
       "mapUrl": "Dùng cho nút Xem bản đồ trên website."
     }
   },
@@ -1075,6 +1097,7 @@
       "hero": "Hero",
       "advantages": "Lợi thế",
       "models": "Mô hình",
+      "investment_header": "Tiêu đề bảng đầu tư",
       "investment": "Đầu tư",
       "profit": "Lợi nhuận tham khảo",
       "process": "Quy trình",
@@ -1159,6 +1182,7 @@
       "hero": "Chỉ hero ACTIVE đầu tiên được dùng. Nút phụ dùng secondaryButtonLink (#investment, /path hoặc URL).",
       "advantages": "Mỗi block = một thẻ lợi thế; có thể thêm nhiều block.",
       "models": "Mỗi block = một mô hình kinh doanh; bật featured để nổi bật.",
+      "investment_header": "Chỉnh nhãn mục, tiêu đề, mô tả và chú thích cuối bảng chi phí. Chỉ block ACTIVE đầu tiên được dùng.",
       "investment": "Mỗi dòng = một hạng mục trong bảng chi phí đầu tư.",
       "profit": "Các chỉ số tham khảo lợi nhuận — không phải cam kết.",
       "process": "Mỗi block = một bước quy trình; stepNumber quyết định thứ tự.",
@@ -1176,7 +1200,15 @@
       "imageUrl": "URL ảnh không hợp lệ (dùng /uploads/..., /duong-dan hoặc https://...)",
       "stepNumber": "Bước số phải từ 1 trở lên",
       "singletonExists": "Đã có block {section} đang ACTIVE — trang web chỉ dùng block đầu tiên.",
+      "investmentItemRequired": "Tên hạng mục chi phí không được để trống.",
       "legacySection": "Section Chi phí / Lợi ích không còn hiển thị trên website. Nên chuyển sang Mô hình hoặc Đầu tư."
+    },
+    "investmentEditor": {
+      "title": "Nội dung trong bảng",
+      "hint": "Chỉnh trực tiếp từng hạng mục, giá trị theo mô hình và ghi chú. Thứ tự dòng được lưu từ trên xuống dưới.",
+      "addRow": "Thêm hạng mục",
+      "remove": "Xóa",
+      "empty": "Chưa có hạng mục chi phí. Nhấn “Thêm hạng mục” để tạo dòng đầu tiên."
     },
     "confirmDelete": {
       "title": "Xóa block nhượng quyền?",
@@ -1197,6 +1229,7 @@
       "noImage": "Chưa có ảnh"
     },
     "contentFields": {
+      "eyebrow": "Nhãn mục",
       "title": "Tiêu đề",
       "subtitle": "Phụ đề",
       "description": "Mô tả",
@@ -1222,6 +1255,7 @@
       "storyContent": "Nội dung câu chuyện",
       "question": "Câu hỏi",
       "answer": "Câu trả lời",
+      "footnote": "Chú thích cuối bảng",
       "amount": "Số tiền",
       "body": "Nội dung"
     },

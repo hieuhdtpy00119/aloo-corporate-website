@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { franchiseContentService } from '../services/cmsService'
+import { franchiseContentService, resolveBackendAssetUrl } from '../services/cmsService'
 
 const franchiseContent = {
   hero: [
@@ -110,6 +110,18 @@ const franchiseContent = {
         'Không gian nhận diện nổi bật, trải nghiệm đỉnh cao. Phù hợp khu trung tâm, phố du lịch, vị trí chiến lược với lưu lượng khách cao.',
       image: '/about/aloo-standard.png',
       featured: false,
+      status: 'ACTIVE',
+    },
+  ],
+  investment_header: [
+    {
+      id: 'investment-header-default',
+      eyebrow: 'Chi phí đầu tư',
+      title: 'Bảng chi phí tham khảo chi tiết',
+      description:
+        'Các mức chi phí mang tính tham khảo, sẽ được tư vấn cụ thể theo mặt bằng và khu vực của bạn.',
+      footnote:
+        '* Chi phí mang tính tham khảo, chưa bao gồm tiền thuê mặt bằng và chi phí vận hành hàng tháng.',
       status: 'ACTIVE',
     },
   ],
@@ -348,16 +360,23 @@ const parseContentPayload = (item) => {
   }
 }
 
-const normalizeFranchiseContent = (item) => ({
-  id: item.id,
-  sectionKey: item.sectionKey,
-  title: item.title,
-  amount: item.amount,
-  note: item.note,
-  sortOrder: Number(item.sortOrder || 0),
-  status: item.status || 'ACTIVE',
-  ...parseContentPayload(item),
-})
+const normalizeFranchiseContent = (item) => {
+  const content = parseContentPayload(item)
+  if (content.image) {
+    content.image = resolveBackendAssetUrl(content.image)
+  }
+
+  return {
+    id: item.id,
+    sectionKey: item.sectionKey,
+    title: item.title,
+    amount: item.amount,
+    note: item.note,
+    sortOrder: Number(item.sortOrder || 0),
+    status: item.status || 'ACTIVE',
+    ...content,
+  }
+}
 
 const groupContentBySection = (items) => {
   const grouped = emptyContent()
@@ -385,6 +404,7 @@ export const useFranchiseContentStore = defineStore('franchiseContent', {
     visibleHero: (state) => (state.content.hero || []).filter(isVisible),
     visibleAdvantages: (state) => (state.content.advantages || []).filter(isVisible),
     visibleModels: (state) => (state.content.models || []).filter(isVisible),
+    visibleInvestmentHeader: (state) => (state.content.investment_header || []).filter(isVisible),
     visibleInvestment: (state) => (state.content.investment || []).filter(isVisible),
     visibleProfit: (state) => (state.content.profit || []).filter(isVisible),
     visibleConditions: (state) => (state.content.conditions || []).filter(isVisible),

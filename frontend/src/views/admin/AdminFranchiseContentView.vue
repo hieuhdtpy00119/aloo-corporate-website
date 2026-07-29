@@ -43,6 +43,8 @@ const uploadingImageKey = ref('')
 const isLoadingLinkOptions = ref(false)
 const products = ref([])
 const posts = ref([])
+const investmentRows = ref([])
+const deletedInvestmentRowIds = ref([])
 
 const SECTION_LINK_DEFAULTS = {
   hero: {
@@ -93,6 +95,7 @@ const formErrorTabMap = computed(() => {
 })
 
 const PUBLIC_SECTION_HASH = {
+  investment_header: 'investment',
   investment: 'investment',
   process: 'process',
 }
@@ -138,6 +141,37 @@ const singletonWarning = computed(() => {
 })
 
 const pendingDeleteItem = computed(() => items.value.find((item) => item.id === pendingDeleteId.value) || null)
+
+const loadInvestmentRows = () => {
+  investmentRows.value = items.value
+    .filter((item) => item.sectionKey === 'investment')
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((item) => ({
+      id: item.id,
+      status: item.status,
+      sortOrder: item.sortOrder,
+      ...parseFranchiseContent('investment', item.content),
+    }))
+  deletedInvestmentRowIds.value = []
+}
+
+const addInvestmentRow = () => {
+  investmentRows.value.push({
+    id: null,
+    itemName: '',
+    kioskValue: '',
+    standardValue: '',
+    flagshipValue: '',
+    note: '',
+    status: 'ACTIVE',
+    sortOrder: investmentRows.value.length + 1,
+  })
+}
+
+const removeInvestmentRow = (index) => {
+  const [removed] = investmentRows.value.splice(index, 1)
+  if (removed?.id) deletedInvestmentRowIds.value.push(removed.id)
+}
 
 const contentFieldError = (key) => {
   const code = formErrors.value[key]
@@ -197,6 +231,8 @@ const statusClass = (status) => {
 const resetForm = () => {
   Object.assign(form, defaultForm())
   Object.assign(contentFields, defaultFranchiseContentFields(form.sectionKey))
+  investmentRows.value = []
+  deletedInvestmentRowIds.value = []
   editingId.value = null
   formErrors.value = {}
   modalFormTab.value = 'required'
@@ -306,6 +342,7 @@ const openEditModal = (item) => {
   })
   Object.assign(contentFields, parseFranchiseContent(item.sectionKey, item.content))
   normalizeContentImageFields(item.sectionKey, contentFields)
+  if (item.sectionKey === 'investment_header') loadInvestmentRows()
   showModal.value = true
 }
 
@@ -340,6 +377,10 @@ const validateForm = () => {
     if (!Number.isFinite(step) || step < 1) {
       errors.stepNumber = m('validation.stepNumber')
     }
+  }
+
+  if (form.sectionKey === 'investment_header' && investmentRows.value.some((row) => !String(row.itemName || '').trim())) {
+    errors.investmentRows = m('validation.investmentItemRequired')
   }
 
   return errors
@@ -382,10 +423,38 @@ const saveItem = async () => {
       ? franchiseContentService.update(editingId.value, payload)
       : franchiseContentService.create(payload)
     const { data } = await request
+    if (form.sectionKey === 'investment_header') {
+      const rowRequests = investmentRows.value.map((row, index) => {
+        const fields = {
+          itemName: String(row.itemName || '').trim(),
+          kioskValue: String(row.kioskValue || '').trim(),
+          standardValue: String(row.standardValue || '').trim(),
+          flagshipValue: String(row.flagshipValue || '').trim(),
+          note: String(row.note || '').trim(),
+        }
+        const rowPayload = {
+          sectionKey: 'investment',
+          title: fields.itemName,
+          content: serializeFranchiseContent('investment', fields),
+          amount: null,
+          note: null,
+          sortOrder: index + 1,
+          status: row.status || 'ACTIVE',
+        }
+        return row.id
+          ? franchiseContentService.update(row.id, rowPayload)
+          : franchiseContentService.create(rowPayload)
+      })
+      await Promise.all([
+        ...rowRequests,
+        ...deletedInvestmentRowIds.value.map((id) => franchiseContentService.remove(id)),
+      ])
+    }
     const normalized = normalizeItem(data)
     const index = items.value.findIndex((item) => item.id === normalized.id)
     if (index === -1) items.value.unshift(normalized)
     else items.value.splice(index, 1, normalized)
+    if (form.sectionKey === 'investment_header') await fetchItems()
     toast.success(mode.value === 'create' ? m('toasts.created') : m('toasts.updated'))
     closeModal()
   } catch (error) {
@@ -421,6 +490,7 @@ watch(
   (sectionKey) => {
     if (mode.value === 'create') {
       applySectionContentDefaults(sectionKey)
+      if (sectionKey === 'investment_header') loadInvestmentRows()
     }
   },
 )
@@ -737,6 +807,49 @@ watch(
                 {{ m(`contentFields.${field.key}`) }}
               </label>
             </template>
+          </div>
+
+          <div v-if="form.sectionKey === 'investment_header'" class="mt-2 grid gap-4 border-t border-slate-200 pt-5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 class="text-base font-black text-avocado-950">{{ m('investmentEditor.title') }}</h3>
+                <p class="mt-1 text-xs font-semibold text-slate-500">{{ m('investmentEditor.hint') }}</p>
+              </div>
+              <button type="button" class="rounded-xl bg-avocado-700 px-4 py-2.5 text-sm font-black text-white hover:bg-avocado-800" @click="addInvestmentRow">
+                {{ m('investmentEditor.addRow') }}
+              </button>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+              <table class="min-w-[920px] w-full text-left text-sm">
+                <thead class="bg-avocado-950 text-white">
+                  <tr>
+                    <th class="px-3 py-3">{{ m('contentFields.itemName') }}</th>
+                    <th class="px-3 py-3">{{ m('contentFields.kioskValue') }}</th>
+                    <th class="px-3 py-3">{{ m('contentFields.standardValue') }}</th>
+                    <th class="px-3 py-3">{{ m('contentFields.flagshipValue') }}</th>
+                    <th class="px-3 py-3">{{ m('contentFields.note') }}</th>
+                    <th class="w-20 px-3 py-3 text-center">{{ m('columns.actions') }}</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr v-for="(row, index) in investmentRows" :key="row.id || `new-${index}`" class="align-top">
+                    <td class="p-2"><input v-model="row.itemName" class="admin-input-premium !px-3 !py-2" /></td>
+                    <td class="p-2"><input v-model="row.kioskValue" class="admin-input-premium !px-3 !py-2" /></td>
+                    <td class="p-2"><input v-model="row.standardValue" class="admin-input-premium !px-3 !py-2" /></td>
+                    <td class="p-2"><input v-model="row.flagshipValue" class="admin-input-premium !px-3 !py-2" /></td>
+                    <td class="p-2"><textarea v-model="row.note" rows="2" class="admin-input-premium resize-none !px-3 !py-2"></textarea></td>
+                    <td class="p-2 text-center">
+                      <button type="button" class="rounded-lg bg-red-50 px-3 py-2 font-black text-red-600 hover:bg-red-100" @click="removeInvestmentRow(index)">
+                        {{ m('investmentEditor.remove') }}
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <p v-if="!investmentRows.length" class="p-6 text-center text-sm font-semibold text-slate-400">{{ m('investmentEditor.empty') }}</p>
+            </div>
+            <span v-if="formErrors.investmentRows" class="text-xs font-bold text-red-600">{{ formErrors.investmentRows }}</span>
           </div>
         </section>
 

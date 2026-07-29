@@ -126,6 +126,7 @@
       "duplicateSlug": "Slug is already used by another product",
       "sortOrder": "Order must be a non-negative number",
       "price": "Price must be a non-negative number",
+      "featuredOrder": "Top 5 position must be between 1 and 5.",
       "imageUrl": "Invalid image URL (use /uploads/..., a /path or https://...)",
       "imageRecommended": "Product is active but has no image — the site will show a placeholder.",
       "gallery": "One or more gallery URLs are invalid",
@@ -135,6 +136,7 @@
     },
     "fieldHints": {
       "category": "Only PRODUCT-type categories are suggested. Enter a new name to create a category.",
+      "featured": "Enable to show this product in the homepage “Top 5 favorites” section. Select up to 5 products.",
       "shortDescription": "Shown in the intro section on the product detail page.",
       "listDescription": "Used on homepage, product listing and search.",
       "detailContent": "Long-form content on the product detail page (product story).",
@@ -161,6 +163,7 @@
       "seoTitle": "SEO title",
       "seoDescription": "SEO description",
       "featured": "Featured product",
+      "featuredOrder": "Top 5 position",
       "branchKey": "Branch code *",
       "menuTitle": "Menu name *",
       "menuSubtitle": "Short description",
@@ -447,6 +450,7 @@
       "COMING_SOON": "Opening soon",
       "TEMPORARILY_CLOSED": "Temporarily closed",
       "MAINTENANCE": "Under maintenance",
+      "FORMERLY_ACTIVE": "Previously operated",
       "INACTIVE": "Hidden"
     },
     "amenities": {
@@ -640,11 +644,29 @@
       "loadFailed": "Could not load image",
       "noImage": "No image yet"
     },
+    "gallery": {
+      "chooseFiles": "Choose multiple images",
+      "uploading": "Uploading images...",
+      "uploadHint": "Select multiple images at once. You can remove or reorder them after uploading.",
+      "uploaded": "Uploaded {count} gallery images",
+      "uploadError": "Could not upload image",
+      "unsupportedFormat": "Unsupported image format",
+      "fileTooLarge": "Image exceeds the 5 MB limit",
+      "noValidImages": "No valid images to upload",
+      "empty": "No gallery images yet",
+      "remove": "Remove image",
+      "moveBack": "Move image backward",
+      "moveForward": "Move image forward",
+      "manualUrls": "Enter URLs manually (advanced option)",
+      "manualUrlsLabel": "One image URL per line"
+    },
     "featuredBadge": "Featured",
     "hints": {
       "galleryText": "Use when you want to show multiple detail images for the store.",
       "menuPostersText": "If the store has its own menu poster, enter the image link here.",
       "openingHours": "Use 24-hour format (e.g. 07:00 - 22:00). Required when status is Active.",
+      "optionalOpeningHours": "Opening hours are optional for this status.",
+      "inactiveOpeningHours": "This store is inactive, so opening and closing times are not required.",
       "mapUrl": "Used for the View map button on the website."
     }
   },
@@ -1075,6 +1097,7 @@
       "hero": "Hero",
       "advantages": "Advantages",
       "models": "Models",
+      "investment_header": "Investment table heading",
       "investment": "Investment",
       "profit": "Reference profit",
       "process": "Process",
@@ -1159,6 +1182,7 @@
       "hero": "Only the first ACTIVE hero is used. Secondary button uses secondaryButtonLink (#investment, /path or URL).",
       "advantages": "Each block = one advantage card; you can add multiple blocks.",
       "models": "Each block = one business model; enable featured to highlight.",
+      "investment_header": "Edit the section label, title, description and table footnote. Only the first ACTIVE block is used.",
       "investment": "Each row = one line in the investment cost table.",
       "profit": "Reference profit metrics — not a guarantee.",
       "process": "Each block = one process step; stepNumber controls order.",
@@ -1176,7 +1200,15 @@
       "imageUrl": "Invalid image URL (use /uploads/..., /path or https://...)",
       "stepNumber": "Step number must be at least 1",
       "singletonExists": "An ACTIVE {section} block already exists — the website only uses the first one.",
+      "investmentItemRequired": "Cost item name is required.",
       "legacySection": "Costs / Benefits sections are no longer shown on the website. Prefer Models or Investment."
+    },
+    "investmentEditor": {
+      "title": "Table content",
+      "hint": "Edit each cost item, model value and note here. Row order is saved from top to bottom.",
+      "addRow": "Add item",
+      "remove": "Remove",
+      "empty": "No cost items yet. Select “Add item” to create the first row."
     },
     "confirmDelete": {
       "title": "Delete franchise block?",
@@ -1184,6 +1216,7 @@
       "confirm": "Delete block"
     },
     "contentFields": {
+      "eyebrow": "Section label",
       "title": "Title",
       "subtitle": "Subtitle",
       "description": "Description",
@@ -1209,6 +1242,7 @@
       "storyContent": "Story content",
       "question": "Question",
       "answer": "Answer",
+      "footnote": "Table footnote",
       "amount": "Amount",
       "body": "Content"
     },

@@ -227,7 +227,7 @@ CREATE TABLE dbo.stores (
     CONSTRAINT uq_stores_store_code UNIQUE (store_code),
     CONSTRAINT uq_stores_slug UNIQUE (slug),
     CONSTRAINT ck_stores_store_type CHECK (store_type IN (N'FLAGSHIP', N'STANDARD', N'KIOSK', N'FRANCHISE', N'POPUP')),
-    CONSTRAINT ck_stores_status CHECK (status IN (N'ACTIVE', N'COMING_SOON', N'TEMPORARILY_CLOSED', N'MAINTENANCE', N'INACTIVE'))
+    CONSTRAINT ck_stores_status CHECK (status IN (N'ACTIVE', N'COMING_SOON', N'TEMPORARILY_CLOSED', N'MAINTENANCE', N'FORMERLY_ACTIVE', N'INACTIVE'))
 );
 GO
 

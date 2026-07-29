@@ -16,6 +16,10 @@ const props = defineProps({
     type: String,
     default: 'avatar.jpg',
   },
+  variant: {
+    type: String,
+    default: 'avatar',
+  },
 })
 
 const emit = defineEmits(['close', 'confirm'])
@@ -144,8 +148,8 @@ const exportCroppedFile = () =>
             return
           }
 
-          const baseName = props.fileName.replace(/\.[^/.]+$/, '') || 'avatar'
-          resolve(new File([blob], `${baseName}_avatar.jpg`, { type: 'image/jpeg' }))
+          const baseName = props.fileName.replace(/\.[^/.]+$/, '') || props.variant
+          resolve(new File([blob], `${baseName}_${props.variant}.jpg`, { type: 'image/jpeg' }))
         },
         'image/jpeg',
         0.92,
@@ -175,17 +179,27 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <BaseModal :show="show" title="Căn chỉnh ảnh đại diện" max-width="max-w-md" @close="$emit('close')">
+  <BaseModal
+    :show="show"
+    :title="variant === 'product' ? 'Căn chỉnh ảnh sản phẩm' : 'Căn chỉnh ảnh đại diện'"
+    max-width="max-w-md"
+    @close="$emit('close')"
+  >
     <div class="space-y-5">
       <p class="text-sm leading-6 text-slate-600">
-        Kéo ảnh để chọn vùng hiển thị trong khung tròn. Dùng thanh zoom nếu cần phóng to.
+        {{ variant === 'product'
+          ? 'Kéo ảnh để chọn vùng hiển thị trong card vuông. Dùng thanh zoom để giữ đúng phần sản phẩm quan trọng.'
+          : 'Kéo ảnh để chọn vùng hiển thị trong khung tròn. Dùng thanh zoom nếu cần phóng to.' }}
       </p>
 
       <div class="flex flex-col items-center gap-4">
         <div
           ref="viewportRef"
-          class="relative touch-none overflow-hidden rounded-full border-4 border-avocado-500 bg-slate-900 shadow-inner"
-          :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
+          class="relative touch-none overflow-hidden border-4 border-avocado-500 bg-slate-900 shadow-inner"
+          :class="[
+            isDragging ? 'cursor-grabbing' : 'cursor-grab',
+            variant === 'product' ? 'rounded-2xl' : 'rounded-full',
+          ]"
           :style="{ width: `${viewportSize}px`, height: `${viewportSize}px` }"
           @pointerdown="onPointerDown"
           @pointermove="onPointerMove"
@@ -203,7 +217,9 @@ onBeforeUnmount(() => {
           />
         </div>
 
-        <p class="text-xs font-semibold text-slate-500">Xem trước giống ảnh đại diện trên website</p>
+        <p class="text-xs font-semibold text-slate-500">
+          {{ variant === 'product' ? 'Xem trước giống khung ảnh sản phẩm trên website' : 'Xem trước giống ảnh đại diện trên website' }}
+        </p>
       </div>
 
       <label class="grid gap-2 text-sm font-bold text-slate-700">
@@ -235,7 +251,7 @@ onBeforeUnmount(() => {
           :disabled="isExporting || !imageSrc"
           @click="handleConfirm"
         >
-          {{ isExporting ? 'Đang xử lý...' : 'Lưu ảnh đại diện' }}
+          {{ isExporting ? 'Đang xử lý...' : variant === 'product' ? 'Cắt và dùng ảnh' : 'Lưu ảnh đại diện' }}
         </button>
       </div>
     </template>

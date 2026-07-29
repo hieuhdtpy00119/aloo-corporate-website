@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { ArrowLeft, ArrowRight, CheckCircle2, Leaf, MessageCircle, Sparkles, Star } from 'lucide-vue-next'
 import { productReviewService, productService, resolveBackendAssetUrl } from '../../services/cmsService'
+import ProductImage from '../../components/public/ProductImage.vue'
 import { setSeoMeta } from '../../services/seoService'
 import { useAppStore } from '../../stores/appStore'
 import { isAuthenticatedToken } from '../../utils/authToken'
@@ -175,10 +176,10 @@ const finalIngredients = computed(() => {
     ]
   }
   return [
-    'Bơ sáp nguyên chất tuyển lựa kỹ càng',
-    'Kem tươi cốt dừa béo mịn thơm dịu',
-    'Sữa đặc béo thơm hảo hạng',
-    'Topping dừa sấy khô thơm giòn rụm'
+    'Bơ sáp Tây Nguyên chín tự nhiên, tuyển chọn kỹ lưỡng',
+    'Kem cốt dừa béo mịn, thơm dịu',
+    'Sữa đặc hảo hạng, cân bằng vị ngọt',
+    'Dừa sấy giòn thơm, tăng thêm kết cấu vui miệng'
   ]
 })
 
@@ -194,19 +195,19 @@ const finalTasteProfile = computed(() => {
     ]
   }
   return [
-    'Béo ngậy tự nhiên từ bơ sáp Tây Nguyên',
-    'Ngọt thanh sảng khoái từ kem tươi dừa',
-    'Thơm nhẹ dịu của nông sản tươi tự nhiên',
-    'Vị giòn giòn vui miệng từ topping dừa sấy'
+    'Béo mịn tự nhiên từ bơ sáp Tây Nguyên',
+    'Ngọt thanh, mát dịu từ kem cốt dừa',
+    'Hương thơm nhẹ nhàng của nguyên liệu tươi',
+    'Dừa sấy giòn rụm, tạo điểm nhấn vui miệng'
   ]
 })
 
 const finalServingSuggestion = computed(() => {
   if (servingItems.value.length) return servingItems.value
   return [
-    'Trộn đều nhẹ nhàng kem dừa và nền bơ trước khi ăn',
-    'Thưởng thức ngay khi kem vừa được dọn ra để giữ độ mát lạnh',
-    'Dùng kèm một ly nước lọc ấm để làm sạch vòm họng sau khi thưởng thức'
+    'Trộn nhẹ kem cốt dừa cùng phần bơ để hương vị hòa quyện',
+    'Thưởng thức ngay khi vừa phục vụ để cảm nhận trọn vẹn độ mát lạnh và béo mịn',
+    'Có thể dùng kèm nước lọc để cân bằng vị giác'
   ]
 })
 
@@ -295,11 +296,11 @@ watch(isAuthenticated, () => {
           <div class="mt-8 grid gap-10 lg:grid-cols-[0.98fr_1.02fr] lg:items-center">
             <div class="space-y-4">
               <div class="overflow-hidden rounded-[2rem] border border-brand-forest/5 bg-brand-cream/30 p-3 shadow-xl">
-                <img
+                <ProductImage
                   v-if="galleryImages[activeImageIndex]"
                   :src="galleryImages[activeImageIndex]"
                   :alt="product.name"
-                  class="aspect-[4/3] w-full rounded-[1.5rem] object-cover transition-all duration-300 hover:scale-[1.01]"
+                  class="aspect-[4/3] w-full rounded-[1.5rem]"
                 />
                 <div v-else class="grid aspect-[4/3] place-items-center rounded-[1.5rem] bg-brand-lime/10 text-3xl font-black text-brand-forest">ALOO</div>
               </div>
@@ -313,7 +314,7 @@ watch(isAuthenticated, () => {
                   :class="activeImageIndex === index ? 'border-brand-forest ring-3 ring-brand-lime/30 shadow-md' : 'border-transparent opacity-75 hover:opacity-100'"
                   @click="activeImageIndex = index"
                 >
-                  <img :src="image" :alt="product.name" class="h-full w-full object-cover" />
+                  <ProductImage :src="image" :alt="product.name" class="h-full w-full" />
                 </button>
               </div>
             </div>
@@ -370,7 +371,7 @@ watch(isAuthenticated, () => {
         <div class="mx-auto grid max-w-[1240px] gap-8 lg:grid-cols-[0.92fr_1.08fr]">
           <div class="lg:sticky lg:top-28 lg:self-start">
             <span class="text-xs font-black uppercase tracking-[0.25em] text-brand-forest">Câu chuyện sản phẩm</span>
-            <h2 class="mt-3 text-3xl font-black text-brand-dark font-display lg:text-4xl">Điểm khác biệt của {{ product.name }}</h2>
+            <h2 class="mt-3 text-3xl font-black text-brand-dark font-display lg:text-4xl">Điều làm nên hương vị {{ product.name }}</h2>
             <p class="mt-5 whitespace-pre-line text-base font-medium leading-8 text-brand-muted">
               {{ product.detailContent || product.description || 'Hương vị bơ chín mịn cao cấp được làm mới hoàn toàn bằng công thức độc quyền từ ALOO.' }}
             </p>
@@ -613,7 +614,7 @@ watch(isAuthenticated, () => {
         <div class="grid gap-6 md:grid-cols-3">
           <RouterLink v-for="item in relatedProducts" :key="item.id" :to="`/products/${item.slug}`" class="group rounded-[2.5rem] border border-brand-forest/5 bg-white p-5 shadow-sm hover-lift flex flex-col justify-between">
             <div class="aspect-[4/3] overflow-hidden rounded-[1.8rem] bg-brand-cream/30">
-              <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105" />
+              <ProductImage v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" class="h-full w-full" />
               <div v-else class="grid h-full place-items-center bg-brand-lime/10 text-lg font-black text-brand-forest">ALOO</div>
             </div>
             <div>

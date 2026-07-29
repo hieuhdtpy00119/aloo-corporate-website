@@ -66,11 +66,11 @@ const socialLinks = [
       <div class="max-w-md space-y-5">
         <RouterLink to="/" class="inline-block transition transform hover:scale-[1.02]">
           <img
-            src="/logo-aloo.png"
+            src="/logo-aloo-nav.png"
             alt="ALOO"
-            class="h-11 w-auto max-w-[150px] object-contain object-left"
-            width="180"
-            height="56"
+            class="h-auto w-40 object-contain object-left sm:w-44 lg:w-48"
+            width="192"
+            height="107"
           />
         </RouterLink>
         <p class="text-sm leading-7 text-white/70">

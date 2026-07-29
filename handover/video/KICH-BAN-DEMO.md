@@ -195,7 +195,7 @@ Lời thoại:
 
 Lời thoại:
 
-> Source gồm frontend, backend, migration Flyway, schema, sample data, Postman collection và tài liệu cài đặt. Unit test frontend hiện có 84 trên 84 pass; backend có 39 trên 39 pass; production build thành công. Bộ Playwright desktop gần nhất có 5 trên 8 test pass và còn ba test selector cần đồng bộ với giao diện mới, nên tôi không tuyên bố E2E pass toàn bộ. Các giới hạn production như OAuth, SMTP, Redis, reverse proxy, upload và quyền media được ghi trong `KNOWN-ISSUES.md`.
+> Source gồm frontend, backend, migration Flyway, schema, sample data, Postman collection và tài liệu cài đặt. Unit test frontend hiện có 84 trên 84 pass; backend có 39 trên 39 pass; production build thành công. Bộ Playwright Chromium desktop gần nhất đã đạt 8 trên 8 test trên SQL Server demo; log kết quả được lưu trong thư mục `handover/evidence`. Kết quả local này không thay thế kiểm thử production. Các giới hạn production như OAuth, SMTP, Redis, reverse proxy, upload và quyền media được ghi trong `KNOWN-ISSUES.md`.
 
 ## Những chức năng không nên thao tác trong video
 

@@ -44,7 +44,7 @@ public class Post {
     @Column(length = 1000)
     private String excerpt;
 
-    @Column(columnDefinition = "nvarchar(max)")
+    @Column(columnDefinition = "text")
     private String content;
 
     @Column(length = 600)

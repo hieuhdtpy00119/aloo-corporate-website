@@ -35,7 +35,7 @@ public class ChatMessage {
     @Column
     private Long senderAdminId;
 
-    @Column(columnDefinition = "nvarchar(max)", nullable = false)
+    @Column(columnDefinition = "text", nullable = false)
     private String body;
 
     private LocalDateTime readAt;

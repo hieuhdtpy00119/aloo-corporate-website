@@ -2,7 +2,7 @@
 
 ## ALOO Corporate Website & Franchise CMS
 
-**Phiên bản rà soát:** 22/07/2026, cập nhật theo source sau 19:30  
+**Phiên bản rà soát:** 24/07/2026  
 **Nguồn:** mã nguồn hiện có, router frontend, controller/backend, schema database và lịch sử Git.
 
 ## 1. Tổng quan
@@ -86,7 +86,7 @@ Luồng chuẩn: thao tác UI → Axios gọi API → JWT/scope được kiểm 
 
 Lịch sử Git hiển thị 28 commit, đều mang tên tác giả `Trung Hi` hoặc `Huỳnh Đoàn Trung Hiếu` (hai email trong cùng repo). Các commit mô tả trực tiếp việc phát triển public site, CMS, RBAC, audit trail, accounts, contact message, timeline, live chat, product reviews, OTP và Google OAuth.
 
-Vì Git author không tự chứng minh người viết từng dòng và working tree còn thay đổi chưa commit, bảng sau phải được người bàn giao xác nhận trước khi ký nghiệm thu.
+Git author không tự chứng minh người viết từng dòng. Bảng dưới đây được xác nhận theo phạm vi công việc và bằng chứng hiện có trong repo.
 
 | Phạm vi | Bằng chứng repo | Phân loại đề xuất |
 |---|---|---|
@@ -97,6 +97,19 @@ Vì Git author không tự chứng minh người viết từng dòng và working
 | Vue, Spring Boot, Tiptap, Axios, Tailwind, JWT libs | Dependency manifests | **Thư viện/framework có sẵn** |
 | Hình ảnh/video nhận diện trong `frontend/public` | Không đủ metadata tác giả | **Tài nguyên có sẵn/cần xác nhận nguồn** |
 | Proposal và báo cáo cũ | Tệp tài liệu trong repo | **Kế thừa/tham khảo** |
+
+### Xác nhận của người bàn giao
+
+Tôi, **Huỳnh Đoàn Trung Hiếu**, xác nhận:
+
+- Các phần Public Vue UI, Admin CMS, Spring REST API và database nêu trên là phần tôi trực tiếp phát triển hoặc điều chỉnh trong phạm vi dự án, theo lịch sử Git và mã nguồn hiện có.
+- Vue, Spring Boot, Tiptap, Axios, Tailwind, JWT và các dependency khác là framework/thư viện có sẵn; tôi không tuyên bố quyền tác giả đối với các thư viện này.
+- Proposal, báo cáo cũ và các tài nguyên do bên khác cung cấp được phân loại là kế thừa/tham khảo.
+- Công cụ AI có thể đã được dùng để hỗ trợ rà soát mã, kiểm thử và soạn tài liệu; tôi chịu trách nhiệm kiểm tra, tích hợp và kết quả bàn giao cuối cùng.
+- Xác nhận này không thay thế giấy phép hoặc bằng chứng quyền sử dụng media. Ba ảnh hero AI vẫn cần bổ sung công cụ/model, prompt, ngày tạo và xác nhận quyền thương mại trước nghiệm thu.
+
+**Ngày xác nhận:** 23/07/2026  
+**Chữ ký người bàn giao:** ______________________________
 
 ## 5. Database
 
@@ -132,13 +145,13 @@ Chỉ dùng local/demo cách ly và đổi ngay nếu môi trường có interne
 | Frontend Vitest | 27 files, 84/84 pass |
 | Frontend production build | Pass |
 | Backend Maven test | 12 suites, 39/39 pass |
-| E2E thật với SQL Server | Đã chạy desktop ngày 23/07/2026: 5/8 pass; chưa đạt pass toàn bộ |
+| E2E thật với SQL Server | Playwright desktop ngày 24/07/2026: 8/8 pass; log trong `evidence/` |
 
 ## 10. Known issues và technical debt
 
 - Bundle JS 1.472 MB sau minify (gzip 427 kB); nên code-split/lazy-load.
 - Cơ chế service worker hiện tại chỉ hủy worker/xóa cache PWA cũ để tránh giao diện stale; không được mô tả là hỗ trợ offline.
-- Cần chạy Playwright E2E thật và smoke test tích hợp trên SQL Server.
+- Playwright desktop đã đạt 8/8 trên SQL Server demo; vẫn cần smoke test đa trình duyệt và môi trường production đích.
 - Cần kiểm chứng OAuth, SMTP, Redis, upload storage và WebSocket sau reverse proxy production.
 - Backend test có cảnh báo repository scanning Redis/JPA và H2 dialect; không làm test fail.
 - Working tree có nhiều thay đổi chưa commit; chưa đủ căn cứ xác nhận đã push source mới nhất.
@@ -150,4 +163,4 @@ Trước khi gửi: review `git status`/`git diff`, loại secret/tệp tạm, c
 
 ## 12. Kết luận
 
-Source hiện tại có đủ lớp frontend, backend, database, test và dữ liệu demo để bàn giao kỹ thuật. Phần không thể tự động hoàn tất là video single-take, credential/quyền sở hữu dịch vụ production, xác nhận đóng góp cá nhân và quyết định commit/push. Các phần đó đã có kịch bản/checklist để chủ dự án hoàn thiện an toàn.
+Source hiện tại có đủ lớp frontend, backend, database, test và dữ liệu demo để bàn giao kỹ thuật. Xác nhận đóng góp cá nhân đã được bổ sung. Phần chưa hoàn tất là video single-take, credential/quyền sở hữu dịch vụ production, quyền sử dụng media và commit/push các cập nhật tài liệu mới nhất; các mục này đã có kịch bản/checklist để chủ dự án hoàn thiện an toàn.

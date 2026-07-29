@@ -73,8 +73,11 @@ const statusLabel = (status) => {
   if (status === 'COMING_SOON') return 'Sắp khai trương'
   if (status === 'TEMPORARILY_CLOSED') return 'Tạm nghỉ'
   if (status === 'MAINTENANCE') return 'Đang sửa chữa'
+  if (status === 'FORMERLY_ACTIVE') return 'Từng hoạt động'
   return status || 'Đang cập nhật'
 }
+
+const isFormerlyActive = computed(() => normalizedStore.value?.status === 'FORMERLY_ACTIVE')
 
 onMounted(async () => {
   loading.value = true
@@ -128,13 +131,16 @@ onMounted(async () => {
                 <MapPin class="mt-0.5 h-4 w-4 shrink-0 text-avocado-700" />
                 <span>{{ normalizedStore.addressText }}</span>
               </p>
-              <p class="flex gap-3">
+              <p v-if="!isFormerlyActive" class="flex gap-3">
                 <Clock class="mt-0.5 h-4 w-4 shrink-0 text-avocado-700" />
                 <span>{{ normalizedStore.openingHours || 'Đang cập nhật' }}</span>
               </p>
-              <p v-if="normalizedStore.phone" class="flex gap-3">
+              <p v-if="normalizedStore.phone && !isFormerlyActive" class="flex gap-3">
                 <Phone class="mt-0.5 h-4 w-4 shrink-0 text-avocado-700" />
                 <span>{{ normalizedStore.phone }}</span>
+              </p>
+              <p v-if="isFormerlyActive" class="font-semibold text-violet-700">
+                Địa điểm này từng hợp tác và hiện không còn hoạt động.
               </p>
             </div>
 
@@ -173,7 +179,7 @@ onMounted(async () => {
               <Compass class="h-4 w-4" />
               Xem bản đồ
             </a>
-            <a v-if="normalizedStore.phone" :href="`tel:${normalizedStore.phone}`" class="inline-flex justify-center gap-2 rounded-full border border-avocado-200 px-5 py-3 text-sm font-black text-avocado-800 hover:bg-avocado-50" @click="trackEvent('click_hotline', { store: normalizedStore.name })">
+            <a v-if="normalizedStore.phone && !isFormerlyActive" :href="`tel:${normalizedStore.phone}`" class="inline-flex justify-center gap-2 rounded-full border border-avocado-200 px-5 py-3 text-sm font-black text-avocado-800 hover:bg-avocado-50" @click="trackEvent('click_hotline', { store: normalizedStore.name })">
               <Phone class="h-4 w-4" />
               Gọi điện
             </a>
