@@ -41,6 +41,8 @@ const pageSize = 5
 const formErrors = ref({})
 const imagePreviewError = ref(false)
 const isUploadingImage = ref(false)
+const isUploadingGallery = ref(false)
+const isSaving = ref(false)
 const slugTouched = ref(false)
 const modalFormTab = ref('required')
 
@@ -65,7 +67,7 @@ const formErrorTabMap = {
   displayOrder: 'content',
 }
 
-const statusOptions = ['ACTIVE', 'COMING_SOON', 'TEMPORARILY_CLOSED', 'MAINTENANCE', 'INACTIVE']
+const statusOptions = ['ACTIVE', 'COMING_SOON', 'TEMPORARILY_CLOSED', 'MAINTENANCE', 'FORMERLY_ACTIVE', 'INACTIVE']
 const storeTypeOptions = ['FLAGSHIP', 'STANDARD', 'KIOSK', 'FRANCHISE', 'POPUP']
 const amenityDefinitions = [
   { key: 'wifi', value: 'Wifi' },
@@ -148,6 +150,7 @@ const buildOpeningHours = (opensAt, closesAt) => {
 }
 
 const openingHoursPreview = computed(() => buildOpeningHours(form.opensAt, form.closesAt))
+const isPermanentlyInactive = computed(() => ['FORMERLY_ACTIVE', 'INACTIVE'].includes(form.status))
 
 const blurOpeningTime = (field) => {
   form[field] = normalizeTimeValue(form[field])
@@ -169,6 +172,7 @@ const statusLabels = computed(() => ({
   COMING_SOON: m('status.COMING_SOON'),
   TEMPORARILY_CLOSED: m('status.TEMPORARILY_CLOSED'),
   MAINTENANCE: m('status.MAINTENANCE'),
+  FORMERLY_ACTIVE: m('status.FORMERLY_ACTIVE'),
   INACTIVE: m('status.INACTIVE'),
 }))
 
@@ -192,6 +196,66 @@ const handleImageFile = async (event) => {
     toast.error(error.response?.data?.message || m('toasts.imageError'))
   } finally {
     isUploadingImage.value = false
+    event.target.value = ''
+  }
+}
+
+const allowedGalleryExtensions = ['jpg', 'jpeg', 'jfif', 'png', 'webp', 'gif']
+const maxGalleryFileSize = 5 * 1024 * 1024
+
+const validateGalleryFile = (file) => {
+  const extension = file.name.split('.').pop()?.toLowerCase() || ''
+  if (!allowedGalleryExtensions.includes(extension) || (file.type && !file.type.startsWith('image/'))) {
+    return m('gallery.unsupportedFormat')
+  }
+  if (file.size > maxGalleryFileSize) return m('gallery.fileTooLarge')
+  return ''
+}
+
+const handleGalleryFiles = async (event) => {
+  const files = Array.from(event.target.files || [])
+  if (!files.length) return
+
+  const validFiles = []
+  const skippedFiles = []
+  files.forEach((file) => {
+    const reason = validateGalleryFile(file)
+    if (reason) skippedFiles.push(`${file.name}: ${reason}`)
+    else validFiles.push(file)
+  })
+
+  if (!validFiles.length) {
+    toast.error(skippedFiles.slice(0, 2).join('\n') || m('gallery.noValidImages'))
+    event.target.value = ''
+    return
+  }
+
+  isUploadingGallery.value = true
+  try {
+    const results = await Promise.allSettled(validFiles.map((file) => uploadService.image(file)))
+    const uploadedUrls = results
+      .filter((result) => result.status === 'fulfilled' && result.value.data?.url)
+      .map((result) => normalizeStorageAssetUrl(result.value.data.url))
+
+    if (uploadedUrls.length) {
+      const currentUrls = String(form.galleryText || '')
+        .split(/\r?\n/)
+        .map((url) => url.trim())
+        .filter(Boolean)
+      form.galleryText = [...currentUrls, ...uploadedUrls]
+        .filter((url, index, all) => all.indexOf(url) === index)
+        .join('\n')
+      toast.success(m('gallery.uploaded', { count: uploadedUrls.length }))
+    }
+
+    const failedFiles = results
+      .map((result, index) => ({ result, file: validFiles[index] }))
+      .filter(({ result }) => result.status === 'rejected')
+      .map(({ result, file }) => `${file.name}: ${result.reason?.response?.data?.message || m('gallery.uploadError')}`)
+    const errors = [...skippedFiles, ...failedFiles]
+    if (errors.length) toast.error(errors.slice(0, 2).join('\n'))
+  } finally {
+    isUploadingGallery.value = false
     event.target.value = ''
   }
 }
@@ -319,7 +383,7 @@ const normalizeLocation = (location) => {
     amenities: parseAmenities(location),
     galleryText: jsonArrayToLines(location.galleryJson),
     menuPostersText: menuPostersJsonToLines(location.menuPostersJson),
-    displayOrder: Number(location.displayOrder || location.id || 1),
+    displayOrder: Number(location.displayOrder ?? location.id ?? 1),
     featured: Boolean(location.featured),
     status:
       location.status === 'Đang hoạt động'
@@ -337,6 +401,8 @@ const statusClass = (status) => ({
   'bg-amber-50 text-amber-700 border-amber-200': status === 'COMING_SOON' || status === 'Sắp khai trương',
   'bg-gray-50 text-gray-700 border-gray-200': status === 'TEMPORARILY_CLOSED',
   'bg-orange-50 text-orange-700 border-orange-200': status === 'MAINTENANCE',
+  'bg-violet-50 text-violet-700 border-violet-200': status === 'FORMERLY_ACTIVE',
+  'bg-slate-50 text-slate-500 border-slate-200': status === 'INACTIVE',
 })
 
 const cityFilters = computed(() => [t('admin.shared.all'), ...new Set(normalizedLocations.value.map((item) => item.city).filter(Boolean))])
@@ -376,6 +442,31 @@ const resetForm = () => {
 }
 
 const coverPreviewUrl = computed(() => resolveBackendAssetUrl(form.coverImageUrl || ''))
+const galleryUrls = computed(() =>
+  String(form.galleryText || '')
+    .split(/\r?\n/)
+    .map((url) => url.trim())
+    .filter(Boolean),
+)
+const galleryPreviews = computed(() =>
+  galleryUrls.value.map((url) => ({ url, preview: resolveBackendAssetUrl(url) })),
+)
+
+const updateGalleryUrls = (urls) => {
+  form.galleryText = urls.join('\n')
+}
+
+const removeGalleryImage = (index) => {
+  updateGalleryUrls(galleryUrls.value.filter((_, itemIndex) => itemIndex !== index))
+}
+
+const moveGalleryImage = (index, direction) => {
+  const targetIndex = index + direction
+  if (targetIndex < 0 || targetIndex >= galleryUrls.value.length) return
+  const urls = [...galleryUrls.value]
+  ;[urls[index], urls[targetIndex]] = [urls[targetIndex], urls[index]]
+  updateGalleryUrls(urls)
+}
 
 const showImageWarning = computed(
   () => form.status === 'ACTIVE' && !String(form.coverImageUrl || '').trim(),
@@ -480,7 +571,7 @@ const validateForm = () => {
     if (!openTime || !closeTime) errors.openingHours = m('validation.openingHours')
     else if (!openingHours) errors.openingHours = m('validation.openingHoursFormat')
   }
-  if (Number.isNaN(Number(form.displayOrder))) errors.displayOrder = m('validation.displayOrder')
+  if (Number.isNaN(Number(form.displayOrder)) || Number(form.displayOrder) < 0) errors.displayOrder = m('validation.displayOrder')
 
   formErrors.value = errors
   if (Object.keys(errors).length) focusFirstErrorTab(errors)
@@ -525,20 +616,21 @@ const buildPayload = () => {
     province: form.city.trim(),
     district: form.district.trim(),
     ward: form.ward.trim(),
-    latitude: form.latitude || null,
-    longitude: form.longitude || null,
+    latitude: form.latitude === '' || form.latitude == null ? null : Number(form.latitude),
+    longitude: form.longitude === '' || form.longitude == null ? null : Number(form.longitude),
     amenities: [...form.amenities],
     galleryJson: linesToJsonArray(form.galleryText),
     amenitiesJson: JSON.stringify(form.amenities),
     menuPostersJson: linesToMenuPostersJson(form.menuPostersText),
     linksJson: buildLinksJson(),
-    displayOrder: Number(form.displayOrder) || 1,
+    displayOrder: Number(form.displayOrder),
     featured: form.featured,
     status: form.status,
   }
 }
 
 const saveLocation = async () => {
+  if (isSaving.value) return
   if (!validateForm()) {
     const firstError = Object.values(formErrors.value)[0]
     toast.error(firstError || m('validation.formInvalid'))
@@ -546,12 +638,15 @@ const saveLocation = async () => {
   }
   const payload = buildPayload()
 
+  isSaving.value = true
   try {
     await store.saveLocation(payload)
     toast.success(mode.value === 'create' ? m('toasts.created') : m('toasts.updated'))
     closeModal()
   } catch (error) {
     toast.error(error.response?.data?.message || m('toasts.saveError'))
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -601,12 +696,27 @@ watch([searchQuery, statusFilter, cityFilter, featuredFilter], () => {
   currentPage.value = 1
 })
 
+watch(totalPages, (value) => {
+  currentPage.value = Math.min(currentPage.value, value)
+})
+
 watch(
   () => form.name,
   (name) => {
     if (mode.value === 'create' && !slugTouched.value) {
       form.slug = slugify(name)
     }
+  },
+)
+
+watch(
+  () => form.status,
+  (status) => {
+    if (!['FORMERLY_ACTIVE', 'INACTIVE'].includes(status)) return
+    form.opensAt = ''
+    form.closesAt = ''
+    form.openingHours = ''
+    delete formErrors.value.openingHours
   },
 )
 
@@ -868,7 +978,7 @@ onMounted(() => {
 
           <div class="grid gap-2">
             <span class="text-xs font-bold uppercase tracking-wider text-slate-500">{{ m('fields.openingHours') }}</span>
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div v-if="!isPermanentlyInactive" class="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label class="grid gap-1.5 text-xs font-semibold normal-case tracking-normal text-slate-600">
                 {{ m('fields.opensAt') }}
                 <input
@@ -894,8 +1004,12 @@ onMounted(() => {
                 />
               </label>
             </div>
-            <span class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('hints.openingHours') }}</span>
-            <span v-if="openingHoursPreview" class="text-xs font-bold normal-case tracking-normal text-avocado-800">{{ openingHoursPreview }}</span>
+            <div v-else class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold leading-6 text-slate-500">
+              {{ m('hints.inactiveOpeningHours') }}
+            </div>
+            <span v-if="form.status === 'ACTIVE'" class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('hints.openingHours') }}</span>
+            <span v-else-if="!isPermanentlyInactive" class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('hints.optionalOpeningHours') }}</span>
+            <span v-if="openingHoursPreview && !isPermanentlyInactive" class="text-xs font-bold normal-case tracking-normal text-avocado-800">{{ openingHoursPreview }}</span>
             <span v-if="formErrors.openingHours" class="text-xs font-bold normal-case tracking-normal text-red-600">{{ formErrors.openingHours }}</span>
           </div>
 
@@ -980,12 +1094,52 @@ onMounted(() => {
             </div>
           </div>
 
-          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-            {{ m('fields.galleryText') }}
-            <textarea v-model="form.galleryText" rows="3" class="admin-input-premium resize-none" :placeholder="m('placeholders.galleryText')" />
-            <span v-if="formErrors.galleryText" class="text-xs font-bold normal-case tracking-normal text-red-600">{{ formErrors.galleryText }}</span>
-            <span v-else class="text-xs font-semibold normal-case tracking-normal text-slate-500">{{ m('fieldHints.galleryText') }}</span>
-          </label>
+          <div class="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-500">{{ m('fields.galleryText') }}</p>
+              <p class="mt-1 text-xs font-semibold leading-5 text-slate-500">{{ m('gallery.uploadHint') }}</p>
+            </div>
+
+            <label class="inline-flex w-fit cursor-pointer items-center rounded-xl bg-avocado-700 px-4 py-2.5 text-sm font-black text-white transition hover:bg-avocado-800">
+              {{ isUploadingGallery ? m('gallery.uploading') : m('gallery.chooseFiles') }}
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.jfif,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
+                multiple
+                class="hidden"
+                :disabled="isUploadingGallery"
+                @change="handleGalleryFiles"
+              />
+            </label>
+
+            <div v-if="galleryPreviews.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              <div
+                v-for="(item, index) in galleryPreviews"
+                :key="`${item.url}-${index}`"
+                class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+              >
+                <img :src="item.preview" :alt="`${m('fields.galleryText')} ${index + 1}`" class="aspect-square w-full object-cover" />
+                <div class="flex items-center justify-between gap-1 p-2">
+                  <button type="button" class="h-8 w-8 rounded-lg border border-slate-200 font-black text-slate-600 disabled:opacity-30" :disabled="index === 0" :title="m('gallery.moveBack')" @click="moveGalleryImage(index, -1)">←</button>
+                  <span class="text-xs font-black text-slate-500">{{ index + 1 }}</span>
+                  <button type="button" class="h-8 w-8 rounded-lg border border-slate-200 font-black text-slate-600 disabled:opacity-30" :disabled="index === galleryPreviews.length - 1" :title="m('gallery.moveForward')" @click="moveGalleryImage(index, 1)">→</button>
+                  <button type="button" class="h-8 w-8 rounded-lg bg-red-50 font-black text-red-600 hover:bg-red-100" :title="m('gallery.remove')" @click="removeGalleryImage(index)">×</button>
+                </div>
+              </div>
+            </div>
+
+            <p v-else class="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm font-semibold text-slate-400">{{ m('gallery.empty') }}</p>
+
+            <details class="rounded-xl border border-slate-200 bg-white p-3">
+              <summary class="cursor-pointer text-sm font-black text-slate-700">{{ m('gallery.manualUrls') }}</summary>
+              <label class="mt-3 grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+                {{ m('gallery.manualUrlsLabel') }}
+                <textarea v-model="form.galleryText" rows="3" class="admin-input-premium resize-none" :placeholder="m('placeholders.galleryText')" />
+              </label>
+            </details>
+
+            <span v-if="formErrors.galleryText" class="text-xs font-bold text-red-600">{{ formErrors.galleryText }}</span>
+          </div>
 
           <label class="inline-flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700">
             <input v-model="form.featured" type="checkbox" class="h-4 w-4 accent-avocado-700" />
@@ -1064,7 +1218,7 @@ onMounted(() => {
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="rounded-lg border border-slate-200 px-4 py-3 font-bold text-slate-600 hover:bg-slate-50" type="button" @click="closeModal">{{ m('actions.cancel') }}</button>
-          <button class="rounded-lg bg-brand-forest px-4 py-3 font-black text-white hover:bg-avocado-800 disabled:cursor-not-allowed disabled:opacity-60" type="button" :disabled="isUploadingImage" @click="saveLocation">
+          <button class="rounded-lg bg-brand-forest px-4 py-3 font-black text-white hover:bg-avocado-800 disabled:cursor-not-allowed disabled:opacity-60" type="button" :disabled="isUploadingImage || isUploadingGallery || isSaving" @click="saveLocation">
             {{ mode === 'create' ? m('actions.saveCreate') : m('actions.saveUpdate') }}
           </button>
         </div>

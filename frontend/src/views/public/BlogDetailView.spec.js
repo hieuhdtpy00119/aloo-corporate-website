@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import BlogDetailView from './BlogDetailView.vue'
@@ -46,7 +46,7 @@ describe('BlogDetailView', () => {
     expect(document.title).toBe('SEO Câu chuyện ALOO | ALOO')
   })
 
-  it('renders a clear not-found state for an unknown post', () => {
+  it('renders a clear not-found state for an unknown post after loading finishes', async () => {
     routeState.params.id = 'missing-post'
     const store = useAppStore()
     store.posts = []
@@ -54,6 +54,7 @@ describe('BlogDetailView', () => {
     vi.spyOn(store, 'fetchPosts').mockResolvedValue()
 
     const wrapper = mount(BlogDetailView)
+    await flushPromises()
 
     expect(wrapper.text()).toContain('Không tìm thấy bài viết')
     expect(wrapper.text()).toContain('Quay lại Blog')

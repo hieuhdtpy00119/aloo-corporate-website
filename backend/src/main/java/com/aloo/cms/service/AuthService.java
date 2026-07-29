@@ -113,13 +113,19 @@ public class AuthService {
             if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
                 throw new BadRequestException("New password must be different from current password");
             }
-        } else if (passwordChangeOtpService.isOtpRequired(user)) {
+        } else if (PasswordChangePolicy.requiresOtpVerification(user)) {
+            if (!passwordChangeOtpService.isOtpRequired(user)) {
+                throw new BadRequestException(
+                        "Email verification is required to set a password for Google accounts. Configure mail or sign in again."
+                );
+            }
             passwordChangeOtpService.verifyAndConsume(user.getId(), request.otp());
         }
 
         LocalDateTime changedAt = LocalDateTime.now();
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         user.setPasswordSetAt(changedAt);
+        user.setSecurityVersion(nextSecurityVersion(user));
         adminUserRepository.save(user);
         auditLogService.log(
                 "CHANGE_OWN_PASSWORD",
@@ -147,5 +153,9 @@ public class AuthService {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private long nextSecurityVersion(AdminUser user) {
+        return (user.getSecurityVersion() == null ? 0L : user.getSecurityVersion()) + 1L;
     }
 }

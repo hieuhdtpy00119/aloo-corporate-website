@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import org.springframework.util.StringUtils;
 public class PasswordChangeOtpService {
 
     private static final SecureRandom RANDOM = new SecureRandom();
+    private static final int MAX_VERIFY_ATTEMPTS = 5;
 
     private final Map<Long, OtpEntry> otpStore = new ConcurrentHashMap<>();
     private final MailNotificationService mailNotificationService;
@@ -52,7 +54,7 @@ public class PasswordChangeOtpService {
 
         String otp = generateOtp();
         Instant expiresAt = Instant.now().plus(Duration.ofMinutes(ttlMinutes));
-        otpStore.put(user.getId(), new OtpEntry(hashOtp(otp), expiresAt));
+        otpStore.put(user.getId(), new OtpEntry(hashOtp(otp), expiresAt, new AtomicInteger(0)));
 
         boolean sent = mailNotificationService.sendPasswordChangeOtp(user, otp);
         if (!sent) {
@@ -81,7 +83,17 @@ public class PasswordChangeOtpService {
             throw new BadRequestException("Verification code expired or not requested");
         }
 
+        if (entry.failedAttempts().get() >= MAX_VERIFY_ATTEMPTS) {
+            otpStore.remove(userId);
+            throw new BadRequestException("Too many incorrect verification attempts. Request a new code.");
+        }
+
         if (!constantTimeEquals(hashOtp(normalizedOtp), entry.codeHash())) {
+            int attempts = entry.failedAttempts().incrementAndGet();
+            if (attempts >= MAX_VERIFY_ATTEMPTS) {
+                otpStore.remove(userId);
+                throw new BadRequestException("Too many incorrect verification attempts. Request a new code.");
+            }
             throw new BadRequestException("Verification code is incorrect");
         }
 
@@ -106,6 +118,6 @@ public class PasswordChangeOtpService {
         return MessageDigest.isEqual(left.getBytes(), right.getBytes());
     }
 
-    private record OtpEntry(String codeHash, Instant expiresAt) {
+    private record OtpEntry(String codeHash, Instant expiresAt, AtomicInteger failedAttempts) {
     }
 }

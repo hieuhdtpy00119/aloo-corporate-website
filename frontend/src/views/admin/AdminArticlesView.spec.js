@@ -64,4 +64,5 @@ describe('AdminArticlesView', () => {
 
     expect(wrapper.text()).toContain('Không tải được bài viết')
   })
+
 })

@@ -2,6 +2,7 @@ package com.aloo.cms.controller;
 
 import com.aloo.cms.dto.FranchiseContentRequest;
 import com.aloo.cms.dto.FranchiseContentResponse;
+import com.aloo.cms.security.AdminScopeChecker;
 import com.aloo.cms.service.FranchiseContentService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -24,10 +25,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class FranchiseContentController {
 
     private final FranchiseContentService franchiseContentService;
+    private final AdminScopeChecker adminScopeChecker;
 
     @GetMapping
     public List<FranchiseContentResponse> findAll() {
-        return franchiseContentService.findAll();
+        if (adminScopeChecker.has("content")) {
+            return franchiseContentService.findAll();
+        }
+        return franchiseContentService.findActive();
     }
 
     @PostMapping

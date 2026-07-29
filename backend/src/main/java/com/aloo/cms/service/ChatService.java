@@ -103,7 +103,7 @@ public class ChatService {
                 .map(session -> {
                     applyVisitorProfile(session, fullName, contactKey);
                     chatSessionRepository.save(session);
-                    return toSessionWithMessages(session, false);
+                    return toSessionWithMessages(session, false, true);
                 })
                 .orElseGet(() -> createSession(new ChatSessionCreateRequest(fullName, contactKey)));
     }
@@ -137,7 +137,7 @@ public class ChatService {
     @Transactional(readOnly = true)
     public ChatSessionResponse getVisitorSession(String sessionToken) {
         ChatSession session = getSessionByToken(sessionToken);
-        return toSessionWithMessages(session, false);
+        return toSessionWithMessages(session, false, true);
     }
 
     @Transactional(readOnly = true)
@@ -150,7 +150,7 @@ public class ChatService {
 
     @Transactional(readOnly = true)
     public ChatSessionResponse findSessionById(Long id) {
-        return toSessionWithMessages(getSession(id), true);
+        return toSessionWithMessages(getSession(id), true, false);
     }
 
     @Transactional
@@ -168,8 +168,11 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatMessageResponse handleVisitorMessage(ChatVisitorSendPayload payload) {
+    public ChatMessageResponse handleVisitorMessage(ChatVisitorSendPayload payload, Long handshakeSessionId) {
         ChatSession session = getSessionByToken(payload.sessionToken());
+        if (handshakeSessionId != null && !handshakeSessionId.equals(session.getId())) {
+            throw new BadRequestException("Chat session token does not match WebSocket connection");
+        }
         if (ChatSession.STATUS_CLOSED.equals(session.getStatus())) {
             throw new BadRequestException("Chat session is closed");
         }
@@ -233,7 +236,7 @@ public class ChatService {
         return chatMessageRepository.save(message);
     }
 
-    private ChatSessionResponse toSessionWithMessages(ChatSession session, boolean markRead) {
+    private ChatSessionResponse toSessionWithMessages(ChatSession session, boolean markRead, boolean includeSessionToken) {
         if (markRead) {
             chatMessageRepository.markReadForSession(session.getId(), ChatMessage.SENDER_VISITOR);
         }
@@ -247,7 +250,17 @@ public class ChatService {
                 .map(message -> chatMapper.toMessageResponse(message, resolveSenderName(session, message, adminNames)))
                 .toList();
 
-        return chatMapper.toSessionResponse(session, messages, resolveVisitorName(session));
+        long unreadCount = chatMessageRepository.countBySessionIdAndSenderTypeAndReadAtIsNull(
+                session.getId(),
+                ChatMessage.SENDER_VISITOR
+        );
+        return chatMapper.toSessionResponse(
+                session,
+                messages,
+                unreadCount,
+                resolveVisitorName(session),
+                includeSessionToken
+        );
     }
 
     private ChatSessionResponse toSessionSummary(ChatSession session) {

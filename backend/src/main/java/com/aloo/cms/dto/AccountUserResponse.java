@@ -14,6 +14,10 @@ public record AccountUserResponse(
         List<String> scopes,
         String status,
         String authProvider,
+        Long version,
+        String statusReason,
+        LocalDateTime deactivatedAt,
+        LocalDateTime roleChangedAt,
         LocalDateTime lastLoginAt,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

@@ -1,11 +1,12 @@
 export const FRANCHISE_ADVANTAGE_ICONS = ['product', 'operation', 'cost', 'support', 'marketing', 'brand']
 
-export const FRANCHISE_SINGLETON_SECTIONS = ['hero', 'founder_story', 'cta']
+export const FRANCHISE_SINGLETON_SECTIONS = ['hero', 'investment_header', 'founder_story', 'cta']
 
 export const FRANCHISE_ADMIN_SECTION_KEYS = [
   'hero',
   'advantages',
   'models',
+  'investment_header',
   'investment',
   'profit',
   'process',
@@ -76,6 +77,12 @@ export const FRANCHISE_SECTION_SCHEMAS = {
     { key: 'description', type: 'textarea', rows: 3 },
     { key: 'image', type: 'image' },
     { key: 'featured', type: 'checkbox' },
+  ],
+  investment_header: [
+    { key: 'eyebrow', type: 'text' },
+    { key: 'title', type: 'text', required: true },
+    { key: 'description', type: 'textarea', rows: 3 },
+    { key: 'footnote', type: 'textarea', rows: 2 },
   ],
   investment: [
     { key: 'itemName', type: 'text', required: true },

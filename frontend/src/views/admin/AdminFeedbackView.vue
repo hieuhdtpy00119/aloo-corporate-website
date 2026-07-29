@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { Edit3, Eye, EyeOff, Plus, Trash2 } from 'lucide-vue-next'
 import AdminListPage from '../../components/admin/AdminListPage.vue'
 import AdminNestedShell from '../../components/admin/shell/AdminNestedShell.vue'
@@ -23,6 +23,8 @@ const searchQuery = ref('')
 const visibleFilter = ref('ALL')
 const showModal = ref(false)
 const editingId = ref(null)
+const isSaving = ref(false)
+const isTogglingVisible = ref(false)
 const pendingDeleteId = ref(null)
 const currentPage = ref(1)
 const pageSize = 8
@@ -120,10 +122,12 @@ const buildPayload = () => ({
 })
 
 const saveTestimonial = async () => {
+  if (isSaving.value) return
   if (!form.customerName.trim() || !form.content.trim()) {
     toast.error(m('toasts.requiredFields'))
     return
   }
+  isSaving.value = true
   try {
     const payload = buildPayload()
     const { data } = editingId.value
@@ -136,10 +140,14 @@ const saveTestimonial = async () => {
     closeModal()
   } catch (error) {
     toast.error(error.response?.data?.message || m('toasts.saveError'))
+  } finally {
+    isSaving.value = false
   }
 }
 
 const toggleVisible = async (item) => {
+  if (isTogglingVisible.value) return
+  isTogglingVisible.value = true
   try {
     const { data } = await feedbackService.updateVisible(item.id, !item.visible)
     const index = testimonials.value.findIndex((entry) => entry.id === data.id)
@@ -147,6 +155,8 @@ const toggleVisible = async (item) => {
     toast.success(data.visible ? m('toasts.visibilityOn') : m('toasts.visibilityOff'))
   } catch (error) {
     toast.error(error.response?.data?.message || m('toasts.visibilityError'))
+  } finally {
+    isTogglingVisible.value = false
   }
 }
 
@@ -161,6 +171,14 @@ const confirmDelete = async () => {
     pendingDeleteId.value = null
   }
 }
+
+watch([searchQuery, visibleFilter], () => {
+  currentPage.value = 1
+})
+
+watch(totalPages, (value) => {
+  currentPage.value = Math.min(currentPage.value, value)
+})
 
 onMounted(loadTestimonials)
 </script>
@@ -245,7 +263,7 @@ onMounted(loadTestimonials)
                 <td class="admin-shell-cell-strong">{{ item.sortOrder }}</td>
                 <td>
                   <div class="flex gap-2">
-                    <button class="rounded-lg border border-slate-200 p-2 text-slate-700 hover:bg-slate-50" :title="m('actions.toggleVisible')" @click="toggleVisible(item)">
+                    <button class="rounded-lg border border-slate-200 p-2 text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isTogglingVisible" :title="m('actions.toggleVisible')" @click="toggleVisible(item)">
                       <Eye v-if="!item.visible" class="h-4 w-4" />
                       <EyeOff v-else class="h-4 w-4" />
                     </button>
@@ -273,7 +291,7 @@ onMounted(loadTestimonials)
                 </div>
                 <p class="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">{{ item.content }}</p>
                 <div class="mt-4 flex gap-2">
-                  <button class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700" @click="toggleVisible(item)">{{ m('actions.toggleVisible') }}</button>
+                  <button class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isTogglingVisible" @click="toggleVisible(item)">{{ m('actions.toggleVisible') }}</button>
                   <button class="rounded-lg border border-avocado-200 px-3 py-2 text-xs font-bold text-avocado-700" @click="openEditModal(item)">{{ m('actions.edit') }}</button>
                   <button class="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600" @click="pendingDeleteId = item.id">{{ m('actions.delete') }}</button>
                 </div>
@@ -322,7 +340,7 @@ onMounted(loadTestimonials)
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-600" @click="closeModal">{{ m('actions.cancel') }}</button>
-          <button class="rounded-xl bg-avocado-800 px-5 py-3 text-sm font-black text-white" @click="saveTestimonial">{{ m('actions.save') }}</button>
+          <button type="button" class="rounded-xl bg-avocado-800 px-5 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-60" :disabled="isSaving" @click="saveTestimonial">{{ m('actions.save') }}</button>
         </div>
       </template>
     </BaseModal>

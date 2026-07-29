@@ -2,6 +2,7 @@ package com.aloo.cms.controller;
 
 import com.aloo.cms.dto.ProductRequest;
 import com.aloo.cms.dto.ProductResponse;
+import com.aloo.cms.security.AdminScopeChecker;
 import com.aloo.cms.service.ProductService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -24,10 +25,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProductController {
 
     private final ProductService productService;
+    private final AdminScopeChecker adminScopeChecker;
 
     @GetMapping
     public List<ProductResponse> findAll() {
-        return productService.findAll();
+        if (adminScopeChecker.has("content")) {
+            return productService.findAll();
+        }
+        return productService.findActive();
     }
 
     @GetMapping("/slug/{slug}")
@@ -37,7 +42,10 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ProductResponse findById(@PathVariable Long id) {
-        return productService.findById(id);
+        if (adminScopeChecker.has("content")) {
+            return productService.findById(id);
+        }
+        return productService.findActiveById(id);
     }
 
     @PostMapping
@@ -59,4 +67,3 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 }
-

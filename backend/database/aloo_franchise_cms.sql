@@ -7,29 +7,18 @@ GO
 USE ALOO_Franchise_CMS;
 GO
 
-SET ANSI_NULLS ON;
-SET QUOTED_IDENTIFIER ON;
+-- Bootstrap guard: this file is only for a brand-new database. If any user
+-- table already exists, disable execution before reaching table creation.
+-- Schema changes for an existing database must go through Flyway instead.
+IF EXISTS (SELECT 1 FROM sys.tables WHERE is_ms_shipped = 0)
+BEGIN
+    PRINT N'ABORTED: ALOO_Franchise_CMS already contains tables. Use Flyway migrations; this bootstrap script did not run.';
+    SET NOEXEC ON;
+END
 GO
 
-DROP TABLE IF EXISTS dbo.post_related_posts;
-DROP TABLE IF EXISTS dbo.post_images;
-DROP TABLE IF EXISTS dbo.testimonials;
-DROP TABLE IF EXISTS dbo.store_gallery;
-DROP TABLE IF EXISTS dbo.store_business_hours;
-DROP TABLE IF EXISTS dbo.store_menu_posters;
-DROP TABLE IF EXISTS dbo.products;
-DROP TABLE IF EXISTS dbo.posts;
-DROP TABLE IF EXISTS dbo.franchise_contents;
-DROP TABLE IF EXISTS dbo.franchise_registrations;
-DROP TABLE IF EXISTS dbo.contact_messages;
-DROP TABLE IF EXISTS dbo.stores;
-DROP TABLE IF EXISTS dbo.locations;
-DROP TABLE IF EXISTS dbo.menu_posters;
-DROP TABLE IF EXISTS dbo.home_sections;
-DROP TABLE IF EXISTS dbo.hero_banners;
-DROP TABLE IF EXISTS dbo.brand_timelines;
-DROP TABLE IF EXISTS dbo.categories;
-DROP TABLE IF EXISTS dbo.users;
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
 GO
 
 CREATE TABLE dbo.users (
@@ -43,6 +32,15 @@ CREATE TABLE dbo.users (
     admin_profile NVARCHAR(30) NULL,
     status NVARCHAR(30) NOT NULL CONSTRAINT df_users_status DEFAULT N'ACTIVE',
     auth_provider NVARCHAR(20) NOT NULL CONSTRAINT df_users_auth_provider DEFAULT N'LOCAL',
+    record_version BIGINT NOT NULL CONSTRAINT df_users_record_version DEFAULT 0,
+    security_version BIGINT NOT NULL CONSTRAINT df_users_security_version DEFAULT 0,
+    status_reason NVARCHAR(500) NULL,
+    invited_at DATETIME2(0) NULL,
+    invitation_accepted_at DATETIME2(0) NULL,
+    deactivated_at DATETIME2(0) NULL,
+    deactivated_by NVARCHAR(180) NULL,
+    role_changed_at DATETIME2(0) NULL,
+    role_changed_by NVARCHAR(180) NULL,
     password_set_at DATETIME2(0) NULL,
     last_login_at DATETIME2(0) NULL,
     created_at DATETIME2(0) NOT NULL CONSTRAINT df_users_created_at DEFAULT GETDATE(),
@@ -50,7 +48,21 @@ CREATE TABLE dbo.users (
     CONSTRAINT pk_users PRIMARY KEY (id),
     CONSTRAINT uq_users_email UNIQUE (email),
     CONSTRAINT ck_users_role CHECK (role IN (N'ADMIN', N'USER')),
-    CONSTRAINT ck_users_status CHECK (status IN (N'ACTIVE', N'INACTIVE', N'LOCKED'))
+    CONSTRAINT ck_users_status CHECK (status IN (N'INVITED', N'ACTIVE', N'SUSPENDED', N'LOCKED', N'DEACTIVATED'))
+);
+GO
+
+CREATE TABLE dbo.account_role_history (
+    id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    from_role NVARCHAR(30) NOT NULL,
+    to_role NVARCHAR(30) NOT NULL,
+    from_admin_profile NVARCHAR(30) NULL,
+    to_admin_profile NVARCHAR(30) NULL,
+    reason NVARCHAR(500) NOT NULL,
+    changed_by NVARCHAR(180) NOT NULL,
+    changed_at DATETIME2(0) NOT NULL CONSTRAINT df_account_role_history_changed_at DEFAULT GETDATE(),
+    CONSTRAINT fk_account_role_history_user FOREIGN KEY (user_id) REFERENCES dbo.users(id)
 );
 GO
 
@@ -215,7 +227,7 @@ CREATE TABLE dbo.stores (
     CONSTRAINT uq_stores_store_code UNIQUE (store_code),
     CONSTRAINT uq_stores_slug UNIQUE (slug),
     CONSTRAINT ck_stores_store_type CHECK (store_type IN (N'FLAGSHIP', N'STANDARD', N'KIOSK', N'FRANCHISE', N'POPUP')),
-    CONSTRAINT ck_stores_status CHECK (status IN (N'ACTIVE', N'COMING_SOON', N'TEMPORARILY_CLOSED', N'MAINTENANCE', N'INACTIVE'))
+    CONSTRAINT ck_stores_status CHECK (status IN (N'ACTIVE', N'COMING_SOON', N'TEMPORARILY_CLOSED', N'MAINTENANCE', N'FORMERLY_ACTIVE', N'INACTIVE'))
 );
 GO
 
@@ -359,6 +371,14 @@ CREATE TABLE dbo.brand_timelines (
 GO
 
 CREATE INDEX ix_users_role_status ON dbo.users(role, status, created_at DESC);
+CREATE INDEX ix_account_role_history_user_changed ON dbo.account_role_history(user_id, changed_at DESC);
+CREATE INDEX ix_users_account_directory
+    ON dbo.users(role, status, created_at DESC)
+    INCLUDE (email, full_name, phone, admin_profile, auth_provider, last_login_at,
+             record_version, security_version);
+CREATE INDEX ix_users_active_admin_lookup
+    ON dbo.users(role, status, full_name, email)
+    INCLUDE (admin_profile, auth_provider, record_version);
 GO
 
 CREATE TABLE dbo.audit_logs (
@@ -398,4 +418,8 @@ GO
 -- Schema only. No mock/demo/sample business data is inserted here.
 -- Create the first ADMIN account manually with a BCrypt password hash in dbo.users,
 -- or run backend/database/aloo_franchise_cms_sample_data.sql only in local development.
+
+-- Restore the connection setting when the bootstrap guard was activated.
+SET NOEXEC OFF;
+GO
 

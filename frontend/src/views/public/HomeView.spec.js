@@ -80,6 +80,19 @@ describe('HomeView', () => {
     expect(wrapper.find('.product-scrollbar .animate-pulse').exists()).toBe(true)
   })
 
+  it('uses featured products for the homepage favorites section', () => {
+    const store = useAppStore()
+    store.products = [
+      { id: 1, name: 'Món thường', status: 'ACTIVE', sortOrder: 1, featured: false },
+      { id: 2, name: 'Món nổi bật', status: 'ACTIVE', sortOrder: 99, featured: true },
+    ]
+
+    const wrapper = mountView()
+
+    expect(wrapper.text()).toContain('Món nổi bật')
+    expect(wrapper.text()).not.toContain('Món thường')
+  })
+
   it('shows featured empty state', async () => {
     const wrapper = mountView()
 

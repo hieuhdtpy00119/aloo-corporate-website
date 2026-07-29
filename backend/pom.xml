@@ -57,9 +57,17 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -77,6 +85,11 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>${jjwt.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.18.3</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

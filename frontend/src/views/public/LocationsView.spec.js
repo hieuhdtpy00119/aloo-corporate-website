@@ -17,6 +17,7 @@ const translations = {
   'locations.active': 'Đang hoạt động',
   'locations.comingSoon': 'Sắp khai trương',
   'locations.maintenance': 'Đang sửa chữa',
+  'locations.formerlyActive': 'Từng hoạt động',
   'locations.statsTotal': 'Tổng chi nhánh',
   'locations.statsActive': 'Đang hoạt động',
   'locations.statsFeatured': 'Nổi bật',
@@ -161,5 +162,42 @@ describe('LocationsView', () => {
     await wrapper.find('input[type="search"]').setValue('Không tồn tại')
 
     expect(wrapper.text()).toContain('Không tìm thấy cửa hàng nào khớp với tìm kiếm.')
+  })
+
+  it('shows formerly active stores publicly but keeps hidden stores private', () => {
+    const store = useAppStore()
+    store.locations = [
+      {
+        id: 1,
+        name: 'ALOO Đã từng hợp tác',
+        addressText: 'Địa chỉ cũ',
+        city: 'TP.HCM',
+        phone: '0900 000 000',
+        openingHours: '07:00 - 22:00',
+        status: 'FORMERLY_ACTIVE',
+      },
+      {
+        id: 2,
+        name: 'ALOO Đang ẩn',
+        addressText: 'Địa chỉ ẩn',
+        city: 'TP.HCM',
+        status: 'INACTIVE',
+      },
+    ]
+    vi.spyOn(store, 'fetchLocations').mockResolvedValue()
+
+    const wrapper = mount(LocationsView, {
+      global: {
+        stubs: {
+          RouterLink: { props: ['to'], template: '<a :href="to"><slot /></a>' },
+        },
+      },
+    })
+
+    expect(wrapper.text()).toContain('ALOO Đã từng hợp tác')
+    expect(wrapper.text()).toContain('Từng hoạt động')
+    expect(wrapper.text()).not.toContain('Giờ mở cửa')
+    expect(wrapper.text()).not.toContain('0900 000 000')
+    expect(wrapper.text()).not.toContain('ALOO Đang ẩn')
   })
 })

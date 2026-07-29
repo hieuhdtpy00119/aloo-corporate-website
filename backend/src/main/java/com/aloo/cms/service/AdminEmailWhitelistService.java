@@ -13,9 +13,14 @@ import org.springframework.stereotype.Service;
 public class AdminEmailWhitelistService {
 
     private final Set<String> allowedEmails;
+    private final boolean requireWhitelist;
 
-    public AdminEmailWhitelistService(@Value("${app.admin.email-whitelist:}") String rawWhitelist) {
-        allowedEmails = parse(rawWhitelist);
+    public AdminEmailWhitelistService(
+            @Value("${app.admin.email-whitelist:}") String rawWhitelist,
+            @Value("${app.admin.require-email-whitelist:true}") boolean requireWhitelist
+    ) {
+        this.allowedEmails = parse(rawWhitelist);
+        this.requireWhitelist = requireWhitelist;
     }
 
     public boolean isEnabled() {
@@ -24,7 +29,7 @@ public class AdminEmailWhitelistService {
 
     public boolean isAllowed(String email) {
         if (!isEnabled()) {
-            return true;
+            return !requireWhitelist;
         }
         String normalized = normalize(email);
         return normalized != null && allowedEmails.contains(normalized);

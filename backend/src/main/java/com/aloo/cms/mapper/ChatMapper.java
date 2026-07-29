@@ -7,7 +7,6 @@ import com.aloo.cms.entity.ChatSession;
 import com.aloo.cms.repository.ChatMessageRepository;
 import com.aloo.cms.support.TextEncodingSupport;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -56,9 +55,19 @@ public class ChatMapper {
             long unreadCount,
             String visitorName
     ) {
+        return toSessionResponse(session, messages, unreadCount, visitorName, true);
+    }
+
+    public ChatSessionResponse toSessionResponse(
+            ChatSession session,
+            List<ChatMessageResponse> messages,
+            long unreadCount,
+            String visitorName,
+            boolean includeSessionToken
+    ) {
         return new ChatSessionResponse(
                 session.getId(),
-                session.getSessionToken(),
+                includeSessionToken ? session.getSessionToken() : null,
                 TextEncodingSupport.repairUtf8Mojibake(visitorName),
                 session.getVisitorPhone(),
                 session.getStatus(),
@@ -72,10 +81,11 @@ public class ChatMapper {
     }
 
     public ChatSessionResponse toSessionSummary(ChatSession session, long unreadCount) {
-        return toSessionResponse(session, List.of(), unreadCount, session.getVisitorName());
+        return toSessionSummary(session, unreadCount, session.getVisitorName());
     }
 
     public ChatSessionResponse toSessionSummary(ChatSession session, long unreadCount, String visitorName) {
-        return toSessionResponse(session, List.of(), unreadCount, visitorName);
+        // Admin inbox/list must never expose visitor session tokens.
+        return toSessionResponse(session, List.of(), unreadCount, visitorName, false);
     }
 }

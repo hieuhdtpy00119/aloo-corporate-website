@@ -2,6 +2,7 @@ package com.aloo.cms.controller;
 
 import com.aloo.cms.dto.BrandTimelineRequest;
 import com.aloo.cms.dto.BrandTimelineResponse;
+import com.aloo.cms.security.AdminScopeChecker;
 import com.aloo.cms.service.BrandTimelineService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -25,10 +26,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class BrandTimelineController {
 
     private final BrandTimelineService brandTimelineService;
+    private final AdminScopeChecker adminScopeChecker;
 
     @GetMapping
-    public List<BrandTimelineResponse> findAll(@RequestParam(defaultValue = "false") boolean activeOnly) {
-        return activeOnly ? brandTimelineService.findActive() : brandTimelineService.findAll();
+    public List<BrandTimelineResponse> findAll(@RequestParam(required = false) Boolean activeOnly) {
+        boolean forceActive = activeOnly == null
+                ? !adminScopeChecker.has("content")
+                : activeOnly || !adminScopeChecker.has("content");
+        return forceActive ? brandTimelineService.findActive() : brandTimelineService.findAll();
     }
 
     @GetMapping("/{id}")

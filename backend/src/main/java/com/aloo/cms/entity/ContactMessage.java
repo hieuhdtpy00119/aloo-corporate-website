@@ -36,7 +36,7 @@ public class ContactMessage {
     @Column(length = 220)
     private String subject;
 
-    @Column(columnDefinition = "nvarchar(max)", nullable = false)
+    @Column(columnDefinition = "text", nullable = false)
     private String message;
 
     @Column(nullable = false, length = 40)

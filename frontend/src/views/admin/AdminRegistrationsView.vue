@@ -14,6 +14,7 @@ import SearchFilterBar from '../../components/admin/SearchFilterBar.vue'
 import { useAdminModuleI18n } from '../../composables/useAdminModuleI18n'
 import { useAppStore } from '../../stores/appStore'
 import { useToastStore } from '../../stores/toastStore'
+import { matchesRegistrationSearch } from '../../utils/registrationSearch'
 import {
   LEAD_STATUS_CODES,
   getLeadStatusBadgeClass,
@@ -28,6 +29,7 @@ const route = useRoute()
 const router = useRouter()
 const selectedRegistration = ref(null)
 const pendingDeleteId = ref(null)
+const isSavingLead = ref(false)
 const searchQuery = ref('')
 const statusFilter = ref(t('admin.shared.all'))
 const isLoading = computed(() => store.loading.registrations)
@@ -76,6 +78,8 @@ const notifyStatusChange = () => {
 }
 
 const updateRegistrationStatus = async (registration, status) => {
+  if (isSavingLead.value) return
+  isSavingLead.value = true
   try {
     const updated = await store.updateRegistrationStatus(registration, status, {
       note: leadForm.note,
@@ -87,6 +91,8 @@ const updateRegistrationStatus = async (registration, status) => {
     notifyStatusChange()
   } catch (error) {
     toast.error(error.response?.data?.message || m('toasts.statusError'))
+  } finally {
+    isSavingLead.value = false
   }
 }
 
@@ -132,12 +138,7 @@ const confirmDeleteRegistration = async () => {
 const filteredRegistrations = computed(() => {
   const keyword = searchQuery.value.trim().toLowerCase()
   return registrations.value.filter((registration) => {
-    const matchesSearch =
-      !keyword ||
-      registration.name.toLowerCase().includes(keyword) ||
-      registration.phone.toLowerCase().includes(keyword) ||
-      registration.email.toLowerCase().includes(keyword) ||
-      registration.area.toLowerCase().includes(keyword)
+    const matchesSearch = matchesRegistrationSearch(registration, keyword)
     const matchesStatus =
       statusFilter.value === t('admin.shared.all') ||
       normalizeLeadStatusCode(registration.status) === getStatusFilterCode(statusFilter.value)
@@ -153,6 +154,10 @@ const listCountText = computed(() => t('admin.shared.totalCount', { count: filte
 
 watch([searchQuery, statusFilter], () => {
   currentPage.value = 1
+})
+
+watch(totalPages, (value) => {
+  currentPage.value = Math.min(currentPage.value, value)
 })
 
 watch(
@@ -355,7 +360,7 @@ onMounted(async () => {
                 </label>
               </div>
               <textarea v-model="leadForm.note" rows="4" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-avocado-500" :placeholder="m('notePlaceholder')"></textarea>
-              <button type="button" class="w-fit rounded-xl bg-avocado-800 px-5 py-3 text-sm font-black text-white hover:bg-avocado-950" @click="saveLeadCare">
+              <button type="button" class="w-fit rounded-xl bg-avocado-800 px-5 py-3 text-sm font-black text-white hover:bg-avocado-950 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isSavingLead" @click="saveLeadCare">
                 {{ m('actions.saveLeadCare') }}
               </button>
             </dd>

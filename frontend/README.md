@@ -104,23 +104,35 @@ Password: 123456
 Public:
 
 - `/`
-- `/products`
-- `/locations`
-- `/franchise`
 - `/about`
-- `/blog`
+- `/products`, `/products/:slug`
+- `/locations`, `/locations/:slug`
+- `/franchise`
+- `/blog`, `/blog/:slug`
 - `/consultation`
+- `/contact`
+- `/account`
+- `/login`, `/oauth/callback`
 
-Admin:
+Admin (canonical nested paths):
 
 - `/admin`
-- `/admin/products`
-- `/admin/banners`
-- `/admin/posts`
-- `/admin/registrations`
-- `/admin/locations`
-- `/admin/franchise-content`
+- `/admin/content/home-sections`
+- `/admin/content/brand-timeline`
+- `/admin/content/products`
+- `/admin/content/franchise`
+- `/admin/content/articles`
+- `/admin/stores/locations`
+- `/admin/crm/feedbacks`
+- `/admin/crm/product-reviews`
+- `/admin/crm/leads`
+- `/admin/crm/contact-messages`
+- `/admin/crm/live-chat`
+- `/admin/system/accounts`
+- `/admin/system/audit-logs`
+- `/admin/profile`
 
+Legacy flat paths like `/admin/products` still redirect to the nested routes above.
 ## Ghi chú
 
 - `node_modules/`, `dist/` và `.env` được Git bỏ qua.

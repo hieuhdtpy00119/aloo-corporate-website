@@ -5,12 +5,14 @@ import { useI18n } from 'vue-i18n'
 import { Search, Award, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { useAppStore } from '../../stores/appStore'
 import { useProductPageStore } from '../../stores/productPageStore'
+import ProductImage from '../../components/public/ProductImage.vue'
 
 const { t } = useI18n()
 const store = useAppStore()
 const productPageStore = useProductPageStore()
 
 const allCategoryLabel = computed(() => t('common.all'))
+const topSeoLabel = computed(() => t('products.topSeo'))
 const activeCategory = ref('')
 const searchQuery = ref('')
 const currentPage = ref(1)
@@ -59,7 +61,7 @@ const defaultSlide = computed(() => ({
   title: t('products.defaultSlideTitle'),
   subtitle: t('products.defaultSlideSubtitle'),
   description: t('products.defaultSlideDescription'),
-  backgroundImage: '/about/aloo-quality-ingredients.png',
+  backgroundImage: '/media/products/aloo-products-hero-ai.webp',
   tone: 'light',
 }))
 
@@ -122,11 +124,12 @@ const products = computed(() =>
 
 const categories = computed(() => {
   const cats = new Set(products.value.map((p) => p.category || defaultCategoryLabel.value))
-  return [allCategoryLabel.value, ...Array.from(cats)]
+  return [allCategoryLabel.value, topSeoLabel.value, ...Array.from(cats)]
 })
 
 const categoryIcon = (category) => {
   if (category === allCategoryLabel.value) return '✨'
+  if (category === topSeoLabel.value) return '🏆'
   const normalized = String(category || '').toLowerCase()
   return categoryIconMap.find((item) => item.match.some((keyword) => normalized.includes(keyword)))?.icon || '🍦'
 }
@@ -134,13 +137,37 @@ const categoryIcon = (category) => {
 const categoryCount = (category) =>
   category === allCategoryLabel.value
     ? products.value.length
+    : category === topSeoLabel.value
+      ? Math.min(5, products.value.length)
     : products.value.filter((product) => (product.category || defaultCategoryLabel.value) === category).length
+
+const seoScore = (product) => {
+  let score = 0
+  if (product.seoTitle?.trim()) score += 4
+  if (product.seoDescription?.trim()) score += 4
+  if (product.slug?.trim()) score += 2
+  if (product.shortDescription?.trim()) score += 2
+  if (product.description?.trim()) score += 1
+  if (product.imageUrl) score += 1
+  if (product.featured) score += 2
+  return score
+}
+
+const topSeoProducts = computed(() =>
+  [...products.value]
+    .sort((a, b) => seoScore(b) - seoScore(a) || (a.sortOrder || a.id) - (b.sortOrder || b.id))
+    .slice(0, 5),
+)
 
 const filteredProducts = computed(() => {
   const keyword = searchQuery.value.trim().toLowerCase()
-  return products.value.filter((product) => {
+  const sourceProducts = activeCategory.value === topSeoLabel.value ? topSeoProducts.value : products.value
+  return sourceProducts.filter((product) => {
     const category = product.category || defaultCategoryLabel.value
-    const matchesCategory = activeCategory.value === allCategoryLabel.value || category === activeCategory.value
+    const matchesCategory =
+      activeCategory.value === allCategoryLabel.value ||
+      activeCategory.value === topSeoLabel.value ||
+      category === activeCategory.value
     const haystack = [product.name, product.category, product.description, product.shortDescription]
       .filter(Boolean)
       .join(' ')
@@ -327,7 +354,12 @@ onBeforeUnmount(() => {
                   :aria-pressed="activeCategory === cat"
                   @click="selectCategory(cat)"
                 >
-                  <span class="min-w-0 flex-1 truncate">{{ cat }}</span>
+                  <span
+                    class="min-w-0 flex-1"
+                    :class="cat === topSeoLabel ? 'whitespace-normal text-xs leading-5' : 'truncate'"
+                  >
+                    {{ cat }}
+                  </span>
                   <span
                     class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black"
                     :class="activeCategory === cat ? 'bg-white/18 text-white' : 'bg-brand-lime/14 text-brand-muted'"
@@ -367,7 +399,7 @@ onBeforeUnmount(() => {
                 class="product-card group flex flex-col overflow-hidden rounded-[28px] border border-brand-forest/7 bg-white p-3 shadow-sm shadow-brand-forest/5 transition duration-500 hover:-translate-y-2 hover:border-brand-forest/14 hover:shadow-xl hover:shadow-brand-forest/10"
               >
                 <div class="relative aspect-[4/3] overflow-hidden rounded-[24px] bg-brand-cream/50">
-                  <img v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                  <ProductImage v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" class="h-full w-full" />
                   <div v-else class="relative grid h-full place-items-center overflow-hidden bg-[radial-gradient(circle_at_30%_20%,rgba(205,236,166,0.62),transparent_36%),linear-gradient(135deg,#FFF7E6,#F5FBEA)] px-5 text-center">
                     <div class="absolute -right-8 -top-8 h-32 w-32 rounded-full border border-brand-forest/8"></div>
                     <div class="absolute -bottom-10 -left-8 h-36 w-36 rounded-full bg-brand-lime/20 blur-2xl"></div>

@@ -29,14 +29,23 @@ public class JwtService {
     private long jwtExpirationMs;
 
     public String generateToken(AdminUser user) {
-        return generateToken(user.getEmail(), user.getRole().name(), adminPermissionService.resolveScopes(user));
+        return generateToken(
+                user.getEmail(),
+                user.getRole().name(),
+                adminPermissionService.resolveScopes(user),
+                user.getSecurityVersion() == null ? 0L : user.getSecurityVersion()
+        );
     }
 
     public String generateToken(String email, String role) {
-        return generateToken(email, role, java.util.List.of());
+        return generateToken(email, role, java.util.List.of(), 0L);
     }
 
     public String generateToken(String email, String role, java.util.List<String> scopes) {
+        return generateToken(email, role, scopes, 0L);
+    }
+
+    private String generateToken(String email, String role, java.util.List<String> scopes, long securityVersion) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + jwtExpirationMs);
 
@@ -44,6 +53,7 @@ public class JwtService {
                 .subject(email)
                 .claim("role", role)
                 .claim("scopes", scopes)
+                .claim("securityVersion", securityVersion)
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(signingKey())
@@ -57,7 +67,20 @@ public class JwtService {
     public boolean isTokenValid(String token, UserDetails userDetails) {
         try {
             String email = extractEmail(token);
-            return email.equalsIgnoreCase(userDetails.getUsername()) && !isExpired(token);
+            if (!email.equalsIgnoreCase(userDetails.getUsername())
+                    || isExpired(token)
+                    || !userDetails.isEnabled()
+                    || !userDetails.isAccountNonLocked()) {
+                return false;
+            }
+            if (userDetails instanceof CustomUserDetails custom) {
+                Number claimVersion = claims(token).get("securityVersion", Number.class);
+                long currentVersion = custom.getUser().getSecurityVersion() == null
+                        ? 0L
+                        : custom.getUser().getSecurityVersion();
+                return claimVersion != null && claimVersion.longValue() == currentVersion;
+            }
+            return true;
         } catch (JwtException | IllegalArgumentException ex) {
             return false;
         }

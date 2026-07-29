@@ -2,6 +2,7 @@ package com.aloo.cms.controller;
 
 import com.aloo.cms.dto.HomeSectionRequest;
 import com.aloo.cms.dto.HomeSectionResponse;
+import com.aloo.cms.security.AdminScopeChecker;
 import com.aloo.cms.service.HomeSectionService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -25,10 +26,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeSectionController {
 
     private final HomeSectionService homeSectionService;
+    private final AdminScopeChecker adminScopeChecker;
 
     @GetMapping
-    public List<HomeSectionResponse> findAll(@RequestParam(defaultValue = "false") boolean activeOnly) {
-        return homeSectionService.findAll(activeOnly);
+    public List<HomeSectionResponse> findAll(@RequestParam(required = false) Boolean activeOnly) {
+        boolean forceActive = activeOnly == null
+                ? !adminScopeChecker.has("content")
+                : activeOnly || !adminScopeChecker.has("content");
+        return homeSectionService.findAll(forceActive);
     }
 
     @GetMapping("/{id}")

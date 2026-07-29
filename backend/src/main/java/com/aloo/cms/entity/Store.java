@@ -68,13 +68,13 @@ public class Store {
     @Column(nullable = false, length = 40)
     private String storeType = "STANDARD";
 
-    @Column(columnDefinition = "nvarchar(max)")
+    @Column(columnDefinition = "text")
     private String description;
 
     @Column(length = 600)
     private String coverImageUrl;
 
-    @Column(columnDefinition = "nvarchar(max)")
+    @Column(columnDefinition = "text")
     private String amenitiesJson = "[]";
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -50,6 +50,7 @@ const modelIconMap = {
 }
 
 const hero = computed(() => franchiseStore.visibleHero[0] || null)
+const investmentHeader = computed(() => franchiseStore.visibleInvestmentHeader[0] || null)
 const founder = computed(() => franchiseStore.visibleFounderStory[0] || null)
 const cta = computed(() => franchiseStore.visibleCta[0] || null)
 
@@ -295,9 +296,9 @@ onMounted(async () => {
       <!-- ===== BẢNG CHI PHÍ ===== -->
       <section id="investment" class="mx-auto max-w-[1240px] px-4 py-20 sm:px-6 lg:px-8 scroll-mt-24">
         <div class="max-w-3xl mb-12">
-          <p class="text-xs font-black uppercase tracking-[0.22em] text-avocado-600">{{ t('franchise.investmentEyebrow') }}</p>
-          <h2 class="mt-3 text-3xl font-black lg:text-4xl">{{ t('franchise.investmentTitle') }}</h2>
-          <p class="mt-3 text-sm leading-7 text-slate-500">{{ t('franchise.investmentDesc') }}</p>
+          <p class="text-xs font-black uppercase tracking-[0.22em] text-avocado-600">{{ investmentHeader?.eyebrow || t('franchise.investmentEyebrow') }}</p>
+          <h2 class="mt-3 text-3xl font-black lg:text-4xl">{{ investmentHeader?.title || t('franchise.investmentTitle') }}</h2>
+          <p class="mt-3 text-sm leading-7 text-slate-500">{{ investmentHeader?.description || t('franchise.investmentDesc') }}</p>
         </div>
 
         <!-- Mobile cards view -->
@@ -351,7 +352,7 @@ onMounted(async () => {
             </tbody>
           </table>
         </div>
-        <p class="mt-4 text-xs text-slate-400 text-center">{{ t('franchise.investmentFootnote') }}</p>
+        <p class="mt-4 text-xs text-slate-400 text-center">{{ investmentHeader?.footnote || t('franchise.investmentFootnote') }}</p>
       </section>
 
       <!-- ===== DOANH THU THAM KHẢO ===== -->

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { CheckCircle2, Trash2, XCircle } from 'lucide-vue-next'
 import AdminListPage from '../../components/admin/AdminListPage.vue'
 import AdminNestedShell from '../../components/admin/shell/AdminNestedShell.vue'
@@ -21,6 +21,7 @@ const errorMessage = ref('')
 const searchQuery = ref('')
 const statusFilter = ref('ALL')
 const pendingDeleteId = ref(null)
+const isModerating = ref(false)
 const currentPage = ref(1)
 const pageSize = 8
 
@@ -74,12 +75,16 @@ const updateReviewInList = (updated) => {
 }
 
 const moderateReview = async (item, status) => {
+  if (isModerating.value) return
+  isModerating.value = true
   try {
     const { data } = await productReviewService.updateStatus(item.id, status)
     updateReviewInList(data)
     toast.success(status === 'APPROVED' ? m('toasts.approved') : m('toasts.rejected'))
   } catch (error) {
     toast.error(error.response?.data?.message || m('toasts.statusError'))
+  } finally {
+    isModerating.value = false
   }
 }
 
@@ -94,6 +99,14 @@ const confirmDelete = async () => {
     pendingDeleteId.value = null
   }
 }
+
+watch([searchQuery, statusFilter], () => {
+  currentPage.value = 1
+})
+
+watch(totalPages, (value) => {
+  currentPage.value = Math.min(currentPage.value, value)
+})
 
 onMounted(loadReviews)
 </script>
@@ -176,6 +189,7 @@ onMounted(loadReviews)
                       v-if="item.status === 'PENDING' || item.status === 'REJECTED'"
                       class="rounded-lg border border-emerald-200 p-2 text-emerald-700 hover:bg-emerald-50"
                       :title="m('actions.approve')"
+                      :disabled="isModerating"
                       @click="moderateReview(item, 'APPROVED')"
                     >
                       <CheckCircle2 class="h-4 w-4" />
@@ -184,6 +198,7 @@ onMounted(loadReviews)
                       v-if="item.status === 'PENDING' || item.status === 'APPROVED'"
                       class="rounded-lg border border-red-200 p-2 text-red-600 hover:bg-red-50"
                       :title="m('actions.reject')"
+                      :disabled="isModerating"
                       @click="moderateReview(item, 'REJECTED')"
                     >
                       <XCircle class="h-4 w-4" />
@@ -213,8 +228,8 @@ onMounted(loadReviews)
                 </div>
                 <p class="mt-3 line-clamp-4 text-sm leading-6 text-slate-600">{{ item.content }}</p>
                 <div class="mt-4 flex flex-wrap gap-2">
-                  <button v-if="item.status === 'PENDING' || item.status === 'REJECTED'" class="rounded-lg border border-emerald-200 px-3 py-2 text-xs font-bold text-emerald-700" @click="moderateReview(item, 'APPROVED')">{{ m('actions.approve') }}</button>
-                  <button v-if="item.status === 'PENDING' || item.status === 'APPROVED'" class="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600" @click="moderateReview(item, 'REJECTED')">{{ m('actions.reject') }}</button>
+                  <button v-if="item.status === 'PENDING' || item.status === 'REJECTED'" class="rounded-lg border border-emerald-200 px-3 py-2 text-xs font-bold text-emerald-700 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isModerating" @click="moderateReview(item, 'APPROVED')">{{ m('actions.approve') }}</button>
+                  <button v-if="item.status === 'PENDING' || item.status === 'APPROVED'" class="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isModerating" @click="moderateReview(item, 'REJECTED')">{{ m('actions.reject') }}</button>
                   <button class="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600" @click="pendingDeleteId = item.id">{{ m('actions.delete') }}</button>
                 </div>
               </article>

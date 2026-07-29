@@ -13,7 +13,7 @@ public class AdminPermissionService {
         if (user.getRole() != UserRole.ADMIN) {
             return null;
         }
-        return user.getAdminProfile() == null ? AdminProfile.FULL : user.getAdminProfile();
+        return user.getAdminProfile() == null ? AdminProfile.CONTENT : user.getAdminProfile();
     }
 
     public List<String> resolveScopes(AdminUser user) {

@@ -1,24 +1,67 @@
 /* Accounts page — styles on top of admin-shell-page.css */
 
 .admin-shell .accounts-table .accounts-col-name {
-  width: 28%;
+  width: 26%;
 }
 
 .admin-shell .accounts-table .accounts-col-email {
-  width: 28%;
+  width: 25%;
+}
+
+.admin-shell .accounts-table .accounts-col-role {
+  width: 11%;
 }
 
 .admin-shell .accounts-table .accounts-col-status {
-  width: 12%;
+  width: 11%;
 }
 
 .admin-shell .accounts-table .accounts-col-login {
-  width: 18%;
+  width: 14%;
 }
 
 .admin-shell .accounts-table .accounts-col-actions {
-  width: 14%;
+  width: 13%;
   text-align: right;
+}
+
+.admin-shell .accounts-table {
+  min-width: 1160px;
+}
+
+.admin-shell .accounts-table th,
+.admin-shell .accounts-table td {
+  padding-right: 18px;
+  padding-left: 18px;
+}
+
+.admin-shell .accounts-table thead th {
+  height: 46px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.admin-shell .accounts-table tbody td {
+  height: 64px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.admin-shell .accounts-table th:first-child,
+.admin-shell .accounts-table td:first-child {
+  padding-left: 20px;
+}
+
+.admin-shell .accounts-table th:last-child,
+.admin-shell .accounts-table td:last-child {
+  padding-right: 20px;
+}
+
+.admin-shell .accounts-table .accounts-col-role,
+.admin-shell .accounts-table .accounts-col-status,
+.admin-shell .accounts-table .accounts-col-login {
+  padding-right: 14px;
+  padding-left: 14px;
 }
 
 .admin-shell-th-name {
@@ -36,14 +79,14 @@
 .accounts-cell-name {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 }
 
 .accounts-avatar,
 .accounts-avatar-fallback {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
   border-radius: 999px;
   object-fit: cover;
@@ -65,6 +108,21 @@
   white-space: nowrap;
   font-weight: 700;
   color: #0d2f1b;
+}
+
+.accounts-identity {
+  min-width: 0;
+}
+
+.accounts-identity__badges {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+}
+
+.accounts-identity__badges .accounts-badge {
+  margin-left: 0;
 }
 
 .accounts-email {
@@ -123,6 +181,14 @@
   border-color: #bbf7d0;
   background: #f0fdf4;
   color: #15803d;
+}
+
+.accounts-role-badge {
+  margin-left: 0;
+  max-width: 100%;
+  padding: 3px 8px;
+  white-space: nowrap;
+  text-transform: none;
 }
 
 .accounts-row-actions {

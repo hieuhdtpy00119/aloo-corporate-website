@@ -85,6 +85,10 @@ watch([search, statusFilter, categoryFilter], () => {
   page.value = 1
 })
 
+watch(totalPages, (value) => {
+  page.value = Math.min(page.value, value)
+})
+
 const openDelete = (post) => {
   pendingDelete.value = post
 }

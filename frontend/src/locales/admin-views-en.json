@@ -5,6 +5,7 @@
     "description": "Manage products and product page banners.",
     "tabs": {
       "products": "Products",
+      "menu": "Menu posters",
       "hero": "Product banners"
     },
     "addProduct": "Add product",
@@ -124,6 +125,8 @@
       "slug": "Slug is required",
       "duplicateSlug": "Slug is already used by another product",
       "sortOrder": "Order must be a non-negative number",
+      "price": "Price must be a non-negative number",
+      "featuredOrder": "Top 5 position must be between 1 and 5.",
       "imageUrl": "Invalid image URL (use /uploads/..., a /path or https://...)",
       "imageRecommended": "Product is active but has no image — the site will show a placeholder.",
       "gallery": "One or more gallery URLs are invalid",
@@ -133,6 +136,7 @@
     },
     "fieldHints": {
       "category": "Only PRODUCT-type categories are suggested. Enter a new name to create a category.",
+      "featured": "Enable to show this product in the homepage “Top 5 favorites” section. Select up to 5 products.",
       "shortDescription": "Shown in the intro section on the product detail page.",
       "listDescription": "Used on homepage, product listing and search.",
       "detailContent": "Long-form content on the product detail page (product story).",
@@ -143,6 +147,7 @@
       "name": "Product name *",
       "slug": "Slug *",
       "category": "Category",
+      "price": "Price",
       "status": "Status",
       "imageUrl": "Image URL",
       "uploadImage": "Upload image",
@@ -158,6 +163,7 @@
       "seoTitle": "SEO title",
       "seoDescription": "SEO description",
       "featured": "Featured product",
+      "featuredOrder": "Top 5 position",
       "branchKey": "Branch code *",
       "menuTitle": "Menu name *",
       "menuSubtitle": "Short description",
@@ -166,6 +172,11 @@
       "menuImageUrl": "Menu image URL",
       "uploadMenuImage": "Upload menu image",
       "bannerTitle": "Banner name *",
+      "bannerSubtitle": "Subtitle",
+      "bannerDescription": "Banner description",
+      "tone": "Tone",
+      "productImage": "Foreground product image",
+      "thumbnailImage": "Thumbnail image",
       "displayOrder": "Display order",
       "backgroundImage": "Background image"
     },
@@ -247,7 +258,10 @@
       "confirm": "Delete product",
       "heroTitle": "Delete product page banner?",
       "heroMessage": "This banner will be removed from the product page slider. This action cannot be undone.",
-      "heroConfirm": "Delete banner"
+      "heroConfirm": "Delete banner",
+      "posterTitle": "Delete menu poster?",
+      "posterMessage": "This menu poster will be removed from the website. This action cannot be undone.",
+      "posterConfirm": "Delete menu poster"
     }
   },
   "homeSections": {
@@ -436,6 +450,7 @@
       "COMING_SOON": "Opening soon",
       "TEMPORARILY_CLOSED": "Temporarily closed",
       "MAINTENANCE": "Under maintenance",
+      "FORMERLY_ACTIVE": "Previously operated",
       "INACTIVE": "Hidden"
     },
     "amenities": {
@@ -539,7 +554,7 @@
       "mapUrl": "Use CUSTOM with a Google Maps link for the View map button.",
       "imageUrl": "Use /uploads/... or upload from your computer.",
       "galleryText": "One URL per line — shown on the store detail page.",
-      "menuPostersText": "CMS only — not shown on the website yet."
+      "menuPostersText": "Shown on the store detail page under gallery."
     },
     "fields": {
       "storeCode": "Store code",
@@ -629,11 +644,29 @@
       "loadFailed": "Could not load image",
       "noImage": "No image yet"
     },
+    "gallery": {
+      "chooseFiles": "Choose multiple images",
+      "uploading": "Uploading images...",
+      "uploadHint": "Select multiple images at once. You can remove or reorder them after uploading.",
+      "uploaded": "Uploaded {count} gallery images",
+      "uploadError": "Could not upload image",
+      "unsupportedFormat": "Unsupported image format",
+      "fileTooLarge": "Image exceeds the 5 MB limit",
+      "noValidImages": "No valid images to upload",
+      "empty": "No gallery images yet",
+      "remove": "Remove image",
+      "moveBack": "Move image backward",
+      "moveForward": "Move image forward",
+      "manualUrls": "Enter URLs manually (advanced option)",
+      "manualUrlsLabel": "One image URL per line"
+    },
     "featuredBadge": "Featured",
     "hints": {
       "galleryText": "Use when you want to show multiple detail images for the store.",
       "menuPostersText": "If the store has its own menu poster, enter the image link here.",
       "openingHours": "Use 24-hour format (e.g. 07:00 - 22:00). Required when status is Active.",
+      "optionalOpeningHours": "Opening hours are optional for this status.",
+      "inactiveOpeningHours": "This store is inactive, so opening and closing times are not required.",
       "mapUrl": "Used for the View map button on the website."
     }
   },
@@ -691,10 +724,55 @@
     "fieldsPublicVisible": "Public visibility",
     "paginationLabel": "testimonial"
   },
+  "brandTimeline": {
+    "title": "Brand timeline",
+    "listTitle": "Timeline milestones",
+    "add": "Add milestone",
+    "edit": "Edit milestone",
+    "create": "Add milestone",
+    "empty": "No timeline milestones yet",
+    "searchPlaceholder": "Search by year, title, description...",
+    "paginationLabel": "milestone",
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "year": "Year",
+      "title": "Title",
+      "status": "Status",
+      "sortOrder": "Order",
+      "actions": "Actions"
+    },
+    "fields": {
+      "year": "Year",
+      "title": "Title",
+      "description": "Description",
+      "imageUrl": "Image URL",
+      "sortOrder": "Order",
+      "status": "Status"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "toasts": {
+      "loadError": "Could not load brand timeline",
+      "requiredFields": "Enter year and title",
+      "created": "Milestone created",
+      "updated": "Milestone updated",
+      "saveError": "Could not save milestone",
+      "deleted": "Milestone deleted",
+      "deleteError": "Could not delete milestone"
+    }
+  },
   "productReviews": {
     "title": "Product reviews",
     "listTitle": "Manage reviews",
-    "description": "Customer reviews appear on the product page immediately. Use Hide or Delete for inappropriate content.",
+    "description": "Customer reviews require approval before appearing on the product page.",
     "searchPlaceholder": "Search by customer, product, content...",
     "paginationLabel": "review",
     "status": {
@@ -717,17 +795,63 @@
       "actions": "Actions"
     },
     "actions": {
-      "approve": "Show again",
+      "approve": "Approve",
       "reject": "Hide",
       "delete": "Delete"
     },
     "toasts": {
       "loadError": "Could not load product reviews",
-      "approved": "Review is visible on the product page again",
+      "approved": "Review approved and visible on the product page",
       "rejected": "Review hidden from the product page",
       "statusError": "Could not update review status",
       "deleted": "Review deleted",
       "deleteError": "Could not delete review"
+    }
+  },
+  "contactMessages": {
+    "title": "Contact messages",
+    "listTitle": "Inbox",
+    "empty": "No contact messages yet",
+    "searchPlaceholder": "Search by name, phone, email, subject...",
+    "noSubject": "No subject",
+    "detailTitle": "Message details",
+    "paginationLabel": "message",
+    "status": {
+      "NEW": "New",
+      "READ": "Read",
+      "REPLIED": "Replied",
+      "ARCHIVED": "Archived"
+    },
+    "filters": {
+      "all": "All"
+    },
+    "columns": {
+      "name": "Full name",
+      "contact": "Contact",
+      "subject": "Subject",
+      "status": "Status",
+      "createdAt": "Received",
+      "actions": "Actions"
+    },
+    "fields": {
+      "name": "Full name",
+      "phone": "Phone",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message",
+      "status": "Status",
+      "createdAt": "Received at"
+    },
+    "actions": {
+      "detail": "Details",
+      "delete": "Delete"
+    },
+    "toasts": {
+      "loadError": "Could not load contact messages",
+      "statusUpdated": "Status updated",
+      "statusError": "Could not update status",
+      "deleted": "Message deleted",
+      "deleteError": "Could not delete message"
     }
   },
   "leads": {
@@ -794,6 +918,9 @@
     "sessionsTitle": "Conversations",
     "emptyTitle": "No conversations yet",
     "emptyDescription": "New visitor chats will appear here.",
+    "loadErrorTitle": "Could not load conversations",
+    "loadErrorDescription": "The server did not return chat data. Please try again.",
+    "retry": "Try again",
     "selectTitle": "Select a conversation",
     "selectDescription": "Choose a visitor on the left to view messages and reply.",
     "send": "Send",
@@ -854,6 +981,7 @@
       "author": "Author",
       "source": "Source",
       "sourceLink": "Source link",
+      "articleType": "Article type",
       "excerpt": "Short description",
       "content": "Article content",
       "coverImage": "Cover image",
@@ -870,6 +998,7 @@
       "slug": "review-aloo-kem-bo-quy-nhon",
       "source": "ALOO / Press / Contributor",
       "sourceLink": "https://...",
+      "articleType": "SEO article, News, Review...",
       "excerpt": "Short summary for blog listing and SEO.",
       "image": "https://...",
       "metaKeywords": "avocado ice cream, Quy Nhon, ALOO"
@@ -913,7 +1042,11 @@
       "name": "Category name",
       "slug": "Slug",
       "status": "Status",
-      "description": "Short description"
+      "description": "Short description",
+      "parent": "Parent category",
+      "noParent": "No parent category",
+      "sortOrder": "Order",
+      "language": "Language"
     },
     "modals": {
       "create": "Add category",
@@ -932,7 +1065,9 @@
       "saveError": "Could not save category",
       "deleted": "Category deleted",
       "deleteError": "Could not delete category",
-      "loadError": "Could not load categories"
+      "loadError": "Could not load categories",
+      "requiredFields": "Enter category name and slug",
+      "sortOrderInvalid": "Order must be a non-negative number"
     }
   },
   "franchise": {
@@ -962,6 +1097,7 @@
       "hero": "Hero",
       "advantages": "Advantages",
       "models": "Models",
+      "investment_header": "Investment table heading",
       "investment": "Investment",
       "profit": "Reference profit",
       "process": "Process",
@@ -1046,6 +1182,7 @@
       "hero": "Only the first ACTIVE hero is used. Secondary button uses secondaryButtonLink (#investment, /path or URL).",
       "advantages": "Each block = one advantage card; you can add multiple blocks.",
       "models": "Each block = one business model; enable featured to highlight.",
+      "investment_header": "Edit the section label, title, description and table footnote. Only the first ACTIVE block is used.",
       "investment": "Each row = one line in the investment cost table.",
       "profit": "Reference profit metrics — not a guarantee.",
       "process": "Each block = one process step; stepNumber controls order.",
@@ -1063,7 +1200,15 @@
       "imageUrl": "Invalid image URL (use /uploads/..., /path or https://...)",
       "stepNumber": "Step number must be at least 1",
       "singletonExists": "An ACTIVE {section} block already exists — the website only uses the first one.",
+      "investmentItemRequired": "Cost item name is required.",
       "legacySection": "Costs / Benefits sections are no longer shown on the website. Prefer Models or Investment."
+    },
+    "investmentEditor": {
+      "title": "Table content",
+      "hint": "Edit each cost item, model value and note here. Row order is saved from top to bottom.",
+      "addRow": "Add item",
+      "remove": "Remove",
+      "empty": "No cost items yet. Select “Add item” to create the first row."
     },
     "confirmDelete": {
       "title": "Delete franchise block?",
@@ -1071,6 +1216,7 @@
       "confirm": "Delete block"
     },
     "contentFields": {
+      "eyebrow": "Section label",
       "title": "Title",
       "subtitle": "Subtitle",
       "description": "Description",
@@ -1096,6 +1242,7 @@
       "storyContent": "Story content",
       "question": "Question",
       "answer": "Answer",
+      "footnote": "Table footnote",
       "amount": "Amount",
       "body": "Content"
     },

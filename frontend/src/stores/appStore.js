@@ -89,7 +89,7 @@ export const useAppStore = defineStore('app', {
         seoDescription: product.seoDescription || '',
         category: product.category || '',
         categoryId: product.categoryId || null,
-        sortOrder: Number(product.sortOrder || product.id || 0),
+        sortOrder: Number(product.sortOrder ?? product.id ?? 0),
         status: product.status || 'ACTIVE',
         createdAt: normalizeDate(product.createdAt),
         updatedAt: normalizeDate(product.updatedAt),
@@ -99,8 +99,8 @@ export const useAppStore = defineStore('app', {
       return {
         ...category,
         type: category.type || 'ARTICLE',
-        sortOrder: Number(category.sortOrder || category.id || 1),
-        parentId: category.parentId || null,
+        sortOrder: Number(category.sortOrder ?? category.id ?? 1),
+        parentId: category.parentId ?? null,
         languageCode: category.languageCode || 'vi',
         status: category.status || 'ACTIVE',
       }
@@ -186,7 +186,7 @@ export const useAppStore = defineStore('app', {
             return []
           }
         })(),
-        displayOrder: Number(location.displayOrder || location.id || 1),
+        displayOrder: Number(location.displayOrder ?? location.id ?? 1),
         featured: Boolean(location.featured),
         status: location.status || 'ACTIVE',
         createdAt: normalizeDate(location.createdAt),
@@ -274,7 +274,7 @@ export const useAppStore = defineStore('app', {
         servingSuggestion: product.servingSuggestion || '',
         gallery: normalizeGalleryStorage(product.gallery || ''),
         faqs: product.faqs || '',
-        price: 0,
+        price: Number(product.price ?? 0),
         imageUrl: normalizeStorageAssetUrl(product.imageUrl || product.image || ''),
         categoryId: product.categoryId || null,
         category: product.category || '',
@@ -305,7 +305,7 @@ export const useAppStore = defineStore('app', {
         slug: category.slug?.trim() || slugify(category.name),
         type: category.type || 'ARTICLE',
         description: category.description?.trim() || '',
-        parentId: category.parentId || null,
+        parentId: category.parentId ?? null,
         sortOrder: Number(category.sortOrder || 0),
         status: category.status || 'ACTIVE',
         languageCode: category.languageCode || 'vi',
@@ -373,8 +373,8 @@ export const useAppStore = defineStore('app', {
         province: location.province || location.city || '',
         district: location.district || '',
         ward: location.ward || '',
-        latitude: location.latitude || null,
-        longitude: location.longitude || null,
+        latitude: location.latitude === '' || location.latitude == null ? null : Number(location.latitude),
+        longitude: location.longitude === '' || location.longitude == null ? null : Number(location.longitude),
         phone: location.phone || '',
         email: location.email || '',
         openingHours: location.openingHours || '',
@@ -426,6 +426,4 @@ export const useAppStore = defineStore('app', {
     },
   },
 })
-
-
 

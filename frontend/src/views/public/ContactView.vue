@@ -2,7 +2,7 @@
 import { reactive, ref } from 'vue'
 import SectionTitle from '../../components/public/SectionTitle.vue'
 import { useI18n } from 'vue-i18n'
-import { Phone, Mail, MapPin, Sparkles, Send } from 'lucide-vue-next'
+import { Phone, MessageCircle, MapPin, Sparkles, Send } from 'lucide-vue-next'
 import { contactMessageService } from '../../services/cmsService'
 import { useToastStore } from '../../stores/toastStore'
 
@@ -126,37 +126,55 @@ async function submitContact() {
       />
       <div class="mx-auto grid max-w-5xl gap-6 md:grid-cols-3 mt-10">
         <!-- Phone card -->
-        <div class="rounded-3xl border border-avocado-100/35 bg-white p-8 shadow-sm hover-lift flex flex-col justify-between">
+        <a
+          href="tel:0935113589"
+          class="rounded-3xl border border-avocado-100/35 bg-white p-8 shadow-sm hover-lift flex flex-col justify-between"
+        >
           <div>
             <div class="grid h-12 w-12 place-items-center rounded-2xl bg-avocado-50 text-avocado-700 shadow-inner mb-6">
               <Phone class="h-5 w-5" />
             </div>
             <h3 class="text-xl font-bold text-avocado-950">{{ t('footer.hotline') }}</h3>
-            <p class="mt-4 text-sm text-slate-500 font-semibold leading-relaxed">0900 888 168</p>
+            <p class="mt-4 text-sm text-slate-500 font-semibold leading-relaxed">0935 113 589</p>
+            <p class="mt-1 text-xs text-slate-400">Nhấn để gọi trực tiếp</p>
           </div>
-        </div>
+        </a>
 
-        <!-- Email card -->
-        <div class="rounded-3xl border border-avocado-100/35 bg-white p-8 shadow-sm hover-lift flex flex-col justify-between">
+        <!-- Zalo card -->
+        <a
+          href="https://zalo.me/0984666077"
+          target="_blank"
+          rel="noreferrer"
+          class="rounded-3xl border border-avocado-100/35 bg-white p-8 shadow-sm hover-lift flex flex-col justify-between"
+        >
           <div>
             <div class="grid h-12 w-12 place-items-center rounded-2xl bg-avocado-50 text-avocado-700 shadow-inner mb-6">
-              <Mail class="h-5 w-5" />
+              <MessageCircle class="h-5 w-5" />
             </div>
-            <h3 class="text-xl font-bold text-avocado-950">{{ t('footer.email') }}</h3>
-            <p class="mt-4 text-sm text-slate-500 font-semibold leading-relaxed">franchise@aloo.vn</p>
+            <h3 class="text-xl font-bold text-avocado-950">Zalo tư vấn</h3>
+            <p class="mt-4 text-sm text-slate-500 font-semibold leading-relaxed">0984 666 077</p>
+            <p class="mt-1 text-xs text-slate-400">Nhắn tin với ALOO qua Zalo</p>
           </div>
-        </div>
+        </a>
 
         <!-- Address card -->
-        <div class="rounded-3xl border border-avocado-100/35 bg-white p-8 shadow-sm hover-lift flex flex-col justify-between">
+        <a
+          href="https://maps.google.com/?q=Kem+Bơ+ALoo+395+Nguyễn+Huệ+Quy+Nhơn"
+          target="_blank"
+          rel="noreferrer"
+          class="rounded-3xl border border-avocado-100/35 bg-white p-8 shadow-sm hover-lift flex flex-col justify-between"
+        >
           <div>
             <div class="grid h-12 w-12 place-items-center rounded-2xl bg-avocado-50 text-avocado-700 shadow-inner mb-6">
               <MapPin class="h-5 w-5" />
             </div>
             <h3 class="text-xl font-bold text-avocado-950">{{ t('footer.address') }}</h3>
-            <p class="mt-4 text-sm text-slate-500 leading-relaxed">{{ t('footer.addressValue') }}</p>
+            <p class="mt-4 text-sm text-slate-500 leading-relaxed">
+              395 Nguyễn Huệ, P. Trần Phú, TP. Quy Nhơn, Bình Định
+            </p>
+            <p class="mt-1 text-xs text-slate-400">Xem chỉ đường trên Google Maps</p>
           </div>
-        </div>
+        </a>
       </div>
 
       <!-- Contact form -->
@@ -171,7 +189,8 @@ async function submitContact() {
             Điền thông tin bên dưới nếu bạn cần tư vấn nhanh về nhượng quyền, mặt bằng, menu hoặc hợp tác truyền thông.
           </p>
           <div class="rounded-2xl bg-avocado-50 p-5 text-sm leading-relaxed text-avocado-900">
-            Dữ liệu form được lưu vào contact messages để đội ngũ vận hành xử lý trong CMS/API thật.
+            Hoặc gọi trực tiếp <a class="font-black underline" href="tel:0935113589">0935 113 589</a>
+            để được đội ngũ ALOO hỗ trợ nhanh hơn.
           </div>
         </div>
 
@@ -199,7 +218,7 @@ async function submitContact() {
                 :class="{ 'border-red-300 focus:border-red-400 focus:ring-red-100': errors.phone }"
                 name="phone"
                 pattern="^[0-9+() .-]{8,40}$"
-                placeholder="0900 888 168"
+                placeholder="0935 113 589"
                 required
                 type="tel"
               />
@@ -227,7 +246,7 @@ async function submitContact() {
                 v-model="form.province"
                 class="h-12 rounded-xl border border-avocado-100 bg-white px-4 text-sm font-semibold outline-none transition focus:border-avocado-500 focus:ring-4 focus:ring-avocado-100"
                 name="province"
-                placeholder="TP.HCM, Đà Nẵng..."
+                placeholder="Quy Nhơn, Nha Trang..."
                 type="text"
               />
             </label>

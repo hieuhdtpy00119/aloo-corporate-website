@@ -3,8 +3,12 @@ package com.aloo.cms.controller;
 import com.aloo.cms.dto.FranchiseRegistrationRequest;
 import com.aloo.cms.dto.FranchiseRegistrationResponse;
 import com.aloo.cms.dto.RegistrationStatusUpdateRequest;
+import com.aloo.cms.security.RateLimitService;
+import com.aloo.cms.security.RequestClient;
 import com.aloo.cms.service.FranchiseRegistrationService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,11 +29,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class FranchiseRegistrationController {
 
     private final FranchiseRegistrationService registrationService;
+    private final RateLimitService rateLimitService;
 
     @PostMapping
     public ResponseEntity<FranchiseRegistrationResponse> create(
-            @Valid @RequestBody FranchiseRegistrationRequest request
+            @Valid @RequestBody FranchiseRegistrationRequest request,
+            HttpServletRequest httpRequest
     ) {
+        rateLimitService.check("franchise-registration-create", RequestClient.ip(httpRequest), 6, Duration.ofMinutes(15));
         return ResponseEntity.status(HttpStatus.CREATED).body(registrationService.create(request));
     }
 

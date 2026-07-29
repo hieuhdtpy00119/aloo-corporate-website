@@ -84,6 +84,28 @@ class ApiSecurityIntegrationTest {
     }
 
     @Test
+    void lockedAndInactiveAccountsCannotLogin() throws Exception {
+        createUserWithStatus("locked-login@aloo.vn", "LOCKED");
+        createUserWithStatus("inactive-login@aloo.vn", "SUSPENDED");
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"locked-login@aloo.vn","password":"123456"}
+                                """))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Account is locked"));
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"inactive-login@aloo.vn","password":"123456"}
+                                """))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Account is inactive"));
+    }
+
+    @Test
     void publicEndpointsAllowAnonymousRequests() throws Exception {
         mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk());
@@ -274,10 +296,21 @@ class ApiSecurityIntegrationTest {
         adminUserRepository.save(user);
     }
 
+    private void createUserWithStatus(String email, String status) {
+        AdminUser user = new AdminUser();
+        user.setEmail(email);
+        user.setFullName("Login Status Test User");
+        user.setPasswordHash(passwordEncoder.encode("123456"));
+        user.setRole(UserRole.USER);
+        user.setStatus(status);
+        adminUserRepository.save(user);
+    }
+
     private String tokenFor(String email, String role) {
         return Jwts.builder()
                 .subject(email)
                 .claim("role", role)
+                .claim("securityVersion", 0L)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 3_600_000))
                 .signWith(Keys.hmacShaKeyFor(TEST_SECRET.getBytes(StandardCharsets.UTF_8)))

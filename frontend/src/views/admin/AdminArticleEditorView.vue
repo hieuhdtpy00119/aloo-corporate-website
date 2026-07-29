@@ -51,6 +51,7 @@ const createDefaultForm = () => ({
   author: 'ALOO Editorial',
   source: '',
   sourceLink: '',
+  articleType: '',
   category: articleCategories.value[0]?.name || 'Review',
   status: 'DRAFT',
   publishedAt: new Date().toISOString().slice(0, 10),
@@ -70,10 +71,18 @@ const form = reactive(createDefaultForm())
 const galleryInput = ref(null)
 const initialized = ref(false)
 const isUploadingImages = ref(false)
+const isSaving = ref(false)
 
 const hydrateForm = () => {
   const storedDraft = localStorage.getItem(draftKey.value)
-  const source = storedDraft ? JSON.parse(storedDraft) : existingArticle.value
+  let source = existingArticle.value
+  if (storedDraft) {
+    try {
+      source = { ...(existingArticle.value || {}), ...JSON.parse(storedDraft) }
+    } catch {
+      localStorage.removeItem(draftKey.value)
+    }
+  }
 
   Object.assign(form, createDefaultForm())
 
@@ -84,6 +93,7 @@ const hydrateForm = () => {
     form.author = source.author || 'ALOO Editorial'
     form.source = source.source || ''
     form.sourceLink = source.sourceLink || ''
+    form.articleType = source.articleType || ''
     form.category = source.category || 'Review'
     form.status = normalizeStatus(source.status)
     form.publishedAt = String(source.publishedAt || source.date || new Date().toISOString()).slice(0, 10)
@@ -235,6 +245,7 @@ const buildPayload = (status) => ({
   author: form.author.trim(),
   source: form.source.trim(),
   sourceLink: form.sourceLink.trim(),
+  articleType: form.articleType.trim(),
   category: form.category,
   status,
   publishedAt: form.publishedAt,
@@ -253,10 +264,12 @@ const buildPayload = (status) => ({
 })
 
 const saveArticle = async (status) => {
+  if (isSaving.value) return
   if (!validateForm()) return
   form.status = status
   const payload = buildPayload(status)
 
+  isSaving.value = true
   try {
     await store.savePost(payload)
     toast.success(status === 'PUBLISHED' ? m('toasts.published') : m('toasts.draftSaved'))
@@ -264,6 +277,8 @@ const saveArticle = async (status) => {
     router.push(adminPaths.content.articles)
   } catch (error) {
     toast.error(error.response?.data?.message || m('toasts.saveError'))
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -289,10 +304,10 @@ onMounted(async () => {
           <button type="button" class="admin-list-btn admin-list-btn--outline" @click="router.push(adminPaths.content.articles)">
             {{ m('exit') }}
           </button>
-          <button type="button" class="admin-list-btn admin-list-btn--outline" :disabled="isUploadingImages" @click="saveArticle('DRAFT')">
+          <button type="button" class="admin-list-btn admin-list-btn--outline" :disabled="isUploadingImages || isSaving" @click="saveArticle('DRAFT')">
             {{ m('saveDraft') }}
           </button>
-          <button type="button" class="admin-list-btn admin-list-btn--primary" :disabled="isUploadingImages" @click="saveArticle('PUBLISHED')">
+          <button type="button" class="admin-list-btn admin-list-btn--primary" :disabled="isUploadingImages || isSaving" @click="saveArticle('PUBLISHED')">
             {{ m('saveAndPublish') }}
           </button>
         </div>
@@ -331,6 +346,10 @@ onMounted(async () => {
             <label class="space-y-2">
               <span class="text-sm font-black text-slate-700">{{ m('fields.sourceLink') }}</span>
               <input v-model="form.sourceLink" class="admin-input" :placeholder="m('placeholders.sourceLink')" />
+            </label>
+            <label class="space-y-2">
+              <span class="text-sm font-black text-slate-700">{{ m('fields.articleType') }}</span>
+              <input v-model="form.articleType" class="admin-input" :placeholder="m('placeholders.articleType')" />
             </label>
             <label class="space-y-2 md:col-span-2">
               <span class="text-sm font-black text-slate-700">{{ m('fields.excerpt') }}</span>

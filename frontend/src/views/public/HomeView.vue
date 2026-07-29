@@ -5,11 +5,20 @@ import { useI18n } from 'vue-i18n'
 import { ChevronLeft, ChevronRight, MapPin, Award, ArrowRight, ShoppingBag } from 'lucide-vue-next'
 import { useAppStore } from '../../stores/appStore'
 import { homeSectionService, resolveBackendAssetUrl } from '../../services/cmsService'
+import ProductImage from '../../components/public/ProductImage.vue'
 
 const { t } = useI18n()
 const store = useAppStore()
 const productRail = ref(null)
 const featuredRail = ref(null)
+
+const brandMoments = [
+  { src: '/media/drive/aloo-news-01.jpg', key: 'store', className: 'sm:col-span-2 sm:row-span-2' },
+  { src: '/media/drive/aloo-news-02.jpg', key: 'mascot', className: '' },
+  { src: '/media/drive/aloo-news-03.jpg', key: 'community', className: '' },
+  { src: '/media/drive/aloo-ktv-01.jpg', key: 'media', className: '' },
+  { src: '/media/drive/aloo-ktv-02.jpg', key: 'craft', className: '' },
+]
 
 const homeSections = ref([])
 const homeSectionsLoading = ref(false)
@@ -21,7 +30,10 @@ const activeProducts = computed(() =>
     .sort((a, b) => (a.sortOrder || a.id || 0) - (b.sortOrder || b.id || 0)),
 )
 
-const popularProducts = computed(() => activeProducts.value.slice(0, 8))
+const popularProducts = computed(() => {
+  const featuredProducts = activeProducts.value.filter((product) => product.featured)
+  return (featuredProducts.length ? featuredProducts : activeProducts.value).slice(0, 5)
+})
 
 const isExternalLink = (url) => /^https?:\/\//i.test(String(url || '').trim())
 
@@ -265,12 +277,14 @@ onMounted(() => {
       <div v-else-if="popularProducts.length" ref="productRail" class="product-scrollbar flex snap-x gap-6 overflow-x-auto pb-8">
         <article v-for="product in popularProducts" :key="product.id" class="min-w-[75vw] snap-start sm:min-w-[280px] lg:min-w-[290px] bg-white rounded-3xl p-4 shadow-sm border border-brand-forest/5 hover-lift group">
           <div class="aspect-square overflow-hidden rounded-2xl bg-brand-cream/30 relative">
-            <img v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105" />
+            <ProductImage v-if="product.imageUrl" :src="product.imageUrl" :alt="product.name" class="h-full w-full" />
             <div v-else class="grid h-full place-items-center text-xl font-black text-brand-forest bg-brand-lime/10">ALOO</div>
           </div>
           <div class="mt-4 space-y-1.5">
             <h3 class="text-base font-bold text-brand-dark transition group-hover:text-brand-forest">{{ product.name }}</h3>
-            <p class="text-xs leading-relaxed text-brand-muted font-medium h-8 line-clamp-2">{{ product.description }}</p>
+            <p class="truncate text-xs font-medium leading-relaxed text-brand-muted" :title="product.description">
+              {{ product.description }}
+            </p>
           </div>
           <div class="mt-4 flex items-center justify-between border-t border-slate-50 pt-3">
             <p class="text-sm font-black text-brand-forest font-display">{{ productMeta(product) }}</p>
@@ -320,6 +334,36 @@ onMounted(() => {
               />
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Real brand moments sourced from ALOO's media archive -->
+    <section class="bg-white py-20">
+      <div class="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+        <div class="mb-10 max-w-2xl">
+          <span class="text-xs font-black uppercase tracking-[0.2em] text-brand-forest">{{ t('home.momentsEyebrow') }}</span>
+          <h2 class="mt-2 text-3xl font-black text-brand-dark lg:text-4xl">{{ t('home.momentsTitle') }}</h2>
+          <p class="mt-3 text-sm font-medium leading-relaxed text-brand-muted">{{ t('home.momentsDescription') }}</p>
+        </div>
+        <div class="grid auto-rows-[220px] gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <figure
+            v-for="moment in brandMoments"
+            :key="moment.key"
+            :class="['group relative overflow-hidden rounded-3xl bg-brand-dark', moment.className]"
+          >
+            <img
+              :src="moment.src"
+              :alt="t(`home.moments.${moment.key}`)"
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent"></div>
+            <figcaption class="absolute inset-x-0 bottom-0 p-5 text-sm font-bold leading-snug text-white">
+              {{ t(`home.moments.${moment.key}`) }}
+            </figcaption>
+          </figure>
         </div>
       </div>
     </section>

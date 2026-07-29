@@ -5,7 +5,7 @@ Repository này tách rõ frontend và backend:
 ```text
 aloo-corporate-website/
 ├─ frontend/   # Vue 3 + Vite
-└─ backend/    # Spring Boot + SQL Server
+└─ backend/    # Spring Boot + PostgreSQL
 ```
 
 ## Frontend

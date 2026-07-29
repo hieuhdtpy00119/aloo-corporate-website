@@ -22,6 +22,18 @@ const decodeUserPayload = (payload) => {
   return decodeBase64JsonUtf8(payload)
 }
 
+const readHashParams = () => {
+  if (typeof window === 'undefined') return new URLSearchParams()
+  const raw = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash
+  return new URLSearchParams(raw)
+}
+
+const clearSensitiveUrlState = () => {
+  if (typeof window === 'undefined') return
+  const cleanUrl = `${window.location.pathname}${window.location.search}`
+  window.history.replaceState({}, document.title, cleanUrl)
+}
+
 onMounted(async () => {
   const error = route.query.error
   if (error) {
@@ -29,7 +41,11 @@ onMounted(async () => {
     return
   }
 
-  const token = Array.isArray(route.query.token) ? route.query.token[0] : route.query.token
+  const hashParams = readHashParams()
+  // Prefer fragment (secure). Fall back to query for older redirects still in flight.
+  const token =
+    hashParams.get('token') ||
+    (Array.isArray(route.query.token) ? route.query.token[0] : route.query.token)
 
   if (!token) {
     errorMessage.value = 'Không nhận được thông tin đăng nhập từ Google'
@@ -38,13 +54,16 @@ onMounted(async () => {
 
   localStorage.setItem('admin_token', token)
   setAuthProvider('google')
+  clearSensitiveUrlState()
 
   try {
     const profile = await refreshAuthProfile()
     router.replace(profile.role === 'ADMIN' ? '/admin' : '/')
     return
   } catch {
-    const userPayload = Array.isArray(route.query.user) ? route.query.user[0] : route.query.user
+    const userPayload =
+      hashParams.get('user') ||
+      (Array.isArray(route.query.user) ? route.query.user[0] : route.query.user)
     const user = decodeUserPayload(userPayload)
 
     if (!user) {

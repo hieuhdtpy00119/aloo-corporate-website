@@ -83,6 +83,27 @@ describe('api axios instance', () => {
     expect(config.headers.Authorization).toBe('Bearer explicit.token')
   })
 
+  it('promotes backend field validation details to an actionable message', async () => {
+    await loadApi()
+    const error = {
+      response: {
+        status: 400,
+        data: {
+          message: 'Validation failed',
+          details: {
+            name: 'Name must be at most 180 characters',
+            slug: 'Slug is required',
+          },
+        },
+      },
+    }
+
+    await expect(axiosMock.handlers.responseError(error)).rejects.toBe(error)
+
+    expect(error.response.data.message).toBe('Name must be at most 180 characters · Slug is required')
+    expect(error.response.data.fieldErrors).toEqual(error.response.data.details)
+  })
+
   it('clears stored admin token on 401 responses', async () => {
     await loadApi()
     window.history.pushState({}, '', '/')

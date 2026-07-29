@@ -6,28 +6,26 @@
 | --- | --- | --- |
 | `PublicLayout` | Header, route body and footer stay visible after navigation | Active nav state follows current route |
 | `/` | Hero image, featured cards, product rail, brand story, location section, CTA links | CTA goes to `/products`, `/franchise`, `/consultation`, `/locations` |
-| `/about` | Brand story cards and content are distinct from blog | Static content should not depend on API |
-| `/products` | Hero slider, menu poster, product grid, empty/loading/error states | Calls product API through `store.fetchProducts`; hidden products are not shown |
-| `/franchise` | Hero, benefits, conditions, process, costs, CTA | Uses `franchiseContentStore.fetchContent`; has loading/error states |
-| `/process` | 6-step process cards render from locale data | CTA copy matches `/consultation` destination |
-| `/cost` | Cost cards render in 3-column grid desktop and stack mobile | CTA goes to `/consultation` |
-| `/locations` | Search/filter bar, location cards, map links | Calls `store.fetchLocations`; search filters by name/address; closed branches hidden |
-| `/blog` | Lead post, editor picks, category chips, latest sidebar, empty/loading/error states | Calls categories/posts API; only published posts shown |
-| `/blog/:id` | Detail hero, article body, TOC, related posts, CTA, not-found state | Supports id or slug; updates `document.title` from article SEO/title |
-| `/consultation` | Form fields and submit disabled state | Client required/email/phone pattern; payload maps to backend DTO; success/error toast |
-| `/contact` | Contact cards, hotline/email/address, contact form, CTA | Client required/email/phone pattern; submits to franchise registration endpoint as a contact lead |
-| `/login` | Demo account text, validation errors, loading state | User login redirects `/profile`; admin email redirects `/admin`; logged-in user cannot stay on `/login` |
-| `/profile` | Avatar, account summary, editable form | Protected route; loads `/user-auth/me`; saves `/user-auth/profile` |
-| `/change-password` | Current/new/confirm fields and validation | Protected route; min 8 chars; success clears token and returns to `/login` |
+| `/about` | Brand story + CMS timeline milestones | Loads `brandTimelineService.list(true)`; falls back to locale defaults |
+| `/products` | Hero slider, product grid, empty/loading/error states | Calls product API; inactive products hidden for anonymous |
+| `/franchise` | Hero, benefits, conditions, process, costs, CTA | Uses franchise content CMS; has loading/error states |
+| `/locations` | Search/filter bar, location cards, map links | Calls locations API; search filters by name/address |
+| `/locations/:slug` | Store hero, amenities, gallery, **menu posters**, map/phone CTAs | Uses store slug API; posters from `menuPosters` / `menuPostersJson` |
+| `/blog` | Lead post, editor picks, category chips, latest sidebar | Only published posts shown |
+| `/blog/:slug` | Detail hero, article body (sanitized HTML), TOC, related posts | Supports slug; SEO title from article |
+| `/consultation` | Form fields and submit disabled state | Payload maps to franchise registration DTO |
+| `/contact` | Contact cards + form | Submits to `/api/contact-messages` (not franchise registrations) |
+| `/login` | Validation errors, loading state | USER → `/account`; ADMIN → `/admin` |
+| `/account` | Profile/security tabs (shared with admin profile) | Protected; uses `/api/auth/me` and `/api/auth/profile` |
 | `404` | Clear not-found message and home button | Random route shows 404 |
 
 ## Flow Checklist
 
-- Guest funnel: `/` -> `/franchise` -> `/cost` -> `/consultation` -> submit success.
-- Contact lead: `/contact` validates phone/email and submits a contact lead successfully.
-- User account: `/login` -> `/profile` -> update profile -> `/change-password` -> logout to `/login`.
-- Route protection: unauthenticated `/profile` and `/change-password` redirect to `/login`; authenticated `/login` redirects away.
-- Expired JWT: `401` from user API clears `user_token` and redirects to `/login`.
+- Guest funnel: `/` -> `/franchise` -> `/consultation` -> submit success.
+- Contact message: `/contact` validates and submits to `/api/contact-messages`.
+- User account: `/login` -> `/account` -> update profile / security tab.
+- Route protection: unauthenticated `/account` redirects to `/login`; authenticated `/login` redirects away.
+- Expired JWT: `401` from auth API clears `admin_token` and redirects to `/login`.
 - Blog navigation: list -> detail -> browser back -> list; missing slug shows clear error.
 
 ## Implemented Test Code

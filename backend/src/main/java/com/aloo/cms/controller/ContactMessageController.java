@@ -3,8 +3,12 @@ package com.aloo.cms.controller;
 import com.aloo.cms.dto.ContactMessageRequest;
 import com.aloo.cms.dto.ContactMessageResponse;
 import com.aloo.cms.dto.RegistrationStatusUpdateRequest;
+import com.aloo.cms.security.RateLimitService;
+import com.aloo.cms.security.RequestClient;
 import com.aloo.cms.service.ContactMessageService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,9 +29,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class ContactMessageController {
 
     private final ContactMessageService contactMessageService;
+    private final RateLimitService rateLimitService;
 
     @PostMapping
-    public ResponseEntity<ContactMessageResponse> create(@Valid @RequestBody ContactMessageRequest request) {
+    public ResponseEntity<ContactMessageResponse> create(
+            @Valid @RequestBody ContactMessageRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        rateLimitService.check("contact-message-create", RequestClient.ip(httpRequest), 8, Duration.ofMinutes(15));
         return ResponseEntity.status(HttpStatus.CREATED).body(contactMessageService.create(request));
     }
 

@@ -25,6 +25,7 @@ const heroCurrentPage = ref(1)
 const isLoadingHeroBanners = ref(false)
 const heroBannerError = ref('')
 const isUploadingHeroImage = ref('')
+const isSavingHero = ref(false)
 const heroBanners = ref([])
 const pageSize = 6
 
@@ -55,12 +56,16 @@ const heroForm = reactive({
   subtitle: '',
   description: '',
   backgroundImageUrl: '',
+  productImageUrl: '',
+  thumbnailImageUrl: '',
   tone: 'light',
   sortOrder: 0,
   status: 'ACTIVE',
 })
 
 const heroBackgroundPreviewUrl = computed(() => resolveBackendAssetUrl(heroForm.backgroundImageUrl || ''))
+const heroProductPreviewUrl = computed(() => resolveBackendAssetUrl(heroForm.productImageUrl || ''))
+const heroThumbnailPreviewUrl = computed(() => resolveBackendAssetUrl(heroForm.thumbnailImageUrl || ''))
 
 const normalizeHeroBanner = (banner) => ({
   ...banner,
@@ -68,6 +73,8 @@ const normalizeHeroBanner = (banner) => ({
   subtitle: banner.subtitle || '',
   description: banner.description || '',
   backgroundImageUrl: normalizeStorageAssetUrl(banner.backgroundImageUrl || ''),
+  productImageUrl: normalizeStorageAssetUrl(banner.productImageUrl || ''),
+  thumbnailImageUrl: normalizeStorageAssetUrl(banner.thumbnailImageUrl || ''),
   tone: banner.tone || 'light',
   sortOrder: Number(banner.sortOrder || 0),
   status: banner.status || 'ACTIVE',
@@ -79,6 +86,8 @@ const resetHeroForm = () => {
     subtitle: '',
     description: '',
     backgroundImageUrl: '',
+    productImageUrl: '',
+    thumbnailImageUrl: '',
     tone: 'light',
     sortOrder: 0,
     status: 'ACTIVE',
@@ -99,7 +108,9 @@ const openEditHeroModal = (banner) => {
     title: banner.title || '',
     subtitle: banner.subtitle || '',
     description: banner.description || '',
-    backgroundImageUrl: banner.backgroundImageUrl || '',
+    backgroundImageUrl: normalizeStorageAssetUrl(banner.backgroundImageUrl || ''),
+    productImageUrl: normalizeStorageAssetUrl(banner.productImageUrl || ''),
+    thumbnailImageUrl: normalizeStorageAssetUrl(banner.thumbnailImageUrl || ''),
     tone: banner.tone || 'light',
     sortOrder: Number(banner.sortOrder || 0),
     status: banner.status || 'ACTIVE',
@@ -339,6 +350,7 @@ const fetchHeroBanners = async () => {
 }
 
 const saveHeroBanner = async () => {
+  if (isSavingHero.value) return
   if (!heroForm.title.trim()) {
     toast.error(m('toasts.heroTitleRequired'))
     return
@@ -346,15 +358,17 @@ const saveHeroBanner = async () => {
 
   const payload = {
     title: heroForm.title.trim(),
-    subtitle: '',
-    description: '',
+    subtitle: heroForm.subtitle.trim(),
+    description: heroForm.description.trim(),
     backgroundImageUrl: normalizeStorageAssetUrl(heroForm.backgroundImageUrl),
-    thumbnailImageUrl: '',
-    tone: 'light',
+    productImageUrl: normalizeStorageAssetUrl(heroForm.productImageUrl),
+    thumbnailImageUrl: normalizeStorageAssetUrl(heroForm.thumbnailImageUrl),
+    tone: heroForm.tone || 'light',
     sortOrder: Number(heroForm.sortOrder || 0),
     status: heroForm.status || 'ACTIVE',
   }
 
+  isSavingHero.value = true
   try {
     const request = editingHeroId.value ? heroBannerService.update(editingHeroId.value, payload) : heroBannerService.create(payload)
     const { data } = await request
@@ -366,6 +380,8 @@ const saveHeroBanner = async () => {
     closeHeroModal()
   } catch (error) {
     toast.error(error.response?.data?.message || m('toasts.heroSaveError'))
+  } finally {
+    isSavingHero.value = false
   }
 }
 
@@ -383,6 +399,10 @@ const confirmDeleteHeroBanner = async () => {
 
 watch([heroSearchQuery, heroStatusFilter], () => {
   heroCurrentPage.value = 1
+})
+
+watch(totalHeroPages, (value) => {
+  heroCurrentPage.value = Math.min(heroCurrentPage.value, value)
 })
 
 onMounted(() => {
@@ -538,7 +558,23 @@ defineExpose({ openCreate: openCreateHeroModal })
             {{ m('fields.displayOrder') }}
             <input v-model.number="heroForm.sortOrder" type="number" min="0" class="admin-input-premium" />
           </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            {{ m('fields.tone') }}
+            <select v-model="heroForm.tone" class="admin-input-premium cursor-pointer">
+              <option value="light">{{ m('misc.toneLight') }}</option>
+              <option value="dark">{{ m('misc.toneDark') }}</option>
+            </select>
+          </label>
         </div>
+
+        <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+          {{ m('fields.bannerSubtitle') }}
+          <input v-model="heroForm.subtitle" class="admin-input-premium" />
+        </label>
+        <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+          {{ m('fields.bannerDescription') }}
+          <textarea v-model="heroForm.description" rows="3" class="admin-input-premium resize-none" />
+        </label>
 
         <div class="grid gap-5 md:grid-cols-2">
           <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -558,11 +594,26 @@ defineExpose({ openCreate: openCreateHeroModal })
             <img v-if="heroBackgroundPreviewUrl" :src="heroBackgroundPreviewUrl" :alt="heroForm.title || ''" class="h-28 w-full rounded-xl border border-slate-100 object-cover" />
           </label>
         </div>
+
+        <div class="grid gap-5 md:grid-cols-2">
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            {{ m('fields.productImage') }}
+            <input v-model="heroForm.productImageUrl" class="admin-input-premium" />
+            <input type="file" accept="image/*" class="w-full text-xs font-bold text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white" :disabled="Boolean(isUploadingHeroImage)" @change="handleHeroImageFileChange($event, 'productImageUrl')" />
+            <img v-if="heroProductPreviewUrl" :src="heroProductPreviewUrl" :alt="heroForm.title || ''" class="h-28 w-full rounded-xl border border-slate-100 object-contain" />
+          </label>
+          <label class="grid gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+            {{ m('fields.thumbnailImage') }}
+            <input v-model="heroForm.thumbnailImageUrl" class="admin-input-premium" />
+            <input type="file" accept="image/*" class="w-full text-xs font-bold text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-avocado-600 file:px-4 file:py-2.5 file:font-semibold file:text-white" :disabled="Boolean(isUploadingHeroImage)" @change="handleHeroImageFileChange($event, 'thumbnailImageUrl')" />
+            <img v-if="heroThumbnailPreviewUrl" :src="heroThumbnailPreviewUrl" :alt="heroForm.title || ''" class="h-28 w-full rounded-xl border border-slate-100 object-contain" />
+          </label>
+        </div>
       </form>
       <template #footer>
         <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
           <button class="rounded-full border border-slate-200 px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-slate-50 transition" @click="closeHeroModal">{{ m('actions.cancel') }}</button>
-          <button class="rounded-full bg-avocado-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:bg-avocado-700 disabled:cursor-not-allowed disabled:opacity-60 transition shadow-md" form="hero-form" type="submit" :disabled="Boolean(isUploadingHeroImage)">
+          <button class="rounded-full bg-avocado-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:bg-avocado-700 disabled:cursor-not-allowed disabled:opacity-60 transition shadow-md" form="hero-form" type="submit" :disabled="Boolean(isUploadingHeroImage) || isSavingHero">
             {{ heroMode === 'create' ? m('addHero') : m('actions.saveUpdate') }}
           </button>
         </div>

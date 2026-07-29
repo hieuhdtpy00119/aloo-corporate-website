@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ProductService {
 
+    public static final String STATUS_ACTIVE = "ACTIVE";
+
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
@@ -35,13 +37,33 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    public List<ProductResponse> findActive() {
+        return productRepository.findByStatusIgnoreCase(
+                        STATUS_ACTIVE,
+                        Sort.by("sortOrder").ascending().and(Sort.by("createdAt").descending())
+                )
+                .stream()
+                .map(productMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public ProductResponse findById(Long id) {
         return productMapper.toResponse(getProduct(id));
     }
 
     @Transactional(readOnly = true)
+    public ProductResponse findActiveById(Long id) {
+        Product product = getProduct(id);
+        if (product.getStatus() == null || !STATUS_ACTIVE.equalsIgnoreCase(product.getStatus())) {
+            throw new ResourceNotFoundException("Product not found");
+        }
+        return productMapper.toResponse(product);
+    }
+
+    @Transactional(readOnly = true)
     public ProductResponse findBySlug(String slug) {
-        return productMapper.toResponse(productRepository.findBySlugAndStatus(slug.trim().toLowerCase(Locale.ROOT), "ACTIVE")
+        return productMapper.toResponse(productRepository.findBySlugAndStatus(slug.trim().toLowerCase(Locale.ROOT), STATUS_ACTIVE)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found")));
     }
 

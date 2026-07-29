@@ -34,6 +34,31 @@ class JwtServiceTest {
         assertThat(expiredService.isTokenValidForEmail(expiredToken, "admin@aloo.vn")).isFalse();
     }
 
+    @Test
+    void tokenIsRevokedWhenAccountIsLockedOrDeactivated() {
+        JwtService jwtService = jwtService(3_600_000);
+        AdminUser admin = admin("admin@aloo.vn");
+        String token = jwtService.generateToken(admin);
+
+        admin.setStatus("LOCKED");
+        assertThat(jwtService.isTokenValid(token, new CustomUserDetails(admin))).isFalse();
+
+        admin.setStatus("DEACTIVATED");
+        assertThat(jwtService.isTokenValid(token, new CustomUserDetails(admin))).isFalse();
+    }
+
+    @Test
+    void tokenIsRevokedAfterSecurityVersionChanges() {
+        JwtService jwtService = jwtService(3_600_000);
+        AdminUser admin = admin("admin@aloo.vn");
+        admin.setSecurityVersion(4L);
+        String token = jwtService.generateToken(admin);
+
+        admin.setSecurityVersion(5L);
+
+        assertThat(jwtService.isTokenValid(token, new CustomUserDetails(admin))).isFalse();
+    }
+
     private JwtService jwtService(long expirationMs) {
         JwtService service = new JwtService(new AdminPermissionService());
         ReflectionTestUtils.setField(

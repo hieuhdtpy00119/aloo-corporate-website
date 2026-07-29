@@ -20,7 +20,9 @@ const normalizeLocation = (location) => ({
 })
 
 const locations = computed(() =>
-  store.locations.map(normalizeLocation).filter((location) => !['TEMPORARILY_CLOSED', 'Tạm đóng'].includes(location.status)),
+  store.locations
+    .map(normalizeLocation)
+    .filter((location) => !['TEMPORARILY_CLOSED', 'Tạm đóng', 'INACTIVE'].includes(location.status)),
 )
 const provinces = computed(() =>
   ['all', ...new Set(locations.value.map((location) => location.city).filter(Boolean))],
@@ -30,8 +32,10 @@ const getStatusLabel = (status) => {
   if (status === 'Đang hoạt động' || status === 'active' || status === 'ACTIVE') return t('locations.active')
   if (status === 'Sắp khai trương' || status === 'comingSoon' || status === 'COMING_SOON') return t('locations.comingSoon')
   if (status === 'MAINTENANCE') return t('locations.maintenance')
+  if (status === 'FORMERLY_ACTIVE') return t('locations.formerlyActive')
   return status
 }
+const isFormerlyActive = (location) => location.status === 'FORMERLY_ACTIVE'
 
 const filteredLocations = computed(() => {
   const keyword = searchKeyword.value.trim().toLowerCase()
@@ -169,6 +173,8 @@ onMounted(() => {
                   :class="
                     location.status === 'Đang hoạt động' || location.status === 'active' || location.status === 'ACTIVE'
                       ? 'border border-emerald-100/70 bg-emerald-50 text-emerald-700'
+                      : location.status === 'FORMERLY_ACTIVE'
+                        ? 'border border-violet-100 bg-violet-50 text-violet-700'
                       : 'border border-amber-100/70 bg-amber-50 text-amber-700'
                   "
                 >
@@ -194,12 +200,12 @@ onMounted(() => {
                   <span class="shrink-0 font-bold text-slate-700">{{ t('common.address') }}:</span>
                   <span class="leading-relaxed">{{ location.addressText }}</span>
                 </p>
-                <p class="flex items-center gap-2">
+                <p v-if="location.phone && !isFormerlyActive(location)" class="flex items-center gap-2">
                   <Phone class="h-3.5 w-3.5 text-slate-400" />
                   <span class="mr-1 shrink-0 font-bold text-slate-700">{{ t('common.phone') }}:</span>
                   <span>{{ location.phone }}</span>
                 </p>
-                <p class="flex items-center gap-2">
+                <p v-if="location.openingHours && !isFormerlyActive(location)" class="flex items-center gap-2">
                   <Clock class="h-3.5 w-3.5 text-slate-400" />
                   <span class="mr-1 shrink-0 font-bold text-slate-700">{{ t('common.openingHours') }}:</span>
                   <span>{{ location.openingHours }}</span>
@@ -239,7 +245,7 @@ onMounted(() => {
                 {{ t('common.viewMap') }}
               </a>
               <a
-                v-if="getOrderLink(location)"
+                v-if="getOrderLink(location) && !isFormerlyActive(location)"
                 :href="getOrderLink(location).url"
                 target="_blank"
                 rel="noreferrer"
@@ -248,7 +254,7 @@ onMounted(() => {
                 {{ t('locations.order') }}
               </a>
               <a
-                v-if="location.phone"
+                v-if="location.phone && !isFormerlyActive(location)"
                 :href="`tel:${location.phone}`"
                 class="inline-flex items-center justify-center gap-1.5 rounded-full bg-avocado-800 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-avocado-900"
               >

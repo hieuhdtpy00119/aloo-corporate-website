@@ -1,8 +1,19 @@
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Navbar from './Navbar.vue'
+
+const refreshAuthProfileMock = vi.hoisted(() => vi.fn())
+
+vi.mock('../../services/authService', () => ({
+  clearAuthSession: () => {
+    localStorage.removeItem('admin_token')
+    localStorage.removeItem('admin_user')
+    localStorage.removeItem('auth_provider')
+  },
+  refreshAuthProfile: refreshAuthProfileMock,
+}))
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -48,6 +59,7 @@ describe('Navbar', () => {
 
   beforeEach(() => {
     localStorage.clear()
+    refreshAuthProfileMock.mockReset()
   })
 
   it('renders public navigation and highlights the active route', async () => {
@@ -120,5 +132,28 @@ describe('Navbar', () => {
     expect(wrapper.find('[role="menu"]').text()).toContain('Nguyễn Admin')
     expect(wrapper.get('a[href="/admin/profile"]').text()).toContain('Hồ sơ')
     expect(wrapper.get('a[href="/admin"]').text()).toContain('CMS')
+  })
+
+  it('clears a cached login when the backend rejects the current account', async () => {
+    localStorage.setItem('admin_token', jwt({ role: 'USER', exp: Math.floor(Date.now() / 1000) + 3600 }))
+    localStorage.setItem('admin_user', JSON.stringify({ fullName: 'Locked User' }))
+    refreshAuthProfileMock.mockRejectedValueOnce({ response: { status: 401 } })
+
+    await router.push('/')
+    await router.isReady()
+    const wrapper = mount(Navbar, {
+      global: {
+        plugins: [router],
+        stubs: {
+          LanguageSwitcher: { template: '<div />' },
+        },
+      },
+    })
+
+    await flushPromises()
+    await wrapper.get('button[aria-haspopup="menu"]').trigger('click')
+
+    expect(localStorage.getItem('admin_token')).toBeNull()
+    expect(wrapper.get('a[href="/login"]').text()).toContain('Đăng nhập')
   })
 })

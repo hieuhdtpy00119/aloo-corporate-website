@@ -30,13 +30,13 @@ public class FranchiseContent {
     @Column(nullable = false, length = 220)
     private String title;
 
-    @Column(columnDefinition = "nvarchar(max)")
+    @Column(columnDefinition = "text")
     private String content;
 
     @Column(length = 120)
     private String amount;
 
-    @Column(columnDefinition = "nvarchar(max)")
+    @Column(columnDefinition = "text")
     private String note;
 
     @Column(nullable = false)

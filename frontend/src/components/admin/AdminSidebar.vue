@@ -3,8 +3,10 @@ import { computed } from 'vue'
 import {
   FileText,
   Handshake,
+  History,
   LayoutDashboard,
   Images,
+  Mail,
   MapPin,
   Package,
   Star,
@@ -41,6 +43,7 @@ const navGroups = [
       { labelKey: 'admin.nav.products', path: adminPaths.content.products, icon: Package, scope: ADMIN_SCOPES.content },
       { labelKey: 'admin.nav.franchise', path: adminPaths.content.franchise, icon: Handshake, scope: ADMIN_SCOPES.content },
       { labelKey: 'admin.nav.articles', path: adminPaths.content.articles, icon: FileText, scope: ADMIN_SCOPES.content },
+      { labelKey: 'admin.nav.brandTimeline', path: adminPaths.content.brandTimeline, icon: History, scope: ADMIN_SCOPES.content },
     ],
   },
   {
@@ -55,6 +58,7 @@ const navGroups = [
     labelKey: 'admin.nav.groups.business',
     items: [
       { labelKey: 'admin.nav.registrations', path: adminPaths.crm.leads, icon: Users, scope: ADMIN_SCOPES.crm },
+      { labelKey: 'admin.nav.contactMessages', path: adminPaths.crm.contactMessages, icon: Mail, scope: ADMIN_SCOPES.crm },
       { labelKey: 'admin.nav.liveChat', path: adminPaths.crm.liveChat, icon: MessagesSquare, scope: ADMIN_SCOPES.crm },
     ],
   },

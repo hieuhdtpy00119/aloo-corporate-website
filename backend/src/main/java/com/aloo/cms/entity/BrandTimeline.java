@@ -30,7 +30,7 @@ public class BrandTimeline {
     @Column(nullable = false, length = 220)
     private String title;
 
-    @Column(columnDefinition = "nvarchar(max)")
+    @Column(columnDefinition = "text")
     private String description;
 
     @Column(length = 600)

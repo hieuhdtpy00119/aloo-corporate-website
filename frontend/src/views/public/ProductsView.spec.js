@@ -10,6 +10,7 @@ const translations = {
   'products.categories': 'Danh mục sản phẩm',
   'products.listEyebrow': 'Danh sách sản phẩm',
   'products.allProducts': 'Tất cả sản phẩm',
+  'products.topSeo': 'Top 5 sản phẩm best SEO',
   'products.servingCount': '{count} sản phẩm đang phục vụ',
   'products.searchPlaceholder': 'Tìm sản phẩm...',
   'products.explore': 'Khám phá',
@@ -87,6 +88,27 @@ describe('ProductsView', () => {
 
     expect(wrapper.text()).toContain('Kem bơ test')
     expect(wrapper.text()).not.toContain('Sản phẩm ẩn')
+  })
+
+  it('shows only the five products with the strongest SEO content', async () => {
+    const store = useAppStore()
+    store.products = Array.from({ length: 7 }, (_, index) => ({
+      id: index + 1,
+      name: `Sản phẩm ${index + 1}`,
+      slug: `san-pham-${index + 1}`,
+      status: 'ACTIVE',
+      sortOrder: index + 1,
+      seoTitle: index < 5 ? `SEO title ${index + 1}` : '',
+      seoDescription: index < 5 ? `SEO description ${index + 1}` : '',
+    }))
+
+    const wrapper = mountView()
+    const topSeoButton = wrapper.findAll('button').find((button) => button.text().includes('Top 5 sản phẩm best SEO'))
+    await topSeoButton.trigger('click')
+
+    expect(wrapper.findAll('.product-card')).toHaveLength(5)
+    expect(wrapper.text()).not.toContain('Sản phẩm 6')
+    expect(wrapper.text()).not.toContain('Sản phẩm 7')
   })
 
   it('renders loading, error and empty states', () => {

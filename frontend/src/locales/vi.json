@@ -41,7 +41,7 @@
     "hotline": "Hotline",
     "email": "Email",
     "address": "Địa chỉ",
-    "addressValue": "TP.HCM, Việt Nam",
+    "addressValue": "395 Nguyễn Huệ, P. Trần Phú, TP. Quy Nhơn, Bình Định",
     "copyright": "© 2026 ALOO. All rights reserved."
   },
   "home": {
@@ -71,8 +71,8 @@
     "featuredLoadError": "Không tải được nội dung nổi bật trang chủ",
     "featuredDefaultCta": "Xem thêm",
     "featuredDefaultBadge": "Nổi bật",
-    "popularEyebrow": "Món ngon nước tiếng",
-    "popularTitle": "Sản phẩm được yêu thích",
+    "popularEyebrow": "Món ngon phải thử",
+    "popularTitle": "Top 5 món ngon được yêu thích",
     "scrollLeft": "Cuộn trái",
     "scrollRight": "Cuộn phải",
     "viewDetail": "Xem chi tiết",
@@ -84,6 +84,16 @@
     "brandStoryP2": "Chúng tôi tự hào xây dựng một mô hình cửa hàng trẻ trung, quy trình vận hành đồng bộ hóa từ quầy pha chế đến phong cách đón khách. Giúp mỗi ly kem bơ khi đến tay bạn luôn giữ nguyên được hương vị tự nhiên tinh tế nhất.",
     "brandStoryCta": "Đọc tiếp câu chuyện",
     "brandStoryImageAlt": "Nguyên liệu bơ tươi ALOO",
+    "momentsEyebrow": "ALOO ngoài đời thực",
+    "momentsTitle": "Một thương hiệu được tạo nên từ những khoảnh khắc thật",
+    "momentsDescription": "Từ cửa hàng nhộn nhịp, niềm vui của các bạn nhỏ đến quy trình chế biến được truyền thông ghi hình — đây là những lát cắt chân thực trong hành trình ALOO đến gần hơn với cộng đồng.",
+    "moments": {
+      "store": "Không gian ALOO nhộn nhịp mỗi tối",
+      "mascot": "Mascot bơ đồng hành cùng niềm vui gia đình",
+      "community": "ALOO góp mặt trong các hoạt động cộng đồng",
+      "media": "Quy trình sản phẩm được truyền thông ghi hình",
+      "craft": "Tỉ mỉ trong từng công đoạn chế biến"
+    },
     "locationsEyebrow": "Trải nghiệm trực tiếp",
     "locationsTitle": "Tìm cửa hàng ALOO gần nhất",
     "locationsViewAll": "Xem tất cả hệ thống cửa hàng",
@@ -145,13 +155,13 @@
     "qualityPoints": [
       "Kiểm soát vùng trồng nghiêm ngặt",
       "Quy trình sơ chế & bảo quản chuẩn hoá",
-      "Hương vị đồng đều tại mọi cửa hàng",
+      "Hương vị kem truyền thống được Aloo sản xuất trực tiếp",
       "Không chất bảo quản · Bơ tươi 100%"
     ],
     "section2ImageCaption": "Bơ tươi thật · Xanh · Lành · Ngon",
     "section3Eyebrow": "Hệ sinh thái & Tầm nhìn",
     "section3Title": "Vươn mình ra biển lớn",
-    "section3P1": "Tính đến năm 2026, Aloo Kem Bơ sở hữu hệ thống chuỗi cửa hàng tại hai thành phố du lịch biển sầm uất là Quy Nhơn và Nha Trang. Không ngừng mở rộng menu với các vị sáng tạo và mô hình ALooBike phục vụ linh hoạt.",
+    "section3P1": "Tính đến năm 2026, Aloo Kem Bơ sở hữu hệ thống chuỗi cửa hàng tại hai thành phố du lịch biển sầm uất là Quy Nhơn và Nha Trang. Không ngừng mở rộng menu với các vị sáng tạo và mô hình A Bơ Bike biến đường phố thành không gian trải nghiệm, làm hình ảnh maketing, là cầu nối cho các điểm bán - cửa hàng tương lai.",
     "section3MenuLabel": "Menu đặc sắc",
     "section3AudienceTitle": "Phục vụ đa dạng đối tượng",
     "section3AudienceText": "Học sinh · Sinh viên · Gia đình · Khách du lịch\nGiá chỉ từ 20.000đ — kem bơ tươi dành cho tất cả mọi người.",
@@ -178,9 +188,9 @@
     ],
     "menuItems": [
       { "name": "Kem Bơ Truyền Thống", "tag": "Signature", "color": "#007A35" },
-      { "name": "Bơ Xoài", "tag": "Tropical", "color": "#C9933F" },
+      { "name": "Kem bơ hộp", "tag": "Alocado", "color": "#C9933F" },
       { "name": "Bơ Sầu Riêng", "tag": "Special", "color": "#A8742D" },
-      { "name": "Bơ Mãng Cầu", "tag": "Seasonal", "color": "#7EC75A" },
+      { "name": "Kem ốc quế", "tag": "Tuổi thơ", "color": "#7EC75A" },
       { "name": "Bơ Aloo Đặc Biệt", "tag": "Premium", "color": "#006227" }
     ],
     "ctaConclusionTitle": "Hơn một thập kỷ đi lên từ",
@@ -209,6 +219,7 @@
     "categories": "Danh mục sản phẩm",
     "listEyebrow": "Danh sách sản phẩm",
     "allProducts": "Tất cả sản phẩm",
+    "topSeo": "Top 5 sản phẩm best SEO",
     "servingCount": "{count} sản phẩm đang phục vụ",
     "searchPlaceholder": "Tìm sản phẩm...",
     "explore": "Khám phá",
@@ -322,6 +333,7 @@
     "active": "Đang hoạt động",
     "comingSoon": "Sắp khai trương",
     "maintenance": "Đang sửa chữa",
+    "formerlyActive": "Từng hoạt động",
     "statsTotal": "Tổng chi nhánh",
     "statsActive": "Đang hoạt động",
     "statsFeatured": "Nổi bật",
@@ -373,7 +385,7 @@
   "contact": {
     "eyebrow": "Liên hệ",
     "title": "Kết nối với ALOO",
-    "description": "Thông tin liên hệ mẫu cho website thương hiệu và nhượng quyền."
+    "description": "Liên hệ trực tiếp với ALOO để được hỗ trợ về cửa hàng, sản phẩm và nhượng quyền."
   },
   "process": {
     "eyebrow": "Quy trình mở cửa hàng",
@@ -454,10 +466,12 @@
       "feedbacks": "Cảm nhận khách hàng",
       "productReviews": "Đánh giá sản phẩm",
       "homeSections": "Trang chủ",
+      "brandTimeline": "Hành trình thương hiệu",
       "articles": "Tin tức",
       "categories": "Danh mục bài viết",
       "locations": "Hệ thống cửa hàng",
       "registrations": "Lead tư vấn",
+      "contactMessages": "Tin nhắn liên hệ",
       "liveChat": "Chat trực tuyến",
       "accounts": "Tài khoản & phân quyền",
       "auditLogs": "Nhật ký hệ thống"
@@ -723,8 +737,12 @@
       "subtitleCustomers": "{count} khách hàng",
       "searchPlaceholder": "Tìm theo tên hoặc email...",
       "allStatuses": "Tất cả trạng thái",
+      "allProfiles": "Tất cả phân quyền",
+      "allProviders": "Tất cả kiểu đăng nhập",
       "profileLabel": "Phân quyền CMS",
+      "authProviderLabel": "Kiểu đăng nhập",
       "customerRoleLabel": "Khách hàng",
+      "localAccountBadge": "Mật khẩu CMS",
       "googleAccountBadge": "Google",
       "sessionAccountBadge": "Bạn",
       "googlePasswordBlocked": "Tài khoản đăng nhập Google không dùng mật khẩu CMS. Hãy đổi mật khẩu trên Google.",
@@ -741,16 +759,36 @@
       "passwordError": "Không đổi được mật khẩu",
       "deleteSuccess": "Đã xóa tài khoản",
       "deleteError": "Không xóa được tài khoản",
+      "deactivateSuccess": "Đã ngừng hoạt động tài khoản",
+      "reasonLabel": "Lý do thay đổi",
+      "reasonRequired": "Vui lòng nhập lý do thay đổi",
+      "defaultActionReason": "Cập nhật từ trang quản lý tài khoản",
+      "transferAdminLabel": "Bàn giao live chat cho admin",
+      "transferAdminOptional": "Không có bàn giao hoặc chọn sau",
+      "transferAdminSearch": "Tìm admin theo tên hoặc email...",
+      "transferAdminLimitHint": "Hiển thị tối đa 20 kết quả gần nhất; nhập từ khóa để tìm chính xác.",
+      "retry": "Thử lại",
       "systemEyebrow": "Hệ thống quản trị",
       "status": {
+        "INVITED": "Đang chờ kích hoạt",
         "ACTIVE": "Đang hoạt động",
-        "INACTIVE": "Tạm ẩn",
-        "LOCKED": "Đã khóa"
+        "SUSPENDED": "Tạm ngưng",
+        "LOCKED": "Đã khóa",
+        "DEACTIVATED": "Ngừng hoạt động"
       },
       "statusShort": {
+        "INVITED": "Chờ kích hoạt",
         "ACTIVE": "Hoạt động",
-        "INACTIVE": "Tạm ẩn",
-        "LOCKED": "Đã khóa"
+        "SUSPENDED": "Tạm ngưng",
+        "LOCKED": "Đã khóa",
+        "DEACTIVATED": "Đã ngừng"
+      },
+      "roleShort": {
+        "FULL": "Toàn quyền",
+        "CONTENT": "Nội dung",
+        "STORES": "Cửa hàng",
+        "CRM": "CRM",
+        "SYSTEM": "Hệ thống"
       },
       "columns": {
         "account": "Tài khoản",
@@ -766,7 +804,7 @@
       "actions": {
         "password": "Đổi mật khẩu",
         "edit": "Sửa",
-        "delete": "Xóa",
+        "delete": "Ngừng hoạt động",
         "promote": "Nâng admin",
         "demote": "Hạ xuống khách",
         "lockAccount": "Khóa tài khoản",
@@ -803,9 +841,9 @@
         "confirm": "Xác nhận"
       },
       "confirmDelete": {
-        "title": "Xóa tài khoản?",
-        "message": "Tài khoản {name} ({email}) sẽ bị xóa vĩnh viễn khỏi hệ thống. Hành động này không thể hoàn tác.",
-        "confirm": "Xóa"
+        "title": "Ngừng hoạt động tài khoản?",
+        "message": "Tài khoản {name} ({email}) sẽ mất quyền đăng nhập nhưng toàn bộ dữ liệu và lịch sử vẫn được giữ lại.",
+        "confirm": "Ngừng hoạt động"
       },
       "promote": {
         "title": "Nâng lên admin CMS",

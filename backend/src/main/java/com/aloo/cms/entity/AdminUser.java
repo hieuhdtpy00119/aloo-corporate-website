@@ -11,6 +11,7 @@ import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -57,6 +58,30 @@ public class AdminUser {
     @Column(length = 20)
     private AuthProvider authProvider = AuthProvider.LOCAL;
 
+    @Version
+    @Column(name = "record_version", nullable = false)
+    private Long version = 0L;
+
+    @Column(nullable = false)
+    private Long securityVersion = 0L;
+
+    @Column(length = 500)
+    private String statusReason;
+
+    private LocalDateTime invitedAt;
+
+    private LocalDateTime invitationAcceptedAt;
+
+    private LocalDateTime deactivatedAt;
+
+    @Column(length = 180)
+    private String deactivatedBy;
+
+    private LocalDateTime roleChangedAt;
+
+    @Column(length = 180)
+    private String roleChangedBy;
+
     private LocalDateTime passwordSetAt;
 
     private LocalDateTime lastLoginAt;
@@ -89,6 +114,9 @@ public class AdminUser {
     private void ensureAuthProvider() {
         if (authProvider == null) {
             authProvider = AuthProvider.LOCAL;
+        }
+        if (securityVersion == null) {
+            securityVersion = 0L;
         }
     }
 }

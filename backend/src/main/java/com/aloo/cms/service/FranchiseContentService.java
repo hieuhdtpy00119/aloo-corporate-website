@@ -29,6 +29,15 @@ public class FranchiseContentService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<FranchiseContentResponse> findActive() {
+        Sort sort = Sort.by(Sort.Direction.ASC, "sortOrder").and(Sort.by(Sort.Direction.ASC, "id"));
+        return franchiseContentRepository.findByStatusIgnoreCase("ACTIVE", sort)
+                .stream()
+                .map(franchiseContentMapper::toResponse)
+                .toList();
+    }
+
     @Transactional
     public FranchiseContentResponse update(Long id, FranchiseContentRequest request) {
         FranchiseContent content = franchiseContentRepository.findById(id)

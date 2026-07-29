@@ -22,6 +22,15 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const details = error.response?.data?.details
+    if (details && typeof details === 'object') {
+      const messages = [...new Set(Object.values(details).filter(Boolean))]
+      if (messages.length) {
+        error.response.data.fieldErrors = details
+        error.response.data.message = messages.join(' · ')
+      }
+    }
+
     if (error.response?.status === 401) {
       const path = window.location.pathname
       clearAuthSession()
