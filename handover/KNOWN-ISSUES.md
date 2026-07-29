@@ -1,28 +1,29 @@
-# KNOWN ISSUES & TECHNICAL DEBT
+# TỒN ĐỌNG VÀ RỦI RO KỸ THUẬT
 
-Ngày rà soát gần nhất: 24/07/2026.
+Rà soát gần nhất: 29/07/2026.
 
-## Đã xác minh
+## Đã khắc phục trong ngày nghiệm thu
 
-- Frontend unit test 84/84 pass; backend test 39/39 pass; frontend build thành công.
-- Bundle JS production khoảng 1.472 MB (gzip 427 kB), Vite cảnh báo chunk vượt 500 kB. Nên lazy-load route/admin editor và tách vendor chunks.
-- Frontend chủ động hủy service worker và xóa cache do ứng dụng PWA cũ để tránh phục vụ giao diện lỗi thời. Đây là cơ chế dọn cache, không phải hỗ trợ offline/PWA; cần smoke test trên trình duyệt từng từng truy cập origin cũ.
-- Playwright desktop đã chạy lại với SQL Server local, backend và frontend: 8/8 test pass ngày 24/07/2026. Ba lỗi test cũ đã được sửa: selector form Product CRUD, locator lead và mock API chat nền của luồng profile. Log: `evidence/PLAYWRIGHT-DESKTOP-8-8-2026-07-24.log`.
-- Bộ test backend in nhiều cảnh báo do Spring Data Redis quét các JPA repository; không làm test fail nhưng nên tách rõ repository scanning nếu muốn log sạch.
-- H2 test cấu hình dialect tường minh và phát cảnh báo deprecated; có thể bỏ `hibernate.dialect` trong test profile.
-- Working tree đang có nhiều tệp modified/untracked. Chưa thể xác nhận “toàn bộ code mới nhất đã commit và push” cho tới khi chủ dự án review phạm vi và commit.
+- API `GET /api/home-sections?activeOnly=true` từng trả 400 do `@Lob` ánh xạ cột PostgreSQL `text` thành Large Object OID. Đã gỡ ánh xạ sai, thêm kiểm thử hồi quy và xác minh API trả 200.
+- Ảnh `/uploads/...` từng trả 404 vì backend chạy trong `backend/` nhưng dữ liệu ảnh nằm ở `uploads/` cấp dự án. Local đã cấu hình `UPLOAD_DIR=../uploads`; trình duyệt không còn ảnh tải lỗi.
 
-## Cần xác minh trên môi trường đích
+## Tồn đọng không chặn nghiệm thu local
 
-- Migration Flyway trên bản SQL Server/backup production thật.
-- Google OAuth redirect URI và whitelist email production.
-- WebSocket/live chat qua reverse proxy, HTTPS và timeout thực tế.
-- Upload ảnh: quyền ghi, giới hạn dung lượng, backup và phục vụ URL trên production.
-- SMTP gửi OTP/thông báo với mailbox production.
-- CORS, rate limiting Redis, TLS và secret rotation.
-- Responsive/đa trình duyệt bằng Chrome, Edge, Safari/mobile thật.
-- Quyền sử dụng ba ảnh hero có tên `*-ai.webp` và quy trình lưu prompt/nguồn tạo ảnh.
+- Bundle JavaScript production 1,488.91 kB (gzip 432.56 kB), vượt ngưỡng cảnh báo 500 kB. Nên lazy-load route CMS/editor và tách vendor chunk.
+- Spring Data Redis quét các JPA repository tạo nhiều cảnh báo log; không làm test thất bại.
+- Flyway hiện cảnh báo PostgreSQL 17 mới hơn phiên bản được thư viện xác nhận chính thức. Migration vẫn validate và chạy thành công; nên nâng Flyway/Spring Boot sau kiểm thử tương thích.
+- Working tree còn thay đổi chưa commit; snapshot Git cuối cùng cần được review, commit và push trước khi đóng gói bàn giao chính thức.
+- SQL Server cũ chỉ nên giữ làm nguồn rollback/đối chiếu cho đến khi có backup PostgreSQL và thử phục hồi thành công.
 
-## Không được coi là lỗi đã sửa
+## Cần xác minh trên production
 
-Tài liệu này không tuyên bố các mục “cần xác minh” đã pass. Chỉ đánh dấu hoàn tất sau khi có ảnh chụp/log/video chứng minh trên môi trường bàn giao.
+- HTTPS, reverse proxy, CORS, WebSocket/live chat và timeout.
+- Google OAuth redirect URI, whitelist email admin, SMTP gửi OTP/thông báo.
+- Redis rate limiting nếu bật.
+- `UPLOAD_DIR` trên volume bền vững, quyền ghi, backup và phục vụ URL.
+- Backup/restore PostgreSQL và quy trình rollback.
+- Đa trình duyệt, thiết bị di động thật và domain production.
+- Quyền sử dụng media, đặc biệt các ảnh có hậu tố `-ai.webp`.
+
+Không mục nào trong phần “cần xác minh trên production” được coi là đã đạt nếu chưa có log, ảnh chụp hoặc biên bản riêng trên môi trường đích.
+

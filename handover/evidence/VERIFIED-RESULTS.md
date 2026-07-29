@@ -1,14 +1,18 @@
 # KẾT QUẢ ĐÃ XÁC MINH
 
-Thời điểm chạy gần nhất: 24/07/2026 (Asia/Saigon).
+Thời điểm chạy: 29/07/2026 (Asia/Saigon).
 
-| Lệnh | Kết quả |
+| Kiểm tra | Kết quả |
 |---|---|
-| `cd frontend; npm test -- --run` | Pass — 27 test files, 84 tests |
-| `cd frontend; npm run build` | Pass — Vite 8.0.12, 1,980 modules transformed |
-| `cd backend; mvn -q test` | Pass — 12 suites, 39 tests, 0 failures/errors/skipped |
-| `npm run e2e -- --project=chromium --reporter=list` với SQL Server local + hai server | Pass — 8/8 test |
+| `cd frontend; npm test -- --run` | Đạt — 27 test file, 87/87 test |
+| `cd frontend; npm run build` | Đạt — Vite 8.0.12, 1.981 module |
+| `cd backend; mvn -q test` | Đạt — 13 suite, 40/40 test, 0 lỗi, 0 bỏ qua |
+| PostgreSQL/Flyway | PostgreSQL 17.10; 8 migration thành công |
+| Dữ liệu CMS | 69 sản phẩm; 20/20 blog published; 5 cửa hàng; 6 tài khoản; 24 nội dung nhượng quyền; 3 home section |
+| API `home-sections` | HTTP 200, trả đủ 3 section |
+| Ảnh trang chủ | 16 ảnh được trình duyệt kiểm tra; 0 ảnh hoàn tất nhưng có kích thước 0; không có lỗi console liên quan |
 
-Build frontend tạo bundle chính khoảng 1,471.56 kB (gzip 427.08 kB) và phát cảnh báo chunk vượt 500 kB.
+Build tạo bundle chính 1,488.91 kB (gzip 432.56 kB) và cảnh báo chunk vượt 500 kB. Đây là technical debt về hiệu năng, không làm build thất bại.
 
-E2E desktop đã chạy với SQL Server local, backend và frontend hoạt động. Cả 8 test đều pass trong lần xác nhận cuối; xem `PLAYWRIGHT-DESKTOP-8-8-2026-07-24.log`. Kết quả này không thay thế kiểm thử production hoặc đa trình duyệt.
+Kết quả trên áp dụng cho môi trường local tại ngày nghiệm thu. Chưa thay thế kiểm thử production, đa trình duyệt hoặc kiểm thử sau reverse proxy.
+

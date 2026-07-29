@@ -1,55 +1,43 @@
-# HƯỚNG DẪN CÀI ĐẶT VÀ CHẠY DỰ ÁN
+# HƯỚNG DẪN CÀI ĐẶT VÀ VẬN HÀNH
+
+Cập nhật: 29/07/2026.
 
 ## 1. Yêu cầu
 
-- Git.
-- Node.js **22.11.0 trở lên** và npm.
-- Java Development Kit **21** (project được kiểm thử thành công bằng Java 22.0.2, nhưng `pom.xml` target Java 21).
-- Maven 3.9+ hoặc Maven đi kèm IntelliJ IDEA.
-- Microsoft SQL Server và `sqlcmd`/SQL Server Management Studio.
-- Redis chỉ bắt buộc khi đặt `RATE_LIMIT_BACKEND=redis`; local nên dùng `memory`.
+- Node.js 22.11.0 trở lên và npm.
+- JDK 21, Maven 3.9+.
+- PostgreSQL 17 (hệ thống hiện được xác minh với PostgreSQL 17.10).
+- Redis chỉ cần khi `RATE_LIMIT_BACKEND=redis`; local dùng `memory`.
 
-## 2. Database local/demo
+## 2. PostgreSQL local
 
-Chạy trong PowerShell từ thư mục gốc repo:
+Tạo database và tài khoản runtime theo chính sách của đơn vị vận hành. Cấu hình tối thiểu:
 
 ```powershell
-sqlcmd -S localhost -E -C -i handover/database/aloo_franchise_cms.sql
-sqlcmd -S localhost -E -C -i handover/database/aloo_franchise_cms_sample_data.sql
+$env:DB_URL='jdbc:postgresql://localhost:5432/aloo_cms'
+$env:DB_USERNAME='postgres'
+$env:DB_PASSWORD='<mat-khau-postgresql>'
+$env:JWT_SECRET='<chuoi-bi-mat-ngau-nhien-it-nhat-32-ky-tu>'
+$env:CORS_ALLOWED_ORIGIN='http://localhost:5173'
+$env:RATE_LIMIT_BACKEND='memory'
 ```
 
-Nếu dùng SQL authentication:
-
-```powershell
-sqlcmd -S localhost -U sa -P '<password>' -C -i handover/database/aloo_franchise_cms.sql
-sqlcmd -S localhost -U sa -P '<password>' -C -i handover/database/aloo_franchise_cms_sample_data.sql
-```
-
-Script schema chỉ dùng để tạo database mới. Sau khi hệ thống đã hoạt động, thay đổi schema phải đi qua Flyway trong `backend/src/main/resources/db/migration`.
+Flyway tự kiểm tra và áp dụng migration trong `backend/src/main/resources/db/migration`. Không sửa migration đã chạy và không dùng lại script SQL Server cũ để khởi tạo môi trường mới.
 
 ## 3. Backend
 
-Không commit `.env` hoặc secret thật. Copy `handover/.env.example` làm danh sách biến cần cấu hình, rồi đặt biến trong shell/secret manager.
+Kho ảnh hiện tại nằm ở `uploads/` tại thư mục gốc dự án. Khi chạy Maven từ `backend/`, đặt:
 
 ```powershell
-$env:DB_URL='jdbc:sqlserver://localhost:1433;databaseName=ALOO_Franchise_CMS;encrypt=true;trustServerCertificate=true'
-$env:DB_USERNAME='sa'
-$env:DB_PASSWORD='<your-password>'
-$env:DB_MIGRATION_USERNAME='sa'
-$env:DB_MIGRATION_PASSWORD='<your-password>'
-$env:JWT_SECRET='<random-secret-at-least-32-characters>'
-$env:CORS_ALLOWED_ORIGIN='http://localhost:5173'
-$env:CORS_INCLUDE_LOCALHOST='true'
-$env:RATE_LIMIT_BACKEND='memory'
-
+$env:UPLOAD_DIR='../uploads'
 cd backend
-mvn spring-boot:run
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 Backend: `http://localhost:8080`  
-API base URL: `http://localhost:8080/api`
+API: `http://localhost:8080/api`
 
-Google OAuth và email là tùy chọn cho local. Nếu bật, điền các biến tương ứng trong `.env.example`.
+Với production, `UPLOAD_DIR` phải trỏ đến volume bền vững có quyền ghi và cơ chế backup. Không dùng đường dẫn tương đối nếu thư mục làm việc của tiến trình không được cố định.
 
 ## 4. Frontend
 
@@ -64,11 +52,11 @@ npm run dev
 
 Frontend: `http://localhost:5173`
 
-## 5. Kiểm tra
+## 5. Kiểm tra nghiệm thu
 
 ```powershell
 cd frontend
-npm test
+npm test -- --run
 npm run build
 ```
 
@@ -77,16 +65,19 @@ cd backend
 mvn test
 ```
 
-E2E cần frontend và backend đang chạy cùng database demo:
+Kiểm tra nhanh khi hai tiến trình đang chạy:
 
 ```powershell
-cd frontend
-npm run e2e
+curl.exe -i "http://localhost:8080/api/home-sections?activeOnly=true"
+curl.exe -i "http://localhost:8080/api/products"
+curl.exe -i "http://localhost:8080/api/posts"
 ```
 
-Có thể override tài khoản admin E2E bằng `E2E_ADMIN_EMAIL` và `E2E_ADMIN_PASSWORD`.
+## 6. Bảo mật và vận hành
 
-## 6. Thứ tự dừng hệ thống
-
-Nhấn `Ctrl+C` tại terminal frontend và backend. Không xóa database nếu vẫn cần đối chiếu với video demo.
+- Không commit `.env`, mật khẩu PostgreSQL, JWT secret, OAuth secret hoặc SMTP credential.
+- Chuyển credential production qua password manager/kênh bí mật riêng; không ghi trong biên bản.
+- Đổi hoặc vô hiệu hóa tài khoản demo trước khi mở internet.
+- Backup cả PostgreSQL và volume `UPLOAD_DIR`, sau đó thử phục hồi trước go-live.
+- Cấu hình HTTPS, reverse proxy, CORS, rate limit và WebSocket trên môi trường đích.
 

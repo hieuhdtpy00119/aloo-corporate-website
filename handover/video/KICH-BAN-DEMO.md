@@ -24,7 +24,7 @@ Thời lượng gợi ý: 12–18 phút. Quay liên tục, bật mic, không c�
 
 ## Câu thuyết minh mẫu cho luồng dữ liệu
 
-“Người dùng thao tác trên Vue tại trình duyệt. Axios gửi request tới Spring Boot REST API. Security filter xác thực JWT và scope; controller chuyển dữ liệu cho service, repository dùng JPA ghi/đọc SQL Server. Kết quả trả JSON cho frontend cập nhật giao diện. Riêng live chat dùng STOMP/WebSocket để đẩy tin nhắn gần thời gian thực.”
+“Người dùng thao tác trên Vue tại trình duyệt. Axios gửi request tới Spring Boot REST API. Security filter xác thực JWT và scope; controller chuyển dữ liệu cho service, repository dùng JPA ghi/đọc PostgreSQL. Kết quả trả JSON cho frontend cập nhật giao diện. Riêng live chat dùng STOMP/WebSocket để đẩy tin nhắn gần thời gian thực.”
 
 ## Tiêu chí video đạt
 
@@ -56,7 +56,7 @@ Không dùng email cá nhân, số điện thoại thật hoặc credential prod
 
 ### Trước khi bấm quay
 
-- [ ] SQL Server đang chạy; database `ALOO_Franchise_CMS` đã có schema và sample data.
+- [ ] PostgreSQL đang chạy; database `aloo_cms` đã có schema và dữ liệu nghiệm thu.
 - [ ] Backend trả dữ liệu tại `http://localhost:8080/api/products`.
 - [ ] Frontend mở được tại `http://localhost:5173`.
 - [ ] `admin@aloo.vn / 123456` đăng nhập với vai trò `ADMIN`, scope `FULL`.
@@ -77,7 +77,7 @@ Thao tác:
 
 Lời thoại:
 
-> Đây là website doanh nghiệp và hệ thống CMS/CRM của ALOO. Frontend sử dụng Vue 3 và Vite, backend sử dụng Spring Boot, dữ liệu lưu trên SQL Server. Video này được quay liên tục, không cắt ghép. Phiên bản đang demo là branch [đọc branch] tại commit [đọc SHA].
+> Đây là website doanh nghiệp và hệ thống CMS/CRM của ALOO. Frontend sử dụng Vue 3 và Vite, backend sử dụng Spring Boot, dữ liệu lưu trên PostgreSQL. Video này được quay liên tục, không cắt ghép. Phiên bản đang demo là branch [đọc branch] tại commit [đọc SHA].
 
 #### 00:45–03:00 — Public site
 
@@ -91,7 +91,7 @@ Thao tác:
 
 Lời thoại:
 
-> Nội dung public không được viết cứng toàn bộ trong giao diện. Vue gọi REST API để lấy sản phẩm, cửa hàng, bài viết và nội dung CMS. Khi người dùng thao tác, Axios gửi request đến Spring Boot; backend xử lý qua controller, service và JPA repository rồi đọc dữ liệu SQL Server.
+> Nội dung public không được viết cứng toàn bộ trong giao diện. Vue gọi REST API để lấy sản phẩm, cửa hàng, bài viết và nội dung CMS. Khi người dùng thao tác, Axios gửi request đến Spring Boot; backend xử lý qua controller, service và JPA repository rồi đọc dữ liệu PostgreSQL.
 
 #### 03:00–04:15 — Tạo lead nhượng quyền
 
@@ -160,7 +160,7 @@ Thao tác:
 
 Lời thoại:
 
-> Đây là dữ liệu vừa tạo ở giao diện khách hàng. Admin có thể tìm kiếm, xem chi tiết và cập nhật trạng thái. Việc thay đổi trạng thái gọi API có JWT Admin và scope CRM; backend kiểm tra quyền trước khi ghi SQL Server. Giao diện sau đó nhận JSON mới và cập nhật danh sách.
+> Đây là dữ liệu vừa tạo ở giao diện khách hàng. Admin có thể tìm kiếm, xem chi tiết và cập nhật trạng thái. Việc thay đổi trạng thái gọi API có JWT Admin và scope CRM; backend kiểm tra quyền trước khi ghi PostgreSQL. Giao diện sau đó nhận JSON mới và cập nhật danh sách.
 
 #### 09:15–11:30 — CMS nội dung
 
@@ -195,7 +195,7 @@ Lời thoại:
 
 Lời thoại:
 
-> Source gồm frontend, backend, migration Flyway, schema, sample data, Postman collection và tài liệu cài đặt. Unit test frontend hiện có 84 trên 84 pass; backend có 39 trên 39 pass; production build thành công. Bộ Playwright Chromium desktop gần nhất đã đạt 8 trên 8 test trên SQL Server demo; log kết quả được lưu trong thư mục `handover/evidence`. Kết quả local này không thay thế kiểm thử production. Các giới hạn production như OAuth, SMTP, Redis, reverse proxy, upload và quyền media được ghi trong `KNOWN-ISSUES.md`.
+> Source gồm frontend, backend, migration Flyway, dữ liệu CMS, Postman collection và tài liệu cài đặt. Unit test frontend hiện có 87 trên 87 pass; backend có 40 trên 40 pass; production build thành công. PostgreSQL 17.10 và 8 migration Flyway đã được xác minh ngày 29/07/2026. Kết quả local này không thay thế kiểm thử production. Các giới hạn production như OAuth, SMTP, Redis, reverse proxy, upload và quyền media được ghi trong `KNOWN-ISSUES.md`.
 
 ## Những chức năng không nên thao tác trong video
 

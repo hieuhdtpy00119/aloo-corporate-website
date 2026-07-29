@@ -1,32 +1,37 @@
-# CHECKLIST NGHIỆM THU
+# CHECKLIST NGHIỆM THU VÀ BÀN GIAO
 
-## Tài liệu
+Ngày nghiệm thu local: **29/07/2026**.
 
-- [x] Có sơ đồ luồng và mô tả kiến trúc.
-- [x] Có danh sách tính năng Public/User/Admin.
-- [x] Có ghi chú nguồn đóng góp dựa trên lịch sử Git.
-- [x] Có hướng dẫn cài đặt từng bước và env example.
-- [x] Có schema, sample data và Postman collection.
-- [x] Có kịch bản video demo.
-- [x] Có known issues/technical debt.
+## Đã hoàn thành và xác minh
 
-## Cần chủ dự án thực hiện
+- [x] PostgreSQL 17.10 hoạt động; Flyway xác nhận 8 migration thành công.
+- [x] Dữ liệu hiện có: 69 sản phẩm, 20 bài blog đã xuất bản, 5 cửa hàng, 6 tài khoản, 24 nội dung nhượng quyền, 3 home section.
+- [x] Frontend unit test: 27 file, 87/87 test đạt.
+- [x] Frontend production build: đạt với Vite 8.0.12.
+- [x] Backend Maven test: 13 suite, 40/40 test đạt.
+- [x] API `home-sections`, `products`, `posts`, `stores` trả kết quả thành công.
+- [x] Đã sửa ánh xạ PostgreSQL `HomeSection.description`; API `home-sections` trả 200.
+- [x] Đã cấu hình đúng kho ảnh local; trình duyệt xác nhận 16 ảnh trang chủ, không có ảnh tải lỗi và không có lỗi console liên quan.
+- [x] Có DOCX/PDF biên bản nghiệm thu và bàn giao ngày 29/07/2026.
+- [x] Có hướng dẫn cài đặt PostgreSQL, biến môi trường, API collection và tài liệu vận hành.
 
-- [x] Xác nhận tên người bàn giao và phần tự phát triển/thư viện/kế thừa trong PDF.
-- [x] Khởi chạy SQL Server và xác minh database demo local.
-- [x] Cập nhật ba test E2E, chạy lại Playwright desktop 8/8 và lưu log ngày 24/07/2026 trong `evidence/`.
-- [ ] Quay video single-take theo kịch bản, đặt file trong `video/`.
-- [ ] Điền trạng thái dịch vụ production và bàn giao quyền qua kênh an toàn.
-- [ ] Review `git diff`, loại bỏ tệp tạm/secret, commit toàn bộ thay đổi cần bàn giao.
-- [ ] Push nhánh được thống nhất và ghi URL/commit SHA bên dưới.
-- [ ] Đổi mật khẩu demo hoặc chỉ dùng môi trường cách ly.
-- [ ] Xác nhận quyền media Google Drive và bổ sung metadata/quyền thương mại cho ba ảnh hero AI.
-- [ ] Smoke test việc xóa service worker/cache cũ trên trình duyệt từng chạy phiên bản PWA trước đây.
-- [ ] Nén thư mục `handover/` sau khi hoàn tất các bước trên.
+## Cần hoàn tất trước go-live/production
 
-Repo URL: https://github.com/hieuhdtpy00119/aloo-corporate-website  
-Branch: `agent/aloo-cms-handover-update`  
-Commit SHA: `74b0b67cbb7e14536f4741bd31ce2cf4401df5e6`  
-Video file/link: Chưa quay  
+- [ ] Review `git diff`, commit có chủ đích và push snapshot nghiệm thu.
+- [ ] Ghi URL repository, branch và commit SHA cuối cùng vào biên bản sau khi push.
+- [ ] Bàn giao credential production qua password manager/kênh bí mật riêng.
+- [ ] Đổi hoặc vô hiệu hóa mật khẩu demo.
+- [ ] Backup PostgreSQL và volume ảnh; thực hiện thử phục hồi.
+- [ ] Xác minh HTTPS, reverse proxy, CORS, WebSocket, Google OAuth, SMTP và Redis trên môi trường đích.
+- [ ] Smoke test Chrome/Edge/mobile thật trên domain production.
+- [ ] Xác nhận quyền sử dụng media và metadata của các ảnh AI.
+- [ ] Quay video demo single-take nếu bên nhận yêu cầu.
+
+Repo URL: `https://github.com/hieuhdtpy00119/aloo-corporate-website`  
+Branch lúc nghiệm thu: `agent/aloo-cms-handover-update`  
+Commit nền lúc nghiệm thu: `adf37d4`  
+Trạng thái snapshot: working tree còn thay đổi chưa commit  
 Người bàn giao: Huỳnh Đoàn Trung Hiếu  
-Ngày nghiệm thu: Chưa xác nhận
+Đại diện bên nhận: ______________________________  
+Ngày ký: ____/____/2026
+

@@ -2,7 +2,7 @@
 
 ## ALOO Corporate Website & Franchise CMS
 
-**Phiên bản rà soát:** 24/07/2026  
+**Phiên bản rà soát:** 29/07/2026  
 **Nguồn:** mã nguồn hiện có, router frontend, controller/backend, schema database và lịch sử Git.
 
 ## 1. Tổng quan
@@ -19,14 +19,14 @@ flowchart LR
   S --> A[Controller + Security]
   A --> B[Service]
   B --> R[JPA Repository]
-  R --> D[(SQL Server)]
+  R --> D[(PostgreSQL 17)]
   S --> F[Local Upload Storage]
   S -. tùy chọn .-> G[Google OAuth]
   S -. tùy chọn .-> M[SMTP]
   S -. tùy chọn .-> X[Redis Rate Limit]
 ```
 
-Luồng chuẩn: thao tác UI → Axios gọi API → JWT/scope được kiểm tra → controller → service → repository → SQL Server → JSON response → giao diện cập nhật. Live chat dùng WebSocket/STOMP song song với REST.
+Luồng chuẩn: thao tác UI → Axios gọi API → JWT/scope được kiểm tra → controller → service → repository → PostgreSQL → JSON response → giao diện cập nhật. Live chat dùng WebSocket/STOMP song song với REST.
 
 ## 2. Công nghệ
 
@@ -36,7 +36,7 @@ Luồng chuẩn: thao tác UI → Axios gọi API → JWT/scope được kiểm 
 | Trình soạn thảo | Tiptap |
 | Realtime | STOMP/WebSocket |
 | Backend | Java 21, Spring Boot 3.3.5, Maven |
-| Data/Security | Spring Data JPA, SQL Server, Flyway, Spring Security, JWT |
+| Data/Security | Spring Data JPA, PostgreSQL 17, Flyway, Spring Security, JWT |
 | Tích hợp tùy chọn | Google OAuth2, SMTP, Redis |
 | Test | Vitest, Vue Test Utils, Playwright, JUnit/Spring Test, H2 |
 
@@ -108,17 +108,16 @@ Tôi, **Huỳnh Đoàn Trung Hiếu**, xác nhận:
 - Công cụ AI có thể đã được dùng để hỗ trợ rà soát mã, kiểm thử và soạn tài liệu; tôi chịu trách nhiệm kiểm tra, tích hợp và kết quả bàn giao cuối cùng.
 - Xác nhận này không thay thế giấy phép hoặc bằng chứng quyền sử dụng media. Ba ảnh hero AI vẫn cần bổ sung công cụ/model, prompt, ngày tạo và xác nhận quyền thương mại trước nghiệm thu.
 
-**Ngày xác nhận:** 23/07/2026  
+**Ngày xác nhận:** 29/07/2026  
 **Chữ ký người bàn giao:** ______________________________
 
 ## 5. Database
 
 Schema chính có các nhóm bảng: users và role history; categories/products/reviews; posts/images/related posts; franchise leads/content; contact messages; stores/gallery/business hours/posters; testimonials; hero/home/menu/timeline; audit logs; chat sessions/messages.
 
-- Tạo mới: `database/aloo_franchise_cms.sql`.
-- Dữ liệu demo: `database/aloo_franchise_cms_sample_data.sql`.
-- Sau khi khởi tạo: Flyway trong source backend quản lý nâng cấp schema.
-- Sample data chứa tài khoản/mật khẩu công khai và tuyệt đối không dùng production.
+- PostgreSQL hiện hành: database `aloo_cms`, cấu trúc do Flyway trong `backend/src/main/resources/db/migration` quản lý.
+- Các script trong `handover/database/` là bản SQL Server cũ để đối chiếu/rollback lịch sử, không dùng khởi tạo môi trường PostgreSQL mới.
+- Dữ liệu demo có tài khoản/mật khẩu công khai và tuyệt đối không dùng production.
 
 ## 6. API
 
@@ -138,20 +137,21 @@ Xem `INSTALLATION.md`. Các nhóm biến gồm database runtime/migration, JWT, 
 
 Chỉ dùng local/demo cách ly và đổi ngay nếu môi trường có internet.
 
-## 9. Kiểm thử ngày 22/07/2026
+## 9. Kiểm thử ngày 29/07/2026
 
 | Kiểm tra | Kết quả |
 |---|---|
-| Frontend Vitest | 27 files, 84/84 pass |
+| Frontend Vitest | 27 files, 87/87 pass |
 | Frontend production build | Pass |
-| Backend Maven test | 12 suites, 39/39 pass |
-| E2E thật với SQL Server | Playwright desktop ngày 24/07/2026: 8/8 pass; log trong `evidence/` |
+| Backend Maven test | 13 suites, 40/40 pass |
+| PostgreSQL/Flyway | PostgreSQL 17.10; 8 migration thành công |
+| Trang chủ/ảnh | API `home-sections` HTTP 200; 16 ảnh được kiểm tra, 0 ảnh lỗi |
 
 ## 10. Known issues và technical debt
 
-- Bundle JS 1.472 MB sau minify (gzip 427 kB); nên code-split/lazy-load.
+- Bundle JS 1,488.91 kB sau minify (gzip 432.56 kB); nên code-split/lazy-load.
 - Cơ chế service worker hiện tại chỉ hủy worker/xóa cache PWA cũ để tránh giao diện stale; không được mô tả là hỗ trợ offline.
-- Playwright desktop đã đạt 8/8 trên SQL Server demo; vẫn cần smoke test đa trình duyệt và môi trường production đích.
+- Nghiệm thu local với PostgreSQL đã đạt; vẫn cần smoke test đa trình duyệt và môi trường production đích.
 - Cần kiểm chứng OAuth, SMTP, Redis, upload storage và WebSocket sau reverse proxy production.
 - Backend test có cảnh báo repository scanning Redis/JPA và H2 dialect; không làm test fail.
 - Working tree có nhiều thay đổi chưa commit; chưa đủ căn cứ xác nhận đã push source mới nhất.

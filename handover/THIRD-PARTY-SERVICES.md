@@ -7,7 +7,7 @@ Không có credential thật nào được chép vào bộ bàn giao. Người s
 | Google OAuth 2.0 | Có | Invite tài khoản quản trị Google Cloud; cấu hình `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, redirect URI | Chưa xác nhận credential production |
 | SMTP email | Có, tùy chọn | Bàn giao mailbox/app password qua password manager; cấu hình nhóm `MAIL_*` | Chưa xác nhận |
 | Redis | Có, tùy chọn | Bàn giao endpoint/password qua secret manager; local dùng memory | Chưa xác nhận production |
-| SQL Server | Có | Tạo riêng runtime user và migration user; không gửi mật khẩu trong file nén | Chưa xác nhận production |
+| PostgreSQL | Có | Tạo riêng runtime user và migration user; không gửi mật khẩu trong file nén | Local 17.10 đã xác minh; production chưa xác nhận |
 | Lưu ảnh | Local filesystem qua `UPLOAD_DIR` | Bàn giao volume/quyền truy cập và chính sách backup | Chưa xác nhận production |
 | Zalo chat link | Có ở frontend | Xác nhận số/URL trong `VITE_ZALO_CHAT_URL` | Đang có URL mẫu trong env example |
 | Media Google Drive của khách hàng | Có | Danh sách nguồn nằm tại `frontend/public/media/drive/SOURCES.md`; xác nhận quyền sử dụng trước production | Có metadata nguồn Drive |

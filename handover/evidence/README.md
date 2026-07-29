@@ -6,8 +6,7 @@
 - `frontend-build.txt`
 - `backend-tests.txt`
 - `e2e-playwright-report/` hoặc ảnh chụp kết quả
-- ảnh/log import SQL Server và Flyway
+- ảnh/log chuyển dữ liệu từ SQL Server sang PostgreSQL và Flyway
 - ảnh kiểm tra OAuth, SMTP, upload và live chat production (nếu áp dụng)
 
 Không lưu token, mật khẩu, connection string có secret hoặc dữ liệu cá nhân trong bằng chứng.
-
